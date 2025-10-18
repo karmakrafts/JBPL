@@ -3,7 +3,7 @@ package dev.karmakrafts.jbpl.assembler.parser;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassTypeRef;
-import dev.karmakrafts.jbpl.assembler.model.util.Pair;
+import dev.karmakrafts.jbpl.assembler.util.Pair;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;

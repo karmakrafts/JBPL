@@ -6,7 +6,7 @@ import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
-import dev.karmakrafts.jbpl.assembler.model.util.Pair;
+import dev.karmakrafts.jbpl.assembler.util.Pair;
 import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
