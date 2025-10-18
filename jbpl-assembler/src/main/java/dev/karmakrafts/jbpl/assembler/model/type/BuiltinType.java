@@ -25,6 +25,21 @@ public enum BuiltinType implements Type {
     }
 
     @Override
+    public boolean isMaterializable() {
+        return true;
+    }
+
+    @Override
+    public boolean isObject() {
+        return this == OBJECT || this == STRING;
+    }
+
+    @Override
+    public boolean isArray() {
+        return false;
+    }
+
+    @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
         return materialType;
     }
