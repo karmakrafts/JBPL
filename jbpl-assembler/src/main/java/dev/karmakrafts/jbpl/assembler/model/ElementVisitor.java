@@ -8,8 +8,6 @@ import dev.karmakrafts.jbpl.assembler.model.statement.*;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashMap;
-
 public interface ElementVisitor {
     default @NotNull Element visitElement(final @NotNull Element element) {
         if (element instanceof AssemblyFile file) {
@@ -29,6 +27,27 @@ public interface ElementVisitor {
         file.clearElements();
         file.addElements(transformedElements);
         return file;
+    }
+
+    default <E extends ExprContainer> @NotNull E visitExprContainer(final @NotNull E container) {
+        final var transformedExpressions = container.getExpressions().stream().map(this::visitExpr).toList();
+        container.clearExpressions();
+        container.addExpressions(transformedExpressions);
+        return container;
+    }
+
+    default <E extends ElementContainer> @NotNull E visitElementContainer(final @NotNull E container) {
+        final var transformedElements = container.getElements().stream().map(this::visitElement).toList();
+        container.clearElements();
+        container.addElements(transformedElements);
+        return container;
+    }
+
+    default <E extends StatementContainer> @NotNull E visitStatementContainer(final @NotNull E container) {
+        final var transformedStatements = container.getStatements().stream().map(this::visitStatement).toList();
+        container.clearStatements();
+        container.addStatements(transformedStatements);
+        return container;
     }
 
     default @NotNull Declaration visitDeclaration(final @NotNull Declaration declaration) {
@@ -64,36 +83,21 @@ public interface ElementVisitor {
     }
 
     default @NotNull Declaration visitPreproClass(final @NotNull PreproClassDecl preproClassDecl) {
-        final var transformedFields = new LinkedHashMap<Expr, Expr>();
-        for (final var entry : preproClassDecl.getFields().entrySet()) {
-            final var name = visitExpr(entry.getKey());
-            transformedFields.put(name, visitExpr(entry.getValue()));
-        }
-        preproClassDecl.clearExpressions();
-        preproClassDecl.addFields(transformedFields);
-        return preproClassDecl;
+        return visitExprContainer(preproClassDecl);
     }
 
     default @NotNull Declaration visitMacro(final @NotNull MacroDecl macroDecl) {
-        final var transformedStatements = macroDecl.transformChildren(this);
-        macroDecl.clearElements();
-        macroDecl.addElements(transformedStatements);
-        return macroDecl;
+        return visitElementContainer(macroDecl);
     }
 
     default @NotNull Declaration visitBlock(final @NotNull BlockDecl blockDecl) {
-        final var transformedStatements = blockDecl.transformChildren(this);
-        blockDecl.clearStatements();
-        blockDecl.addStatements(transformedStatements);
-        return blockDecl;
+        return visitStatementContainer(blockDecl);
     }
 
     default @NotNull Declaration visitInjector(final @NotNull InjectorDecl injectorDecl) {
         injectorDecl.setTarget(visitFunctionSignatureExpr(injectorDecl.getTarget()));
-        final var transformedStatements = injectorDecl.transformChildren(this);
-        injectorDecl.clearStatements();
-        injectorDecl.addStatements(transformedStatements);
-        return injectorDecl;
+        injectorDecl.setSelector(visitExpr(injectorDecl.getSelector()));
+        return visitStatementContainer(injectorDecl);
     }
 
     default @NotNull Declaration visitSelector(final @NotNull SelectorDecl selectorDecl) {
@@ -129,18 +133,11 @@ public interface ElementVisitor {
 
     default @NotNull Declaration visitFunction(final @NotNull FunctionDecl functionDecl) {
         functionDecl.setSignature(visitFunctionSignatureExpr(functionDecl.getSignature()));
-        final var transformedStatements = functionDecl.transformChildren(this);
-        functionDecl.clearStatements();
-        functionDecl.addStatements(transformedStatements);
-        return functionDecl;
+        return visitStatementContainer(functionDecl);
     }
 
     default @NotNull Declaration visitField(final @NotNull FieldDecl fieldDecl) {
-        fieldDecl.setSignature(visitFieldSignatureExpr(fieldDecl.getSignature()));
-        final var transformedExpressions = fieldDecl.transformChildren(this);
-        fieldDecl.clearExpressions();
-        fieldDecl.addExpressions(transformedExpressions);
-        return fieldDecl;
+        return visitExprContainer(fieldDecl);
     }
 
     default @NotNull Expr visitExpr(final @NotNull Expr expr) {
@@ -205,31 +202,19 @@ public interface ElementVisitor {
     }
 
     default @NotNull Expr visitIsExpr(final @NotNull IsExpr isExpr) {
-        final var transformedExpressions = isExpr.transformChildren(this);
-        isExpr.clearExpressions();
-        isExpr.addExpressions(transformedExpressions);
-        return isExpr;
+        return visitExprContainer(isExpr);
     }
 
     default @NotNull Expr visitTypeOfExpr(final @NotNull TypeOfExpr typeOfExpr) {
-        final var transformedExpressions = typeOfExpr.transformChildren(this);
-        typeOfExpr.clearExpressions();
-        typeOfExpr.addExpressions(transformedExpressions);
-        return typeOfExpr;
+        return visitExprContainer(typeOfExpr);
     }
 
     default @NotNull Expr visitOpcodeOfExpr(final @NotNull OpcodeOfExpr opcodeOfExpr) {
-        final var transformedExpressions = opcodeOfExpr.transformChildren(this);
-        opcodeOfExpr.clearExpressions();
-        opcodeOfExpr.addExpressions(transformedExpressions);
-        return opcodeOfExpr;
+        return visitExprContainer(opcodeOfExpr);
     }
 
     default @NotNull Expr visitAnonBlockExpr(final @NotNull AnonBlockExpr anonBlockExpr) {
-        final var transformedStatements = anonBlockExpr.transformChildren(this);
-        anonBlockExpr.clearStatements();
-        anonBlockExpr.addStatements(transformedStatements);
-        return anonBlockExpr;
+        return visitStatementContainer(anonBlockExpr);
     }
 
     default @NotNull SignatureExpr visitSignatureExpr(final @NotNull SignatureExpr signatureExpr) {
@@ -251,17 +236,11 @@ public interface ElementVisitor {
     }
 
     default @NotNull Expr visitBinaryExpr(final @NotNull BinaryExpr binaryExpr) {
-        final var transformedExpressions = binaryExpr.transformChildren(this);
-        binaryExpr.clearExpressions();
-        binaryExpr.addExpressions(transformedExpressions);
-        return binaryExpr;
+        return visitExprContainer(binaryExpr);
     }
 
     default @NotNull Expr visitUnaryExpr(final @NotNull UnaryExpr unaryExpr) {
-        final var transformedExpressions = unaryExpr.transformChildren(this);
-        unaryExpr.clearExpressions();
-        unaryExpr.addExpressions(transformedExpressions);
-        return unaryExpr;
+        return visitExprContainer(unaryExpr);
     }
 
     default @NotNull Expr visitLiteralExpr(final @NotNull LiteralExpr literalExpr) {
@@ -269,36 +248,19 @@ public interface ElementVisitor {
     }
 
     default @NotNull Expr visitStringLerpExpr(final @NotNull StringLerpExpr stringLerpExpr) {
-        final var segments = stringLerpExpr.getExpressions();
-        // @formatter:off
-        final var transformedSegments = segments.stream()
-            .map(this::visitExpr)
-            .toList();
-        // @formatter:on
-        segments.clear();
-        segments.addAll(transformedSegments);
-        return stringLerpExpr;
+        return visitExprContainer(stringLerpExpr);
     }
 
     default @NotNull Expr visitMacroCallExpr(final @NotNull MacroCallExpr macroCallExpr) {
-        final var transformedExpressions = macroCallExpr.transformChildren(this);
-        macroCallExpr.clearExpressions();
-        macroCallExpr.addExpressions(transformedExpressions);
-        return macroCallExpr;
+        return visitExprContainer(macroCallExpr);
     }
 
     default @NotNull Expr visitClassInstantiationExpr(final @NotNull ClassInstantiationExpr classInstantiationExpr) {
-        final var transformedArgs = classInstantiationExpr.transformChildren(this);
-        classInstantiationExpr.clearExpressions();
-        classInstantiationExpr.addExpressions(transformedArgs);
-        return classInstantiationExpr;
+        return visitExprContainer(classInstantiationExpr);
     }
 
     default @NotNull Expr visitReferenceExpr(final @NotNull ReferenceExpr referenceExpr) {
-        final var transformedExpressions = referenceExpr.transformChildren(this);
-        referenceExpr.clearExpressions();
-        referenceExpr.addExpressions(transformedExpressions);
-        return referenceExpr;
+        return visitExprContainer(referenceExpr);
     }
 
     default @NotNull Statement visitStatement(final @NotNull Statement statement) {
@@ -336,10 +298,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull Statement visitCompoundStatement(final @NotNull CompoundStatement compoundStatement) {
-        final var transformedElements = compoundStatement.transformChildren(this);
-        compoundStatement.clearElements();
-        compoundStatement.addElements(transformedElements);
-        return compoundStatement;
+        return visitElementContainer(compoundStatement);
     }
 
     default @NotNull Statement visitLocal(final @NotNull LocalStatement localStatement) {
@@ -355,24 +314,15 @@ public interface ElementVisitor {
     }
 
     default @NotNull Statement visitYeetStatement(final @NotNull YeetStatement yeetStatement) {
-        final var transformedExpressions = yeetStatement.transformChildren(this);
-        yeetStatement.clearExpressions();
-        yeetStatement.addExpressions(transformedExpressions);
-        return yeetStatement;
+        return visitExprContainer(yeetStatement);
     }
 
     default @NotNull Statement visitReturnStatement(final @NotNull ReturnStatement returnStatement) {
-        final var transformedExpressions = returnStatement.transformChildren(this);
-        returnStatement.clearExpressions();
-        returnStatement.addExpressions(transformedExpressions);
-        return returnStatement;
+        return visitExprContainer(returnStatement);
     }
 
     default @NotNull Statement visitDefine(final @NotNull DefineStatement defineStatement) {
-        final var transformedExpressions = defineStatement.transformChildren(this);
-        defineStatement.clearExpressions();
-        defineStatement.addExpressions(transformedExpressions);
-        return defineStatement;
+        return visitExprContainer(defineStatement);
     }
 
     default @NotNull Statement visitInclude(final @NotNull IncludeStatement includeStatement) {
@@ -402,11 +352,11 @@ public interface ElementVisitor {
     }
 
     default @NotNull Instruction visitInvokeDynamicInstruction(final @NotNull InvokeDynamicInstruction instruction) {
-        return instruction;
+        return visitExprContainer(instruction);
     }
 
     default @NotNull Instruction visitInvokeInstruction(final @NotNull InvokeInstruction instruction) {
-        return instruction;
+        return visitExprContainer(instruction);
     }
 
     default @NotNull Instruction visitOplessInstruction(final @NotNull OplessInstruction instruction) {
@@ -414,23 +364,14 @@ public interface ElementVisitor {
     }
 
     default @NotNull Instruction visitStackInstruction(final @NotNull StackInstruction instruction) {
-        final var transformedExpressions = instruction.transformChildren(this);
-        instruction.clearExpressions();
-        instruction.addExpressions(transformedExpressions);
-        return instruction;
+        return visitExprContainer(instruction);
     }
 
     default @NotNull Instruction visitLoadConstantInstruction(final @NotNull LoadConstantInstruction instruction) {
-        final var transformedExpressions = instruction.transformChildren(this);
-        instruction.clearExpressions();
-        instruction.addExpressions(transformedExpressions);
-        return instruction;
+        return visitExprContainer(instruction);
     }
 
     default @NotNull Instruction visitFieldInstruction(final @NotNull FieldInstruction instruction) {
-        final var transformedExpressions = instruction.transformChildren(this);
-        instruction.clearExpressions();
-        instruction.addExpressions(transformedExpressions);
-        return instruction;
+        return visitExprContainer(instruction);
     }
 }
