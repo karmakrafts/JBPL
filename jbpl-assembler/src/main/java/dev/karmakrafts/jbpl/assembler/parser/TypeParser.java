@@ -54,60 +54,31 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
     @Override
     public @NotNull List<Type> visitType(final @NotNull TypeContext ctx) {
         final var signature = ctx.signatureType();
-        if(signature != null) { // @formatter:off
+        if (signature != null) {
+            // @formatter:off
             return List.of(signature.KW_FIELD() != null
                 ? PreproType.FIELD_SIGNATURE
                 : PreproType.FUNCTION_SIGNATURE);
-        } // @formatter:on
-        if (ctx.KW_TYPE() != null) {
-            return List.of(PreproType.TYPE);
+            // @formatter:on
         }
-        else if (ctx.KW_SELECTOR() != null) {
-            return List.of(PreproType.SELECTOR);
-        }
-        else if (ctx.KW_OPCODE() != null) {
-            return List.of(PreproType.OPCODE);
-        }
-        else if (ctx.KW_BLOCK() != null) {
-            return List.of(PreproType.BLOCK);
-        }
-        else if (ctx.KW_INSTRUCTION() != null) {
-            return List.of(PreproType.INSTRUCTION);
-        }
-        else if (ctx.KW_STRING() != null) {
-            return List.of(BuiltinType.STRING);
-        }
-        else if (ctx.IDENT() != null) {
-            return List.of(new PreproClassTypeRef(ctx.IDENT().getText()));
-        }
-        else if (ctx.KW_I8() != null) {
-            return List.of(BuiltinType.I8);
-        }
-        else if (ctx.KW_I16() != null) {
-            return List.of(BuiltinType.I16);
-        }
-        else if (ctx.KW_I32() != null) {
-            return List.of(BuiltinType.I32);
-        }
-        else if (ctx.KW_I64() != null) {
-            return List.of(BuiltinType.I64);
-        }
-        else if (ctx.KW_F32() != null) {
-            return List.of(BuiltinType.F32);
-        }
-        else if (ctx.KW_F64() != null) {
-            return List.of(BuiltinType.F64);
-        }
-        else if (ctx.KW_VOID() != null) {
-            return List.of(BuiltinType.VOID);
-        }
-        else if (ctx.KW_BOOL() != null) {
-            return List.of(BuiltinType.BOOL);
-        }
-        else if (ctx.KW_CHAR() != null) {
-            return List.of(BuiltinType.CHAR);
-        }
-        return super.visitType(ctx);
+        // @formatter:off
+        if (ctx.KW_TYPE() != null)             return List.of(PreproType.TYPE);
+        else if (ctx.KW_SELECTOR() != null)    return List.of(PreproType.SELECTOR);
+        else if (ctx.KW_OPCODE() != null)      return List.of(PreproType.OPCODE);
+        else if (ctx.KW_INSTRUCTION() != null) return List.of(PreproType.INSTRUCTION);
+        else if (ctx.KW_STRING() != null)      return List.of(BuiltinType.STRING);
+        else if (ctx.IDENT() != null)          return List.of(new PreproClassTypeRef(ctx.IDENT().getText()));
+        else if (ctx.KW_I8() != null)          return List.of(BuiltinType.I8);
+        else if (ctx.KW_I16() != null)         return List.of(BuiltinType.I16);
+        else if (ctx.KW_I32() != null)         return List.of(BuiltinType.I32);
+        else if (ctx.KW_I64() != null)         return List.of(BuiltinType.I64);
+        else if (ctx.KW_F32() != null)         return List.of(BuiltinType.F32);
+        else if (ctx.KW_F64() != null)         return List.of(BuiltinType.F64);
+        else if (ctx.KW_VOID() != null)        return List.of(BuiltinType.VOID);
+        else if (ctx.KW_BOOL() != null)        return List.of(BuiltinType.BOOL);
+        else if (ctx.KW_CHAR() != null)        return List.of(BuiltinType.CHAR);
+        else                                   return super.visitType(ctx);
+        // @formatter:on
     }
 
     @Override

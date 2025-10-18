@@ -34,19 +34,6 @@ public final class NoopRemovalLowering implements ElementVisitor {
     }
 
     @Override
-    public @NotNull Declaration visitBlock(final @NotNull BlockDecl blockDecl) {
-        final var statements = blockDecl.getStatements();
-        // @formatter:off
-        final var filteredStatements = statements.stream()
-            .filter(s -> !(s instanceof NoopStatement))
-            .toList();
-        // @formatter:on
-        statements.clear();
-        statements.addAll(filteredStatements);
-        return blockDecl;
-    }
-
-    @Override
     public @NotNull Declaration visitInjector(final @NotNull InjectorDecl injectorDecl) {
         final var statements = injectorDecl.getStatements();
         // @formatter:off

@@ -290,22 +290,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
-    public List<Expr> visitAnonymousBlock(final @NotNull AnonymousBlockContext ctx) {
-        final var block = new AnonBlockExpr();
-        // @formatter:off
-        block.addStatements(ctx.statement().stream()
-            .map(StatementParser::parse)
-            .toList());
-        // @formatter:on
-        return List.of(block);
-    }
-
-    @Override
-    public @NotNull List<Expr> visitBlockReference(final @NotNull BlockReferenceContext ctx) {
-        return List.of(new BlockReferenceExpr(ctx.IDENT().getText()));
-    }
-
-    @Override
     public @NotNull List<Expr> visitSelectorReference(final @NotNull SelectorReferenceContext ctx) {
         return List.of(new SelectorReferenceExpr(ctx.IDENT().getText()));
     }

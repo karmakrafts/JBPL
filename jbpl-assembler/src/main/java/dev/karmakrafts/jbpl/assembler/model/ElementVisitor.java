@@ -51,10 +51,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull Declaration visitDeclaration(final @NotNull Declaration declaration) {
-        if (declaration instanceof BlockDecl blockDecl) {
-            return visitBlock(blockDecl);
-        }
-        else if (declaration instanceof InjectorDecl injectorDecl) {
+        if (declaration instanceof InjectorDecl injectorDecl) {
             return visitInjector(injectorDecl);
         }
         else if (declaration instanceof SelectorDecl selectorDecl) {
@@ -88,10 +85,6 @@ public interface ElementVisitor {
 
     default @NotNull Declaration visitMacro(final @NotNull MacroDecl macroDecl) {
         return visitElementContainer(macroDecl);
-    }
-
-    default @NotNull Declaration visitBlock(final @NotNull BlockDecl blockDecl) {
-        return visitStatementContainer(blockDecl);
     }
 
     default @NotNull Declaration visitInjector(final @NotNull InjectorDecl injectorDecl) {
@@ -165,9 +158,6 @@ public interface ElementVisitor {
         else if (expr instanceof ReferenceExpr referenceExpr) {
             return visitReferenceExpr(referenceExpr);
         }
-        else if (expr instanceof AnonBlockExpr anonBlockExpr) {
-            return visitAnonBlockExpr(anonBlockExpr);
-        }
         else if (expr instanceof TypeOfExpr typeOfExpr) {
             return visitTypeOfExpr(typeOfExpr);
         }
@@ -177,17 +167,10 @@ public interface ElementVisitor {
         else if (expr instanceof IsExpr isExpr) {
             return visitIsExpr(isExpr);
         }
-        else if (expr instanceof BlockReferenceExpr blockReferenceExpr) {
-            return visitBlockReferenceExpr(blockReferenceExpr);
-        }
         else if (expr instanceof SelectorReferenceExpr selectorReferenceExpr) {
             return visitSelectorReferenceExpr(selectorReferenceExpr);
         }
         throw new IllegalStateException("Unsupported expression type");
-    }
-
-    default @NotNull Expr visitBlockReferenceExpr(final @NotNull BlockReferenceExpr blockReferenceExpr) {
-        return blockReferenceExpr;
     }
 
     default @NotNull Expr visitSelectorReferenceExpr(final @NotNull SelectorReferenceExpr selectorReferenceExpr) {
@@ -204,10 +187,6 @@ public interface ElementVisitor {
 
     default @NotNull Expr visitOpcodeOfExpr(final @NotNull OpcodeOfExpr opcodeOfExpr) {
         return visitExprContainer(opcodeOfExpr);
-    }
-
-    default @NotNull Expr visitAnonBlockExpr(final @NotNull AnonBlockExpr anonBlockExpr) {
-        return visitStatementContainer(anonBlockExpr);
     }
 
     default @NotNull SignatureExpr visitSignatureExpr(final @NotNull SignatureExpr signatureExpr) {

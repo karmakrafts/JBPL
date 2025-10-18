@@ -42,18 +42,6 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     }
 
     @Override
-    public @NotNull List<Declaration> visitBlock(final @NotNull BlockContext ctx) {
-        final var name = ctx.IDENT().getText();
-        final var block = new BlockDecl(name);
-        // @formatter:off
-        block.addStatements(ctx.statement().stream()
-            .map(StatementParser::parse)
-            .toList());
-        // @formatter:on
-        return List.of(block);
-    }
-
-    @Override
     public @NotNull List<Declaration> visitInjector(final @NotNull InjectorContext ctx) {
         final var signature = (FunctionSignatureExpr) ExprParser.parse(ctx.functionSignature());
         final var name = ParserUtils.parseRefOrName(ctx.refOrName());

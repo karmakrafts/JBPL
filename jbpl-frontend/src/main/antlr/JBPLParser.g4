@@ -216,7 +216,6 @@ expr:
 
     | expr KW_IS type
 
-    | anonymousBlock
     | ifExpr
     | macroCall
     | signatureExpr
@@ -226,18 +225,10 @@ expr:
     | definedExpr
     | nameOfExpr
     | preproClassInstantiation
-    | blockReference
     | injectorReference
     | selectorReference
     | reference
     | literal
-    ;
-
-blockReference:
-    KW_BLOCK
-    L_PAREN
-    IDENT
-    R_PAREN
     ;
 
 injectorReference:
@@ -273,14 +264,6 @@ signatureExpr:
     | fieldSignature
     ;
 
-anonymousBlock:
-    KW_BLOCK
-    L_BRACE
-    (statement
-    | NL)*?
-    R_BRACE
-    ;
-
 reference:
     DOLLAR
     L_BRACE
@@ -313,21 +296,11 @@ declaration:
     preproClass
     | classDecl
     | enumDecl
-    | block
     | macro
     | function
     | field
     | injector
     | selector
-    ;
-
-block:
-    KW_BLOCK
-    IDENT
-    L_BRACE
-    (statement
-    | NL)*?
-    R_BRACE
     ;
 
 field:
@@ -698,7 +671,6 @@ type:
     | KW_TYPE
     | KW_STRING
     | KW_OPCODE
-    | KW_BLOCK
     | KW_INSTRUCTION
     | KW_VOID
     | KW_BOOL

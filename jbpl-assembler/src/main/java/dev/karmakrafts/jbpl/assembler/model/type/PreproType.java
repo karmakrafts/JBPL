@@ -10,7 +10,6 @@ public enum PreproType implements Type {
     FUNCTION_SIGNATURE,
     SELECTOR,
     OPCODE,
-    BLOCK,
     INSTRUCTION,
     INJECTOR;
     // @formatter:on

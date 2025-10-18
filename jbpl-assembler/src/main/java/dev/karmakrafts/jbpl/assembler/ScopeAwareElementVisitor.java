@@ -3,8 +3,6 @@ package dev.karmakrafts.jbpl.assembler;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
-import dev.karmakrafts.jbpl.assembler.model.expr.AnonBlockExpr;
-import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Stack;
@@ -26,36 +24,6 @@ public abstract class ScopeAwareElementVisitor implements ElementVisitor {
         final var transformedFile = visitFileInScope(ElementVisitor.super.visitFile(file));
         scopeStack.pop();
         return transformedFile;
-    }
-
-    public @NotNull Declaration visitBlockInScope(final @NotNull BlockDecl blockDecl) {
-        return blockDecl;
-    }
-
-    @Override
-    public @NotNull Declaration visitBlock(final @NotNull BlockDecl blockDecl) {
-        scopeStack.push(new Scope(getScope(), blockDecl));
-        var transformedBlock = ElementVisitor.super.visitBlock(blockDecl);
-        if (transformedBlock instanceof BlockDecl decl) {
-            transformedBlock = visitBlockInScope(decl);
-        }
-        scopeStack.pop();
-        return transformedBlock;
-    }
-
-    public @NotNull Expr visitAnonBlockExprInScope(final @NotNull AnonBlockExpr anonBlockExpr) {
-        return anonBlockExpr;
-    }
-
-    @Override
-    public @NotNull Expr visitAnonBlockExpr(final @NotNull AnonBlockExpr anonBlockExpr) {
-        scopeStack.push(new Scope(getScope(), anonBlockExpr));
-        var transformedExpr = ElementVisitor.super.visitAnonBlockExpr(anonBlockExpr);
-        if (transformedExpr instanceof AnonBlockExpr expr) {
-            transformedExpr = visitAnonBlockExprInScope(expr);
-        }
-        scopeStack.pop();
-        return transformedExpr;
     }
 
     public @NotNull Declaration visitSelectorInScope(final @NotNull SelectorDecl selectorDecl) {

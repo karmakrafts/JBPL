@@ -9,6 +9,11 @@ import org.jetbrains.annotations.NotNull;
 public final class CompoundStatement extends AbstractElementContainer implements Statement {
     @Override
     public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+        for(final var element : elements) {
+            if(element instanceof Statement statement) {
+                statement.evaluate(context);
+            }
+        }
         return new UnitExpr();
     }
 }

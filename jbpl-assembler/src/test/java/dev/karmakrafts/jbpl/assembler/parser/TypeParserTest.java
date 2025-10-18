@@ -65,11 +65,6 @@ public class TypeParserTest extends AbstractParserTest {
     }
 
     @Test
-    public void parseBlockType() {
-        runTest(PreproType.BLOCK, "typeof(block)");
-    }
-
-    @Test
     public void parseOpcodeType() {
         runTest(PreproType.OPCODE, "typeof(opcode)");
     }
@@ -111,7 +106,8 @@ public class TypeParserTest extends AbstractParserTest {
 
     @Test
     public void parseIntersectionType() {
-        runTest(new IntersectionType(List.of(BuiltinType.I32, BuiltinType.F32, BuiltinType.F64)), "typeof((i32 | f32 | f64))");
+        runTest(new IntersectionType(List.of(BuiltinType.I32, BuiltinType.F32, BuiltinType.F64)),
+            "typeof((i32 | f32 | f64))");
     }
 
     @Test

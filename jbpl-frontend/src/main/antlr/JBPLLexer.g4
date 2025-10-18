@@ -34,7 +34,6 @@ KW_STRING: 'string';
 KW_STATIC: 'static';
 KW_TYPEOF: 'typeof';
 KW_CLASS: 'class';
-KW_BLOCK: 'block';
 KW_FINAL: 'final';
 KW_FIELD: 'field';
 KW_LOCAL: 'local';
