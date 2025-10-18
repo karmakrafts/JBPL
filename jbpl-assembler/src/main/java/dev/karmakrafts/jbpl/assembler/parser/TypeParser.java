@@ -118,8 +118,8 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
     @Override
     public @NotNull List<Type> visitClassType(final @NotNull ClassTypeContext ctx) {
         // @formatter:off
-        final var name = ctx.classNameSegment().stream()
-            .map(ClassNameSegmentContext::getText)
+        final var name = ctx.nameSegment().stream()
+            .map(NameSegmentContext::getText)
             .collect(Collectors.joining("/"));
         // @formatter:on
         return List.of(new ClassType(name));
