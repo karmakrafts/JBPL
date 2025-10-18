@@ -14,6 +14,10 @@ public final class PreproClassDecl extends AbstractExprContainer implements Decl
         this.name = name;
     }
 
+    public @NotNull String getName() {
+        return name;
+    }
+
     public void addFields(final @NotNull Map<Expr, Expr> fields) {
         for (final var entry : fields.entrySet()) {
             addField(entry.getKey(), entry.getValue());

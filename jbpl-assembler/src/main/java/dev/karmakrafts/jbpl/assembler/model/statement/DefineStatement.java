@@ -17,6 +17,10 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
         addExpression(value);
     }
 
+    public @NotNull String getName() {
+        return name;
+    }
+
     @Override
     public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
         return new UnitExpr();

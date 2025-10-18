@@ -14,4 +14,8 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     public MacroDecl(final @NotNull String name) {
         this.name = name;
     }
+
+    public @NotNull String getName() {
+        return name;
+    }
 }

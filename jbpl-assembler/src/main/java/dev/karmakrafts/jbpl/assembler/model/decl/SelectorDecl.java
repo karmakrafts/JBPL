@@ -22,6 +22,10 @@ public final class SelectorDecl extends AbstractElement implements Declaration, 
         this.name = name;
     }
 
+    public @NotNull String getName() {
+        return name;
+    }
+
     public sealed interface Condition extends SourceOwner {
         @NotNull Order order();
     }

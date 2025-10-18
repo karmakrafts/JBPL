@@ -1,0 +1,53 @@
+package dev.karmakrafts.jbpl.assembler.util;
+
+import dev.karmakrafts.jbpl.assembler.Scope;
+import dev.karmakrafts.jbpl.assembler.ScopeAwareElementVisitor;
+import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
+import dev.karmakrafts.jbpl.assembler.model.Element;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.function.Function;
+
+public final class NamedResolver<T> extends ScopeAwareElementVisitor {
+    private final Class<T> type;
+    private final Function<T, String> nameGetter;
+    private final HashMap<Scope, HashMap<String, T>> defines = new HashMap<>();
+
+    private NamedResolver(final @NotNull Class<T> type, final @NotNull Function<T, String> nameGetter) {
+        this.type = type;
+        this.nameGetter = nameGetter;
+    }
+
+    public static <T> @NotNull NamedResolver<T> analyze(final @NotNull AssemblyFile file,
+                                                        final @NotNull Class<T> type,
+                                                        final @NotNull Function<T, String> nameGetter) {
+        final var analyzer = new NamedResolver<>(type, nameGetter);
+        file.accept(analyzer);
+        return analyzer;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NotNull Element visitElement(final @NotNull Element element) {
+        if (!type.isAssignableFrom(element.getClass())) {
+            return super.visitElement(element);
+        }
+        final var scope = getScope();
+        final var scopeMap = defines.computeIfAbsent(scope, s -> new HashMap<>());
+        final var typedElement = (T) element;
+        scopeMap.put(nameGetter.apply(typedElement), typedElement);
+        return element;
+    }
+
+    public @Nullable T resolve(final @NotNull Scope scope, final @NotNull String name) {
+        return scope.find(currentScope -> {
+            final var scopeMap = defines.get(currentScope);
+            if (scopeMap == null) {
+                return null;
+            }
+            return scopeMap.get(name);
+        });
+    }
+}
