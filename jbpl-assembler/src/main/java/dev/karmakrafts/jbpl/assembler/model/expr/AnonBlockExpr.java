@@ -22,6 +22,10 @@ public final class AnonBlockExpr extends AbstractStatementContainer implements E
 
     @Override
     public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+        final var statements = getStatements();
+        for (final var statement : statements) {
+            statement.evaluate(context);
+        }
         return this; // Anon blocks evaluate to themselves
     }
 }
