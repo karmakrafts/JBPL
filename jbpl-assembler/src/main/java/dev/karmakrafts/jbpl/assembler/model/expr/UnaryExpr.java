@@ -12,12 +12,12 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         this.op = op;
     }
 
-    public void setValue(final @NotNull Expr value) {
-        getExpressions().set(VALUE_INDEX, value);
-    }
-
     public @NotNull Expr getValue() {
         return getExpressions().get(VALUE_INDEX);
+    }
+
+    public void setValue(final @NotNull Expr value) {
+        getExpressions().set(VALUE_INDEX, value);
     }
 
     @Override

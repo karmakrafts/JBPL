@@ -18,20 +18,20 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         this.op = op;
     }
 
-    public void setLhs(final @NotNull Expr lhs) {
-        getExpressions().set(LHS_INDEX, lhs);
-    }
-
     public @NotNull Expr getLhs() {
         return getExpressions().get(LHS_INDEX);
     }
 
-    public void setRhs(final @NotNull Expr rhs) {
-        getExpressions().set(RHS_INDEX, rhs);
+    public void setLhs(final @NotNull Expr lhs) {
+        getExpressions().set(LHS_INDEX, lhs);
     }
 
     public @NotNull Expr getRhs() {
         return getExpressions().get(RHS_INDEX);
+    }
+
+    public void setRhs(final @NotNull Expr rhs) {
+        getExpressions().set(RHS_INDEX, rhs);
     }
 
     @Override
