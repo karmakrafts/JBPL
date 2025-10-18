@@ -1,7 +1,11 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.type.IntersectionType;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public final class BinaryExpr extends AbstractExprContainer implements Expr {
     public static final int LHS_INDEX = 0;
@@ -36,6 +40,10 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         if (lhsValue instanceof String lhsString) { // String concatenation with any type
             final var rhsValue = getRhs().evaluateAsLiteral(context, Object.class);
             return LiteralExpr.of(String.format("%s%s", lhsString, rhsValue));
+        }
+        else if (lhsValue instanceof Type lhsType) { // Type grouping creates intersection types
+            final var rhsType = getRhs().evaluateAsLiteral(context, Type.class);
+            return LiteralExpr.of(new IntersectionType(List.of(lhsType, rhsType)));
         }
         else if (lhsValue instanceof Boolean lhsBool) { // Boolean binary expressions
             return switch (op) {
