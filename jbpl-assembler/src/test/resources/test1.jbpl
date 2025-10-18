@@ -1,0 +1,5 @@
+public static field <com/example/Foo>.testField: i32 = 0
+
+public static fun <com/example/Foo>.testFunction(): void {
+    return
+}

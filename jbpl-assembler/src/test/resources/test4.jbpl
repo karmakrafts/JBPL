@@ -1,0 +1,2 @@
+^define TEST3: i32 = 42
+^define TEST4: f32 = 3.141592654f32
