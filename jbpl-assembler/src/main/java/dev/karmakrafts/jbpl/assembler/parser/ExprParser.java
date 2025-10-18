@@ -306,11 +306,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
-    public @NotNull List<Expr> visitInjectorReference(final @NotNull InjectorReferenceContext ctx) {
-        return List.of(new InjectorReferenceExpr(ctx.IDENT().getText()));
-    }
-
-    @Override
     public @NotNull List<Expr> visitSelectorReference(final @NotNull SelectorReferenceContext ctx) {
         return List.of(new SelectorReferenceExpr(ctx.IDENT().getText()));
     }

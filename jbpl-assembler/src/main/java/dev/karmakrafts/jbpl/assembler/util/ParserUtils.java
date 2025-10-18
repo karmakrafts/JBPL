@@ -49,7 +49,7 @@ public final class ParserUtils {
         // @formatter:off
         return ref != null
             ? ExprParser.parse(ref)
-            : LiteralExpr.of(ctx.IDENT().getText());
+            : LiteralExpr.of(ctx.nameSegment().getText());
         // @formatter:on
     }
 

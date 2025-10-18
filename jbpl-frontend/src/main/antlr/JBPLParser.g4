@@ -146,7 +146,7 @@ parameter:
 
 refOrName:
     reference
-    | nameSegment+
+    | nameSegment
     ;
 
 refOrType:
