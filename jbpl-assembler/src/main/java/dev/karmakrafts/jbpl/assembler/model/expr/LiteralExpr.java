@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
@@ -67,6 +68,11 @@ public final class LiteralExpr extends AbstractElement implements Expr {
 
     public static LiteralExpr of(final boolean value) {
         return new LiteralExpr(BuiltinType.BOOL, value);
+    }
+
+    @Override
+    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+        return this; // Literals are always evaluated to themselves
     }
 
     @Override
