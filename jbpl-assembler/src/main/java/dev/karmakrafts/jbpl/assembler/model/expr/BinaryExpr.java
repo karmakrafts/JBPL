@@ -41,9 +41,24 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             final var rhsValue = getRhs().evaluateAsLiteral(context, Object.class);
             return LiteralExpr.of(String.format("%s%s", lhsString, rhsValue));
         }
-        else if (lhsValue instanceof Type lhsType) { // Type grouping creates intersection types
+        else if (lhsValue instanceof Type lhsType) { // Type addition/subtraction creates intersection types
             final var rhsType = getRhs().evaluateAsLiteral(context, Type.class);
-            return LiteralExpr.of(new IntersectionType(List.of(lhsType, rhsType)));
+            return switch (op) {
+                case ADD -> LiteralExpr.of(IntersectionType.unfold(List.of(lhsType, rhsType)));
+                case SUB -> {
+                    if (lhsType instanceof IntersectionType lhsIntersectionType) {
+                        final var newType = lhsIntersectionType.unfold();
+                        newType.alternatives().remove(rhsType);
+                        yield LiteralExpr.of(newType);
+                    }
+                    throw new IllegalStateException(
+                        "Left hand side type must be an intersection type for subtraction operation!");
+                }
+                default -> throw new IllegalStateException(String.format("Unsupported type binary expression: %s %s %s",
+                    lhsType,
+                    op,
+                    rhsType));
+            };
         }
         else if (lhsValue instanceof Boolean lhsBool) { // Boolean binary expressions
             return switch (op) {
