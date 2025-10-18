@@ -71,9 +71,10 @@ public final class InstructionParser extends JBPLParserBaseVisitor<List<Instruct
     }
 
     @Override
-    public List<Instruction> visitLdc(LdcContext ctx) {
+    public List<Instruction> visitLdc(final @NotNull LdcContext ctx) {
+        final var opcode = ParserUtils.parseOpcode(ctx.INSN_LDC()).orElseThrow();
         final var value = ExprParser.parse(ctx.literal());
-        return List.of(new LoadConstantInstruction(value));
+        return List.of(new LoadConstantInstruction(opcode, value));
     }
 
     @Override
