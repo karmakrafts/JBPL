@@ -180,9 +180,6 @@ public interface ElementVisitor {
         else if (expr instanceof BlockReferenceExpr blockReferenceExpr) {
             return visitBlockReferenceExpr(blockReferenceExpr);
         }
-        else if (expr instanceof InjectorReferenceExpr injectorReferenceExpr) {
-            return visitInjectorReferenceExpr(injectorReferenceExpr);
-        }
         else if (expr instanceof SelectorReferenceExpr selectorReferenceExpr) {
             return visitSelectorReferenceExpr(selectorReferenceExpr);
         }
@@ -191,10 +188,6 @@ public interface ElementVisitor {
 
     default @NotNull Expr visitBlockReferenceExpr(final @NotNull BlockReferenceExpr blockReferenceExpr) {
         return blockReferenceExpr;
-    }
-
-    default @NotNull Expr visitInjectorReferenceExpr(final @NotNull InjectorReferenceExpr injectorReferenceExpr) {
-        return injectorReferenceExpr;
     }
 
     default @NotNull Expr visitSelectorReferenceExpr(final @NotNull SelectorReferenceExpr selectorReferenceExpr) {

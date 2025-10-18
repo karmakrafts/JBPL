@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 public final class UnaryExpr extends AbstractExprContainer implements Expr {
@@ -18,6 +19,11 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
 
     public void setValue(final @NotNull Expr value) {
         getExpressions().set(VALUE_INDEX, value);
+    }
+
+    @Override
+    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+        return getValue().getType(context);
     }
 
     @Override

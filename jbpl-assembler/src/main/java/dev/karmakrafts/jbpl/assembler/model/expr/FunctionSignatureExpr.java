@@ -2,6 +2,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
+import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,8 +23,13 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
     }
 
     @Override
+    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+        return PreproType.FUNCTION_SIGNATURE;
+    }
+
+    @Override
     public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return this;
+        return this; // Function signatures evaluate to themselves
     }
 
     public @NotNull ClassType evaluateFunctionOwner(final @NotNull AssemblerContext context) {

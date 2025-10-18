@@ -2,9 +2,9 @@ package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
-import dev.karmakrafts.jbpl.assembler.model.expr.EmptyExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -18,7 +18,7 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     public FieldDecl(final @NotNull FieldSignatureExpr signature) {
         signature.setParent(this);
         this.signature = signature;
-        addExpression(new EmptyExpr()); // Initializer
+        addExpression(new UnitExpr()); // Initializer
     }
 
     public @NotNull Expr getInitializer() {

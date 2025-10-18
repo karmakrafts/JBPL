@@ -103,7 +103,8 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitMacro(final @NotNull MacroContext ctx) {
         final var name = ctx.IDENT().getText();
-        final var macro = new MacroDecl(name);
+        final var returnType = TypeParser.parse(ctx.type());
+        final var macro = new MacroDecl(name, LiteralExpr.of(returnType)); // TODO: fix return types not accepting refs
         // @formatter:off
         macro.addElements(ctx.bodyElement().stream()
             .map(ElementParser::parse)

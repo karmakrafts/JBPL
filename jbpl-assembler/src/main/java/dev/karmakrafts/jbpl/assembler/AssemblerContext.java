@@ -1,6 +1,8 @@
 package dev.karmakrafts.jbpl.assembler;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
+import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
+import dev.karmakrafts.jbpl.assembler.model.decl.BlockDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
@@ -26,7 +28,9 @@ public final class AssemblerContext {
     public final NamedResolver<DefineStatement> defineResolver;
     public final NamedResolver<SelectorDecl> selectorResolver;
     public final NamedResolver<MacroDecl> macroResolver;
+    public final NamedResolver<BlockDecl> blockResolver;
     private final Stack<StackFrame> frameStack = new Stack<>();
+    private final Stack<Scope> scopeStack = new Stack<>();
 
     public AssemblerContext(final @NotNull AssemblyFile file) {
         this.file = file;
@@ -34,6 +38,7 @@ public final class AssemblerContext {
         defineResolver = NamedResolver.analyze(file, DefineStatement.class, DefineStatement::getName);
         selectorResolver = NamedResolver.analyze(file, SelectorDecl.class, SelectorDecl::getName);
         macroResolver = NamedResolver.analyze(file, MacroDecl.class, MacroDecl::getName);
+        blockResolver = NamedResolver.analyze(file, BlockDecl.class, BlockDecl::getName);
     }
 
     public void emit(final AbstractInsnNode instruction) {
@@ -42,6 +47,19 @@ public final class AssemblerContext {
 
     public void emitAll(final InsnList instructions) {
         peekFrame().instructionBuffer.add(instructions);
+    }
+
+    public @NotNull Scope getScope() {
+        return scopeStack.peek();
+    }
+
+    public void pushScope(final @NotNull ScopeOwner owner) {
+        final var parent = scopeStack.empty() ? null : scopeStack.peek();
+        scopeStack.push(new Scope(parent, owner));
+    }
+
+    public void popScope() {
+        scopeStack.pop();
     }
 
     public @NotNull StackFrame peekFrame() {

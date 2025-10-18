@@ -11,7 +11,8 @@ public enum PreproType implements Type {
     SELECTOR,
     OPCODE,
     BLOCK,
-    INSTRUCTION;
+    INSTRUCTION,
+    INJECTOR;
     // @formatter:on
 
     @Override

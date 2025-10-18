@@ -71,6 +71,11 @@ public final class LiteralExpr extends AbstractElement implements Expr {
     }
 
     @Override
+    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+        return type;
+    }
+
+    @Override
     public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
         return this; // Literals are always evaluated to themselves
     }

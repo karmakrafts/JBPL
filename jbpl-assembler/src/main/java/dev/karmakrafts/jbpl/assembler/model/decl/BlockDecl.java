@@ -10,4 +10,8 @@ public final class BlockDecl extends AbstractStatementContainer implements Decla
     public BlockDecl(final @NotNull String name) {
         this.name = name;
     }
+
+    public @NotNull String getName() {
+        return name;
+    }
 }

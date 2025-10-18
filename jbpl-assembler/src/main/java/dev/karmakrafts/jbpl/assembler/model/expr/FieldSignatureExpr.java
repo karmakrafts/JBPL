@@ -2,6 +2,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
+import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +15,16 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
         addExpression(owner);
         addExpression(name);
         addExpression(type);
+    }
+
+    @Override
+    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+        return PreproType.FIELD_SIGNATURE;
+    }
+
+    @Override
+    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+        return this; // Field signatures evaluate to themselves
     }
 
     public @NotNull String evaluateFieldName(final @NotNull AssemblerContext context) {

@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.IntersectionType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +33,16 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
 
     public void setRhs(final @NotNull Expr rhs) {
         getExpressions().set(RHS_INDEX, rhs);
+    }
+
+    @Override
+    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+        return switch (op) {
+            // For all comparisons, we always evaluate to booleans
+            case EQ, NE, LT, LE, GT, GE -> BuiltinType.BOOL;
+            // All other binary expressions evaluate to their left hand side type
+            default -> getLhs().getType(context);
+        };
     }
 
     @Override

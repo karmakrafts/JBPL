@@ -2,9 +2,12 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 public interface Expr extends Statement {
+    @NotNull Type getType(final @NotNull AssemblerContext context);
+
     /**
      * Evaluate this expression into a constant state.
      * This means that all scalar values will be evaluated into {@link LiteralExpr},
