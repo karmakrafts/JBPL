@@ -34,6 +34,21 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         addExpression(targetInstruction);
     }
 
+    private static @NotNull String computeFactoryDescriptor(final @NotNull ClassType type,
+                                                            final @NotNull AssemblerContext context) {
+        return org.objectweb.asm.Type.getMethodDescriptor(type.materialize(context));
+    }
+
+    private static int getInvokeTag(final @NotNull Opcode opcode) {
+        return switch (opcode) {
+            case INVOKEVIRTUAL -> Opcodes.H_INVOKEVIRTUAL;
+            case INVOKESTATIC -> Opcodes.H_INVOKESTATIC;
+            case INVOKESPECIAL -> Opcodes.H_INVOKESPECIAL;
+            case INVOKEINTERFACE -> Opcodes.H_INVOKEINTERFACE;
+            default -> throw new IllegalStateException(String.format("Unsupported invoke tag for opcode %s", opcode));
+        };
+    }
+
     public void addArguments(final @NotNull Collection<? extends Expr> arguments) {
         getExpressions().addAll(ARGS_INDEX + argumentIndex, arguments);
         argumentIndex += arguments.size();
@@ -55,56 +70,41 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         return getExpressions().subList(ARGS_INDEX, ARGS_INDEX + argumentIndex);
     }
 
-    public void setInstantiatedSignature(final @NotNull Expr signature) {
-        getExpressions().set(INSTANTIATED_SIGNATURE_INDEX, signature);
-    }
-
     public @NotNull Expr getInstantiatedSignature() {
         return getExpressions().get(INSTANTIATED_SIGNATURE_INDEX);
     }
 
-    public void setBSMInstruction(final @NotNull Expr bsm) {
-        getExpressions().set(BSM_INSTRUCTION_INDEX, bsm);
+    public void setInstantiatedSignature(final @NotNull Expr signature) {
+        getExpressions().set(INSTANTIATED_SIGNATURE_INDEX, signature);
     }
 
     public @NotNull Expr getBSMInstruction() {
         return getExpressions().get(BSM_INSTRUCTION_INDEX);
     }
 
-    public void setSAMSignature(final @NotNull Expr target) {
-        getExpressions().set(SAM_SIGNATURE_INDEX, target);
+    public void setBSMInstruction(final @NotNull Expr bsm) {
+        getExpressions().set(BSM_INSTRUCTION_INDEX, bsm);
     }
 
     public @NotNull Expr getSAMSignature() {
         return getExpressions().get(SAM_SIGNATURE_INDEX);
     }
 
-    public void setTargetInstruction(final @NotNull Expr samTarget) {
-        getExpressions().set(TARGET_INSTRUCTION_INDEX, samTarget);
+    public void setSAMSignature(final @NotNull Expr target) {
+        getExpressions().set(SAM_SIGNATURE_INDEX, target);
     }
 
     public @NotNull Expr getTargetInstruction() {
         return getExpressions().get(TARGET_INSTRUCTION_INDEX);
     }
 
+    public void setTargetInstruction(final @NotNull Expr samTarget) {
+        getExpressions().set(TARGET_INSTRUCTION_INDEX, samTarget);
+    }
+
     @Override
     public @NotNull Opcode getOpcode(final @NotNull AssemblerContext context) {
         return Opcode.INVOKEDYNAMIC;
-    }
-
-    private static @NotNull String computeFactoryDescriptor(final @NotNull ClassType type,
-                                                            final @NotNull AssemblerContext context) {
-        return org.objectweb.asm.Type.getMethodDescriptor(type.materialize(context));
-    }
-
-    private static int getInvokeTag(final @NotNull Opcode opcode) {
-        return switch (opcode) {
-            case INVOKEVIRTUAL -> Opcodes.H_INVOKEVIRTUAL;
-            case INVOKESTATIC -> Opcodes.H_INVOKESTATIC;
-            case INVOKESPECIAL -> Opcodes.H_INVOKESPECIAL;
-            case INVOKEINTERFACE -> Opcodes.H_INVOKEINTERFACE;
-            default -> throw new IllegalStateException(String.format("Unsupported invoke tag for opcode %s", opcode));
-        };
     }
 
     private @NotNull Handle evaluateInvokeHandle(final @NotNull Expr expr, final @NotNull AssemblerContext context) {

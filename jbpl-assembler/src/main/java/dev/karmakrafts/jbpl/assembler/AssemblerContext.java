@@ -16,21 +16,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class AssemblerContext {
-    /**
-     * Holds the expression (evaluation) stack for the current scope,
-     * as well as the instruction buffer of the current scope,
-     * which is joined to the end of the parent scope when the frame is popped.
-     *
-     * @param instructionBuffer The instruction buffer of the current scope.
-     */
-    public record StackFrame(InsnList instructionBuffer) {
-    }
-
     public final AssemblyFile file;
     public final TypeResolver typeResolver;
     public final DefineResolver defineResolver;
     private final Stack<StackFrame> frameStack = new Stack<>();
-
     public AssemblerContext(final @NotNull AssemblyFile file) {
         this.file = file;
         typeResolver = TypeResolver.analyze(file);
@@ -83,5 +72,15 @@ public final class AssemblerContext {
 
     public @NotNull Map<String, ClassNode> apply(final @NotNull ClassNode clazz) {
         return apply(Map.of(clazz.name, clazz));
+    }
+
+    /**
+     * Holds the expression (evaluation) stack for the current scope,
+     * as well as the instruction buffer of the current scope,
+     * which is joined to the end of the parent scope when the frame is popped.
+     *
+     * @param instructionBuffer The instruction buffer of the current scope.
+     */
+    public record StackFrame(InsnList instructionBuffer) {
     }
 }

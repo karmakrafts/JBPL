@@ -16,12 +16,12 @@ public final class InvokeInstruction extends AbstractExprContainer implements In
         addExpression(signature);
     }
 
-    public void setSignature(final @NotNull Expr signature) {
-        getExpressions().set(SIGNATURE_INDEX, signature);
-    }
-
     public @NotNull Expr getSignature() {
         return getExpressions().get(SIGNATURE_INDEX);
+    }
+
+    public void setSignature(final @NotNull Expr signature) {
+        getExpressions().set(SIGNATURE_INDEX, signature);
     }
 
     @Override

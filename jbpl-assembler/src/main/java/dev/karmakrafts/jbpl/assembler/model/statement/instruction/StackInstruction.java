@@ -19,12 +19,12 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
         addExpression(slot);
     }
 
-    public void setSlot(final @NotNull Expr slot) {
-        getExpressions().set(SLOT_INDEX, slot);
-    }
-
     public @NotNull Expr getSlot() {
         return getExpressions().get(SLOT_INDEX);
+    }
+
+    public void setSlot(final @NotNull Expr slot) {
+        getExpressions().set(SLOT_INDEX, slot);
     }
 
     @Override
@@ -38,7 +38,6 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
         final var slotIdObject = getSlot().evaluateAsLiteral(context, Object.class);
         if (slotIdObject instanceof Integer slotId) {
             context.emit(new VarInsnNode(encodedOpcode, slotId));
-            return;
         }
         // If we fall through the above case, we need to resolve the local using pre-defined locals in the sack frame
         // TODO: context.emit(new VarInsnNode(encodedOpcode, index));

@@ -27,8 +27,9 @@ public record ArrayType(Type elementType, int dimensions) implements Type {
 
     @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
-        if(!isMaterializable()) {
-            throw new UnsupportedOperationException(String.format("Array of type %s cannot be materialized", elementType));
+        if (!isMaterializable()) {
+            throw new UnsupportedOperationException(String.format("Array of type %s cannot be materialized",
+                elementType));
         }
         return org.objectweb.asm.Type.getType(String.format("[%s", elementType.materialize(context).getDescriptor()));
     }

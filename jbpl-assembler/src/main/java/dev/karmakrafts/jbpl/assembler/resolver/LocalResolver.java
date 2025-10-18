@@ -23,10 +23,10 @@ public final class LocalResolver extends ScopeAwareElementVisitor {
     }
 
     public void resolveLocalNames(final @NotNull AssemblerContext context) {
-        for(final var scopeEntry : unresolvedLocals.entrySet()) {
+        for (final var scopeEntry : unresolvedLocals.entrySet()) {
             final var scope = scopeEntry.getKey();
             final var resolvedScopeMap = resolvedLocals.computeIfAbsent(scope, s -> new HashMap<>());
-            for(final var unresolvedEntry : scopeEntry.getValue().entrySet()) {
+            for (final var unresolvedEntry : scopeEntry.getValue().entrySet()) {
                 final var name = unresolvedEntry.getKey().evaluateAsLiteral(context, String.class);
                 resolvedScopeMap.put(name, unresolvedEntry.getValue());
             }
