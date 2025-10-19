@@ -17,12 +17,12 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
         addExpression(value);
     }
 
-    public void setValue(final @NotNull Expr value) {
-        getExpressions().set(VALUE_INDEX, value);
-    }
-
     public @NotNull Expr getValue() {
         return getExpressions().get(VALUE_INDEX);
+    }
+
+    public void setValue(final @NotNull Expr value) {
+        getExpressions().set(VALUE_INDEX, value);
     }
 
     @Override
