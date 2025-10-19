@@ -66,7 +66,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
             condition.setTokenRange(TokenRange.fromContext(ctx));
             return condition;
         }
-        final var opcode = ParserUtils.parseOpcode(ctx.opcodeExpr().opcode()).orElseThrow();
+        final var opcode = ParserUtils.parseOpcode(ctx.opcode()).orElseThrow();
         final var condition = new SelectorDecl.OpcodeCondition(order, opcode);
         condition.setTokenRange(TokenRange.fromContext(ctx));
         return condition;

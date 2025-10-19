@@ -7,10 +7,12 @@ import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
+import dev.karmakrafts.jbpl.assembler.model.statement.VersionStatement;
 import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
@@ -81,6 +83,19 @@ public final class AssemblerContext {
     public @NotNull InsnList getInstructionBuffer() {
         return peekFrame().instructionBuffer;
     }
+
+    /**
+     * @return The bytecode ASM version used by this assembly file.
+     * Defaults to Java 17/ASM 9.2.
+     */
+    public int getBytecodeVersion() { // @formatter:off
+        return file.getElements().stream()
+            .filter(VersionStatement.class::isInstance)
+            .map(VersionStatement.class::cast)
+            .map(statement -> statement.version.evaluateAsLiteral(this, Integer.class))
+            .findFirst()
+            .orElse(Opcodes.ASM9); // Java 17 default maps to ASM9(.2)
+    } // @formatter:on
 
     public @NotNull Map<String, @Nullable ClassNode> apply(final @NotNull Function<String, ClassNode> classProvider) {
         return Map.of(); // TODO: implement this

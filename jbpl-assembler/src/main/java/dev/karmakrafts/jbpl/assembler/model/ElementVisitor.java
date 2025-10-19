@@ -263,10 +263,17 @@ public interface ElementVisitor {
         else if (statement instanceof YeetStatement yeetStatement) {
             return visitYeetStatement(yeetStatement);
         }
+        else if (statement instanceof VersionStatement versionStatement) {
+            return visitVersionStatement(versionStatement);
+        }
         else if (statement instanceof Expr expr) {
             return visitExpr(expr);
         }
         throw new IllegalStateException(String.format("Unsupported statement type %s", statement.getClass()));
+    }
+
+    default @NotNull Statement visitVersionStatement(final @NotNull VersionStatement versionStatement) {
+        return versionStatement;
     }
 
     default @NotNull Statement visitCompoundStatement(final @NotNull CompoundStatement compoundStatement) {

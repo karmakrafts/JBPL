@@ -24,6 +24,7 @@ KW_SELECTOR: 'selector';
 KW_OPCODEOF: 'opcodeof';
 KW_DEFINED: 'defined';
 KW_PRIVATE: 'private';
+KW_VERSION: 'version'; // This indicates the ASM (classfile) version we assemble against
 KW_NAMEOF: 'nameof';
 KW_PUBLIC: 'public';
 KW_OPCODE: 'opcode';

@@ -46,7 +46,12 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitOpcodeOfExpr(final @NotNull OpcodeOfExprContext ctx) {
-        return List.of(new OpcodeOfExpr(parse(ctx.expr())));
+        final var opcodeNode = ctx.opcode();
+        if (opcodeNode != null) {
+            final var opcode = ParserUtils.parseOpcode(ctx.opcode()).orElseThrow();
+            return List.of(new OpcodeOfExpr(LiteralExpr.of(opcode)));
+        }
+        return List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr())));
     }
 
     @Override
@@ -281,12 +286,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             .toList());
         // @formatter:on
         return List.of(signature);
-    }
-
-    @Override
-    public @NotNull List<Expr> visitOpcodeExpr(final @NotNull OpcodeExprContext ctx) {
-        final var opcode = ParserUtils.parseOpcode(ctx.opcode()).orElseThrow();
-        return List.of(LiteralExpr.of(opcode));
     }
 
     @Override

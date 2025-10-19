@@ -41,6 +41,12 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     }
 
     @Override
+    public List<Statement> visitVersionStatement(final @NotNull VersionStatementContext ctx) {
+        final var version = ExprParser.parse(ctx.expr());
+        return List.of(new VersionStatement(version));
+    }
+
+    @Override
     public List<Statement> visitYeetStatement(final @NotNull YeetStatementContext ctx) {
         final var classType = ctx.classType();
         if (classType != null) {

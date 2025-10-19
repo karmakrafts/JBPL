@@ -73,6 +73,11 @@ include:
     simpleStringLiteral
     ;
 
+versionStatement:
+    KW_VERSION
+    expr
+    ;
+
 yeetStatement:
     KW_YEET
     (functionSignature
@@ -221,7 +226,6 @@ expr:
     | signatureExpr
     | typeOfExpr
     | opcodeOfExpr
-    | opcodeExpr
     | definedExpr
     | nameOfExpr
     | preproClassInstantiation
@@ -274,7 +278,8 @@ reference:
 opcodeOfExpr:
     KW_OPCODEOF
     L_PAREN
-    expr
+    (opcode
+    | expr)
     R_PAREN
     ;
 
@@ -369,7 +374,7 @@ selectionStatement:
     (KW_AFTER
     | KW_BEFORE)
     (instruction
-    | opcodeExpr)
+    | opcode)
     ;
 
 injector:
@@ -432,6 +437,7 @@ statement:
     | reportStatement
     | returnStatement
     | yeetStatement
+    | versionStatement
     | label
     | local
     | instruction
@@ -634,13 +640,6 @@ logicInstruction:
     | INSN_AND
     | INSN_XOR
     | INSN_OR
-    ;
-
-opcodeExpr:
-    KW_OPCODE
-    L_PAREN
-    opcode
-    R_PAREN
     ;
 
 opcode:
