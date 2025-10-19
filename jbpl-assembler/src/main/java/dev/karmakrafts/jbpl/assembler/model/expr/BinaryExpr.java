@@ -4,8 +4,10 @@ import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.IntersectionType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class BinaryExpr extends AbstractExprContainer implements Expr {
@@ -65,6 +67,16 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                     throw new IllegalStateException(
                         "Left hand side type must be an intersection type for subtraction operation!");
                 }
+                case AND -> { // @formatter:off
+                    final var lhsAlternatives = lhsType instanceof IntersectionType lhsIntersectionType
+                        ? lhsIntersectionType.alternatives()
+                        : List.of(lhsType);
+                    final var rhsAlternatives = rhsType instanceof IntersectionType rhsIntersectionType
+                        ? rhsIntersectionType.alternatives()
+                        : List.of(rhsType);
+                    yield LiteralExpr.of(IntersectionType.unfold(
+                        CollectionUtils.intersect(lhsAlternatives, rhsAlternatives, ArrayList::new)));
+                } // @formatter:on
                 default -> throw new IllegalStateException(String.format("Unsupported type binary expression: %s %s %s",
                     lhsType,
                     op,

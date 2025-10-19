@@ -10,6 +10,7 @@ import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
@@ -81,21 +82,21 @@ public final class AssemblerContext {
         return peekFrame().instructionBuffer;
     }
 
-    public @NotNull Map<String, ClassNode> apply(final @NotNull Function<String, ClassNode> classProvider) {
+    public @NotNull Map<String, @Nullable ClassNode> apply(final @NotNull Function<String, ClassNode> classProvider) {
         return Map.of(); // TODO: implement this
     }
 
-    public @NotNull Map<String, ClassNode> apply(final @NotNull Map<String, ClassNode> classes) {
+    public @NotNull Map<String, @Nullable ClassNode> apply(final @NotNull Map<String, ClassNode> classes) {
         return apply(classes::get);
     }
 
-    public @NotNull Map<String, ClassNode> apply(final @NotNull Collection<ClassNode> classes) { // @formatter:off
+    public @NotNull Map<String, @Nullable ClassNode> apply(final @NotNull Collection<ClassNode> classes) { // @formatter:off
         return apply(classes.stream()
             .map(node -> new Pair<>(node.name, node))
             .collect(Collectors.toMap(Pair::left, Pair::right)));
     } // @formatter:on
 
-    public @NotNull Map<String, ClassNode> apply(final @NotNull ClassNode clazz) {
+    public @NotNull Map<String, @Nullable ClassNode> apply(final @NotNull ClassNode clazz) {
         return apply(Map.of(clazz.name, clazz));
     }
 

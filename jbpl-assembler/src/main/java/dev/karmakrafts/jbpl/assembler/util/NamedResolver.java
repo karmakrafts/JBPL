@@ -13,7 +13,7 @@ import java.util.function.Function;
 public final class NamedResolver<T> extends ScopeAwareElementVisitor {
     private final Class<T> type;
     private final Function<T, String> nameGetter;
-    private final HashMap<Scope, HashMap<String, T>> defines = new HashMap<>();
+    private final HashMap<Scope, HashMap<String, T>> elements = new HashMap<>();
 
     private NamedResolver(final @NotNull Class<T> type, final @NotNull Function<T, String> nameGetter) {
         this.type = type;
@@ -35,7 +35,7 @@ public final class NamedResolver<T> extends ScopeAwareElementVisitor {
             return super.visitElement(element);
         }
         final var scope = getScope();
-        final var scopeMap = defines.computeIfAbsent(scope, s -> new HashMap<>());
+        final var scopeMap = elements.computeIfAbsent(scope, s -> new HashMap<>());
         final var typedElement = (T) element;
         scopeMap.put(nameGetter.apply(typedElement), typedElement);
         return element;
@@ -43,7 +43,7 @@ public final class NamedResolver<T> extends ScopeAwareElementVisitor {
 
     public @Nullable T resolve(final @NotNull Scope scope, final @NotNull String name) {
         return scope.find(currentScope -> {
-            final var scopeMap = defines.get(currentScope);
+            final var scopeMap = elements.get(currentScope);
             if (scopeMap == null) {
                 return null;
             }

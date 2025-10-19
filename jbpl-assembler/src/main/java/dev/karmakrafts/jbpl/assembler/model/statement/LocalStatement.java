@@ -15,6 +15,9 @@ public final class LocalStatement extends AbstractElement implements Statement {
 
     @Override
     public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+        // Make this local available in the current frame during further evaluation
+        final var name = this.name.evaluateAsLiteral(context, String.class);
+        context.peekFrame().locals().put(name, this);
         return new UnitExpr();
     }
 }
