@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -75,5 +76,10 @@ public final class PreproClassDecl extends AbstractExprContainer implements Decl
 
     public int getFieldCount() {
         return elements.size() >> 1;
+    }
+
+    @Override
+    public void evaluate(@NotNull AssemblerContext context) {
+
     }
 }

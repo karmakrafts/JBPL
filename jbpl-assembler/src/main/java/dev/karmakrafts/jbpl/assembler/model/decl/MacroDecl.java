@@ -37,4 +37,9 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     public @NotNull String getName() {
         return name;
     }
+
+    @Override
+    public void evaluate(@NotNull AssemblerContext context) {
+
+    }
 }

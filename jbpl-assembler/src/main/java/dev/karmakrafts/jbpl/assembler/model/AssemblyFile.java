@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;
@@ -59,5 +60,10 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     @Override
     public void setParent(final @Nullable ElementContainer parent) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void evaluate(@NotNull AssemblerContext context) {
+        //TODO:
     }
 }

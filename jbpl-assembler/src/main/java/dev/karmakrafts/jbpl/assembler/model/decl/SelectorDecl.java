@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.Order;
 import dev.karmakrafts.jbpl.assembler.model.ReturnTarget;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
@@ -25,6 +26,11 @@ public final class SelectorDecl extends AbstractElement implements Declaration, 
 
     public @NotNull String getName() {
         return name;
+    }
+
+    @Override
+    public void evaluate(@NotNull AssemblerContext context) {
+
     }
 
     public sealed interface Condition extends SourceOwner {

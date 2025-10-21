@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.ReturnTarget;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -34,5 +35,10 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
     public void setTarget(final @NotNull FunctionSignatureExpr target) {
         target.setParent(this);
         this.target = target;
+    }
+
+    @Override
+    public void evaluate(@NotNull AssemblerContext context) {
+
     }
 }

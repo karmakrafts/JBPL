@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.ReturnTarget;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
@@ -25,5 +26,10 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
     public void setSignature(final @NotNull FunctionSignatureExpr signature) {
         signature.setParent(this);
         this.signature = signature;
+    }
+
+    @Override
+    public void evaluate(@NotNull AssemblerContext context) {
+
     }
 }

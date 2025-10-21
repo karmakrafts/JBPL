@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -36,5 +37,10 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     public void setSignature(final @NotNull FieldSignatureExpr signature) {
         signature.setParent(this);
         this.signature = signature;
+    }
+
+    @Override
+    public void evaluate(@NotNull AssemblerContext context) {
+
     }
 }
