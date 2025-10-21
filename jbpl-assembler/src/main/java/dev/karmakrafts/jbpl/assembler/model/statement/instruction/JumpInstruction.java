@@ -20,6 +20,7 @@ import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.JumpInsnNode;
 
 public final class JumpInstruction extends AbstractExprContainer implements Instruction {
     public static final int TARGET_INDEX = 0;
@@ -55,6 +56,10 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
     //  ElementVisitor also needs to be adapted to include JumpInstructions when traversing the tree
     @Override
     public void evaluate(@NotNull AssemblerContext context) {
+        final var encodedOpcode = opcode.encodedValue;
+        final var target = getTarget();
+        final var label = target.evaluateAsConst(context, String.class);
 
+        context.emit(new JumpInsnNode());
     }
 }

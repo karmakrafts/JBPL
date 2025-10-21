@@ -328,6 +328,9 @@ public interface ElementVisitor {
         else if (instruction instanceof FieldInstruction fieldInstruction) {
             return visitFieldInstruction(fieldInstruction);
         }
+        else if (instruction instanceof JumpInstruction jumpInstruction) {
+            return visitJumpInstruction(jumpInstruction);
+        }
         throw new IllegalStateException("Unsupported instruction type");
     }
 
@@ -352,6 +355,10 @@ public interface ElementVisitor {
     }
 
     default @NotNull Instruction visitFieldInstruction(final @NotNull FieldInstruction instruction) {
+        return visitExprContainer(instruction);
+    }
+
+    default @NotNull Instruction visitJumpInstruction(final @NotNull JumpInstruction instruction) {
         return visitExprContainer(instruction);
     }
 }
