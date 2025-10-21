@@ -44,4 +44,12 @@ public interface Expr extends Statement {
         }
         return type.cast(evaluateAs(context, LiteralExpr.class).value);
     }
+
+    default <T> @NotNull T evaluateAsConstAndMaterialize(final @NotNull AssemblerContext context, final @NotNull Class<T> type) {
+        // Const types are materialized after unwrapping
+        if(type.isAssignableFrom(org.objectweb.asm.Type.class)) {
+            return type.cast(evaluateAsConst(context, Type.class).materialize(context));
+        }
+        return evaluateAsConst(context, type);
+    }
 }
