@@ -15,10 +15,7 @@ import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,6 +54,20 @@ public final class AssemblerContext {
 
     public void addClass(final @NotNull ClassNode classNode) {
         output.put(classNode.name, classNode);
+    }
+
+    public void addField(final @NotNull String className, final @NotNull FieldNode fieldNode) {
+        transformClass(className, node -> {
+            node.fields.add(fieldNode);
+            return node;
+        });
+    }
+
+    public void addFunction(final @NotNull String className, final @NotNull MethodNode methodNode) {
+        transformClass(className, node -> {
+            node.methods.add(methodNode);
+            return node;
+        });
     }
 
     public void transformClass(final @NotNull String name, final @NotNull Function<ClassNode, ClassNode> transform) {
