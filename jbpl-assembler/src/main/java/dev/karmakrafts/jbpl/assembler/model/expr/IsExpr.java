@@ -28,7 +28,7 @@ public final class IsExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return LiteralExpr.of(getValue().getType(context).equals(type));
+    public void evaluate(final @NotNull AssemblerContext context) {
+        context.pushValue(LiteralExpr.of(getValue().getType(context).equals(type)));
     }
 }

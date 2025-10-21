@@ -48,15 +48,15 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
         final var lhsValue = getLhs().evaluateAsConst(context, Object.class);
         if (lhsValue instanceof String lhsString) { // String concatenation with any type
             final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
-            return LiteralExpr.of(String.format("%s%s", lhsString, rhsValue));
+            context.pushValue(LiteralExpr.of(String.format("%s%s", lhsString, rhsValue)));
         }
         else if (lhsValue instanceof Type lhsType) { // Type addition/subtraction creates intersection types
             final var rhsType = getRhs().evaluateAsConst(context, Type.class);
-            return switch (op) {
+            var result = switch (op) {
                 case ADD -> LiteralExpr.of(IntersectionType.unfold(List.of(lhsType, rhsType)));
                 case SUB -> {
                     if (lhsType instanceof IntersectionType lhsIntersectionType) {
@@ -82,9 +82,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                     op,
                     rhsType));
             };
+
+            context.pushValue(result);
         }
         else if (lhsValue instanceof Boolean lhsBool) { // Boolean binary expressions
-            return switch (op) {
+            var result = switch (op) {
                 // Boolean equality
                 case EQ -> {
                     final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
@@ -125,6 +127,8 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                     op,
                     getRhs().evaluateAsConst(context, Object.class)));
             };
+
+            context.pushValue(result);
         }
         else if (lhsValue instanceof Number lhsNumber) { // Numeric binary expressions
             final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
@@ -132,7 +136,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                 throw new IllegalStateException("Numeric binary expression must have a number on the right hand side!");
             }
             if (lhsNumber instanceof Byte lhsByte) {
-                return switch (op) {
+                var result = switch (op) {
                     // Comparisons
                     case EQ -> LiteralExpr.of(lhsByte == rhsNumber.byteValue());
                     case NE -> LiteralExpr.of(lhsByte != rhsNumber.byteValue());
@@ -159,9 +163,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                         op,
                         rhsValue));
                 };
+
+                context.pushValue(result);
             }
             else if (lhsNumber instanceof Short lhsShort) {
-                return switch (op) {
+                var result = switch (op) {
                     // Comparisons
                     case EQ -> LiteralExpr.of(lhsShort == rhsNumber.shortValue());
                     case NE -> LiteralExpr.of(lhsShort != rhsNumber.shortValue());
@@ -188,9 +194,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                         op,
                         rhsValue));
                 };
+
+                context.pushValue(result);
             }
             else if (lhsNumber instanceof Integer lhsInteger) {
-                return switch (op) {
+                var result = switch (op) {
                     // Comparisons
                     case EQ -> LiteralExpr.of(lhsInteger == rhsNumber.intValue());
                     case NE -> LiteralExpr.of(lhsInteger != rhsNumber.intValue());
@@ -217,9 +225,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                         op,
                         rhsValue));
                 };
+
+                context.pushValue(result);
             }
             else if (lhsNumber instanceof Long lhsLong) {
-                return switch (op) {
+                var result = switch (op) {
                     // Comparisons
                     case EQ -> LiteralExpr.of(lhsLong == rhsNumber.longValue());
                     case NE -> LiteralExpr.of(lhsLong != rhsNumber.longValue());
@@ -246,9 +256,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                         op,
                         rhsValue));
                 };
+
+                context.pushValue(result);
             }
             else if (lhsNumber instanceof Float lhsFloat) {
-                return switch (op) {
+                var result = switch (op) {
                     // Comparisons
                     case EQ -> LiteralExpr.of(lhsFloat == rhsNumber.floatValue());
                     case NE -> LiteralExpr.of(lhsFloat != rhsNumber.floatValue());
@@ -268,9 +280,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                         op,
                         rhsValue));
                 };
+
+                context.pushValue(result);
             }
             else if (lhsNumber instanceof Double lhsDouble) {
-                return switch (op) {
+                var result = switch (op) {
                     // Comparisons
                     case EQ -> LiteralExpr.of(lhsDouble == rhsNumber.doubleValue());
                     case NE -> LiteralExpr.of(lhsDouble != rhsNumber.doubleValue());
@@ -290,6 +304,8 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                         op,
                         rhsValue));
                 };
+
+                context.pushValue(result);
             }
         }
         throw new IllegalStateException(String.format("Unsupported binary expression operands: %s %s %s",

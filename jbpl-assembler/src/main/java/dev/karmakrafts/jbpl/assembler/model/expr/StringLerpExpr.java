@@ -12,7 +12,7 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
         final var buffer = new StringBuilder();
         final var expressions = getExpressions();
         for (final var expr : expressions) {
@@ -22,6 +22,7 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
             }
             buffer.append(expr.evaluateAsConst(context, Object.class));
         }
-        return LiteralExpr.of(buffer.toString());
+
+        context.pushValue(LiteralExpr.of(buffer.toString()));
     }
 }

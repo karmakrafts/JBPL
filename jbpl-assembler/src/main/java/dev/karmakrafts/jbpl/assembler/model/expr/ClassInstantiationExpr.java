@@ -19,7 +19,7 @@ public final class ClassInstantiationExpr extends AbstractCallExpr implements Ex
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return this; // Calls evaluate to themselves since they are only argument storage
+    public void evaluate(final @NotNull AssemblerContext context) {
+        // Calls evaluate to themselves since they are only argument storage
     }
 }

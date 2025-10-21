@@ -28,8 +28,9 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return this; // Function signatures evaluate to themselves
+    public void evaluate(final @NotNull AssemblerContext context) {
+        context.pushValue(LiteralExpr.of(this));
+        // Function signatures evaluate to themselves
     }
 
     public @NotNull ClassType evaluateFunctionOwner(final @NotNull AssemblerContext context) {

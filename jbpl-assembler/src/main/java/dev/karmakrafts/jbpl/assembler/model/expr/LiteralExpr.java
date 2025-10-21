@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
@@ -70,14 +71,24 @@ public final class LiteralExpr extends AbstractElement implements Expr {
         return new LiteralExpr(BuiltinType.BOOL, value);
     }
 
+    public static LiteralExpr of(final @NotNull SignatureExpr value) {
+        final var type = value instanceof FunctionSignatureExpr ? PreproType.FUNCTION_SIGNATURE : PreproType.FIELD_SIGNATURE;
+        return new LiteralExpr(type, value);
+    }
+
+    public static LiteralExpr of(final @NotNull SelectorDecl value) {
+        return new LiteralExpr(PreproType.SELECTOR, value);
+    }
+
     @Override
     public @NotNull Type getType(final @NotNull AssemblerContext context) {
         return type;
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return this; // Literals are always evaluated to themselves
+    public void evaluate(final @NotNull AssemblerContext context) {
+        context.pushValue(this);
+        // Literals are always evaluated to themselves
     }
 
     @Override

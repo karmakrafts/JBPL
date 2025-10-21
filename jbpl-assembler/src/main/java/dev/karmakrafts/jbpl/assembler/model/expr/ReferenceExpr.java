@@ -28,7 +28,8 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return getDefine(context).getValue();
+    public void evaluate(final @NotNull AssemblerContext context) {
+
+        context.pushValue(getDefine(context).getValue());
     }
 }

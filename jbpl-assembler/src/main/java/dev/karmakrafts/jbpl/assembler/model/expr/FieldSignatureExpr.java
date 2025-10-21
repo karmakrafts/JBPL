@@ -23,8 +23,9 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return this; // Field signatures evaluate to themselves
+    public void evaluate(final @NotNull AssemblerContext context) {
+        context.pushValue(LiteralExpr.of(this));
+        //Field signatures evaluate to themselves
     }
 
     public @NotNull String evaluateFieldName(final @NotNull AssemblerContext context) {

@@ -31,6 +31,6 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-
+        //TODO:
     }
 }

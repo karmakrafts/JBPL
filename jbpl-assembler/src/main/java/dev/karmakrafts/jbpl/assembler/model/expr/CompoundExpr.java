@@ -22,7 +22,7 @@ public final class CompoundExpr extends AbstractElementContainer implements Expr
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-
+    public void evaluate(final @NotNull AssemblerContext context) {
+        //TODO:
     }
 }

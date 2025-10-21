@@ -27,8 +27,8 @@ public final class OpcodeOfExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
         final var opcode = getValue().evaluateAsConst(context, Instruction.class).getOpcode(context);
-        return LiteralExpr.of(opcode);
+        context.pushValue(LiteralExpr.of(opcode));
     }
 }

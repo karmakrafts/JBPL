@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
@@ -18,8 +19,17 @@ public final class SelectorReferenceExpr extends AbstractElement implements Expr
         return PreproType.SELECTOR;
     }
 
+    private @NotNull SelectorDecl getSelector(final @NotNull AssemblerContext context) {
+        final var scope = context.getScope();
+        final var define = context.selectorResolver.resolve(scope, name);
+        if (define == null) {
+            throw new IllegalStateException(String.format("Could not find selector '%s' in scope %s", name, scope));
+        }
+        return define;
+    }
+
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return null; // TODO: implement this
+    public void evaluate(final @NotNull AssemblerContext context) {
+        context.pushValue(LiteralExpr.of(getSelector(context)));
     }
 }
