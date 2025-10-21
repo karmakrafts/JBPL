@@ -31,8 +31,8 @@ public final class AssemblerContext {
     public final NamedResolver<DefineStatement> defineResolver;
     public final NamedResolver<SelectorDecl> selectorResolver;
     public final NamedResolver<MacroDecl> macroResolver;
-    private final Stack<StackFrame> frameStack = new Stack<>();
     public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
+    private final Stack<StackFrame> frameStack = new Stack<>();
     public int bytecodeVersion = Opcodes.ASM9; // Default is ASM 9.2 for Java 17
 
     public AssemblerContext(final @NotNull AssemblyFile file,
