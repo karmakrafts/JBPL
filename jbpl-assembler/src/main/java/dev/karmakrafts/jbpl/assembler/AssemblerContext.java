@@ -8,6 +8,7 @@ import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
+import dev.karmakrafts.jbpl.assembler.model.statement.LabelStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import org.jetbrains.annotations.NotNull;
@@ -113,6 +114,7 @@ public final class AssemblerContext {
         public final Stack<Expr> values = new Stack<>();
         public final InsnList instructionBuffer = new InsnList();
         public final HashMap<String, LocalStatement> locals = new HashMap<>();
+        public final HashMap<String, LabelStatement> labels = new HashMap<>();
         public ReturnTarget returnTarget;
 
         public StackFrame(final @NotNull Scope scope) {

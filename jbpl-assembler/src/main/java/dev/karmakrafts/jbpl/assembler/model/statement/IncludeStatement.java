@@ -2,8 +2,6 @@ package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
-import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
 import org.jetbrains.annotations.NotNull;
 
 public final class IncludeStatement extends AbstractElement implements Statement {
@@ -14,7 +12,7 @@ public final class IncludeStatement extends AbstractElement implements Statement
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return new UnitExpr();
+    public void evaluate(final @NotNull AssemblerContext context) {
+
     }
 }

@@ -1,20 +1,30 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
+import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
 import org.jetbrains.annotations.NotNull;
 
-public final class LabelStatement extends AbstractElement implements Statement {
-    public String name;
+public final class LabelStatement extends AbstractExprContainer implements Statement {
+    public static final int NAME_INDEX = 0;
 
-    public LabelStatement(final @NotNull String name) {
-        this.name = name;
+    public LabelStatement(final @NotNull Expr name) {
+        addExpression(name);
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return new UnitExpr();
+    public void evaluate(final @NotNull AssemblerContext context) {
+        // Make this local available in the current frame during further evaluation
+
+        final var name = getName().evaluateAsConst(context, String.class);
+        context.peekFrame().labels.put(name, this);
+    }
+
+    public @NotNull Expr getName() {
+        return getExpressions().get(NAME_INDEX);
+    }
+
+    public void setName(final @NotNull Expr name) {
+        getExpressions().set(NAME_INDEX, name);
     }
 }

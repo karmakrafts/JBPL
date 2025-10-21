@@ -71,7 +71,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
 
     @Override
     public @NotNull List<Statement> visitLabel(final @NotNull LabelContext ctx) {
-        final var name = ctx.IDENT().getText();
+        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
         return List.of(new LabelStatement(name));
     }
 

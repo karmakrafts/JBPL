@@ -491,7 +491,7 @@ fieldStore:
 
 label:
     COLON
-    IDENT
+    refOrName
     ;
 
 jump:

@@ -32,7 +32,7 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
     }
 
     @Override
-    public void emit(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
         final var encodedOpcode = opcode.encodedValue;
         final var signature = getSignature().evaluateAs(context, FieldSignatureExpr.class);
         final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);

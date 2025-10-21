@@ -124,7 +124,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     @Override
-    public void emit(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
         final var instantiatedSignature = getInstantiatedSignature().evaluateAs(context, FunctionSignatureExpr.class);
         final var samSignature = getSAMSignature().evaluateAs(context, FunctionSignatureExpr.class);
         final var name = instantiatedSignature.evaluateFunctionName(context);

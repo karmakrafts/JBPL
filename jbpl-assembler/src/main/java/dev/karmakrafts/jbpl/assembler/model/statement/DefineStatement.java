@@ -3,7 +3,6 @@ package dev.karmakrafts.jbpl.assembler.model.statement;
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +30,7 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return new UnitExpr();
+    public void evaluate(final @NotNull AssemblerContext context) {
+        getValue().evaluate(context);
     }
 }

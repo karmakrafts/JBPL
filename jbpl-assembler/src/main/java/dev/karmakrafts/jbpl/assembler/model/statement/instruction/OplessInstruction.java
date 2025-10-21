@@ -18,7 +18,7 @@ public final class OplessInstruction extends AbstractElement implements Instruct
     }
 
     @Override
-    public void emit(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
         context.emit(new InsnNode(opcode.encodedValue));
     }
 }
