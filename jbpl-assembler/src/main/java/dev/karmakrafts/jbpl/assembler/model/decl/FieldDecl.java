@@ -6,7 +6,9 @@ import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.FieldNode;
 
 import java.util.EnumSet;
 
@@ -41,6 +43,15 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     @Override
     public void evaluate(@NotNull AssemblerContext context) {
+        final var owner = signature.evaluateFieldOwner(context);
+        final var modifier = AccessModifier.combine(accessModifiers);
+        final var name = signature.evaluateFieldName(context);
+        final var descriptor = signature.getFieldType().evaluateAsConst(context, Type.class).materialize(context).getDescriptor();
 
+        final var initialValue = getInitializer().evaluateAsConstAndMaterialize(context);
+
+        final var node = new FieldNode(context.bytecodeVersion, modifier, name, descriptor, descriptor, initialValue);
+
+        context.addField(owner.name(), node);
     }
 }
