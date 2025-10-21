@@ -5,6 +5,8 @@ import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public interface Expr extends Statement {
     @NotNull Type getType(final @NotNull AssemblerContext context);
 
@@ -23,7 +25,8 @@ public interface Expr extends Statement {
      */
     default <E extends Expr> @NotNull E evaluateAs(final @NotNull AssemblerContext context,
                                                    final @NotNull Class<E> type) {
-        return type.cast(evaluate(context));
+        evaluate(context);
+        return type.cast(Objects.requireNonNull(context.peekValue()));
     }
 
     /**
