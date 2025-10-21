@@ -494,12 +494,16 @@ label:
     refOrName
     ;
 
-jump:
+jumpInstruction:
     (INSN_GOTO
     | INSN_IF
     | INSN_IF_ACMP
     | INSN_IF_ICMP)
-    IDENT
+    ;
+
+jump:
+    jumpInstruction
+    refOrName
     ;
 
 typeInstruction:

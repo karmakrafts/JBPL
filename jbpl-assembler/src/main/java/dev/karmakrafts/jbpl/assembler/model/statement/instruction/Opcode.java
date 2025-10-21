@@ -50,7 +50,22 @@ public enum Opcode {
     INVOKEVIRTUAL   (Opcodes.INVOKEVIRTUAL),
     INVOKESPECIAL   (Opcodes.INVOKESPECIAL),
     INVOKEINTERFACE (Opcodes.INVOKEINTERFACE),
-    INVOKEDYNAMIC   (Opcodes.INVOKEDYNAMIC);
+    INVOKEDYNAMIC   (Opcodes.INVOKEDYNAMIC),
+    IFEQ            (Opcodes.IFEQ),
+    IFNE            (Opcodes.IFNE),
+    IFLT            (Opcodes.IFLT),
+    IFGE            (Opcodes.IFGE),
+    IFGT            (Opcodes.IFGT),
+    IFLE            (Opcodes.IFLE),
+    IF_ICMPEQ       (Opcodes.IF_ICMPEQ),
+    IF_ICMPNE       (Opcodes.IF_ICMPNE),
+    IF_ICMPLT       (Opcodes.IF_ICMPLT),
+    IF_ICMPGE       (Opcodes.IF_ICMPGE),
+    IF_ICMPGT       (Opcodes.IF_ICMPGT),
+    IF_ICMPLE       (Opcodes.IF_ICMPLE),
+    IF_ACMPEQ       (Opcodes.IF_ACMPEQ),
+    IF_ACMPNE       (Opcodes.IF_ACMPNE),
+    GOTO            (Opcodes.GOTO);
     // @formatter:on
 
     // @formatter:off

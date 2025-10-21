@@ -85,6 +85,14 @@ public final class InstructionParser extends JBPLParserBaseVisitor<List<Instruct
     }
 
     @Override
+    public List<Instruction> visitJump(final @NotNull JumpContext ctx) {
+        final var opcode = ParserUtils.parseOpcode(ctx.jumpInstruction()).orElseThrow();
+        final var signature = ParserUtils.parseRefOrName(ctx.refOrName());
+
+        return List.of(new JumpInstruction(opcode, signature));
+    }
+
+    @Override
     public List<Instruction> visitInvokedynamic(final @NotNull InvokedynamicContext ctx) {
         var signatureIndex = 0;
         final var instantiatedSignature = ExprParser.parse(ctx.functionSignature(signatureIndex++)); // First signature is instantiated type
