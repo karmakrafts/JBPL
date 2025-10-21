@@ -27,18 +27,17 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
 
     public Opcode opcode;
 
-    public JumpInstruction(final @NotNull Opcode opcode,
-                           final @NotNull Expr target) {
+    public JumpInstruction(final @NotNull Opcode opcode, final @NotNull Expr target) {
         this.opcode = opcode;
         addExpression(target);
     }
 
-    public void setTarget(final @NotNull Expr target) {
-        getExpressions().set(TARGET_INDEX, target);
-    }
-
     public @NotNull Expr getTarget() {
         return getExpressions().get(TARGET_INDEX);
+    }
+
+    public void setTarget(final @NotNull Expr target) {
+        getExpressions().set(TARGET_INDEX, target);
     }
 
     @Override
@@ -46,20 +45,12 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
         return opcode;
     }
 
-    // TODO for Marlon:
-    //  A jump instruction may be one of the following:
-    //  GOTO and any IF-like instruction
-    //  It's target expression can either evaluate to a LiteralExpr directly
-    //  which contains a string (the name of a label)
-    //  It can also be a reference, so it needs to be evaluated
-    //  -----
-    //  ElementVisitor also needs to be adapted to include JumpInstructions when traversing the tree
     @Override
     public void evaluate(@NotNull AssemblerContext context) {
         final var encodedOpcode = opcode.encodedValue;
         final var target = getTarget();
-        final var label = target.evaluateAsConst(context, String.class);
+        final var label = context.getOrCreateLabelNode(target.evaluateAsConst(context, String.class));
 
-        context.emit(new JumpInsnNode());
+        context.emit(new JumpInsnNode(encodedOpcode, label));
     }
 }
