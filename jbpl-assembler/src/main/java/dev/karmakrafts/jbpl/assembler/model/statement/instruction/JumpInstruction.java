@@ -49,7 +49,7 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
     //  A jump instruction may be one of the following:
     //  GOTO and any IF-like instruction
     //  It's target expression can either evaluate to a LiteralExpr directly
-    //  which contains an i32 value (for the stack index) or a string (the name of a label)
+    //  which contains a string (the name of a label)
     //  It can also be a reference, so it needs to be evaluated
     //  -----
     //  ElementVisitor also needs to be adapted to include JumpInstructions when traversing the tree
