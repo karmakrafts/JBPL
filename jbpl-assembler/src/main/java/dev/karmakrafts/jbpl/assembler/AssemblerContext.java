@@ -10,6 +10,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LabelStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +19,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.function.Function;
@@ -52,9 +54,50 @@ public final class AssemblerContext {
         output.put(classNode.name, classNode);
     }
 
-    public void transformClass(final @NotNull String name,
-                               final @NotNull Function<@Nullable ClassNode, ClassNode> transform) {
+    public void transformClass(final @NotNull String name, final @NotNull Function<ClassNode, ClassNode> transform) {
+        final var clazz = output.get(name);
+        if (clazz != null) {
+            output.put(name, transform.apply(clazz));
+            return;
+        }
         output.put(name, transform.apply(classResolver.apply(name)));
+    }
+
+    public void removeField(final @NotNull String className, final @NotNull String name) {
+        transformClass(className, node -> {
+            // @formatter:off
+            final var target = node.fields.stream()
+                .filter(field -> field.name.equals(name))
+                .findFirst()
+                .orElseThrow();
+            // @formatter:on
+            node.fields.remove(target);
+            return node;
+        });
+    }
+
+    public void removeFunction(final @NotNull String className,
+                               final @NotNull String name,
+                               final @NotNull org.objectweb.asm.Type type) {
+        transformClass(className, node -> {
+            // @formatter:off
+            final var target = node.methods.stream()
+                .filter(method -> org.objectweb.asm.Type.getMethodType(method.desc).equals(type))
+                .findFirst()
+                .orElseThrow();
+            // @formatter:on
+            node.methods.remove(target);
+            return node;
+        });
+    }
+
+    public void removeFunction(final @NotNull String className,
+                               final @NotNull String name,
+                               final @NotNull Type returnType,
+                               final @NotNull Type... paramTypes) {
+        final var mReturnType = returnType.materialize(this);
+        final var mParamTypes = Arrays.stream(paramTypes).map(type -> type.materialize(this)).toArray(org.objectweb.asm.Type[]::new);
+        removeFunction(className, name, org.objectweb.asm.Type.getMethodType(mReturnType, mParamTypes));
     }
 
     public void emit(final AbstractInsnNode instruction) {
