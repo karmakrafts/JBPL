@@ -92,7 +92,7 @@ returnStatement:
 
 macro:
     KW_PREPRO_MACRO
-    IDENT
+    refOrName
     L_PAREN
     (parameter
     (COMMA
@@ -100,7 +100,7 @@ macro:
     )?
     R_PAREN
     (COLON
-    type)?
+    refOrType)?
     L_BRACE
     (bodyElement
     | NL)*?
@@ -356,7 +356,7 @@ function:
 selector:
     KW_SELECTOR
     NL*?
-    IDENT
+    refOrName
     NL*?
     L_BRACE
     (selectionStatement

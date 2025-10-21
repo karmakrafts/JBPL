@@ -79,7 +79,7 @@ public final class PreproClassDecl extends AbstractExprContainer implements Decl
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
 
     }
 }

@@ -14,8 +14,8 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
     private FunctionSignatureExpr signature;
 
     public FunctionDecl(final @NotNull FunctionSignatureExpr signature) {
-        this.signature = signature;
         signature.setParent(this);
+        this.signature = signature;
     }
 
     public @NotNull FunctionSignatureExpr getSignature() {
@@ -23,12 +23,15 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
     }
 
     public void setSignature(final @NotNull FunctionSignatureExpr signature) {
+        if (this.signature != null) {
+            this.signature.setParent(null);
+        }
         signature.setParent(this);
         this.signature = signature;
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
 
     }
 }

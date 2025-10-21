@@ -13,36 +13,35 @@ import org.objectweb.asm.tree.FieldNode;
 import java.util.EnumSet;
 
 public final class FieldDecl extends AbstractExprContainer implements Declaration {
-    public static final int INITIALIZER_INDEX = 0;
+    public static final int SIGNATURE_INDEX = 0;
+    public static final int INITIALIZER_INDEX = 1;
 
     public final EnumSet<AccessModifier> accessModifiers = EnumSet.noneOf(AccessModifier.class);
-    private FieldSignatureExpr signature;
 
     public FieldDecl(final @NotNull FieldSignatureExpr signature) {
-        signature.setParent(this);
-        this.signature = signature;
+        addExpression(signature);
         addExpression(LiteralExpr.unit()); // Initializer
     }
 
     public @NotNull Expr getInitializer() {
-        return (Expr) elements.get(INITIALIZER_INDEX);
+        return getExpressions().get(INITIALIZER_INDEX);
     }
 
     public void setInitializer(final @NotNull Expr initializer) {
         elements.set(INITIALIZER_INDEX, initializer);
     }
 
-    public @NotNull FieldSignatureExpr getSignature() {
-        return signature;
+    public @NotNull Expr getSignature() {
+        return getExpressions().get(SIGNATURE_INDEX);
     }
 
-    public void setSignature(final @NotNull FieldSignatureExpr signature) {
-        signature.setParent(this);
-        this.signature = signature;
+    public void setSignature(final @NotNull Expr signature) {
+        getExpressions().set(SIGNATURE_INDEX, signature);
     }
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
+        final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
         final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
         final var modifier = AccessModifier.combine(accessModifiers);
         final var name = signature.getFieldName().evaluateAsConst(context, String.class);

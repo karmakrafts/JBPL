@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model;
 
 public interface ScopeOwner {
-    default boolean mergeLocalFrameDataOnFrameExit() {
+    default boolean mergeFrameInstructionsOnFrameExit() {
         return false;
     }
 }

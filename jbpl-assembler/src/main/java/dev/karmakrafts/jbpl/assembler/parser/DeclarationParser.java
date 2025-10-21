@@ -74,25 +74,27 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
 
     @Override
     public @NotNull List<Declaration> visitSelector(final @NotNull SelectorContext ctx) {
-        final var name = ctx.IDENT().getText();
-        final var selector = new SelectorDecl(name);
+        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+        // @formatter:off
+        final var offset = ctx.selectionOffset().stream()
+            .findFirst()
+            .map(ExprParser::parse)
+            .orElseGet(() -> LiteralExpr.of(0));
+        // @formatter:on
+        final var selector = new SelectorDecl(name, offset);
         // @formatter:off
         selector.conditions.addAll(ctx.selectionStatement().stream()
             .map(this::parseSelectorCondition)
             .toList());
-        selector.offset = ctx.selectionOffset().stream()
-            .findFirst()
-            .map(ExprParser::parse)
-            .orElseGet(() -> LiteralExpr.of(0));
         // @formatter:on
         return List.of(selector);
     }
 
     @Override
     public @NotNull List<Declaration> visitMacro(final @NotNull MacroContext ctx) {
-        final var name = ctx.IDENT().getText();
-        final var returnType = TypeParser.parse(ctx.type());
-        final var macro = new MacroDecl(name, LiteralExpr.of(returnType)); // TODO: fix return types not accepting refs
+        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+        final var returnType = ParserUtils.parseRefOrType(ctx.refOrType());
+        final var macro = new MacroDecl(name, returnType);
         // @formatter:off
         macro.addElements(ctx.bodyElement().stream()
             .map(ElementParser::parse)

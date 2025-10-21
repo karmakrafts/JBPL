@@ -26,7 +26,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull AssemblerContext context) {
-        return getMacro(context).evaluateReturnType(context);
+        return getMacro(context).returnType.evaluateAsConst(context, Type.class);
     }
 
     @Override
@@ -36,6 +36,6 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        return null;
+        return LiteralExpr.unit();
     }
 }

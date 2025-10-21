@@ -40,8 +40,12 @@ public final class AssemblerContext {
         pushFrame(file); // We always require a root frame for the file itself
         preproClassResolver = NamedResolver.analyze(file, PreproClassDecl.class, PreproClassDecl::getName);
         defineResolver = NamedResolver.analyze(file, DefineStatement.class, DefineStatement::getName);
-        selectorResolver = NamedResolver.analyze(file, SelectorDecl.class, SelectorDecl::getName);
-        macroResolver = NamedResolver.analyze(file, MacroDecl.class, MacroDecl::getName);
+        selectorResolver = NamedResolver.analyze(file,
+            SelectorDecl.class,
+            selector -> selector.getName().evaluateAsConst(this, String.class));
+        macroResolver = NamedResolver.analyze(file,
+            MacroDecl.class,
+            macro -> macro.name.evaluateAsConst(this, String.class));
     }
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
@@ -136,7 +140,7 @@ public final class AssemblerContext {
     public void popFrame() {
         final var lastFrame = frameStack.pop();
         // If the popped frames owner doesn't request frame data to be merged, we return early
-        if (!lastFrame.scope.owner().mergeLocalFrameDataOnFrameExit()) {
+        if (!lastFrame.scope.owner().mergeFrameInstructionsOnFrameExit()) {
             return;
         }
         // Otherwise we merge the instruction buffer; locals and labels are never merged

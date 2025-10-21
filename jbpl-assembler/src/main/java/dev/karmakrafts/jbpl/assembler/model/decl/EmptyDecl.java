@@ -9,7 +9,7 @@ public final class EmptyDecl extends AbstractElement implements Declaration {
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
 
     }
 }

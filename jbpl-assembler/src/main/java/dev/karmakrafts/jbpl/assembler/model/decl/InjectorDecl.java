@@ -23,6 +23,9 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
     }
 
     public void setSelector(final @NotNull Expr selector) {
+        if (this.selector != null) {
+            this.selector.setParent(null);
+        }
         selector.setParent(this);
         this.selector = selector;
     }
@@ -32,12 +35,15 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
     }
 
     public void setTarget(final @NotNull FunctionSignatureExpr target) {
+        if (this.target != null) {
+            this.target.setParent(null);
+        }
         target.setParent(this);
         this.target = target;
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
 
     }
 }

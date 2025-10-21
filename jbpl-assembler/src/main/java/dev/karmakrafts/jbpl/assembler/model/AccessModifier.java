@@ -7,12 +7,12 @@ import java.util.Collection;
 
 public enum AccessModifier {
     // @formatter:off
-    PUBLIC(Opcodes.ACC_PUBLIC),
+    PUBLIC   (Opcodes.ACC_PUBLIC),
     PROTECTED(Opcodes.ACC_PROTECTED),
-    PRIVATE(Opcodes.ACC_PRIVATE),
-    STATIC(Opcodes.ACC_STATIC),
-    FINAL(Opcodes.ACC_FINAL),
-    SYNC(Opcodes.ACC_SYNCHRONIZED);
+    PRIVATE  (Opcodes.ACC_PRIVATE),
+    STATIC   (Opcodes.ACC_STATIC),
+    FINAL    (Opcodes.ACC_FINAL),
+    SYNC     (Opcodes.ACC_SYNCHRONIZED);
     // @formatter:on
 
     public final int encodedValue;
@@ -23,10 +23,9 @@ public enum AccessModifier {
 
     public static int combine(final @NotNull Collection<AccessModifier> modifiers) {
         var result = 0;
-        for(var modifier: modifiers) {
+        for (var modifier : modifiers) {
             result |= modifier.encodedValue;
         }
-
         return result;
     }
 }

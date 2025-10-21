@@ -4,9 +4,8 @@ import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.Order;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.SourceOwner;
-import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
+import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
@@ -14,21 +13,34 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public final class SelectorDecl extends AbstractElement implements Declaration, ScopeOwner {
+public final class SelectorDecl extends AbstractExprContainer implements Declaration, ScopeOwner {
+    public static final int NAME_INDEX = 0;
+    public static final int OFFSET_INDEX = 1;
     public final ArrayList<Condition> conditions = new ArrayList<>();
-    public String name;
-    public Expr offset = LiteralExpr.of(0);
 
-    public SelectorDecl(final @NotNull String name) {
-        this.name = name;
+    public SelectorDecl(final @NotNull Expr name, final @NotNull Expr offset) {
+        addExpression(name);
+        addExpression(offset);
     }
 
-    public @NotNull String getName() {
-        return name;
+    public @NotNull Expr getName() {
+        return getExpressions().get(NAME_INDEX);
+    }
+
+    public void setName(final @NotNull Expr name) {
+        getExpressions().set(NAME_INDEX, name);
+    }
+
+    public @NotNull Expr getOffset() {
+        return getExpressions().get(OFFSET_INDEX);
+    }
+
+    public void setOffset(final @NotNull Expr offset) {
+        getExpressions().set(OFFSET_INDEX, offset);
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
 
     }
 

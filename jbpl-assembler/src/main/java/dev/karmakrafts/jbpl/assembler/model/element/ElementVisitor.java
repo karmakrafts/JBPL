@@ -95,15 +95,8 @@ public interface ElementVisitor {
     }
 
     default @NotNull Declaration visitSelector(final @NotNull SelectorDecl selectorDecl) {
-        selectorDecl.offset = visitExpr(selectorDecl.offset);
-        // @formatter:off
-        final var transformedConditions = selectorDecl.conditions.stream()
-            .map(this::visitSelectorCondition)
-            .toList();
-        // @formatter:on
-        selectorDecl.conditions.clear();
-        selectorDecl.conditions.addAll(transformedConditions);
-        return selectorDecl;
+        selectorDecl.conditions.replaceAll(this::visitSelectorCondition);
+        return visitExprContainer(selectorDecl);
     }
 
     default @NotNull SelectorDecl.Condition visitSelectorCondition(final @NotNull SelectorDecl.Condition condition) {
