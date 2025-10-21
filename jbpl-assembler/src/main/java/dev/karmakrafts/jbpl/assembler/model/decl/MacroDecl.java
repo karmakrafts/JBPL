@@ -39,7 +39,7 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) {
 
     }
 }

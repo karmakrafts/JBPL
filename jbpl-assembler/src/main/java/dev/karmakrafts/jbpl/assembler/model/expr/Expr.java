@@ -2,6 +2,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
+import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,11 +46,21 @@ public interface Expr extends Statement {
         return type.cast(evaluateAs(context, LiteralExpr.class).value);
     }
 
-    default <T> @NotNull T evaluateAsConstAndMaterialize(final @NotNull AssemblerContext context, final @NotNull Class<T> type) {
+    /**
+     * Functions to bridge const evaluated expression into ObjectWeb constant values.
+     * This will automatically materialize any {@link Type} results, and pass through
+     * any other result type as described by {@link #evaluateAsConst(AssemblerContext, Class)}.
+     *
+     * @param context The assembler context instance of the current evaluation pass.
+     * @return The evaluated, unwrapped result of evaluating this expression into a constant value.
+     */
+    default @NotNull Object evaluateAsConstAndMaterialize(final @NotNull AssemblerContext context) {
         // Const types are materialized after unwrapping
-        if(type.isAssignableFrom(org.objectweb.asm.Type.class)) {
-            return type.cast(evaluateAsConst(context, Type.class).materialize(context));
+        // TODO: take care of handling any type of SignatureExpr? -Alex
+        final var type = getType(context);
+        if (type == PreproType.TYPE) {
+            return evaluateAsConst(context, Type.class).materialize(context);
         }
-        return evaluateAsConst(context, type);
+        return evaluateAsConst(context, Object.class);
     }
 }
