@@ -108,7 +108,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     private @NotNull Handle evaluateInvokeHandle(final @NotNull Expr expr, final @NotNull AssemblerContext context) {
-        final var instruction = expr.evaluateAsLiteral(context, Instruction.class);
+        final var instruction = expr.evaluateAsConst(context, Instruction.class);
         if (!(instruction instanceof InvokeInstruction invokeInstruction)) {
             throw new IllegalStateException(
                 "Invoke handle requires INVOKESTATIC, INVOKEVIRTUAL, INVOKESPECIAL or INVOKEINTERFACE target");
@@ -132,16 +132,16 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             context);
         // @formatter:off
         final var samReturnType = samSignature.getFunctionReturnType()
-            .evaluateAsLiteral(context, Type.class)
+            .evaluateAsConst(context, Type.class)
             .materialize(context);
         final var samParamTypes = samSignature.getFunctionParameters().stream()
-            .map(type -> type.evaluateAsLiteral(context, Type.class).materialize(context))
+            .map(type -> type.evaluateAsConst(context, Type.class).materialize(context))
             .toArray(org.objectweb.asm.Type[]::new);
         final var returnType = instantiatedSignature.getFunctionReturnType()
-            .evaluateAsLiteral(context, Type.class)
+            .evaluateAsConst(context, Type.class)
             .materialize(context);
         final var paramTypes = instantiatedSignature.getFunctionParameters().stream()
-            .map(type -> type.evaluateAsLiteral(context, Type.class).materialize(context))
+            .map(type -> type.evaluateAsConst(context, Type.class).materialize(context))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         final var bsmHandle = evaluateInvokeHandle(getBSMInstruction(), context);
@@ -150,7 +150,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         final var instantiatedType = org.objectweb.asm.Type.getMethodType(returnType, paramTypes);
         // @formatter:off
         final var arguments = getArguments().stream()
-            .map(expr -> expr.evaluateAsLiteral(context, Object.class))
+            .map(expr -> expr.evaluateAsConst(context, Object.class))
             .toList();
         // @formatter:on
         // Compose BSM arguments

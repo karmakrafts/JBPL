@@ -35,7 +35,7 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
     @Override
     public void emit(final @NotNull AssemblerContext context) {
         final var encodedOpcode = getOpcode(context).encodedValue;
-        final var slotIdObject = getSlot().evaluateAsLiteral(context, Object.class);
+        final var slotIdObject = getSlot().evaluateAsConst(context, Object.class);
         if (slotIdObject instanceof Integer slotId) {
             context.emit(new VarInsnNode(encodedOpcode, slotId));
         }

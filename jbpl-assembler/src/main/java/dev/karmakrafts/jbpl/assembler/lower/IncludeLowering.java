@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.lower;
 
 import dev.karmakrafts.jbpl.assembler.Assembler;
-import dev.karmakrafts.jbpl.assembler.model.ElementVisitor;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.statement.CompoundStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.IncludeStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;

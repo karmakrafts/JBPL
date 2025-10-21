@@ -1,5 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model;
 
+import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;
 import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
@@ -9,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public final class AssemblyFile extends AbstractElementContainer implements ScopeOwner {
+public final class AssemblyFile extends AbstractElementContainer implements ScopeOwner, ReturnTarget {
     public final String path;
     public final List<Token> source;
 

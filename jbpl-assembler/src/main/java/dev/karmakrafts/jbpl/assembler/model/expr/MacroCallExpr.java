@@ -30,7 +30,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return null; // TODO: implement this
+    public void evaluate(final @NotNull AssemblerContext context) {
+
     }
 }

@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.AbstractElement;
+import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.InsnNode;
 

@@ -28,15 +28,15 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
     }
 
     public @NotNull String evaluateFieldName(final @NotNull AssemblerContext context) {
-        return getFieldName().evaluateAsLiteral(context, String.class);
+        return getFieldName().evaluateAsConst(context, String.class);
     }
 
     public @NotNull ClassType evaluateFieldOwner(final @NotNull AssemblerContext context) {
-        return getFieldOwner().evaluateAsLiteral(context, ClassType.class);
+        return getFieldOwner().evaluateAsConst(context, ClassType.class);
     }
 
     public @NotNull Type evaluateFieldType(final @NotNull AssemblerContext context) {
-        return getFieldOwner().evaluateAsLiteral(context, Type.class);
+        return getFieldOwner().evaluateAsConst(context, Type.class);
     }
 
     public @NotNull Expr getFieldOwner() {

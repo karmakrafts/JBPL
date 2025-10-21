@@ -20,7 +20,7 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
                 buffer.append(literalExpr.value);
                 continue;
             }
-            buffer.append(expr.evaluateAsLiteral(context, Object.class));
+            buffer.append(expr.evaluateAsConst(context, Object.class));
         }
         return LiteralExpr.of(buffer.toString());
     }

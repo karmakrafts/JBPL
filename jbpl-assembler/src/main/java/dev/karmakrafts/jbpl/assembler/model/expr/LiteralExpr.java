@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.AbstractElement;
+import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;

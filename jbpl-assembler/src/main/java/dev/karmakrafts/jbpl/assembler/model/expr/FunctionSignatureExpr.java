@@ -33,20 +33,20 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
     }
 
     public @NotNull ClassType evaluateFunctionOwner(final @NotNull AssemblerContext context) {
-        return getFunctionOwner().evaluateAsLiteral(context, ClassType.class);
+        return getFunctionOwner().evaluateAsConst(context, ClassType.class);
     }
 
     public @NotNull String evaluateFunctionName(final @NotNull AssemblerContext context) {
-        return getFunctionName().evaluateAsLiteral(context, String.class);
+        return getFunctionName().evaluateAsConst(context, String.class);
     }
 
     public @NotNull org.objectweb.asm.Type evaluateFunctionReturnType(final @NotNull AssemblerContext context) {
-        return getFunctionReturnType().evaluateAsLiteral(context, Type.class).materialize(context);
+        return getFunctionReturnType().evaluateAsConst(context, Type.class).materialize(context);
     }
 
     public @NotNull List<org.objectweb.asm.Type> evaluateFunctionParameters(final @NotNull AssemblerContext context) { // @formatter:off
         return getFunctionParameters().stream()
-            .map(type -> type.evaluateAsLiteral(context, Type.class).materialize(context))
+            .map(type -> type.evaluateAsConst(context, Type.class).materialize(context))
             .toList();
     } // @formatter:on
 

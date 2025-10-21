@@ -49,13 +49,13 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        final var lhsValue = getLhs().evaluateAsLiteral(context, Object.class);
+        final var lhsValue = getLhs().evaluateAsConst(context, Object.class);
         if (lhsValue instanceof String lhsString) { // String concatenation with any type
-            final var rhsValue = getRhs().evaluateAsLiteral(context, Object.class);
+            final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
             return LiteralExpr.of(String.format("%s%s", lhsString, rhsValue));
         }
         else if (lhsValue instanceof Type lhsType) { // Type addition/subtraction creates intersection types
-            final var rhsType = getRhs().evaluateAsLiteral(context, Type.class);
+            final var rhsType = getRhs().evaluateAsConst(context, Type.class);
             return switch (op) {
                 case ADD -> LiteralExpr.of(IntersectionType.unfold(List.of(lhsType, rhsType)));
                 case SUB -> {
@@ -87,47 +87,47 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             return switch (op) {
                 // Boolean equality
                 case EQ -> {
-                    final var rhsBool = getRhs().evaluateAsLiteral(context, Boolean.class);
+                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
                     yield LiteralExpr.of(lhsBool == rhsBool);
                 }
                 case NE -> {
-                    final var rhsBool = getRhs().evaluateAsLiteral(context, Boolean.class);
+                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
                     yield LiteralExpr.of(lhsBool != rhsBool);
                 }
                 // Boolean logic
                 case AND -> {
-                    final var rhsBool = getRhs().evaluateAsLiteral(context, Boolean.class);
+                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
                     yield LiteralExpr.of(lhsBool & rhsBool);
                 }
                 case OR -> {
-                    final var rhsBool = getRhs().evaluateAsLiteral(context, Boolean.class);
+                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
                     yield LiteralExpr.of(lhsBool | rhsBool);
                 }
                 case XOR -> {
-                    final var rhsBool = getRhs().evaluateAsLiteral(context, Boolean.class);
+                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
                     yield LiteralExpr.of(lhsBool ^ rhsBool);
                 }
                 case SC_AND -> {
                     if (!lhsBool) {
                         yield LiteralExpr.of(false);
                     }
-                    yield LiteralExpr.of(getRhs().evaluateAsLiteral(context, Boolean.class));
+                    yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class));
                 }
                 case SC_OR -> {
                     if (lhsBool) {
                         yield LiteralExpr.of(true);
                     }
-                    yield LiteralExpr.of(getRhs().evaluateAsLiteral(context, Boolean.class));
+                    yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class));
                 }
                 default -> throw new IllegalStateException(String.format(
                     "Unsupported boolean binary expression: %s %s %s",
                     lhsValue,
                     op,
-                    getRhs().evaluateAsLiteral(context, Object.class)));
+                    getRhs().evaluateAsConst(context, Object.class)));
             };
         }
         else if (lhsValue instanceof Number lhsNumber) { // Numeric binary expressions
-            final var rhsValue = getRhs().evaluateAsLiteral(context, Object.class);
+            final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
             if (!(rhsValue instanceof Number rhsNumber)) {
                 throw new IllegalStateException("Numeric binary expression must have a number on the right hand side!");
             }
@@ -295,7 +295,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         throw new IllegalStateException(String.format("Unsupported binary expression operands: %s %s %s",
             lhsValue,
             op,
-            getRhs().evaluateAsLiteral(context, Object.class)));
+            getRhs().evaluateAsConst(context, Object.class)));
     }
 
     public enum Op {

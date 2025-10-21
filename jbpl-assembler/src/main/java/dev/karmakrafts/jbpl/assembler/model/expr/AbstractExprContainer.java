@@ -1,6 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.model.AbstractElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

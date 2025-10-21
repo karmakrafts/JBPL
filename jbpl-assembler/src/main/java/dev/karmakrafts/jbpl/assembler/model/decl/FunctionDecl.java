@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
+import dev.karmakrafts.jbpl.assembler.model.ReturnTarget;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 
-public final class FunctionDecl extends AbstractStatementContainer implements Declaration, ScopeOwner {
+public final class FunctionDecl extends AbstractStatementContainer implements Declaration, ScopeOwner, ReturnTarget {
     public final EnumSet<AccessModifier> accessModifiers = EnumSet.noneOf(AccessModifier.class);
     private FunctionSignatureExpr signature;
 

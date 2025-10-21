@@ -1,8 +1,8 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
-import dev.karmakrafts.jbpl.assembler.model.Element;
-import dev.karmakrafts.jbpl.assembler.model.ElementContainer;
-import dev.karmakrafts.jbpl.assembler.model.ElementVisitor;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

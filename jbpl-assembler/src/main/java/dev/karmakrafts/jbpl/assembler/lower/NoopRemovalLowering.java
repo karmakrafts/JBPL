@@ -1,9 +1,9 @@
 package dev.karmakrafts.jbpl.assembler.lower;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.Element;
-import dev.karmakrafts.jbpl.assembler.model.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.statement.NoopStatement;
 import org.jetbrains.annotations.NotNull;
 

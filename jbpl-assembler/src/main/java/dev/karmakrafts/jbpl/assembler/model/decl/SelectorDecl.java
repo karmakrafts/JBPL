@@ -1,9 +1,10 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
-import dev.karmakrafts.jbpl.assembler.model.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.Order;
+import dev.karmakrafts.jbpl.assembler.model.ReturnTarget;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.SourceOwner;
+import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public final class SelectorDecl extends AbstractElement implements Declaration, ScopeOwner {
+public final class SelectorDecl extends AbstractElement implements Declaration, ScopeOwner, ReturnTarget {
     public final ArrayList<Condition> conditions = new ArrayList<>();
     public String name;
     public Expr offset = LiteralExpr.of(0);

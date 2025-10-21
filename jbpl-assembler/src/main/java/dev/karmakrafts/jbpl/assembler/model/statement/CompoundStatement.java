@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.AbstractElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
 import org.jetbrains.annotations.NotNull;

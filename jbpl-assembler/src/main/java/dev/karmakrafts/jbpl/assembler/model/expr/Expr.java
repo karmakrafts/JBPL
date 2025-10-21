@@ -35,7 +35,7 @@ public interface Expr extends Statement {
      * @param <T>     The type of constant value this expression is being evaluated into.
      * @return The evaluated, unwrapped constant value of this expression.
      */
-    default <T> @NotNull T evaluateAsLiteral(final @NotNull AssemblerContext context, final @NotNull Class<T> type) {
+    default <T> @NotNull T evaluateAsConst(final @NotNull AssemblerContext context, final @NotNull Class<T> type) {
         if (this instanceof LiteralExpr literalExpr) {
             return type.cast(literalExpr.value);
         }

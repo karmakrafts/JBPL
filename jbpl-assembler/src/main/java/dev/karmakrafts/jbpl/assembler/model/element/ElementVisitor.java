@@ -1,5 +1,6 @@
-package dev.karmakrafts.jbpl.assembler.model;
+package dev.karmakrafts.jbpl.assembler.model.element;
 
+import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl.InstructionCondition;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl.OpcodeCondition;

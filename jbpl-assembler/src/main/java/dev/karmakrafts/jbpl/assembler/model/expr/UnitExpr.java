@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.AbstractElement;
+import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +14,7 @@ public final class UnitExpr extends AbstractElement implements Expr {
     }
 
     @Override
-    public @NotNull Expr evaluate(final @NotNull AssemblerContext context) {
-        return this; // Unit expression evaluate to themselves
+    public void evaluate(final @NotNull AssemblerContext context) {
     }
 
     @Override

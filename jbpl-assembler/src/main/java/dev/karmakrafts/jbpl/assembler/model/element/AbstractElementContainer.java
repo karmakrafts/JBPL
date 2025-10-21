@@ -1,4 +1,4 @@
-package dev.karmakrafts.jbpl.assembler.model;
+package dev.karmakrafts.jbpl.assembler.model.element;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

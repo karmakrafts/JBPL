@@ -512,7 +512,8 @@ typeInstruction:
 
 ldc:
     INSN_LDC
-    literal
+    (reference
+    | literal)
     ;
 
 ipush:

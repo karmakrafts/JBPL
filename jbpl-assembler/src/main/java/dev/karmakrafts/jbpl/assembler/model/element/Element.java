@@ -1,5 +1,7 @@
-package dev.karmakrafts.jbpl.assembler.model;
+package dev.karmakrafts.jbpl.assembler.model.element;
 
+import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
+import dev.karmakrafts.jbpl.assembler.model.SourceOwner;
 import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;
 import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
 import org.jetbrains.annotations.NotNull;

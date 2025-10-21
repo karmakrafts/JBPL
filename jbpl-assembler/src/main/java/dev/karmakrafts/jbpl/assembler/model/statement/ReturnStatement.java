@@ -7,8 +7,18 @@ import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
 import org.jetbrains.annotations.NotNull;
 
 public final class ReturnStatement extends AbstractExprContainer implements Statement {
+    public static final int VALUE_INDEX = 0;
+
     public ReturnStatement(final @NotNull Expr value) {
         addExpression(value);
+    }
+
+    public @NotNull Expr getValue() {
+        return getExpressions().get(VALUE_INDEX);
+    }
+
+    public void setValue(final @NotNull Expr value) {
+        getExpressions().set(VALUE_INDEX, value);
     }
 
     @Override

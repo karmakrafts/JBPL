@@ -3,7 +3,7 @@ package dev.karmakrafts.jbpl.assembler.util;
 import dev.karmakrafts.jbpl.assembler.Scope;
 import dev.karmakrafts.jbpl.assembler.ScopeAwareElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.Element;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +39,10 @@ public final class NamedResolver<T> extends ScopeAwareElementVisitor {
         final var typedElement = (T) element;
         scopeMap.put(nameGetter.apply(typedElement), typedElement);
         return element;
+    }
+
+    public void inject(final @NotNull Scope scope, final @NotNull T value) {
+        elements.computeIfAbsent(scope, s -> new HashMap<>()).put(nameGetter.apply(value), value);
     }
 
     public @Nullable T resolve(final @NotNull Scope scope, final @NotNull String name) {

@@ -1,37 +1,46 @@
 package dev.karmakrafts.jbpl.assembler.lower;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.Element;
-import dev.karmakrafts.jbpl.assembler.model.ElementContainer;
-import dev.karmakrafts.jbpl.assembler.model.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.decl.Declaration;
 import dev.karmakrafts.jbpl.assembler.model.decl.FunctionDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.InjectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
+import dev.karmakrafts.jbpl.assembler.model.expr.CompoundExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.CompoundStatement;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
 /**
- * Lifts all elements from a {@link CompoundStatement} into its
+ * Lifts all elements from a {@link CompoundStatement} or {@link CompoundExpr} into its
  * parent {@link ElementContainer}.
  * Mostly to reduce overhead when traversing the tree.
  */
 public final class CompoundLowering implements ElementVisitor {
-    public static final CompoundLowering INSTANCE = new CompoundLowering();
+    private final AssemblerContext context;
 
-    private CompoundLowering() {
+    public CompoundLowering(final @NotNull AssemblerContext context) {
+        this.context = context;
     }
 
+    @SuppressWarnings("all")
     private <C extends ElementContainer> @NotNull C expandCompounds(final @NotNull C container) {
         final var newElements = new ArrayList<Element>();
         for (final var element : container.getElements()) {
-            if (!(element instanceof CompoundStatement compound)) {
-                newElements.add(element);
+            if (element instanceof CompoundStatement statement) {
+                newElements.addAll(statement.getElements());
                 continue;
             }
-            newElements.addAll(compound.getElements());
+            else if (element instanceof CompoundExpr expr && expr.getType(context) == BuiltinType.VOID) {
+                newElements.addAll(expr.getElements());
+                continue;
+            }
+            newElements.add(element);
         }
         container.clearElements();
         container.addElementsVerbatim(newElements); // We don't want to override the original parent to retain source info

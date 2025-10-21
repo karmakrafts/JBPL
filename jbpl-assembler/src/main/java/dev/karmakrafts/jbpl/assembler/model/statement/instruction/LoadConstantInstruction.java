@@ -32,7 +32,7 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
 
     @Override
     public void emit(final @NotNull AssemblerContext context) {
-        final var value = getValue().evaluateAsLiteral(context, Number.class);
+        final var value = getValue().evaluateAsConst(context, Number.class);
         switch (opcode) {
             case BIPUSH -> context.emit(new IntInsnNode(Opcodes.BIPUSH, value.byteValue()));
             case SIPUSH -> context.emit(new IntInsnNode(Opcodes.SIPUSH, value.shortValue()));
