@@ -520,6 +520,14 @@ ldc:
     | literal)
     ;
 
+constInstruction:
+    INSN_ACONST_NULL
+    | INSN_ICONST
+    | INSN_LCONST
+    | INSN_FCONST
+    | INSN_DCONST
+    ;
+
 ipush:
     INSN_IPUSH
     intLiteral
@@ -625,6 +633,7 @@ oplessInstruction:
     | INSN_MULTIANEWARRAY
     | INSN_ARRAY_LOAD
     | INSN_ARRAY_STORE
+    | constInstruction
     | arithmeticInstruction
     | logicInstruction
     ;

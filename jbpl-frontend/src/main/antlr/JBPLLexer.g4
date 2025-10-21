@@ -121,6 +121,11 @@ INSN_TABLESWITCH: 'tableswitch';
 INSN_ACONST_NULL: 'aconst_null';
 INSN_IPUSH: EXT_INT_TYPE 'ipush';
 
+INSN_ICONST: 'iconst_' ('m1' | [012345]);
+INSN_LCONST: 'lconst_' [01];
+INSN_FCONST: 'fconst_' [012];
+INSN_DCONST: 'dconst_' [01];
+
 INSN_PUT: 'put' ('field' | 'static');
 INSN_GET: 'get' ('field' | 'static');
 
