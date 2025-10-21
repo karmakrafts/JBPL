@@ -61,9 +61,4 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     public void setParent(final @Nullable ElementContainer parent) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public void evaluate(@NotNull AssemblerContext context) {
-        //TODO:
-    }
 }

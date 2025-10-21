@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.element;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -50,5 +51,12 @@ public interface ElementContainer extends Element {
             .map(element -> element.transform(visitor))
             .toList();
         // @formatter:on
+    }
+
+    @Override
+    default void evaluate(final @NotNull AssemblerContext context) {
+        for (final var element : getElements()) {
+            element.evaluate(context);
+        }
     }
 }
