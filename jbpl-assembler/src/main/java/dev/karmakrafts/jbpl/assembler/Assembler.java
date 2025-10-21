@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.io.IOException;
 import java.nio.channels.Channels;
@@ -106,8 +107,9 @@ public final class Assembler {
         }
     }
 
-    private @NotNull AssemblerContext lower(final @NotNull AssemblyFile file) throws ValidationException {
-        final var context = new AssemblerContext(file);
+    private @NotNull AssemblerContext lower(final @NotNull AssemblyFile file,
+                                            final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
+        final var context = new AssemblerContext(file, classResolver);
         validatePreLowering(context);
         file.transform(includeLowering);
         file.transform(new CompoundLowering(context));
@@ -116,7 +118,8 @@ public final class Assembler {
         return context;
     }
 
-    public @NotNull AssemblerContext getOrParseAndLowerFile(final @NotNull String path) throws ValidationException {
-        return lower(getOrParseFile(path));
+    public @NotNull AssemblerContext getOrParseAndLowerFile(final @NotNull String path,
+                                                            final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
+        return lower(getOrParseFile(path), classResolver);
     }
 }

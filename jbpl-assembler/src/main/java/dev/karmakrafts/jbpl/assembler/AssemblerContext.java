@@ -15,27 +15,46 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.function.Function;
 
 public final class AssemblerContext {
     public final AssemblyFile file;
+    public final Function<String, ClassNode> classResolver;
     public final NamedResolver<PreproClassDecl> preproClassResolver;
     public final NamedResolver<DefineStatement> defineResolver;
     public final NamedResolver<SelectorDecl> selectorResolver;
     public final NamedResolver<MacroDecl> macroResolver;
     private final Stack<StackFrame> frameStack = new Stack<>();
+    public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
     public int bytecodeVersion = Opcodes.ASM9; // Default is ASM 9.2 for Java 17
 
-    public AssemblerContext(final @NotNull AssemblyFile file) {
+    public AssemblerContext(final @NotNull AssemblyFile file,
+                            final @NotNull Function<String, ClassNode> classResolver) {
         this.file = file;
+        this.classResolver = classResolver;
         pushFrame(file); // We always require a root frame for the file itself
         preproClassResolver = NamedResolver.analyze(file, PreproClassDecl.class, PreproClassDecl::getName);
         defineResolver = NamedResolver.analyze(file, DefineStatement.class, DefineStatement::getName);
         selectorResolver = NamedResolver.analyze(file, SelectorDecl.class, SelectorDecl::getName);
         macroResolver = NamedResolver.analyze(file, MacroDecl.class, MacroDecl::getName);
+    }
+
+    public void removeClass(final @NotNull String name) {
+        output.put(name, null);
+    }
+
+    public void addClass(final @NotNull ClassNode classNode) {
+        output.put(classNode.name, classNode);
+    }
+
+    public void transformClass(final @NotNull String name,
+                               final @NotNull Function<@Nullable ClassNode, ClassNode> transform) {
+        output.put(name, transform.apply(classResolver.apply(name)));
     }
 
     public void emit(final AbstractInsnNode instruction) {
