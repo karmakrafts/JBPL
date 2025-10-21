@@ -30,6 +30,10 @@ public final class SelectorReferenceExpr extends AbstractElement implements Expr
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-        context.pushValue(LiteralExpr.of(getSelector(context)));
+    }
+
+    @Override
+    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+        return LiteralExpr.of(getSelector(context));
     }
 }

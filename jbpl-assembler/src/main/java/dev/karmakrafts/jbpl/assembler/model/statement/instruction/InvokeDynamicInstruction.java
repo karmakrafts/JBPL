@@ -115,21 +115,22 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         }
         final var opcode = invokeInstruction.getOpcode(context);
         final var tag = getInvokeTag(opcode);
-        final var signature = invokeInstruction.getSignature().evaluateAs(context, FunctionSignatureExpr.class);
-        final var owner = signature.evaluateFunctionOwner(context).materialize(context);
-        final var name = signature.evaluateFunctionName(context);
-        final var descriptor = signature.evaluateAsDescriptor(context);
+        final var signature = invokeInstruction.getSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
+        final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class).materialize(context);
+        final var name = signature.getFunctionName().evaluateAsConst(context, String.class);
         final var isInterface = opcode == Opcode.INVOKEINTERFACE;
+        final var descriptor = signature.evaluateAsConstDescriptor(context);
         return new Handle(tag, owner.getInternalName(), name, descriptor, isInterface);
     }
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-        final var instantiatedSignature = getInstantiatedSignature().evaluateAs(context, FunctionSignatureExpr.class);
-        final var samSignature = getSAMSignature().evaluateAs(context, FunctionSignatureExpr.class);
-        final var name = instantiatedSignature.evaluateFunctionName(context);
-        final var factoryDescriptor = computeFactoryDescriptor(instantiatedSignature.evaluateFunctionOwner(context),
-            context);
+        final var instantiatedSignature = getInstantiatedSignature().evaluateAsConst(context,
+            FunctionSignatureExpr.class);
+        final var samSignature = getSAMSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
+        final var name = instantiatedSignature.getFunctionName().evaluateAsConst(context, String.class);
+        final var owner = instantiatedSignature.getFunctionOwner().evaluateAsConst(context, ClassType.class);
+        final var factoryDescriptor = computeFactoryDescriptor(owner, context);
         // @formatter:off
         final var samReturnType = samSignature.getFunctionReturnType()
             .evaluateAsConst(context, Type.class)

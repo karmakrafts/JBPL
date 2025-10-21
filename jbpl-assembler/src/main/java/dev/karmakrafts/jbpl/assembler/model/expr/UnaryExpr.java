@@ -28,8 +28,13 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
+        super.evaluate(context);
+    }
+
+    @Override
+    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
         final var value = getValue().evaluateAsConst(context, Object.class);
-        final var result = switch (op) {
+        return switch (op) {
             case NOT -> {
                 if (!(value instanceof Boolean boolValue)) {
                     throw new IllegalStateException("Not operator can only be applied to boolean values");
@@ -81,7 +86,6 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
                 throw new IllegalStateException(String.format("Unsupported inverse expression operand %s", value));
             }
         };
-        context.pushValue(result);
     }
 
     public enum Op {

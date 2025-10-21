@@ -27,7 +27,11 @@ public final class TypeOfExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-        final var value = getValue();
-        context.pushValue(LiteralExpr.of(value.getType(context)));
+        super.evaluate(context);
+    }
+
+    @Override
+    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+        return LiteralExpr.of(getValue().getType(context));
     }
 }

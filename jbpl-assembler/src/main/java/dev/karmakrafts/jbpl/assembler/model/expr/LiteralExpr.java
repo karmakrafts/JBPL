@@ -18,9 +18,13 @@ public final class LiteralExpr extends AbstractElement implements Expr {
     public Type type;
     public Object value;
 
-    private LiteralExpr(final @NotNull Type type, final @NotNull Object value) {
+    private LiteralExpr(final @NotNull Type type, final @Nullable Object value) {
         this.type = type;
         this.value = value;
+    }
+
+    public static LiteralExpr unit() {
+        return new LiteralExpr(BuiltinType.VOID, null);
     }
 
     public static LiteralExpr of(final @NotNull Type type) {
@@ -87,8 +91,15 @@ public final class LiteralExpr extends AbstractElement implements Expr {
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-        context.pushValue(this);
-        // Literals are always evaluated to themselves
+    }
+
+    @Override
+    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+        if (type == BuiltinType.VOID) {
+            throw new IllegalStateException(
+                "Attempted to const evaluate unit expression, this is an implementation fault");
+        }
+        return this;
     }
 
     @Override

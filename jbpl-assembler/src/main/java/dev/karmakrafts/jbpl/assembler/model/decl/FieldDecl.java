@@ -5,8 +5,8 @@ import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
-import dev.karmakrafts.jbpl.assembler.model.expr.UnitExpr;
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.FieldNode;
 
@@ -21,7 +21,7 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     public FieldDecl(final @NotNull FieldSignatureExpr signature) {
         signature.setParent(this);
         this.signature = signature;
-        addExpression(new UnitExpr()); // Initializer
+        addExpression(LiteralExpr.unit()); // Initializer
     }
 
     public @NotNull Expr getInitializer() {
@@ -42,16 +42,13 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
-        final var owner = signature.evaluateFieldOwner(context);
+    public void evaluate(final @NotNull AssemblerContext context) {
+        final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
         final var modifier = AccessModifier.combine(accessModifiers);
-        final var name = signature.evaluateFieldName(context);
-        final var descriptor = signature.getFieldType().evaluateAsConst(context, Type.class).materialize(context).getDescriptor();
-
+        final var name = signature.getFieldName().evaluateAsConst(context, String.class);
+        final var descriptor = signature.evaluateAsConstDescriptor(context);
         final var initialValue = getInitializer().evaluateAsConstAndMaterialize(context);
-
         final var node = new FieldNode(context.bytecodeVersion, modifier, name, descriptor, descriptor, initialValue);
-
         context.addField(owner.name(), node);
     }
 }

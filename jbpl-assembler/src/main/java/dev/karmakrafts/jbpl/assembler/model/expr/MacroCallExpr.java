@@ -33,4 +33,9 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     public void evaluate(final @NotNull AssemblerContext context) {
         //TODO:
     }
+
+    @Override
+    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+        return null;
+    }
 }

@@ -1,6 +1,5 @@
 package dev.karmakrafts.jbpl.assembler.model;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;

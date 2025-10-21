@@ -5,7 +5,6 @@ import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.FieldInsnNode;
 
@@ -34,10 +33,10 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
         final var encodedOpcode = opcode.encodedValue;
-        final var signature = getSignature().evaluateAs(context, FieldSignatureExpr.class);
-        final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
+        final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
+        final var owner = signature.evaluateAsConst(context, ClassType.class);
         final var name = signature.getFieldName().evaluateAsConst(context, String.class);
-        final var type = signature.getFieldType().evaluateAsConst(context, Type.class).materialize(context);
-        context.emit(new FieldInsnNode(encodedOpcode, owner.name(), name, type.getDescriptor()));
+        final var descriptor = signature.evaluateAsConstDescriptor(context);
+        context.emit(new FieldInsnNode(encodedOpcode, owner.name(), name, descriptor));
     }
 }

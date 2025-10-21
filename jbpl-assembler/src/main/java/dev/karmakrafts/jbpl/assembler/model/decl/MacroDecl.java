@@ -42,4 +42,9 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     public void evaluate(final @NotNull AssemblerContext context) {
 
     }
+
+    @Override
+    public boolean mergeLocalFrameDataOnFrameExit() {
+        return true; // Macro calls always their local frame data into the parent frame
+    }
 }

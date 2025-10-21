@@ -1,7 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -24,20 +23,17 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-        context.pushValue(LiteralExpr.of(this));
-        //Field signatures evaluate to themselves
+        super.evaluate(context);
     }
 
-    public @NotNull String evaluateFieldName(final @NotNull AssemblerContext context) {
-        return getFieldName().evaluateAsConst(context, String.class);
+    @Override
+    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+        return LiteralExpr.of(this);
     }
 
-    public @NotNull ClassType evaluateFieldOwner(final @NotNull AssemblerContext context) {
-        return getFieldOwner().evaluateAsConst(context, ClassType.class);
-    }
-
-    public @NotNull Type evaluateFieldType(final @NotNull AssemblerContext context) {
-        return getFieldOwner().evaluateAsConst(context, Type.class);
+    @Override
+    public @NotNull String evaluateAsConstDescriptor(final @NotNull AssemblerContext context) {
+        return getFieldType().evaluateAsConst(context, Type.class).materialize(context).getDescriptor();
     }
 
     public @NotNull Expr getFieldOwner() {

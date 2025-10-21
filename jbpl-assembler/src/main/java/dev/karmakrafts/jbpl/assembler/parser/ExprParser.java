@@ -2,7 +2,7 @@ package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
-import dev.karmakrafts.jbpl.assembler.model.type.PreproClassTypeRef;
+import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
@@ -56,8 +56,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitPreproClassInstantiation(final @NotNull PreproClassInstantiationContext ctx) {
-        final var type = new PreproClassTypeRef(ctx.IDENT().getText());
-        final var instantiation = new ClassInstantiationExpr(type);
+        final var type = new PreproClassType(ctx.IDENT().getText());
+        final var instantiation = new PreproClassExpr(type);
         // @formatter:off
         instantiation.addArguments(ctx.expr().stream()
             .map(ExprParser::parse)
@@ -137,7 +137,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     @Override
     public @NotNull List<Expr> visitReference(final @NotNull ReferenceContext ctx) {
         // TODO: This only handles top level references
-        return parseReference(ctx, new UnitExpr());
+        return parseReference(ctx, LiteralExpr.unit());
     }
 
     private @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx, final @NotNull Expr receiver) {
@@ -154,7 +154,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     @Override
     public @NotNull List<Expr> visitMacroCall(final @NotNull MacroCallContext ctx) {
         // TODO: This only handles top level references
-        return parseMacroCall(ctx, new UnitExpr());
+        return parseMacroCall(ctx, LiteralExpr.unit());
     }
 
     @Override

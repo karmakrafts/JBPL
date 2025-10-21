@@ -101,7 +101,7 @@ public class TypeParserTest extends AbstractParserTest {
 
     @Test
     public void parsePreproClassType() {
-        runTest(new PreproClassTypeRef("Testing"), "typeof(Testing)");
+        runTest(new PreproClassType("Testing"), "typeof(Testing)");
     }
 
     @Test

@@ -23,6 +23,19 @@ public final class CompoundExpr extends AbstractElementContainer implements Expr
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-        //TODO:
+        super.evaluate(context);
+    }
+
+    @Override
+    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+        final var elements = getElements();
+        final var lastElement = elements.get(elements.size() - 1);
+        if (lastElement instanceof ReturnStatement returnStatement) {
+            return returnStatement.getValue().evaluateAsConst(context);
+        }
+        else if (lastElement instanceof Expr expr) {
+            return expr.evaluateAsConst(context);
+        }
+        return LiteralExpr.unit();
     }
 }

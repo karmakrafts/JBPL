@@ -30,7 +30,5 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        getValue().evaluate(context);
-    }
+    public void evaluate(final @NotNull AssemblerContext context) {}
 }

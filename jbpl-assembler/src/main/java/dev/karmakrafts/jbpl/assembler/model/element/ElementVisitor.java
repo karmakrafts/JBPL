@@ -153,8 +153,8 @@ public interface ElementVisitor {
         else if (expr instanceof StringLerpExpr stringLerpExpr) {
             return visitStringLerpExpr(stringLerpExpr);
         }
-        else if (expr instanceof ClassInstantiationExpr classInstantiationExpr) {
-            return visitClassInstantiationExpr(classInstantiationExpr);
+        else if (expr instanceof PreproClassExpr preproClassExpr) {
+            return visitClassInstantiationExpr(preproClassExpr);
         }
         else if (expr instanceof ReferenceExpr referenceExpr) {
             return visitReferenceExpr(referenceExpr);
@@ -228,8 +228,8 @@ public interface ElementVisitor {
         return visitExprContainer(macroCallExpr);
     }
 
-    default @NotNull Expr visitClassInstantiationExpr(final @NotNull ClassInstantiationExpr classInstantiationExpr) {
-        return visitExprContainer(classInstantiationExpr);
+    default @NotNull Expr visitClassInstantiationExpr(final @NotNull PreproClassExpr preproClassExpr) {
+        return visitExprContainer(preproClassExpr);
     }
 
     default @NotNull Expr visitReferenceExpr(final @NotNull ReferenceExpr referenceExpr) {

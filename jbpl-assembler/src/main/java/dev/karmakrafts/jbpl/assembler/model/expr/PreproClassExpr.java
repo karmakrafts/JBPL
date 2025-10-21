@@ -1,14 +1,21 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
+import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
-public final class StringLerpExpr extends AbstractExprContainer implements Expr {
+public final class PreproClassExpr extends AbstractCallExpr implements Expr {
+    public final PreproClassType type;
+
+    public PreproClassExpr(final @NotNull PreproClassType type) {
+        super(LiteralExpr.unit()); // Class instantiations don't have a receiver
+        this.type = type;
+    }
+
     @Override
     public @NotNull Type getType(final @NotNull AssemblerContext context) {
-        return BuiltinType.STRING;
+        return type;
     }
 
     @Override
@@ -18,11 +25,6 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
 
     @Override
     public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        final var buffer = new StringBuilder();
-        final var expressions = getExpressions();
-        for (final var expr : expressions) {
-            buffer.append(expr.evaluateAsConst(context, Object.class));
-        }
-        return LiteralExpr.of(buffer.toString());
+        return null;
     }
 }

@@ -6,7 +6,6 @@ import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
-import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LabelStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
@@ -144,22 +143,6 @@ public final class AssemblerContext {
         currentFrame.instructionBuffer.add(lastInstructionBuffer);
     }
 
-    public void pushValue(final @NotNull Expr value) {
-        peekFrame().values.push(value);
-    }
-
-    public @NotNull Expr popValue() {
-        return peekFrame().values.pop();
-    }
-
-    public @Nullable Expr peekValue() {
-        final var stack = peekFrame().values;
-        if (stack.isEmpty()) {
-            return null;
-        }
-        return stack.peek();
-    }
-
     public @NotNull Scope getScope() {
         return peekFrame().scope;
     }
@@ -189,7 +172,6 @@ public final class AssemblerContext {
 
     public final class StackFrame {
         public final Scope scope;
-        public final Stack<Expr> values = new Stack<>();
         public final InsnList instructionBuffer = new InsnList();
         public final HashMap<String, LocalStatement> locals = new HashMap<>();
         private final HashMap<String, LabelStatement> labels = new HashMap<>();

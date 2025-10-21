@@ -3,7 +3,7 @@ package dev.karmakrafts.jbpl.assembler.model.type;
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import org.jetbrains.annotations.NotNull;
 
-public record PreproClassTypeRef(@NotNull String name) implements Type {
+public record PreproClassType(@NotNull String name) implements Type {
     @Override
     public boolean isObject() {
         return false;

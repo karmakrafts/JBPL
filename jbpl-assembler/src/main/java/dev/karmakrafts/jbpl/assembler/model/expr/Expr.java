@@ -6,33 +6,19 @@ import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public interface Expr extends Statement {
     @NotNull Type getType(final @NotNull AssemblerContext context);
 
-    /**
-     * Evaluate this expression into a constant state.
-     * This means that all scalar values will be evaluated into {@link LiteralExpr},
-     * and every non-scalar value will be evaluated recursively such that all its
-     * scalar components are of type {@link LiteralExpr}.
-     *
-     * @param context The assembler context instance of the current evaluation pass.
-     * @param type    The type to evaluate this expression into.
-     *                For scalar values, this is usually {@link LiteralExpr},
-     *                for any non-scalar value, this is usually the called expression type.
-     * @param <E>     The type of expression this expression is being evaluated into.
-     * @return The const-evaluated representation of this expression.
-     */
-    default <E extends Expr> @NotNull E evaluateAs(final @NotNull AssemblerContext context,
-                                                   final @NotNull Class<E> type) {
-        evaluate(context);
-        return type.cast(Objects.requireNonNull(context.peekValue()));
+    @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context);
+
+    @Override
+    default void evaluate(final @NotNull AssemblerContext context) {
+        // Regular evaluation is a noop for expressions by default
     }
 
     /**
      * Evaluate this expression into a constant scalar value and
-     * unwrap it as the given type.
+     * unwraps it as the given type.
      *
      * @param context The assembler context instance of the current evaluation pass.
      * @param type    The type to unwrap the evaluated {@link LiteralExpr} as.
@@ -40,10 +26,7 @@ public interface Expr extends Statement {
      * @return The evaluated, unwrapped constant value of this expression.
      */
     default <T> @NotNull T evaluateAsConst(final @NotNull AssemblerContext context, final @NotNull Class<T> type) {
-        if (this instanceof LiteralExpr literalExpr) {
-            return type.cast(literalExpr.value);
-        }
-        return type.cast(evaluateAs(context, LiteralExpr.class).value);
+        return type.cast(evaluateAsConst(context).value);
     }
 
     /**
@@ -55,10 +38,9 @@ public interface Expr extends Statement {
      * @return The evaluated, unwrapped result of evaluating this expression into a constant value.
      */
     default @NotNull Object evaluateAsConstAndMaterialize(final @NotNull AssemblerContext context) {
-        // Const types are materialized after unwrapping
-        // TODO: take care of handling any type of SignatureExpr? -Alex
         final var type = getType(context);
         if (type == PreproType.TYPE) {
+            // Const types are materialized after unwrapping
             return evaluateAsConst(context, Type.class).materialize(context);
         }
         return evaluateAsConst(context, Object.class);

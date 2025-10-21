@@ -12,7 +12,5 @@ public final class IncludeStatement extends AbstractElement implements Statement
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-
-    }
+    public void evaluate(final @NotNull AssemblerContext context) {}
 }
