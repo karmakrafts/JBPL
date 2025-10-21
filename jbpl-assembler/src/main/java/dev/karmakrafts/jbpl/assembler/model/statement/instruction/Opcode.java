@@ -1,8 +1,10 @@
 package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
 
+import dev.karmakrafts.jbpl.assembler.util.CollectionUtils;
 import org.objectweb.asm.Opcodes;
 
 import java.util.EnumSet;
+import java.util.Set;
 
 public enum Opcode {
     // @formatter:off
@@ -77,6 +79,10 @@ public enum Opcode {
     public static final EnumSet<Opcode> FIELD_STORE = EnumSet.of(PUTFIELD, PUTSTATIC);
     public static final EnumSet<Opcode> CONSTANT = EnumSet.of(LDC, BIPUSH, SIPUSH);
     public static final EnumSet<Opcode> INVOKE = EnumSet.of(INVOKESTATIC, INVOKEVIRTUAL, INVOKESPECIAL, INVOKEINTERFACE, INVOKEDYNAMIC);
+    public static final EnumSet<Opcode> IF = EnumSet.of(IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE);
+    public static final EnumSet<Opcode> IF_ICMP = EnumSet.of(IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE);
+    public static final EnumSet<Opcode> IF_ACMP = EnumSet.of(IF_ACMPEQ, IF_ACMPNE);
+    public static final EnumSet<Opcode> JUMP = CollectionUtils.enumSetOf(Opcode.class, IF, IF_ICMP, IF_ACMP, Set.of(Opcode.GOTO));
     // @formatter:on
 
     public final int encodedValue;
@@ -111,5 +117,9 @@ public enum Opcode {
 
     public boolean isInvoke() {
         return INVOKE.contains(this);
+    }
+
+    public boolean isJump() {
+        return JUMP.contains(this);
     }
 }
