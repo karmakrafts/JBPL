@@ -18,6 +18,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LabelNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +45,10 @@ public final class AssemblerContext {
         defineResolver = NamedResolver.analyze(file, DefineStatement.class, DefineStatement::getName);
         selectorResolver = NamedResolver.analyze(file, SelectorDecl.class, SelectorDecl::getName);
         macroResolver = NamedResolver.analyze(file, MacroDecl.class, MacroDecl::getName);
+    }
+
+    public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
+        return peekFrame().getOrCreateLabelNode(name);
     }
 
     public void removeClass(final @NotNull String name) {
@@ -171,16 +176,31 @@ public final class AssemblerContext {
         return peekFrame().instructionBuffer;
     }
 
-    public static final class StackFrame {
+    public final class StackFrame {
         public final Scope scope;
         public final Stack<Expr> values = new Stack<>();
         public final InsnList instructionBuffer = new InsnList();
         public final HashMap<String, LocalStatement> locals = new HashMap<>();
-        public final HashMap<String, LabelStatement> labels = new HashMap<>();
+        private final HashMap<String, LabelStatement> labels = new HashMap<>();
+        private final HashMap<String, LabelNode> labelNodes = new HashMap<>();
         public ReturnTarget returnTarget;
 
         public StackFrame(final @NotNull Scope scope) {
             this.scope = scope;
+        }
+
+        public @Nullable LabelStatement findLabel(final @NotNull String name) {
+            return labels.get(name);
+        }
+
+        public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
+            return labelNodes.computeIfAbsent(name, n -> new LabelNode());
+        }
+
+        public void addLabel(final @NotNull LabelStatement statement) {
+            final var name = statement.getName().evaluateAsConst(AssemblerContext.this, String.class);
+            labels.put(name, statement);
+            labelNodes.put(name, new LabelNode());
         }
     }
 }
