@@ -1,11 +1,12 @@
 package dev.karmakrafts.jbpl.assembler;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.ReturnTarget;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LabelStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
@@ -133,8 +134,12 @@ public final class AssemblerContext {
     }
 
     public void popFrame() {
-        // Merge the instruction buffer of the popped frame with the current frames instruction buffer
         final var lastFrame = frameStack.pop();
+        // If the popped frames owner doesn't request frame data to be merged, we return early
+        if (!lastFrame.scope.owner().mergeLocalFrameDataOnFrameExit()) {
+            return;
+        }
+        // Otherwise we merge the instruction buffer; locals and labels are never merged
         final var lastInstructionBuffer = lastFrame.instructionBuffer;
         if (lastInstructionBuffer.size() == 0) {
             return;
@@ -147,23 +152,20 @@ public final class AssemblerContext {
         return peekFrame().scope;
     }
 
-    public void setReturnTarget() {
-        final var scopeOwner = getScope().owner();
-        if (!(scopeOwner instanceof ReturnTarget returnTarget)) {
-            throw new IllegalStateException("Current scope owner must be a valid return target");
-        }
-        setReturnTarget(returnTarget);
-    }
-
-    public @Nullable ReturnTarget getReturnTarget() {
+    public @Nullable ScopeOwner getReturnTarget() {
         if (frameStack.isEmpty()) {
             return null;
         }
-        return peekFrame().returnTarget;
+        return peekFrame().scope.owner();
     }
 
-    public void setReturnTarget(final @NotNull ReturnTarget returnTarget) {
-        peekFrame().returnTarget = returnTarget;
+    public @NotNull Expr getReturnValue() {
+        final var value = peekFrame().returnValue;
+        return value != null ? value : LiteralExpr.unit();
+    }
+
+    public void setReturnValue(final @NotNull Expr returnValue) {
+        peekFrame().returnValue = returnValue;
     }
 
     public @NotNull InsnList getInstructionBuffer() {
@@ -176,7 +178,7 @@ public final class AssemblerContext {
         public final HashMap<String, LocalStatement> locals = new HashMap<>();
         private final HashMap<String, LabelStatement> labels = new HashMap<>();
         private final HashMap<String, LabelNode> labelNodes = new HashMap<>();
-        public ReturnTarget returnTarget;
+        public Expr returnValue;
 
         public StackFrame(final @NotNull Scope scope) {
             this.scope = scope;

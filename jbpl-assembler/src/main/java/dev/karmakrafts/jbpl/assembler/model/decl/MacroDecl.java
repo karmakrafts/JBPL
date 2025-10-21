@@ -1,7 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.ReturnTarget;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -10,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 
-public final class MacroDecl extends AbstractElementContainer implements Declaration, ScopeOwner, ReturnTarget {
+public final class MacroDecl extends AbstractElementContainer implements Declaration, ScopeOwner {
     public final LinkedHashMap<Expr, Expr> parameterTypes = new LinkedHashMap<>();
     public Expr returnType;
     public String name;

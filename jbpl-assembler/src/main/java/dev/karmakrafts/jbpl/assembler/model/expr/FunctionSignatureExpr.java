@@ -39,8 +39,11 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
     @Override
     public @NotNull String evaluateAsConstDescriptor(final @NotNull AssemblerContext context) {
         final var returnType = getFunctionReturnType().evaluateAsConst(context, Type.class).materialize(context);
-        final var paramTypes = getFunctionParameters().stream().map(type -> type.evaluateAsConst(context,
-            Type.class).materialize(context)).toArray(org.objectweb.asm.Type[]::new);
+        // @formatter:off
+        final var paramTypes = getFunctionParameters().stream()
+            .map(type -> type.evaluateAsConst(context, Type.class).materialize(context))
+            .toArray(org.objectweb.asm.Type[]::new);
+        // @formatter:on
         return org.objectweb.asm.Type.getMethodDescriptor(returnType, paramTypes);
     }
 

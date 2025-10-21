@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public final class AssemblyFile extends AbstractElementContainer implements ScopeOwner, ReturnTarget {
+public final class AssemblyFile extends AbstractElementContainer implements ScopeOwner {
     public final String path;
     public final List<Token> source;
 
