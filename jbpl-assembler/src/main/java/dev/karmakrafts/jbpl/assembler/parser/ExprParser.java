@@ -117,6 +117,12 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             }
             return parseReference(ctx.reference(), receiver);
         }
+        else if (ctx.L_SQBRACKET() != null) {
+            // We know this is a subscript operator
+            final var reference = parse(ctx.expr(0));
+            final var index = parse(ctx.expr(1));
+            return List.of(new ArrayAccessExpr(reference, index));
+        }
         else if (ctx.KW_IS() != null) {
             final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
             return List.of(new IsExpr(expr, TypeParser.parse(type)));

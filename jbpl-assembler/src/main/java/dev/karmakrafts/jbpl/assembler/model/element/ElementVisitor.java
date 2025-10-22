@@ -167,10 +167,17 @@ public interface ElementVisitor {
         else if (expr instanceof ArrayExpr arrayExpr) {
             return visitArrayExpr(arrayExpr);
         }
+        else if (expr instanceof ArrayAccessExpr arrayAccessExpr) {
+            return visitArrayAccessExpr(arrayAccessExpr);
+        }
         else if (expr instanceof DefaultExpr defaultExpr) {
             return visitDefaultExpr(defaultExpr);
         }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitArrayAccessExpr(final @NotNull ArrayAccessExpr arrayAccessExpr) {
+        return visitExprContainer(arrayAccessExpr);
     }
 
     default @NotNull Expr visitDefaultExpr(final @NotNull DefaultExpr defaultExpr) {

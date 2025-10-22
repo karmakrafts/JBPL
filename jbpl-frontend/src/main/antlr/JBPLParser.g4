@@ -189,6 +189,7 @@ preproClassInstantiation:
 
 expr:
     L_PAREN NL*? expr NL*? R_PAREN
+    | expr NL*? L_SQBRACKET NL*? expr NL*? R_SQBRACKET
 
     | expr NL*? DOT NL*? macroCall
     | expr NL*? DOT NL*? reference
@@ -245,13 +246,15 @@ defaultExpr:
     ;
 
 arrayExpr:
-    refOrType? // This is optional when using type inferrence
     L_SQBRACKET
+    refOrType?
+    R_SQBRACKET
+    L_BRACE
     (expr
     (COMMA
     expr)*
     )?
-    R_SQBRACKET
+    R_BRACE
     ;
 
 injectorReference:
