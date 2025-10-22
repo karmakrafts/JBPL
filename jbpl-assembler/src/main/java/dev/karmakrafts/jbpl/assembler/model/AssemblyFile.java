@@ -9,15 +9,14 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public final class AssemblyFile extends AbstractElementContainer implements ScopeOwner {
     public final String path;
-    public final List<Token> source;
+    public final ArrayList<Token> source = new ArrayList<>();
 
-    public AssemblyFile(final @NotNull String path, final @NotNull List<Token> source) {
+    public AssemblyFile(final @NotNull String path) {
         this.path = path;
-        this.source = source;
     }
 
     public @NotNull SourceRange getSourceRange(final TokenRange range) {

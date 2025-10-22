@@ -5,7 +5,9 @@ import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
+import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.util.EnumSet;
 
@@ -32,6 +34,16 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-
+        final var access = AccessModifier.combine(accessModifiers);
+        final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class);
+        final var name = signature.getFunctionName().evaluateAsConst(context, String.class);
+        final var descriptor = signature.evaluateAsConstDescriptor(context);
+        final var method = new MethodNode(context.bytecodeApi, access, name, descriptor, descriptor, null);
+        final var statements = getStatements();
+        for (final var statement : statements) {
+            statement.evaluate(context);
+        }
+        method.instructions.add(context.getInstructionBuffer());
+        context.addFunction(owner.name(), method);
     }
 }

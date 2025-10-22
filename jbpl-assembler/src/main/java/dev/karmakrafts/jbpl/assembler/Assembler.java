@@ -4,14 +4,19 @@ import dev.karmakrafts.jbpl.assembler.lower.CompoundLowering;
 import dev.karmakrafts.jbpl.assembler.lower.IncludeLowering;
 import dev.karmakrafts.jbpl.assembler.lower.NoopRemovalLowering;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
+import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;
+import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
+import dev.karmakrafts.jbpl.assembler.parser.ParserException;
 import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
 import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.frontend.JBPLParser;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
@@ -19,13 +24,13 @@ import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.CodingErrorAction;
-import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Function;
 
 public final class Assembler {
-    public static final Set<Integer> BYTECODE_VERSIONS = Set.of(Opcodes.V1_1,
+    private static final Set<Integer> BYTECODE_VERSIONS = Set.of(Opcodes.V1_1,
         Opcodes.V1_2,
         Opcodes.V1_3,
         Opcodes.V1_4,
@@ -50,6 +55,14 @@ public final class Assembler {
         Opcodes.V23,
         Opcodes.V24,
         Opcodes.V25);
+    @SuppressWarnings("deprecation")
+    private static final Set<Integer> BYTECODE_API_VERSIONS = Set.of(Opcodes.ASM4,
+        Opcodes.ASM5,
+        Opcodes.ASM6,
+        Opcodes.ASM7,
+        Opcodes.ASM8,
+        Opcodes.ASM9,
+        Opcodes.ASM10_EXPERIMENTAL);
 
     private final Function<String, ReadableByteChannel> resourceProvider;
     private final HashMap<String, AssemblyFile> files = new HashMap<>();
@@ -70,13 +83,18 @@ public final class Assembler {
     public @NotNull AssemblyFile getOrParseFile(final @NotNull String path) {
         return files.computeIfAbsent(path, p -> {
             try (final var channel = resourceProvider.apply(path)) {
+                final var file = new AssemblyFile(path);
+                final var errorListener = new ErrorListener(file);
                 final var charStream = CharStreams.fromChannel(channel, 4096, CodingErrorAction.REPLACE, path);
                 final var lexer = new JBPLLexer(charStream);
+                lexer.removeErrorListeners();
+                lexer.addErrorListener(errorListener);
                 final var tokenStream = new CommonTokenStream(lexer);
                 tokenStream.fill();
-                final var source = new ArrayList<>(tokenStream.getTokens());
+                file.source.addAll(tokenStream.getTokens());
                 final var parser = new JBPLParser(tokenStream);
-                final var file = new AssemblyFile(path, source);
+                parser.removeErrorListeners();
+                parser.addErrorListener(errorListener);
                 // @formatter:off
                 file.addElements(parser.file().bodyElement().stream()
                     .map(ElementParser::parse)
@@ -121,5 +139,55 @@ public final class Assembler {
     public @NotNull AssemblerContext getOrParseAndLowerFile(final @NotNull String path,
                                                             final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
         return lower(getOrParseFile(path), classResolver);
+    }
+
+    private static final class ErrorListener implements ANTLRErrorListener {
+        public final AssemblyFile file;
+
+        public ErrorListener(final @NotNull AssemblyFile file) {
+            this.file = file;
+        }
+
+        @Override
+        public void syntaxError(final @NotNull Recognizer<?, ?> recognizer,
+                                final @Nullable Object offendingSymbol,
+                                final int line,
+                                final int charPositionInLine,
+                                final @NotNull String msg,
+                                final @NotNull RecognitionException e) {
+            final var location = new SourceLocation(file.path, line, charPositionInLine);
+            throw new ParserException(msg, e, file, SourceRange.of(location));
+        }
+
+        @Override
+        public void reportAmbiguity(final @NotNull Parser recognizer,
+                                    final @NotNull DFA dfa,
+                                    final int startIndex,
+                                    final int stopIndex,
+                                    final boolean exact,
+                                    final @NotNull BitSet ambigAlts,
+                                    final @NotNull ATNConfigSet configs) {
+
+        }
+
+        @Override
+        public void reportAttemptingFullContext(final @NotNull Parser recognizer,
+                                                final @NotNull DFA dfa,
+                                                final int startIndex,
+                                                final int stopIndex,
+                                                final @NotNull BitSet conflictingAlts,
+                                                final @NotNull ATNConfigSet configs) {
+
+        }
+
+        @Override
+        public void reportContextSensitivity(final @NotNull Parser recognizer,
+                                             final @NotNull DFA dfa,
+                                             final int startIndex,
+                                             final int stopIndex,
+                                             final int prediction,
+                                             final @NotNull ATNConfigSet configs) {
+
+        }
     }
 }

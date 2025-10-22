@@ -29,6 +29,7 @@ public final class AssemblerContext {
     public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
     private final Stack<StackFrame> frameStack = new Stack<>();
     public int bytecodeVersion = Opcodes.V17;
+    public int bytecodeApi = Opcodes.ASM9;
 
     public AssemblerContext(final @NotNull AssemblyFile file,
                             final @NotNull Function<String, ClassNode> classResolver) {
@@ -181,6 +182,12 @@ public final class AssemblerContext {
 
     public @NotNull InsnList getInstructionBuffer() {
         return peekFrame().instructionBuffer;
+    }
+
+    public @NotNull InsnList copyInstructionBuffer() {
+        final var list = new InsnList();
+        list.add(getInstructionBuffer());
+        return list;
     }
 
     public final class StackFrame {
