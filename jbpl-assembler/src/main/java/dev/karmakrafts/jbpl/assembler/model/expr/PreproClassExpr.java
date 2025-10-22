@@ -25,6 +25,14 @@ public final class PreproClassExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        return null;
+        final var instance = new PreproClassExpr(type);
+        instance.setParent(getParent());
+        instance.setTokenRange(getTokenRange());
+        // @formatter:off
+        instance.addExpressions(getExpressions().stream()
+            .map(expr -> expr.evaluateAsConst(context))
+            .toList());
+        // @formatter:on
+        return new LiteralExpr(type, instance);
     }
 }

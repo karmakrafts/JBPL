@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.jbpl.assembler.model.type;
 
+import dev.karmakrafts.jbpl.assembler.model.expr.PreproClassExpr;
 import org.jetbrains.annotations.NotNull;
 
 public final class TypeMapper {
@@ -40,13 +41,17 @@ public final class TypeMapper {
                 return classType.loadClass();
             }
             catch (final ClassNotFoundException error) {
-                throw new IllegalStateException(error);
+                throw new IllegalStateException(String.format("Could not load runtime class '%s'", classType.name()),
+                    error);
             }
         }
         throw new IllegalStateException(String.format("Could not map type '%s' to runtime", type));
     }
 
     public static @NotNull Type map(final @NotNull Class<?> type, final boolean unbox) {
+        if (type == PreproClassExpr.class) {
+            throw new IllegalStateException("Preprocessor class instances cannot be mapped to a runtime type");
+        }
         if (type.isArray()) {
             return map(type.componentType(), unbox).array();
         }

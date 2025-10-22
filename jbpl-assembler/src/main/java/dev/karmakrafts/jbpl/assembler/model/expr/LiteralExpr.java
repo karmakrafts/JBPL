@@ -15,7 +15,7 @@ public final class LiteralExpr extends AbstractElement implements Expr {
     public Type type;
     public Object value;
 
-    private LiteralExpr(final @NotNull Type type, final @Nullable Object value) {
+    public LiteralExpr(final @NotNull Type type, final @Nullable Object value) {
         this.type = type;
         this.value = value;
     }
