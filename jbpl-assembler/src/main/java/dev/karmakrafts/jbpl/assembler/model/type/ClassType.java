@@ -10,8 +10,7 @@ public record ClassType(String name) implements Type {
     }
 
     public @NotNull Class<?> loadClass() throws ClassNotFoundException {
-        final var className = name.replace('/', '.');
-        return Class.forName(className);
+        return Class.forName(name.replace('/', '.'));
     }
 
     @Override

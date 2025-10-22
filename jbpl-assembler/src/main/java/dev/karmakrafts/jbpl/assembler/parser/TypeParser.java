@@ -83,7 +83,7 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
 
     @Override
     public @NotNull List<Type> visitArrayType(final @NotNull ArrayTypeContext ctx) {
-        return List.of(parse(ctx.type()).array(1));
+        return List.of(parse(ctx.type()).array());
     }
 
     @Override

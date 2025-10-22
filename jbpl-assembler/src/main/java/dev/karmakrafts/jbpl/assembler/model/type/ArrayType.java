@@ -5,7 +5,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.ArrayExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
-public record ArrayType(Type elementType, int dimensions) implements Type {
+public record ArrayType(Type elementType) implements Type {
     @Override
     public @NotNull TypeCategory getCategory() {
         return TypeCategory.ARRAY;
@@ -23,10 +23,5 @@ public record ArrayType(Type elementType, int dimensions) implements Type {
                 elementType));
         }
         return org.objectweb.asm.Type.getType(String.format("[%s", elementType.materialize(context).getDescriptor()));
-    }
-
-    @Override
-    public @NotNull ArrayType array(final int dimensions) {
-        return new ArrayType(elementType, this.dimensions + dimensions);
     }
 }

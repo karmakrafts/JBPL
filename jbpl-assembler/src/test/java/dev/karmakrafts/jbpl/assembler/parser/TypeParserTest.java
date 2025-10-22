@@ -112,8 +112,8 @@ public class TypeParserTest extends AbstractParserTest {
 
     @Test
     public void parseArrayType() {
-        runTest(BuiltinType.I32.array(1), "typeof([i32])");
-        runTest(BuiltinType.I32.array(2), "typeof([[i32]])");
-        runTest(BuiltinType.I32.array(3), "typeof([[[i32]]])");
+        runTest(BuiltinType.I32.array(), "typeof([i32])");
+        runTest(BuiltinType.I32.array().array(), "typeof([[i32]])");
+        runTest(BuiltinType.I32.array().array().array(), "typeof([[[i32]]])");
     }
 }

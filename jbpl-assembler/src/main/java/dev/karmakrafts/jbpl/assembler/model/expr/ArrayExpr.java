@@ -19,16 +19,23 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeCommonizer;
+import dev.karmakrafts.jbpl.assembler.model.type.TypeMapper;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
 public final class ArrayExpr extends AbstractExprContainer implements Expr {
     public static final int TYPE_INDEX = 0;
+    public static final int VALUES_INDEX = 1;
+
     public final boolean hasInferredType;
     private final BiFunction<AssemblerContext, Optional<? extends Type>, Type> elementTypeResolver;
     private boolean hasDynamicType = false; // Whether the type is an Expr or not
+    private int valueIndex = 0;
 
     private ArrayExpr(final @NotNull BiFunction<AssemblerContext, Optional<? extends Type>, Type> elementTypeResolver,
                       final boolean hasInferredType) {
@@ -54,7 +61,7 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
      * The offset into the expression list until array values start
      */
     public int getValueOffset() {
-        return hasDynamicType ? 1 : 0;
+        return hasDynamicType ? VALUES_INDEX : 0;
     }
 
     public boolean hasDynamicType() {
@@ -71,6 +78,33 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
         getExpressions().set(TYPE_INDEX, type);
     }
 
+    public void clearValues() {
+        final var type = hasDynamicType ? getType() : null;
+        clearExpressions();
+        if (type != null) {
+            addExpression(type);
+        }
+        valueIndex = 0;
+    }
+
+    public void addValue(final @NotNull Expr value) {
+        getExpressions().add(VALUES_INDEX + valueIndex++, value);
+    }
+
+    public void addValues(final @NotNull Collection<Expr> values) {
+        getExpressions().addAll(VALUES_INDEX + valueIndex, values);
+        valueIndex++;
+    }
+
+    public @NotNull Expr getValue(final int index) {
+        return getExpressions().get(VALUES_INDEX + index);
+    }
+
+    public @NotNull List<Expr> getValues() {
+        final var expressions = getExpressions();
+        return expressions.subList(VALUES_INDEX, expressions.size() - 1);
+    }
+
     @Override
     public @NotNull Type getType(final @NotNull AssemblerContext context) { // @formatter:off
         return elementTypeResolver.apply(context, TypeCommonizer.commonize(getExpressions().stream()
@@ -85,6 +119,14 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        return null; // TODO: ...
+        final var type = getType(context);
+        final var clazz = TypeMapper.map(type); // Map type to runtime class
+        final var values = getValues();
+        final var size = values.size();
+        final var array = Array.newInstance(clazz.componentType(), size);
+        for (var i = 0; i < size; ++i) {
+            Array.set(array, i, values.get(i).evaluateAsConst(context, Object.class));
+        }
+        return LiteralExpr.of(array);
     }
 }
