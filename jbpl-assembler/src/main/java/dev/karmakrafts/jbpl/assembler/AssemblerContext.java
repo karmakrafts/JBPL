@@ -7,7 +7,6 @@ import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
-import dev.karmakrafts.jbpl.assembler.model.statement.LabelStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
@@ -190,30 +189,19 @@ public final class AssemblerContext {
         return list;
     }
 
-    public final class StackFrame {
+    public static final class StackFrame {
         public final Scope scope;
         public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
         public final InsnList instructionBuffer = new InsnList();
         public final HashMap<String, LocalStatement> locals = new HashMap<>();
-        private final HashMap<String, LabelStatement> labels = new HashMap<>();
         private final HashMap<String, LabelNode> labelNodes = new HashMap<>();
 
         public StackFrame(final @NotNull Scope scope) {
             this.scope = scope;
         }
 
-        public @Nullable LabelStatement findLabel(final @NotNull String name) {
-            return labels.get(name);
-        }
-
         public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
             return labelNodes.computeIfAbsent(name, n -> new LabelNode());
-        }
-
-        public void addLabel(final @NotNull LabelStatement statement) {
-            final var name = statement.getName().evaluateAsConst(AssemblerContext.this, String.class);
-            labels.put(name, statement);
-            labelNodes.put(name, new LabelNode());
         }
     }
 }

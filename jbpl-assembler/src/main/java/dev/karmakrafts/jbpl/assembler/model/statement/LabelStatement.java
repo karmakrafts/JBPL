@@ -14,7 +14,8 @@ public final class LabelStatement extends AbstractExprContainer implements State
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-        context.peekFrame().addLabel(this);
+        final var name = getName().evaluateAsConst(context, String.class);
+        context.peekFrame().getOrCreateLabelNode(name); // Pre-allocate label
     }
 
     public @NotNull Expr getName() {
