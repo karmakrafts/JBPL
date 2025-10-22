@@ -1,18 +1,13 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
 public interface Type {
-    boolean isMaterializable();
+    @NotNull TypeCategory getCategory();
 
-    boolean isObject();
-
-    boolean isArray();
-
-    default boolean isPrimitive() {
-        return !isObject() && !isArray();
-    }
+    @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context);
 
     @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context);
 

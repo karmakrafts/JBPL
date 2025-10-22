@@ -1,6 +1,10 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
+import dev.karmakrafts.jbpl.assembler.model.statement.instruction.OplessInstruction;
 import org.jetbrains.annotations.NotNull;
 
 public enum PreproType implements Type {
@@ -14,19 +18,20 @@ public enum PreproType implements Type {
     INJECTOR;
     // @formatter:on
 
+
     @Override
-    public boolean isMaterializable() {
-        return false;
+    public @NotNull TypeCategory getCategory() {
+        return TypeCategory.PREPROCESSOR;
     }
 
     @Override
-    public boolean isObject() {
-        return false;
-    }
-
-    @Override
-    public boolean isArray() {
-        return false;
+    public @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context) {
+        return switch (this) {
+            case TYPE -> LiteralExpr.of(BuiltinType.VOID);
+            case OPCODE -> LiteralExpr.of(Opcode.NOP);
+            case INSTRUCTION -> LiteralExpr.of(new OplessInstruction(Opcode.NOP));
+            default -> throw new IllegalStateException(String.format("Type %s does not have a default value", this));
+        };
     }
 
     @Override

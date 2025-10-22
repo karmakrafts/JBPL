@@ -1,32 +1,24 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.expr.ArrayExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
 public record ArrayType(Type elementType, int dimensions) implements Type {
-    public ArrayType(final @NotNull Type elementType, final int dimensions) {
-        this.elementType = elementType;
-        this.dimensions = dimensions;
+    @Override
+    public @NotNull TypeCategory getCategory() {
+        return TypeCategory.ARRAY;
     }
 
     @Override
-    public boolean isObject() {
-        return true;
-    }
-
-    @Override
-    public boolean isArray() {
-        return true;
-    }
-
-    @Override
-    public boolean isMaterializable() {
-        return elementType.isMaterializable();
+    public @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context) {
+        return new ArrayExpr(this);
     }
 
     @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
-        if (!isMaterializable()) {
+        if (!elementType.getCategory().isMaterializable()) {
             throw new UnsupportedOperationException(String.format("Array of type %s cannot be materialized",
                 elementType));
         }

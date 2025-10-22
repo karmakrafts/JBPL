@@ -40,6 +40,23 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
+    public List<Expr> visitDefaultExpr(final @NotNull DefaultExprContext ctx) {
+        final var type = ParserUtils.parseRefOrType(ctx.refOrType());
+        return List.of(new DefaultExpr(type));
+    }
+
+    @Override
+    public List<Expr> visitArrayExpr(final @NotNull ArrayExprContext ctx) {
+        // @formatter:off
+        final var array = ctx.refOrType() != null
+            ? new ArrayExpr(ParserUtils.parseRefOrType(ctx.refOrType()))
+            : new ArrayExpr();
+        // @formatter:on
+        array.addExpressions(ctx.expr().stream().map(ExprParser::parse).toList());
+        return List.of(array);
+    }
+
+    @Override
     public @NotNull List<Expr> visitTypeOfExpr(final @NotNull TypeOfExprContext ctx) {
         return List.of(new TypeOfExpr(parse(ctx.expr())));
     }

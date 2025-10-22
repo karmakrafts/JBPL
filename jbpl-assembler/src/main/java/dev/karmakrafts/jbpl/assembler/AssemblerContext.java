@@ -6,7 +6,6 @@ import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LabelStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
@@ -17,9 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Function;
 
 public final class AssemblerContext {
@@ -45,7 +42,7 @@ public final class AssemblerContext {
             selector -> selector.getName().evaluateAsConst(this, String.class));
         macroResolver = NamedResolver.analyze(file,
             MacroDecl.class,
-            macro -> macro.name.evaluateAsConst(this, String.class));
+            macro -> macro.getName().evaluateAsConst(this, String.class));
     }
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
@@ -156,20 +153,30 @@ public final class AssemblerContext {
         return peekFrame().scope;
     }
 
-    public @Nullable ScopeOwner getReturnTarget() {
-        if (frameStack.isEmpty()) {
-            return null;
+    public void pushValue(final @NotNull Expr value) {
+        peekFrame().valueStack.push(value);
+    }
+
+    public void pushValues(final @NotNull Collection<Expr> values) {
+        for (final var value : values) {
+            pushValue(value);
         }
-        return peekFrame().scope.owner();
     }
 
-    public @NotNull Expr getReturnValue() {
-        final var value = peekFrame().returnValue;
-        return value != null ? value : LiteralExpr.unit();
+    public @NotNull Expr popValue() {
+        return peekFrame().valueStack.pop();
     }
 
-    public void setReturnValue(final @NotNull Expr returnValue) {
-        peekFrame().returnValue = returnValue;
+    public @NotNull List<Expr> popValues(final int count) {
+        final var values = new ArrayList<Expr>(count);
+        for (var i = 0; i < count; ++i) {
+            values.add(popValue());
+        }
+        return values;
+    }
+
+    public @NotNull Expr peekValue() {
+        return peekFrame().valueStack.peek();
     }
 
     public @NotNull InsnList getInstructionBuffer() {
@@ -178,11 +185,11 @@ public final class AssemblerContext {
 
     public final class StackFrame {
         public final Scope scope;
+        public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
         public final InsnList instructionBuffer = new InsnList();
         public final HashMap<String, LocalStatement> locals = new HashMap<>();
         private final HashMap<String, LabelStatement> labels = new HashMap<>();
         private final HashMap<String, LabelNode> labelNodes = new HashMap<>();
-        public Expr returnValue;
 
         public StackFrame(final @NotNull Scope scope) {
             this.scope = scope;

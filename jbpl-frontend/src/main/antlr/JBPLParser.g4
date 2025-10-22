@@ -222,10 +222,12 @@ expr:
     | expr KW_IS type
 
     | ifExpr
+    | arrayExpr
     | macroCall
     | signatureExpr
     | typeOfExpr
     | opcodeOfExpr
+    | defaultExpr
     | definedExpr
     | nameOfExpr
     | preproClassInstantiation
@@ -233,6 +235,23 @@ expr:
     | selectorReference
     | reference
     | literal
+    ;
+
+defaultExpr:
+    KW_DEFAULT
+    L_PAREN
+    refOrType
+    R_PAREN
+    ;
+
+arrayExpr:
+    refOrType? // This is optional when using type inferrence
+    L_SQBRACKET
+    (expr
+    (COMMA
+    expr)*
+    )?
+    R_SQBRACKET
     ;
 
 injectorReference:

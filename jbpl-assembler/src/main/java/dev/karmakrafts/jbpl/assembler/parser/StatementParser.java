@@ -37,7 +37,9 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
 
     @Override
     public @NotNull List<Statement> visitReturnStatement(final @NotNull ReturnStatementContext ctx) {
-        return List.of(new ReturnStatement(ExprParser.parse(ctx.expr())));
+        final var valueNode = ctx.expr();
+        final var value = valueNode != null ? ExprParser.parse(valueNode) : LiteralExpr.unit();
+        return List.of(new ReturnStatement(value));
     }
 
     @Override

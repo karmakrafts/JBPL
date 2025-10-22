@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
@@ -26,18 +27,13 @@ public record IntersectionType(@NotNull List<Type> alternatives) implements Type
     }
 
     @Override
-    public boolean isObject() {
-        return false;
+    public @NotNull TypeCategory getCategory() {
+        return TypeCategory.INTERSECTION;
     }
 
     @Override
-    public boolean isArray() {
-        return false;
-    }
-
-    @Override
-    public boolean isMaterializable() {
-        return false;
+    public @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context) {
+        throw new UnsupportedOperationException("Intersection types do not have a default value");
     }
 
     @Override

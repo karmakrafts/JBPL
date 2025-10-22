@@ -164,7 +164,14 @@ public interface ElementVisitor {
         else if (expr instanceof SelectorReferenceExpr selectorReferenceExpr) {
             return visitSelectorReferenceExpr(selectorReferenceExpr);
         }
+        else if (expr instanceof ArrayExpr arrayExpr) {
+            return visitArrayExpr(arrayExpr);
+        }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitArrayExpr(final @NotNull ArrayExpr arrayExpr) {
+        return visitExprContainer(arrayExpr);
     }
 
     default @NotNull Expr visitSelectorReferenceExpr(final @NotNull SelectorReferenceExpr selectorReferenceExpr) {

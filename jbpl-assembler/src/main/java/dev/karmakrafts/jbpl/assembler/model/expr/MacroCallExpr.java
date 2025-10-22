@@ -26,14 +26,16 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull AssemblerContext context) {
-        return getMacro(context).returnType.evaluateAsConst(context, Type.class);
+        return getMacro(context).getReturnType().evaluateAsConst(context, Type.class);
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        //TODO:
-    }
+    public void evaluate(final @NotNull AssemblerContext context) {}
 
+    /**
+     * Macro calls are evaluated using the value stack of the {@link dev.karmakrafts.jbpl.assembler.AssemblerContext.StackFrame},
+     * which allows passing multiple values between references and declarations when evaluating the tree.
+     */
     @Override
     public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
         return LiteralExpr.unit();

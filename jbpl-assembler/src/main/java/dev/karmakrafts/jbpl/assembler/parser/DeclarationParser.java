@@ -100,7 +100,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
             .map(ElementParser::parse)
             .toList());
         // @formatter:on
-        macro.parameterTypes.putAll(ParserUtils.parseParameters(ctx.parameter()));
+        macro.addParameters(ParserUtils.parseParameters(ctx.parameter()));
         return List.of(macro);
     }
 
