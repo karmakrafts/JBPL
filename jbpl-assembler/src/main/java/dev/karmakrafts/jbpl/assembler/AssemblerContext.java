@@ -28,7 +28,7 @@ public final class AssemblerContext {
     public final NamedResolver<MacroDecl> macroResolver;
     public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
     private final Stack<StackFrame> frameStack = new Stack<>();
-    public int bytecodeVersion = Opcodes.ASM9; // Default is ASM 9.2 for Java 17
+    public int bytecodeVersion = Opcodes.V17;
 
     public AssemblerContext(final @NotNull AssemblyFile file,
                             final @NotNull Function<String, ClassNode> classResolver) {
