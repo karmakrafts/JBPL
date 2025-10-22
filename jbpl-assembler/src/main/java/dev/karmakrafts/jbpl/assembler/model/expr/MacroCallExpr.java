@@ -30,7 +30,8 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {}
+    public void evaluate(final @NotNull AssemblerContext context) {
+    }
 
     /**
      * Macro calls are evaluated using the value stack of the {@link dev.karmakrafts.jbpl.assembler.AssemblerContext.StackFrame},

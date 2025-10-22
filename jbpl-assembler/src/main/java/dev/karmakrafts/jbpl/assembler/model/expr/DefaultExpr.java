@@ -27,12 +27,12 @@ public final class DefaultExpr extends AbstractExprContainer implements Expr {
         addExpression(type);
     }
 
-    public void setType(final @NotNull Expr type) {
-        getExpressions().set(TYPE_INDEX, type);
-    }
-
     public @NotNull Expr getType() {
         return getExpressions().get(TYPE_INDEX);
+    }
+
+    public void setType(final @NotNull Expr type) {
+        getExpressions().set(TYPE_INDEX, type);
     }
 
     @Override

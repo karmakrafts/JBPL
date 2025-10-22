@@ -26,8 +26,8 @@ import java.util.function.BiFunction;
 
 public final class ArrayExpr extends AbstractExprContainer implements Expr {
     public static final int TYPE_INDEX = 0;
-    private final BiFunction<AssemblerContext, Optional<? extends Type>, Type> elementTypeResolver;
     public final boolean hasInferredType;
+    private final BiFunction<AssemblerContext, Optional<? extends Type>, Type> elementTypeResolver;
     private boolean hasDynamicType = false; // Whether the type is an Expr or not
 
     private ArrayExpr(final @NotNull BiFunction<AssemblerContext, Optional<? extends Type>, Type> elementTypeResolver,
@@ -61,14 +61,14 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
         return hasDynamicType;
     }
 
-    public void setType(final @NotNull Expr type) {
-        assert hasDynamicType;
-        getExpressions().set(TYPE_INDEX, type);
-    }
-
     public @NotNull Expr getType() {
         assert hasDynamicType;
         return getExpressions().get(TYPE_INDEX);
+    }
+
+    public void setType(final @NotNull Expr type) {
+        assert hasDynamicType;
+        getExpressions().set(TYPE_INDEX, type);
     }
 
     @Override
