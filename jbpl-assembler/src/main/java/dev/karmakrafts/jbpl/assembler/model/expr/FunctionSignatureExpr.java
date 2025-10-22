@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 
 public final class FunctionSignatureExpr extends AbstractExprContainer implements SignatureExpr {
@@ -33,7 +34,15 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
 
     @Override
     public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        return LiteralExpr.of(this);
+        final var owner = getFunctionOwner().evaluateAsConst(context);
+        final var name = getFunctionName().evaluateAsConst(context);
+        final var returnType = getFunctionReturnType().evaluateAsConst(context);
+        final var paramTypes = getFunctionParameters().stream().map(expr -> expr.evaluateAsConst(context)).toList();
+        final var signature = new FunctionSignatureExpr(owner, name, returnType);
+        signature.setParent(getParent());
+        signature.setTokenRange(getTokenRange());
+        signature.addFunctionParameters(paramTypes);
+        return LiteralExpr.of(signature);
     }
 
     @Override
@@ -53,6 +62,11 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
 
     public void addFunctionParameter(final @NotNull Expr parameterType) {
         getExpressions().add(PARAMETERS_INDEX + parameterIndex++, parameterType);
+    }
+
+    public void addFunctionParameters(final @NotNull Collection<? extends Expr> parameterTypes) {
+        getExpressions().addAll(PARAMETERS_INDEX + parameterIndex, parameterTypes);
+        parameterIndex += parameterTypes.size();
     }
 
     public @NotNull Expr getFunctionParameter(final int index) {

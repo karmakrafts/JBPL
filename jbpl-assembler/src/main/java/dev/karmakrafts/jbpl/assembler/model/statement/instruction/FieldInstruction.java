@@ -34,7 +34,7 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
     public void evaluate(final @NotNull AssemblerContext context) {
         final var encodedOpcode = opcode.encodedValue;
         final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
-        final var owner = signature.evaluateAsConst(context, ClassType.class);
+        final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
         final var name = signature.getFieldName().evaluateAsConst(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
         context.emit(new FieldInsnNode(encodedOpcode, owner.name(), name, descriptor));

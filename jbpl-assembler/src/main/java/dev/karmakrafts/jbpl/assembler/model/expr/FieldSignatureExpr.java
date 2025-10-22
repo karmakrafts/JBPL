@@ -28,7 +28,13 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
 
     @Override
     public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        return LiteralExpr.of(this);
+        final var owner = getFieldOwner().evaluateAsConst(context);
+        final var name = getFieldName().evaluateAsConst(context);
+        final var type = getFieldType().evaluateAsConst(context);
+        final var signature = new FieldSignatureExpr(owner, name, type);
+        signature.setParent(getParent());
+        signature.setTokenRange(getTokenRange());
+        return LiteralExpr.of(signature);
     }
 
     @Override
