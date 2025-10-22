@@ -2,6 +2,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
+import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeMapper;
@@ -10,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-// TODO: how do we properly handle token ranges for literals?
 public final class LiteralExpr extends AbstractElement implements Expr {
     public Type type;
     public Object value;
@@ -20,13 +20,25 @@ public final class LiteralExpr extends AbstractElement implements Expr {
         this.value = value;
     }
 
-    public static LiteralExpr unit() {
-        return new LiteralExpr(BuiltinType.VOID, null);
+    public static @NotNull LiteralExpr unit() {
+        return unit(TokenRange.SYNTHETIC);
+    }
+
+    public static @NotNull LiteralExpr unit(final @NotNull TokenRange tokenRange) {
+        final var expr = new LiteralExpr(BuiltinType.VOID, null);
+        expr.setTokenRange(tokenRange);
+        return expr;
     }
 
     public static @NotNull LiteralExpr of(final @NotNull Object value) {
-        final var type = TypeMapper.map(value.getClass(), true); // We auto-unbox constant values
-        return new LiteralExpr(type, value);
+        return of(value, TokenRange.SYNTHETIC);
+    }
+
+    public static @NotNull LiteralExpr of(final @NotNull Object value, final @NotNull TokenRange tokenRange) {
+        final var type = TypeMapper.map(value.getClass(), true);
+        final var expr = new LiteralExpr(type, value);
+        expr.setTokenRange(tokenRange);
+        return expr;
     }
 
     @Override

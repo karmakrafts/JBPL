@@ -65,8 +65,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public @NotNull List<Expr> visitOpcodeOfExpr(final @NotNull OpcodeOfExprContext ctx) {
         final var opcodeNode = ctx.opcode();
         if (opcodeNode != null) {
-            final var opcode = ParserUtils.parseOpcode(ctx.opcode()).orElseThrow();
-            return List.of(new OpcodeOfExpr(LiteralExpr.of(opcode)));
+            final var opcode = ParserUtils.parseOpcode(opcodeNode).orElseThrow();
+            return List.of(new OpcodeOfExpr(LiteralExpr.of(opcode, TokenRange.fromContext(opcodeNode))));
         }
         return List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr())));
     }
@@ -127,7 +127,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
             return List.of(new IsExpr(expr, TypeParser.parse(type)));
         } // @formatter:off
-        else if (type != null)              return List.of(LiteralExpr.of(TypeParser.parse(type)));
+        else if (type != null)              return List.of(LiteralExpr.of(TypeParser.parse(type), TokenRange.fromContext(type)));
         else if (ctx.EQEQ() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
         else if (ctx.NEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.NE);
         else if (ctx.L_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.LT);
@@ -195,7 +195,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                     default -> throw new IllegalStateException("Unsupported character escape sequence");
                 };
             }
-            return List.of(LiteralExpr.of(value.charAt(0)));
+            return List.of(LiteralExpr.of(value.charAt(0), TokenRange.fromTerminalNode(literalChar)));
         }
         return super.visitLiteral(ctx);
     }
@@ -203,17 +203,20 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     private @NotNull Expr parseStringSegment(final @NotNull StringSegmentContext ctx) {
         final var text = ctx.M_CONST_STR_TEXT();
         if (text != null) {
-            return LiteralExpr.of(text.getText());
+            return LiteralExpr.of(text.getText(), TokenRange.fromTerminalNode(text));
         }
         return parse(ctx.expr());
     }
 
     private @NotNull LiteralExpr mergeStringLiterals(final @NotNull ArrayDeque<LiteralExpr> queue) {
         final var builder = new StringBuilder();
+        final var ranges = new ArrayList<TokenRange>();
         while (!queue.isEmpty()) {
-            builder.append(queue.pop().value);
+            final var segment = queue.pop();
+            ranges.add(segment.getTokenRange());
+            builder.append(segment.value);
         }
-        return LiteralExpr.of(builder.toString());
+        return LiteralExpr.of(builder.toString(), TokenRange.union(ranges));
     }
 
     @Override
@@ -225,7 +228,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         // @formatter:on
         // Handle empty strings
         if (segments.isEmpty()) {
-            return List.of(LiteralExpr.of(""));
+            return List.of(LiteralExpr.of("", TokenRange.fromContext(ctx)));
         }
         // Merge all adjacent text segments
         final var mergedSegments = new ArrayList<Expr>();
@@ -249,25 +252,27 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             return List.of(literalExpr);
         }
         final var lerpExpr = new StringLerpExpr();
+        lerpExpr.setTokenRange(TokenRange.union(mergedSegments.stream().map(Expr::getTokenRange).toList()));
         lerpExpr.addExpressions(mergedSegments);
         return List.of(lerpExpr);
     }
 
     @Override
     public @NotNull List<Expr> visitBoolLiteral(final @NotNull BoolLiteralContext ctx) {
-        return List.of(LiteralExpr.of(ctx.KW_TRUE() != null));
+        return List.of(LiteralExpr.of(ctx.KW_TRUE() != null, TokenRange.fromContext(ctx)));
     }
 
     @Override
     public @NotNull List<Expr> visitIntLiteral(final @NotNull IntLiteralContext ctx) {
         final var value = ctx.LITERAL_INT().getText();
+        final var tokenRange = TokenRange.fromContext(ctx);
         // @formatter:off
-        if (ctx.KW_I64() != null)       return List.of(LiteralExpr.of(Long.parseLong(value)));
-        else if (ctx.KW_I16() != null)  return List.of(LiteralExpr.of(Short.parseShort(value)));
-        else if (ctx.KW_I8() != null)   return List.of(LiteralExpr.of(Byte.parseByte(value)));
+        if (ctx.KW_I64() != null)       return List.of(LiteralExpr.of(Long.parseLong(value), tokenRange));
+        else if (ctx.KW_I16() != null)  return List.of(LiteralExpr.of(Short.parseShort(value), tokenRange));
+        else if (ctx.KW_I8() != null)   return List.of(LiteralExpr.of(Byte.parseByte(value), tokenRange));
         // @formatter:on
         // Without suffix or with i32, we assume int as the default case
-        return List.of(LiteralExpr.of(Integer.parseInt(value)));
+        return List.of(LiteralExpr.of(Integer.parseInt(value), tokenRange));
     }
 
     @Override
@@ -276,10 +281,11 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         if (value == null) {
             value = ctx.LITERAL_INT();
         }
+        final var tokenRange = TokenRange.fromContext(ctx);
         if (ctx.KW_F32() != null) {
-            return List.of(LiteralExpr.of(Float.parseFloat(value.getText())));
+            return List.of(LiteralExpr.of(Float.parseFloat(value.getText()), tokenRange));
         }
-        return List.of(LiteralExpr.of(Double.parseDouble(value.getText())));
+        return List.of(LiteralExpr.of(Double.parseDouble(value.getText()), tokenRange));
     }
 
     private @NotNull Pair<Expr, Expr> parseFunctionSignatureParameter(final @NotNull FunctionSignatureParameterContext ctx) {
