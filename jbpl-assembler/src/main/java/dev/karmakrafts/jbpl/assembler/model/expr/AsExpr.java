@@ -31,33 +31,29 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         addExpression(type);
     }
 
-    public void setValue(final @NotNull Expr value) {
-        getExpressions().set(VALUE_INDEX, value);
-    }
-
     public @NotNull Expr getValue() {
         return getExpressions().get(VALUE_INDEX);
     }
 
-    public void setType(final @NotNull Expr type) {
-        getExpressions().set(TYPE_INDEX, type);
+    public void setValue(final @NotNull Expr value) {
+        getExpressions().set(VALUE_INDEX, value);
     }
 
     public @NotNull Expr getType() {
         return getExpressions().get(TYPE_INDEX);
     }
 
+    public void setType(final @NotNull Expr type) {
+        getExpressions().set(TYPE_INDEX, type);
+    }
+
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
         return getType().evaluateAsConst(context, Type.class);
     }
 
-    @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    private @NotNull LiteralExpr castFromNumber(final @NotNull Type type, final @NotNull Number number) {
+    private @NotNull LiteralExpr castFromNumber(final @NotNull Type type,
+                                                final @NotNull Number number) throws EvaluationException {
         // If we have a number, we may cast into other numbers and chars/bools with special rules
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -75,7 +71,8 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         throw new EvaluationException(String.format("Cannot cast numeric type into %s", type), this);
     }
 
-    private @NotNull LiteralExpr castFromBoolean(final @NotNull Type type, final @NotNull Boolean bool) {
+    private @NotNull LiteralExpr castFromBoolean(final @NotNull Type type,
+                                                 final @NotNull Boolean bool) throws EvaluationException {
         // Booleans can be cast into any integer and floating point type
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -91,7 +88,8 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         throw new EvaluationException(String.format("Cannot cast boolean into %s", type), this);
     }
 
-    private @NotNull LiteralExpr castFromString(final @NotNull Type type, final @NotNull String string) {
+    private @NotNull LiteralExpr castFromString(final @NotNull Type type,
+                                                final @NotNull String string) throws EvaluationException {
         // Strings can be cast into any builtin type for parsing numerics and converting into chars/bools
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -109,7 +107,8 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         throw new EvaluationException(String.format("Cannot cast string into %s", type), this);
     }
 
-    private @NotNull LiteralExpr castFromChar(final @NotNull Type type, final @NotNull Character value) {
+    private @NotNull LiteralExpr castFromChar(final @NotNull Type type,
+                                              final @NotNull Character value) throws EvaluationException {
         // Strings can be cast into any builtin type for parsing numerics and converting into chars/bools
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -128,35 +127,42 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var type = getType(context);
         // Always return unit literal for void type so we can have proper generic evaluation
         if (type == BuiltinType.VOID) {
-            return LiteralExpr.unit(getTokenRange());
+            context.pushValue(LiteralExpr.unit(getTokenRange()));
+            return;
         }
         final var value = getValue();
         final var valueType = value.getType(context);
         // Shortcut if the type is already the same, just evaluate the value directly
         if (type.equals(valueType)) {
-            return value.evaluateAsConst(context);
+            context.pushValue(value.evaluateAsConst(context));
+            return;
         }
         final var constValue = value.evaluateAsConst(context, Object.class);
         // Anything may be cast to a string to allow string conversions
         if (type == BuiltinType.STRING) {
-            return LiteralExpr.of(constValue.toString(), getTokenRange());
+            context.pushValue(LiteralExpr.of(constValue.toString(), getTokenRange()));
+            return;
         }
         // We decide which conversions are possible based on the incoming type
         if (constValue instanceof Number number) {
-            return castFromNumber(type, number);
+            context.pushValue(castFromNumber(type, number));
+            return;
         }
         else if (constValue instanceof Boolean bool) {
-            return castFromBoolean(type, bool);
+            context.pushValue(castFromBoolean(type, bool));
+            return;
         }
         else if (constValue instanceof String string) {
-            return castFromString(type, string);
+            context.pushValue(castFromString(type, string));
+            return;
         }
         else if (constValue instanceof Character character) {
-            return castFromChar(type, character);
+            context.pushValue(castFromChar(type, character));
+            return;
         }
         throw new EvaluationException(String.format("Cannot cast %s into %s", valueType, type), this);
     }

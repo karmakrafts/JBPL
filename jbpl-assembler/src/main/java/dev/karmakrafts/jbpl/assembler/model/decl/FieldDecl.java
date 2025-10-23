@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -40,7 +41,7 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
         final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
         final var modifier = AccessModifier.combine(accessModifiers);

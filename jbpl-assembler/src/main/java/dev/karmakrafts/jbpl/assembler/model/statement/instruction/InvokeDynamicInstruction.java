@@ -1,11 +1,13 @@
 package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
@@ -39,13 +41,14 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         return org.objectweb.asm.Type.getMethodDescriptor(type.materialize(context));
     }
 
-    private static int getInvokeTag(final @NotNull Opcode opcode) {
+    private int getInvokeTag(final @NotNull Opcode opcode) throws EvaluationException {
         return switch (opcode) {
             case INVOKEVIRTUAL -> Opcodes.H_INVOKEVIRTUAL;
             case INVOKESTATIC -> Opcodes.H_INVOKESTATIC;
             case INVOKESPECIAL -> Opcodes.H_INVOKESPECIAL;
             case INVOKEINTERFACE -> Opcodes.H_INVOKEINTERFACE;
-            default -> throw new IllegalStateException(String.format("Unsupported invoke tag for opcode %s", opcode));
+            default ->
+                throw new EvaluationException(String.format("Unsupported invoke tag for opcode %s", opcode), this);
         };
     }
 
@@ -107,11 +110,13 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         return Opcode.INVOKEDYNAMIC;
     }
 
-    private @NotNull Handle evaluateInvokeHandle(final @NotNull Expr expr, final @NotNull AssemblerContext context) {
+    private @NotNull Handle evaluateInvokeHandle(final @NotNull Expr expr,
+                                                 final @NotNull AssemblerContext context) throws EvaluationException {
         final var instruction = expr.evaluateAsConst(context, Instruction.class);
         if (!(instruction instanceof InvokeInstruction invokeInstruction)) {
-            throw new IllegalStateException(
-                "Invoke handle requires INVOKESTATIC, INVOKEVIRTUAL, INVOKESPECIAL or INVOKEINTERFACE target");
+            throw new EvaluationException(
+                "Invoke handle requires INVOKESTATIC, INVOKEVIRTUAL, INVOKESPECIAL or INVOKEINTERFACE target",
+                this);
         }
         final var opcode = invokeInstruction.getOpcode(context);
         final var tag = getInvokeTag(opcode);
@@ -124,7 +129,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var instantiatedSignature = getInstantiatedSignature().evaluateAsConst(context,
             FunctionSignatureExpr.class);
         final var samSignature = getSAMSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
@@ -136,13 +141,13 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             .evaluateAsConst(context, Type.class)
             .materialize(context);
         final var samParamTypes = samSignature.getFunctionParameters().stream()
-            .map(type -> type.evaluateAsConst(context, Type.class).materialize(context))
+            .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         final var returnType = instantiatedSignature.getFunctionReturnType()
             .evaluateAsConst(context, Type.class)
             .materialize(context);
         final var paramTypes = instantiatedSignature.getFunctionParameters().stream()
-            .map(type -> type.evaluateAsConst(context, Type.class).materialize(context))
+            .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         final var bsmHandle = evaluateInvokeHandle(getBSMInstruction(), context);
@@ -151,7 +156,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         final var instantiatedType = org.objectweb.asm.Type.getMethodType(returnType, paramTypes);
         // @formatter:off
         final var arguments = getArguments().stream()
-            .map(expr -> expr.evaluateAsConst(context, Object.class))
+            .map(ExceptionUtils.propagateUnchecked(expr -> expr.evaluateAsConst(context, Object.class)))
             .toList();
         // @formatter:on
         // Compose BSM arguments

@@ -1,8 +1,10 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -28,29 +30,28 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var owner = getFunctionOwner().evaluateAsConst(context);
         final var name = getFunctionName().evaluateAsConst(context);
         final var returnType = getFunctionReturnType().evaluateAsConst(context);
-        final var paramTypes = getFunctionParameters().stream().map(expr -> expr.evaluateAsConst(context)).toList();
+        // @formatter:off
+        final var paramTypes = getFunctionParameters().stream()
+            .map(ExceptionUtils.propagateUnchecked(expr -> expr.evaluateAsConst(context)))
+            .toList();
+        // @formatter:on
         final var signature = new FunctionSignatureExpr(owner, name, returnType);
         signature.setParent(getParent());
         signature.setTokenRange(getTokenRange());
         signature.addFunctionParameters(paramTypes);
-        return LiteralExpr.of(signature);
+        context.pushValue(LiteralExpr.of(signature));
     }
 
     @Override
-    public @NotNull String evaluateAsConstDescriptor(final @NotNull AssemblerContext context) {
+    public @NotNull String evaluateAsConstDescriptor(final @NotNull AssemblerContext context) throws EvaluationException {
         final var returnType = getFunctionReturnType().evaluateAsConst(context, Type.class).materialize(context);
         // @formatter:off
         final var paramTypes = getFunctionParameters().stream()
-            .map(type -> type.evaluateAsConst(context, Type.class).materialize(context))
+            .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         return org.objectweb.asm.Type.getMethodDescriptor(returnType, paramTypes);

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler;
+package dev.karmakrafts.jbpl.assembler.util;
 
-import org.jetbrains.annotations.NotNull;
-
-public interface Evaluable {
-    void evaluate(final @NotNull AssemblerContext context) throws EvaluationException;
+@FunctionalInterface
+public interface XSupplier<T, X extends Throwable> {
+    T get() throws X;
 }

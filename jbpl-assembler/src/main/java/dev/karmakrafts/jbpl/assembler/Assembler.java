@@ -80,32 +80,37 @@ public final class Assembler {
         });
     }
 
-    public @NotNull AssemblyFile getOrParseFile(final @NotNull String path) {
-        return files.computeIfAbsent(path, p -> {
-            try (final var channel = resourceProvider.apply(path)) {
-                final var file = new AssemblyFile(path);
-                final var errorListener = new ErrorListener(file);
-                final var charStream = CharStreams.fromChannel(channel, 4096, CodingErrorAction.REPLACE, path);
-                final var lexer = new JBPLLexer(charStream);
-                lexer.removeErrorListeners();
-                lexer.addErrorListener(errorListener);
-                final var tokenStream = new CommonTokenStream(lexer);
-                tokenStream.fill();
-                file.source.addAll(tokenStream.getTokens());
-                final var parser = new JBPLParser(tokenStream);
-                parser.removeErrorListeners();
-                parser.addErrorListener(errorListener);
-                // @formatter:off
-                file.addElements(parser.file().bodyElement().stream()
-                    .map(ElementParser::parse)
-                    .toList());
-                // @formatter:on
-                return file;
-            }
-            catch (IOException error) {
-                throw new RuntimeException(error);
-            }
-        });
+    public @NotNull AssemblyFile getOrParseFile(final @NotNull String path) throws ParserException {
+        try {
+            return files.computeIfAbsent(path, p -> {
+                try (final var channel = resourceProvider.apply(path)) {
+                    final var file = new AssemblyFile(path);
+                    final var errorListener = new ErrorListener(file);
+                    final var charStream = CharStreams.fromChannel(channel, 4096, CodingErrorAction.REPLACE, path);
+                    final var lexer = new JBPLLexer(charStream);
+                    lexer.removeErrorListeners();
+                    lexer.addErrorListener(errorListener);
+                    final var tokenStream = new CommonTokenStream(lexer);
+                    tokenStream.fill();
+                    file.source.addAll(tokenStream.getTokens());
+                    final var parser = new JBPLParser(tokenStream);
+                    parser.removeErrorListeners();
+                    parser.addErrorListener(errorListener);
+                    // @formatter:off
+                    file.addElements(parser.file().bodyElement().stream()
+                        .map(ElementParser::parse)
+                        .toList());
+                    // @formatter:on
+                    return file;
+                }
+                catch (IOException error) {
+                    throw new RuntimeException(error);
+                }
+            });
+        }
+        catch (SyntaxError error) {
+            throw error.cause;
+        }
     }
 
     private void validatePreLowering(final @NotNull AssemblerContext context) throws ValidationException {
@@ -130,21 +135,28 @@ public final class Assembler {
         final var context = new AssemblerContext(file, classResolver);
         validatePreLowering(context);
         file.transform(includeLowering);
-        file.transform(new CompoundLowering(context));
+        file.transform(CompoundLowering.INSTANCE);
         file.transform(NoopRemovalLowering.INSTANCE);
         validatePostLowering(context);
         return context;
     }
 
     public @NotNull AssemblerContext getOrParseAndLowerFile(final @NotNull String path,
-                                                            final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
+                                                            final @NotNull Function<String, ClassNode> classResolver) throws ValidationException, ParserException {
         return lower(getOrParseFile(path), classResolver);
     }
 
-    private static final class ErrorListener implements ANTLRErrorListener {
-        public final AssemblyFile file;
+    private static final class SyntaxError extends RuntimeException {
+        public final ParserException cause;
 
-        public ErrorListener(final @NotNull AssemblyFile file) {
+        public SyntaxError(ParserException cause) {
+            super(cause);
+            this.cause = cause;
+        }
+    }
+
+    private record ErrorListener(AssemblyFile file) implements ANTLRErrorListener {
+        private ErrorListener(final @NotNull AssemblyFile file) {
             this.file = file;
         }
 
@@ -156,7 +168,7 @@ public final class Assembler {
                                 final @NotNull String msg,
                                 final @NotNull RecognitionException e) {
             final var location = new SourceLocation(file.path, line, charPositionInLine);
-            throw new ParserException(msg, e, file, SourceRange.of(location));
+            throw new SyntaxError(new ParserException(msg, e, file, SourceRange.of(location)));
         }
 
         @Override

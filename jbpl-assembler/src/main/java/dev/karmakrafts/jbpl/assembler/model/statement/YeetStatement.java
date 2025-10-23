@@ -1,9 +1,11 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 public final class YeetStatement extends AbstractExprContainer implements Statement {
@@ -14,7 +16,7 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var target = getTarget();
         if (target instanceof LiteralExpr literalExpr) {
             var type = (ClassType) literalExpr.value;
@@ -27,7 +29,7 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
             final var returnType = result.getFunctionReturnType().evaluateAsConst(context, Type.class);
             // @formatter:off
             final var paramTypes = result.getFunctionParameters().stream()
-                .map(type -> type.evaluateAsConst(context, Type.class))
+                .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class)))
                 .toArray(Type[]::new);
             // @formatter:on
             context.removeFunction(owner.name(), name, returnType, paramTypes);
@@ -38,7 +40,7 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
             context.removeField(owner.name(), name);
         }
         else {
-            throw new IllegalStateException(String.format("Unsupported target type for yeet: %s", target));
+            throw new EvaluationException(String.format("Unsupported target type for yeet: %s", target), this);
         }
     }
 

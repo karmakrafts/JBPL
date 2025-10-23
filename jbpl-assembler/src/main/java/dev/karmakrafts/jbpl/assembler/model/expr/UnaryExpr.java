@@ -1,6 +1,8 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,45 +24,29 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
         return getValue().getType(context);
     }
 
-    @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        final var value = getValue().evaluateAsConst(context, Object.class);
+    private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number value) throws EvaluationException {
         return switch (op) {
-            case NOT -> {
-                if (!(value instanceof Boolean boolValue)) {
-                    throw new IllegalStateException("Not operator can only be applied to boolean values");
-                }
-                yield LiteralExpr.of(!boolValue);
-            }
             case MINUS, PLUS -> {
-                if (!(value instanceof Number numberValue)) {
-                    throw new IllegalStateException("Negation operator can only be applied to numeric values");
-                }
-                if (numberValue instanceof Byte byteValue) {
+                if (value instanceof Byte byteValue) {
                     yield LiteralExpr.of(-byteValue);
                 }
-                else if (numberValue instanceof Short shortValue) {
+                else if (value instanceof Short shortValue) {
                     yield LiteralExpr.of(-shortValue);
                 }
-                else if (numberValue instanceof Integer integerValue) {
+                else if (value instanceof Integer integerValue) {
                     yield LiteralExpr.of(-integerValue);
                 }
-                else if (numberValue instanceof Long longValue) {
+                else if (value instanceof Long longValue) {
                     yield LiteralExpr.of(-longValue);
                 }
-                else if (numberValue instanceof Float floatValue) {
+                else if (value instanceof Float floatValue) {
                     yield LiteralExpr.of(-floatValue);
                 }
-                else if (numberValue instanceof Double doubleValue) {
+                else if (value instanceof Double doubleValue) {
                     yield LiteralExpr.of(-doubleValue);
                 }
                 throw new IllegalStateException(String.format("Unsupported negation expression operand %s %s",
@@ -68,24 +54,48 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
                     value));
             }
             case INVERSE -> {
-                if (!(value instanceof Number numberValue)) {
-                    throw new IllegalStateException("Negation operator can only be applied to numeric values");
-                }
-                if (numberValue instanceof Byte byteValue) {
+                if (value instanceof Byte byteValue) {
                     yield LiteralExpr.of(~byteValue);
                 }
-                else if (numberValue instanceof Short shortValue) {
+                else if (value instanceof Short shortValue) {
                     yield LiteralExpr.of(~shortValue);
                 }
-                else if (numberValue instanceof Integer integerValue) {
+                else if (value instanceof Integer integerValue) {
                     yield LiteralExpr.of(~integerValue);
                 }
-                else if (numberValue instanceof Long longValue) {
+                else if (value instanceof Long longValue) {
                     yield LiteralExpr.of(~longValue);
                 }
                 throw new IllegalStateException(String.format("Unsupported inverse expression operand %s", value));
             }
+            default ->
+                throw new EvaluationException(String.format("Unary operator %s cannot be applied to number", op), this);
         };
+    }
+
+    private @NotNull LiteralExpr evaluateForBool(final boolean value) throws EvaluationException {
+        return switch (op) {
+            case NOT -> LiteralExpr.of(!value);
+            default ->
+                throw new EvaluationException(String.format("Unary operator %s cannot be applied to boolean", op),
+                    this);
+        };
+    }
+
+    @Override
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+        final var value = getValue();
+        final var constValue = value.evaluateAsConst(context, Object.class);
+        final var type = value.getType(context);
+        if (type == BuiltinType.BOOL) {
+            context.pushValue(evaluateForBool((boolean) constValue));
+            return;
+        }
+        else if (constValue instanceof Number numberValue) {
+            context.pushValue(evaluateForNumber(numberValue));
+            return;
+        }
+        throw new EvaluationException(String.format("Unary operator %s cannot be applied to %s", op, value), this);
     }
 
     public enum Op {

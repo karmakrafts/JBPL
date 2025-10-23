@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
@@ -33,7 +34,7 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var access = AccessModifier.combine(accessModifiers);
         final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class);
         final var name = signature.getFunctionName().evaluateAsConst(context, String.class);

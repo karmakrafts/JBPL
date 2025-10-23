@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -28,12 +29,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        return getDefine(context).getValue().evaluateAsConst(context);
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+        context.pushValue(getDefine(context).getValue().evaluateAsConst(context));
     }
 }

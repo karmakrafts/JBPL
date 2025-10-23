@@ -17,10 +17,12 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeCommonizer;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,22 +30,22 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public final class IfExpr extends AbstractStatementContainer implements Expr, ScopeOwner {
-    private Expr condition;
     private final ArrayList<ElseIfBranch> elseIfBranches = new ArrayList<>();
+    private Expr condition;
     private ElseBranch elseBranch;
 
     public IfExpr(final @NotNull Expr condition) {
         this.condition = condition;
     }
 
+    public @NotNull Expr getCondition() {
+        return condition;
+    }
+
     public void setCondition(final @NotNull Expr condition) {
         this.condition.setParent(null);
         condition.setParent(this);
         this.condition = condition;
-    }
-
-    public @NotNull Expr getCondition() {
-        return condition;
     }
 
     public void addElseIfBranch(final @NotNull ElseIfBranch branch) {
@@ -56,6 +58,10 @@ public final class IfExpr extends AbstractStatementContainer implements Expr, Sc
         branch.setParent(null);
     }
 
+    public @Nullable ElseBranch getElseBranch() {
+        return elseBranch;
+    }
+
     public void setElseBranch(final @Nullable ElseBranch branch) {
         if (elseBranch != null) {
             elseBranch.setParent(null);
@@ -66,15 +72,11 @@ public final class IfExpr extends AbstractStatementContainer implements Expr, Sc
         this.elseBranch = branch;
     }
 
-    public @Nullable ElseBranch getElseBranch() {
-        return elseBranch;
-    }
-
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
         // @formatter:off
         final var types = elseIfBranches.stream()
-            .map(branch -> branch.getType(context))
+            .map(ExceptionUtils.propagateUnchecked(branch -> branch.getType(context)))
             .collect(Collectors.toCollection(ArrayList::new));
         // @formatter:on
         types.add(TypeCommonizer.getCommonType(this, context).orElseThrow());
@@ -85,7 +87,7 @@ public final class IfExpr extends AbstractStatementContainer implements Expr, Sc
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var condition = this.condition.evaluateAsConst(context, Boolean.class);
         if (!condition) {
             // If the condition of this if() expression didn't evaluate to true, attempt to take one of the else if() branches..
@@ -122,12 +124,12 @@ public final class IfExpr extends AbstractStatementContainer implements Expr, Sc
             this.condition = condition;
         }
 
-        public @NotNull Type getType(final @NotNull AssemblerContext context) {
+        public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
             return TypeCommonizer.getCommonType(this, context).orElseThrow();
         }
 
         @Override
-        public void evaluate(@NotNull AssemblerContext context) {
+        public void evaluate(@NotNull AssemblerContext context) throws EvaluationException {
             final var condition = this.condition.evaluateAsConst(context, Boolean.class);
             if (!condition) {
                 return;
@@ -140,12 +142,12 @@ public final class IfExpr extends AbstractStatementContainer implements Expr, Sc
     }
 
     public static final class ElseBranch extends AbstractStatementContainer implements ScopeOwner {
-        public @NotNull Type getType(final @NotNull AssemblerContext context) {
+        public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
             return TypeCommonizer.getCommonType(this, context).orElseThrow();
         }
 
         @Override
-        public void evaluate(final @NotNull AssemblerContext context) {
+        public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
             context.pushFrame(this);
             super.evaluate(context);
             context.popFrame();

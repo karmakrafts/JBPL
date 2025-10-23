@@ -48,15 +48,7 @@ public final class LiteralExpr extends AbstractElement implements Expr {
 
     @Override
     public void evaluate(final @NotNull AssemblerContext context) {
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        if (type == BuiltinType.VOID) {
-            throw new IllegalStateException(
-                "Attempted to const evaluate unit expression, this is an implementation fault");
-        }
-        return this;
+        context.pushValue(this); // Literals push themselves on the stack
     }
 
     @Override

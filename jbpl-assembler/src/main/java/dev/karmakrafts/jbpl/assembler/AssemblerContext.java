@@ -9,6 +9,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +22,10 @@ import java.util.function.Function;
 public final class AssemblerContext {
     public final AssemblyFile file;
     public final Function<String, ClassNode> classResolver;
-    public final NamedResolver<PreproClassDecl> preproClassResolver;
-    public final NamedResolver<DefineStatement> defineResolver;
-    public final NamedResolver<SelectorDecl> selectorResolver;
-    public final NamedResolver<MacroDecl> macroResolver;
+    public final NamedResolver<PreproClassDecl, EvaluationException> preproClassResolver;
+    public final NamedResolver<DefineStatement, EvaluationException> defineResolver;
+    public final NamedResolver<SelectorDecl, EvaluationException> selectorResolver;
+    public final NamedResolver<MacroDecl, EvaluationException> macroResolver;
     public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
     private final Stack<StackFrame> frameStack = new Stack<>();
     public int bytecodeVersion = Opcodes.V17;
@@ -122,9 +123,13 @@ public final class AssemblerContext {
     public void removeFunction(final @NotNull String className,
                                final @NotNull String name,
                                final @NotNull Type returnType,
-                               final @NotNull Type... paramTypes) {
+                               final @NotNull Type... paramTypes) throws EvaluationException {
         final var mReturnType = returnType.materialize(this);
-        final var mParamTypes = Arrays.stream(paramTypes).map(type -> type.materialize(this)).toArray(org.objectweb.asm.Type[]::new);
+        // @formatter:off
+        final var mParamTypes = Arrays.stream(paramTypes)
+            .map(ExceptionUtils.propagateUnchecked(type -> type.materialize(this)))
+            .toArray(org.objectweb.asm.Type[]::new);
+        // @formatter:on
         removeFunction(className, name, org.objectweb.asm.Type.getMethodType(mReturnType, mParamTypes));
     }
 

@@ -17,27 +17,29 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeCommonizer;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeMapper;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
+import dev.karmakrafts.jbpl.assembler.util.XBiFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 public final class ArrayExpr extends AbstractExprContainer implements Expr {
     public static final int TYPE_INDEX = 0;
     public static final int VALUES_INDEX = 1;
 
     public final boolean hasInferredType;
-    private final BiFunction<AssemblerContext, Optional<? extends Type>, Type> elementTypeResolver;
-    private boolean hasDynamicType = false; // Whether the type is an Expr or not
+    private final XBiFunction<AssemblerContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver;
+    private boolean hasUnresolvedType = false; // Whether the type is an Expr or not
     private int valueIndex = 0;
 
-    private ArrayExpr(final @NotNull BiFunction<AssemblerContext, Optional<? extends Type>, Type> elementTypeResolver,
+    private ArrayExpr(final @NotNull XBiFunction<AssemblerContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver,
                       final boolean hasInferredType) {
         this.elementTypeResolver = elementTypeResolver;
         this.hasInferredType = hasInferredType;
@@ -49,7 +51,7 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
 
     public ArrayExpr(final @NotNull Expr type) {
         this((ctx, commonType) -> type.evaluateAsConst(ctx, Type.class), false);
-        hasDynamicType = true;
+        hasUnresolvedType = true;
         addExpression(type);
     }
 
@@ -61,25 +63,25 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
      * The offset into the expression list until array values start
      */
     public int getValueOffset() {
-        return hasDynamicType ? VALUES_INDEX : 0;
+        return hasUnresolvedType ? VALUES_INDEX : 0;
     }
 
-    public boolean hasDynamicType() {
-        return hasDynamicType;
+    public boolean hasUnresolvedType() {
+        return hasUnresolvedType;
     }
 
     public @NotNull Expr getType() {
-        assert hasDynamicType;
+        assert hasUnresolvedType;
         return getExpressions().get(TYPE_INDEX);
     }
 
     public void setType(final @NotNull Expr type) {
-        assert hasDynamicType;
+        assert hasUnresolvedType;
         getExpressions().set(TYPE_INDEX, type);
     }
 
     public void clearValues() {
-        final var type = hasDynamicType ? getType() : null;
+        final var type = hasUnresolvedType ? getType() : null;
         clearExpressions();
         if (type != null) {
             addExpression(type);
@@ -106,19 +108,14 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) { // @formatter:off
+    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException { // @formatter:off
         return elementTypeResolver.apply(context, TypeCommonizer.getCommonType(getExpressions().stream()
-            .map(expr -> expr.getType(context))
+            .map(ExceptionUtils.propagateUnchecked(expr -> expr.getType(context)))
             .toList()));
     } // @formatter:on
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var type = getType(context);
         final var clazz = TypeMapper.map(type); // Map type to runtime class
         final var values = getValues();
@@ -127,6 +124,6 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
         for (var i = 0; i < size; ++i) {
             Array.set(array, i, values.get(i).evaluateAsConst(context, Object.class));
         }
-        return LiteralExpr.of(array);
+        context.pushValue(LiteralExpr.of(array));
     }
 }

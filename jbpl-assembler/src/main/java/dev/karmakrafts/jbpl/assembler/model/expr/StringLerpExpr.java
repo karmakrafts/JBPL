@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -12,17 +13,12 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var buffer = new StringBuilder();
         final var expressions = getExpressions();
         for (final var expr : expressions) {
             buffer.append(expr.evaluateAsConst(context, Object.class));
         }
-        return LiteralExpr.of(buffer.toString());
+        context.pushValue(LiteralExpr.of(buffer.toString()));
     }
 }

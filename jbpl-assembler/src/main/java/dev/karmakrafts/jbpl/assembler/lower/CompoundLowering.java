@@ -1,6 +1,5 @@
 package dev.karmakrafts.jbpl.assembler.lower;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.decl.Declaration;
 import dev.karmakrafts.jbpl.assembler.model.decl.FunctionDecl;
@@ -11,7 +10,6 @@ import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.expr.CompoundExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.CompoundStatement;
-import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -22,10 +20,9 @@ import java.util.ArrayList;
  * Mostly to reduce overhead when traversing the tree.
  */
 public final class CompoundLowering implements ElementVisitor {
-    private final AssemblerContext context;
+    public static final CompoundLowering INSTANCE = new CompoundLowering();
 
-    public CompoundLowering(final @NotNull AssemblerContext context) {
-        this.context = context;
+    private CompoundLowering() {
     }
 
     @SuppressWarnings("all")
@@ -34,10 +31,6 @@ public final class CompoundLowering implements ElementVisitor {
         for (final var element : container.getElements()) {
             if (element instanceof CompoundStatement statement) {
                 newElements.addAll(statement.getElements());
-                continue;
-            }
-            else if (element instanceof CompoundExpr expr && expr.getType(context) == BuiltinType.VOID) {
-                newElements.addAll(expr.getElements());
                 continue;
             }
             newElements.add(element);

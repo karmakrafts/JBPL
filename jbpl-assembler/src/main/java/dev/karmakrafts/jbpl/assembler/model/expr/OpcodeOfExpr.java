@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
@@ -27,12 +28,7 @@ public final class OpcodeOfExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(@NotNull AssemblerContext context) {
-        return LiteralExpr.of(getValue().evaluateAsConst(context, Instruction.class).getOpcode(context));
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+        context.pushValue(LiteralExpr.of(getValue().evaluateAsConst(context, Instruction.class).getOpcode(context)));
     }
 }

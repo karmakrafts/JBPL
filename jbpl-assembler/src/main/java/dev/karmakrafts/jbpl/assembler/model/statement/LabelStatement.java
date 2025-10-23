@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ public final class LabelStatement extends AbstractExprContainer implements State
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var name = getName().evaluateAsConst(context, String.class);
         context.peekFrame().getOrCreateLabelNode(name); // Pre-allocate label
     }

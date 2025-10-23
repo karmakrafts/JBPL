@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,17 +37,12 @@ public final class DefaultExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
         return getType().evaluateAsConst(context, Type.class);
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
-        return getType(context).createDefaultValue(context).evaluateAsConst(context);
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+        context.pushValue(getType(context).createDefaultValue(context).evaluateAsConst(context));
     }
 }

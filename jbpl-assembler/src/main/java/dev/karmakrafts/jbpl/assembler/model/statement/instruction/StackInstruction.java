@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +34,7 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var encodedOpcode = getOpcode(context).encodedValue;
         final var slotIdObject = getSlot().evaluateAsConst(context, Object.class);
         if (slotIdObject instanceof Integer slotId) {

@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -74,7 +75,7 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var parameters = new LinkedHashMap<String, Type>();
         for (final var entry : parameterTypes.entrySet()) {
             final var name = entry.getKey().evaluateAsConst(context, String.class);

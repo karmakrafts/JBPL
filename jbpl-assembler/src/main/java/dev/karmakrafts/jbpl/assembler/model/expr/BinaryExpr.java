@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.IntersectionType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
@@ -38,12 +39,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
         return switch (op) {
             // For all comparisons, we always evaluate to booleans
             case EQ, NE, LT, LE, GT, GE -> BuiltinType.BOOL;
@@ -52,255 +48,302 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
+    private @NotNull LiteralExpr evaluateForType(final @NotNull Type lhs,
+                                                 final @NotNull Type rhs) throws EvaluationException {
+        return switch (op) {
+            case ADD -> LiteralExpr.of(IntersectionType.unfold(List.of(lhs, rhs)));
+            case SUB -> {
+                if (lhs instanceof IntersectionType lhsIntersectionType) {
+                    final var newType = lhsIntersectionType.unfold();
+                    newType.alternatives().remove(rhs);
+                    yield LiteralExpr.of(newType);
+                }
+                throw new EvaluationException(
+                    "Left hand side type must be an intersection type for subtraction operation!",
+                    this);
+            }
+            case AND -> { // @formatter:off
+                final var lhsAlternatives = lhs instanceof IntersectionType lhsIntersectionType
+                    ? lhsIntersectionType.alternatives()
+                    : List.of(lhs);
+                final var rhsAlternatives = rhs instanceof IntersectionType rhsIntersectionType
+                    ? rhsIntersectionType.alternatives()
+                    : List.of(rhs);
+                yield LiteralExpr.of(IntersectionType.unfold(
+                    CollectionUtils.intersect(lhsAlternatives, rhsAlternatives, ArrayList::new)));
+            } // @formatter:on
+            default -> throw new EvaluationException(String.format("Unsupported type binary expression: %s %s %s",
+                lhs,
+                op,
+                rhs), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForBool(final @NotNull Boolean lhsBool,
+                                                 final @NotNull AssemblerContext context) throws EvaluationException {
+        return switch (op) {
+            // Boolean equality
+            case EQ -> {
+                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                yield LiteralExpr.of(lhsBool == rhsBool);
+            }
+            case NE -> {
+                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                yield LiteralExpr.of(lhsBool != rhsBool);
+            }
+            // Boolean logic
+            case AND -> {
+                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                yield LiteralExpr.of(lhsBool & rhsBool);
+            }
+            case OR -> {
+                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                yield LiteralExpr.of(lhsBool | rhsBool);
+            }
+            case XOR -> {
+                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                yield LiteralExpr.of(lhsBool ^ rhsBool);
+            }
+            case SC_AND -> {
+                if (!lhsBool) {
+                    yield LiteralExpr.of(false);
+                }
+                yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class));
+            }
+            case SC_OR -> {
+                if (lhsBool) {
+                    yield LiteralExpr.of(true);
+                }
+                yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class));
+            }
+            default -> throw new EvaluationException(String.format("Unsupported boolean binary expression: %s %s %s",
+                lhsBool,
+                op,
+                getRhs().evaluateAsConst(context, Object.class)), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForByte(final @NotNull Byte lhsByte,
+                                                 final @NotNull Number rhsNumber) throws EvaluationException {
+        return switch (op) {
+            // Comparisons
+            case EQ -> LiteralExpr.of(lhsByte == rhsNumber.byteValue());
+            case NE -> LiteralExpr.of(lhsByte != rhsNumber.byteValue());
+            case LT -> LiteralExpr.of(lhsByte < rhsNumber.byteValue());
+            case LE -> LiteralExpr.of(lhsByte <= rhsNumber.byteValue());
+            case GT -> LiteralExpr.of(lhsByte > rhsNumber.byteValue());
+            case GE -> LiteralExpr.of(lhsByte >= rhsNumber.byteValue());
+            // Arithmetic operations
+            case ADD -> LiteralExpr.of(lhsByte + rhsNumber.byteValue());
+            case SUB -> LiteralExpr.of(lhsByte - rhsNumber.byteValue());
+            case MUL -> LiteralExpr.of(lhsByte * rhsNumber.byteValue());
+            case DIV -> LiteralExpr.of(lhsByte / rhsNumber.byteValue());
+            case REM -> LiteralExpr.of(lhsByte % rhsNumber.byteValue());
+            // Bitwise operations
+            case LSH -> LiteralExpr.of(lhsByte << rhsNumber.intValue());
+            case RSH -> LiteralExpr.of(lhsByte >> rhsNumber.intValue());
+            case URSH -> LiteralExpr.of(lhsByte >>> rhsNumber.intValue());
+            case AND -> LiteralExpr.of(lhsByte & rhsNumber.byteValue());
+            case OR -> LiteralExpr.of(lhsByte | rhsNumber.byteValue());
+            case XOR -> LiteralExpr.of(lhsByte ^ rhsNumber.byteValue());
+            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+                lhsByte,
+                op,
+                rhsNumber), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForShort(final @NotNull Short lhsShort,
+                                                  final @NotNull Number rhsNumber) throws EvaluationException {
+        return switch (op) {
+            // Comparisons
+            case EQ -> LiteralExpr.of(lhsShort == rhsNumber.shortValue());
+            case NE -> LiteralExpr.of(lhsShort != rhsNumber.shortValue());
+            case LT -> LiteralExpr.of(lhsShort < rhsNumber.shortValue());
+            case LE -> LiteralExpr.of(lhsShort <= rhsNumber.shortValue());
+            case GT -> LiteralExpr.of(lhsShort > rhsNumber.shortValue());
+            case GE -> LiteralExpr.of(lhsShort >= rhsNumber.shortValue());
+            // Arithmetic operations
+            case ADD -> LiteralExpr.of(lhsShort + rhsNumber.shortValue());
+            case SUB -> LiteralExpr.of(lhsShort - rhsNumber.shortValue());
+            case MUL -> LiteralExpr.of(lhsShort * rhsNumber.shortValue());
+            case DIV -> LiteralExpr.of(lhsShort / rhsNumber.shortValue());
+            case REM -> LiteralExpr.of(lhsShort % rhsNumber.shortValue());
+            // Bitwise operations
+            case LSH -> LiteralExpr.of(lhsShort << rhsNumber.intValue());
+            case RSH -> LiteralExpr.of(lhsShort >> rhsNumber.intValue());
+            case URSH -> LiteralExpr.of(lhsShort >>> rhsNumber.intValue());
+            case AND -> LiteralExpr.of(lhsShort & rhsNumber.shortValue());
+            case OR -> LiteralExpr.of(lhsShort | rhsNumber.shortValue());
+            case XOR -> LiteralExpr.of(lhsShort ^ rhsNumber.shortValue());
+            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+                lhsShort,
+                op,
+                rhsNumber), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForInteger(final @NotNull Integer lhsInteger,
+                                                    final @NotNull Number rhsNumber) throws EvaluationException {
+        return switch (op) {
+            // Comparisons
+            case EQ -> LiteralExpr.of(lhsInteger == rhsNumber.intValue());
+            case NE -> LiteralExpr.of(lhsInteger != rhsNumber.intValue());
+            case LT -> LiteralExpr.of(lhsInteger < rhsNumber.intValue());
+            case LE -> LiteralExpr.of(lhsInteger <= rhsNumber.intValue());
+            case GT -> LiteralExpr.of(lhsInteger > rhsNumber.intValue());
+            case GE -> LiteralExpr.of(lhsInteger >= rhsNumber.intValue());
+            // Arithmetic operations
+            case ADD -> LiteralExpr.of(lhsInteger + rhsNumber.intValue());
+            case SUB -> LiteralExpr.of(lhsInteger - rhsNumber.intValue());
+            case MUL -> LiteralExpr.of(lhsInteger * rhsNumber.intValue());
+            case DIV -> LiteralExpr.of(lhsInteger / rhsNumber.intValue());
+            case REM -> LiteralExpr.of(lhsInteger % rhsNumber.intValue());
+            // Bitwise operations
+            case LSH -> LiteralExpr.of(lhsInteger << rhsNumber.intValue());
+            case RSH -> LiteralExpr.of(lhsInteger >> rhsNumber.intValue());
+            case URSH -> LiteralExpr.of(lhsInteger >>> rhsNumber.intValue());
+            case AND -> LiteralExpr.of(lhsInteger & rhsNumber.intValue());
+            case OR -> LiteralExpr.of(lhsInteger | rhsNumber.intValue());
+            case XOR -> LiteralExpr.of(lhsInteger ^ rhsNumber.intValue());
+            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+                lhsInteger,
+                op,
+                rhsNumber), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForLong(final @NotNull Long lhsLong,
+                                                 final @NotNull Number rhsNumber) throws EvaluationException {
+        return switch (op) {
+            // Comparisons
+            case EQ -> LiteralExpr.of(lhsLong == rhsNumber.longValue());
+            case NE -> LiteralExpr.of(lhsLong != rhsNumber.longValue());
+            case LT -> LiteralExpr.of(lhsLong < rhsNumber.longValue());
+            case LE -> LiteralExpr.of(lhsLong <= rhsNumber.longValue());
+            case GT -> LiteralExpr.of(lhsLong > rhsNumber.longValue());
+            case GE -> LiteralExpr.of(lhsLong >= rhsNumber.longValue());
+            // Arithmetic operations
+            case ADD -> LiteralExpr.of(lhsLong + rhsNumber.longValue());
+            case SUB -> LiteralExpr.of(lhsLong - rhsNumber.longValue());
+            case MUL -> LiteralExpr.of(lhsLong * rhsNumber.longValue());
+            case DIV -> LiteralExpr.of(lhsLong / rhsNumber.longValue());
+            case REM -> LiteralExpr.of(lhsLong % rhsNumber.longValue());
+            // Bitwise operations
+            case LSH -> LiteralExpr.of(lhsLong << rhsNumber.intValue());
+            case RSH -> LiteralExpr.of(lhsLong >> rhsNumber.intValue());
+            case URSH -> LiteralExpr.of(lhsLong >>> rhsNumber.intValue());
+            case AND -> LiteralExpr.of(lhsLong & rhsNumber.longValue());
+            case OR -> LiteralExpr.of(lhsLong | rhsNumber.longValue());
+            case XOR -> LiteralExpr.of(lhsLong ^ rhsNumber.longValue());
+            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+                lhsLong,
+                op,
+                rhsNumber), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForFloat(final @NotNull Float lhsFloat,
+                                                  final @NotNull Number rhsNumber) throws EvaluationException {
+        return switch (op) {
+            // Comparisons
+            case EQ -> LiteralExpr.of(lhsFloat == rhsNumber.floatValue());
+            case NE -> LiteralExpr.of(lhsFloat != rhsNumber.floatValue());
+            case LT -> LiteralExpr.of(lhsFloat < rhsNumber.floatValue());
+            case LE -> LiteralExpr.of(lhsFloat <= rhsNumber.floatValue());
+            case GT -> LiteralExpr.of(lhsFloat > rhsNumber.floatValue());
+            case GE -> LiteralExpr.of(lhsFloat >= rhsNumber.floatValue());
+            // Arithmetic operations
+            case ADD -> LiteralExpr.of(lhsFloat + rhsNumber.floatValue());
+            case SUB -> LiteralExpr.of(lhsFloat - rhsNumber.floatValue());
+            case MUL -> LiteralExpr.of(lhsFloat * rhsNumber.floatValue());
+            case DIV -> LiteralExpr.of(lhsFloat / rhsNumber.floatValue());
+            case REM -> LiteralExpr.of(lhsFloat % rhsNumber.floatValue());
+            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+                lhsFloat,
+                op,
+                rhsNumber), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForDouble(final @NotNull Double lhsDouble,
+                                                   final @NotNull Number rhsNumber) throws EvaluationException {
+        return switch (op) {
+            // Comparisons
+            case EQ -> LiteralExpr.of(lhsDouble == rhsNumber.doubleValue());
+            case NE -> LiteralExpr.of(lhsDouble != rhsNumber.doubleValue());
+            case LT -> LiteralExpr.of(lhsDouble < rhsNumber.doubleValue());
+            case LE -> LiteralExpr.of(lhsDouble <= rhsNumber.doubleValue());
+            case GT -> LiteralExpr.of(lhsDouble > rhsNumber.doubleValue());
+            case GE -> LiteralExpr.of(lhsDouble >= rhsNumber.doubleValue());
+            // Arithmetic operations
+            case ADD -> LiteralExpr.of(lhsDouble + rhsNumber.doubleValue());
+            case SUB -> LiteralExpr.of(lhsDouble - rhsNumber.doubleValue());
+            case MUL -> LiteralExpr.of(lhsDouble * rhsNumber.doubleValue());
+            case DIV -> LiteralExpr.of(lhsDouble / rhsNumber.doubleValue());
+            case REM -> LiteralExpr.of(lhsDouble % rhsNumber.doubleValue());
+            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+                lhsDouble,
+                op,
+                rhsNumber), this);
+        };
+    }
+
+    private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number lhsNumber,
+                                                   final @NotNull AssemblerContext context) throws EvaluationException {
+        final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
+        if (!(rhsValue instanceof Number rhsNumber)) {
+            throw new EvaluationException("Numeric binary expression must have a number on the right hand side!", this);
+        }
+        if (lhsNumber instanceof Byte lhsByte) {
+            return evaluateForByte(lhsByte, rhsNumber);
+        }
+        else if (lhsNumber instanceof Short lhsShort) {
+            return evaluateForShort(lhsShort, rhsNumber);
+        }
+        else if (lhsNumber instanceof Integer lhsInteger) {
+            return evaluateForInteger(lhsInteger, rhsNumber);
+        }
+        else if (lhsNumber instanceof Long lhsLong) {
+            return evaluateForLong(lhsLong, rhsNumber);
+        }
+        else if (lhsNumber instanceof Float lhsFloat) {
+            return evaluateForFloat(lhsFloat, rhsNumber);
+        }
+        else if (lhsNumber instanceof Double lhsDouble) {
+            return evaluateForDouble(lhsDouble, rhsNumber);
+        }
+        throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+            lhsNumber,
+            op,
+            rhsNumber), this);
+    }
+
     @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var lhsValue = getLhs().evaluateAsConst(context, Object.class);
         if (lhsValue instanceof String lhsString) { // String concatenation with any type
             final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
-            return LiteralExpr.of(String.format("%s%s", lhsString, rhsValue));
+            context.pushValue(LiteralExpr.of(String.format("%s%s", lhsString, rhsValue)));
+            return;
         }
         else if (lhsValue instanceof Type lhsType) { // Type addition/subtraction creates intersection types
             final var rhsType = getRhs().evaluateAsConst(context, Type.class);
-            return switch (op) {
-                case ADD -> LiteralExpr.of(IntersectionType.unfold(List.of(lhsType, rhsType)));
-                case SUB -> {
-                    if (lhsType instanceof IntersectionType lhsIntersectionType) {
-                        final var newType = lhsIntersectionType.unfold();
-                        newType.alternatives().remove(rhsType);
-                        yield LiteralExpr.of(newType);
-                    }
-                    throw new IllegalStateException(
-                        "Left hand side type must be an intersection type for subtraction operation!");
-                }
-                case AND -> { // @formatter:off
-                    final var lhsAlternatives = lhsType instanceof IntersectionType lhsIntersectionType
-                        ? lhsIntersectionType.alternatives()
-                        : List.of(lhsType);
-                    final var rhsAlternatives = rhsType instanceof IntersectionType rhsIntersectionType
-                        ? rhsIntersectionType.alternatives()
-                        : List.of(rhsType);
-                    yield LiteralExpr.of(IntersectionType.unfold(
-                        CollectionUtils.intersect(lhsAlternatives, rhsAlternatives, ArrayList::new)));
-                } // @formatter:on
-                default -> throw new IllegalStateException(String.format("Unsupported type binary expression: %s %s %s",
-                    lhsType,
-                    op,
-                    rhsType));
-            };
+            context.pushValue(evaluateForType(lhsType, rhsType));
+            return;
         }
         else if (lhsValue instanceof Boolean lhsBool) { // Boolean binary expressions
-            return switch (op) {
-                // Boolean equality
-                case EQ -> {
-                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
-                    yield LiteralExpr.of(lhsBool == rhsBool);
-                }
-                case NE -> {
-                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
-                    yield LiteralExpr.of(lhsBool != rhsBool);
-                }
-                // Boolean logic
-                case AND -> {
-                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
-                    yield LiteralExpr.of(lhsBool & rhsBool);
-                }
-                case OR -> {
-                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
-                    yield LiteralExpr.of(lhsBool | rhsBool);
-                }
-                case XOR -> {
-                    final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
-                    yield LiteralExpr.of(lhsBool ^ rhsBool);
-                }
-                case SC_AND -> {
-                    if (!lhsBool) {
-                        yield LiteralExpr.of(false);
-                    }
-                    yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class));
-                }
-                case SC_OR -> {
-                    if (lhsBool) {
-                        yield LiteralExpr.of(true);
-                    }
-                    yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class));
-                }
-                default -> throw new IllegalStateException(String.format(
-                    "Unsupported boolean binary expression: %s %s %s",
-                    lhsValue,
-                    op,
-                    getRhs().evaluateAsConst(context, Object.class)));
-            };
+            context.pushValue(evaluateForBool(lhsBool, context));
+            return;
         }
         else if (lhsValue instanceof Number lhsNumber) { // Numeric binary expressions
-            final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
-            if (!(rhsValue instanceof Number rhsNumber)) {
-                throw new IllegalStateException("Numeric binary expression must have a number on the right hand side!");
-            }
-            if (lhsNumber instanceof Byte lhsByte) {
-                return switch (op) {
-                    // Comparisons
-                    case EQ -> LiteralExpr.of(lhsByte == rhsNumber.byteValue());
-                    case NE -> LiteralExpr.of(lhsByte != rhsNumber.byteValue());
-                    case LT -> LiteralExpr.of(lhsByte < rhsNumber.byteValue());
-                    case LE -> LiteralExpr.of(lhsByte <= rhsNumber.byteValue());
-                    case GT -> LiteralExpr.of(lhsByte > rhsNumber.byteValue());
-                    case GE -> LiteralExpr.of(lhsByte >= rhsNumber.byteValue());
-                    // Arithmetic operations
-                    case ADD -> LiteralExpr.of(lhsByte + rhsNumber.byteValue());
-                    case SUB -> LiteralExpr.of(lhsByte - rhsNumber.byteValue());
-                    case MUL -> LiteralExpr.of(lhsByte * rhsNumber.byteValue());
-                    case DIV -> LiteralExpr.of(lhsByte / rhsNumber.byteValue());
-                    case REM -> LiteralExpr.of(lhsByte % rhsNumber.byteValue());
-                    // Bitwise operations
-                    case LSH -> LiteralExpr.of(lhsByte << rhsNumber.intValue());
-                    case RSH -> LiteralExpr.of(lhsByte >> rhsNumber.intValue());
-                    case URSH -> LiteralExpr.of(lhsByte >>> rhsNumber.intValue());
-                    case AND -> LiteralExpr.of(lhsByte & rhsNumber.byteValue());
-                    case OR -> LiteralExpr.of(lhsByte | rhsNumber.byteValue());
-                    case XOR -> LiteralExpr.of(lhsByte ^ rhsNumber.byteValue());
-                    default -> throw new IllegalStateException(String.format(
-                        "Unsupported numeric binary expression: %s %s %s",
-                        lhsValue,
-                        op,
-                        rhsValue));
-                };
-            }
-            else if (lhsNumber instanceof Short lhsShort) {
-                return switch (op) {
-                    // Comparisons
-                    case EQ -> LiteralExpr.of(lhsShort == rhsNumber.shortValue());
-                    case NE -> LiteralExpr.of(lhsShort != rhsNumber.shortValue());
-                    case LT -> LiteralExpr.of(lhsShort < rhsNumber.shortValue());
-                    case LE -> LiteralExpr.of(lhsShort <= rhsNumber.shortValue());
-                    case GT -> LiteralExpr.of(lhsShort > rhsNumber.shortValue());
-                    case GE -> LiteralExpr.of(lhsShort >= rhsNumber.shortValue());
-                    // Arithmetic operations
-                    case ADD -> LiteralExpr.of(lhsShort + rhsNumber.shortValue());
-                    case SUB -> LiteralExpr.of(lhsShort - rhsNumber.shortValue());
-                    case MUL -> LiteralExpr.of(lhsShort * rhsNumber.shortValue());
-                    case DIV -> LiteralExpr.of(lhsShort / rhsNumber.shortValue());
-                    case REM -> LiteralExpr.of(lhsShort % rhsNumber.shortValue());
-                    // Bitwise operations
-                    case LSH -> LiteralExpr.of(lhsShort << rhsNumber.intValue());
-                    case RSH -> LiteralExpr.of(lhsShort >> rhsNumber.intValue());
-                    case URSH -> LiteralExpr.of(lhsShort >>> rhsNumber.intValue());
-                    case AND -> LiteralExpr.of(lhsShort & rhsNumber.shortValue());
-                    case OR -> LiteralExpr.of(lhsShort | rhsNumber.shortValue());
-                    case XOR -> LiteralExpr.of(lhsShort ^ rhsNumber.shortValue());
-                    default -> throw new IllegalStateException(String.format(
-                        "Unsupported numeric binary expression: %s %s %s",
-                        lhsValue,
-                        op,
-                        rhsValue));
-                };
-            }
-            else if (lhsNumber instanceof Integer lhsInteger) {
-                return switch (op) {
-                    // Comparisons
-                    case EQ -> LiteralExpr.of(lhsInteger == rhsNumber.intValue());
-                    case NE -> LiteralExpr.of(lhsInteger != rhsNumber.intValue());
-                    case LT -> LiteralExpr.of(lhsInteger < rhsNumber.intValue());
-                    case LE -> LiteralExpr.of(lhsInteger <= rhsNumber.intValue());
-                    case GT -> LiteralExpr.of(lhsInteger > rhsNumber.intValue());
-                    case GE -> LiteralExpr.of(lhsInteger >= rhsNumber.intValue());
-                    // Arithmetic operations
-                    case ADD -> LiteralExpr.of(lhsInteger + rhsNumber.intValue());
-                    case SUB -> LiteralExpr.of(lhsInteger - rhsNumber.intValue());
-                    case MUL -> LiteralExpr.of(lhsInteger * rhsNumber.intValue());
-                    case DIV -> LiteralExpr.of(lhsInteger / rhsNumber.intValue());
-                    case REM -> LiteralExpr.of(lhsInteger % rhsNumber.intValue());
-                    // Bitwise operations
-                    case LSH -> LiteralExpr.of(lhsInteger << rhsNumber.intValue());
-                    case RSH -> LiteralExpr.of(lhsInteger >> rhsNumber.intValue());
-                    case URSH -> LiteralExpr.of(lhsInteger >>> rhsNumber.intValue());
-                    case AND -> LiteralExpr.of(lhsInteger & rhsNumber.intValue());
-                    case OR -> LiteralExpr.of(lhsInteger | rhsNumber.intValue());
-                    case XOR -> LiteralExpr.of(lhsInteger ^ rhsNumber.intValue());
-                    default -> throw new IllegalStateException(String.format(
-                        "Unsupported numeric binary expression: %s %s %s",
-                        lhsValue,
-                        op,
-                        rhsValue));
-                };
-            }
-            else if (lhsNumber instanceof Long lhsLong) {
-                return switch (op) {
-                    // Comparisons
-                    case EQ -> LiteralExpr.of(lhsLong == rhsNumber.longValue());
-                    case NE -> LiteralExpr.of(lhsLong != rhsNumber.longValue());
-                    case LT -> LiteralExpr.of(lhsLong < rhsNumber.longValue());
-                    case LE -> LiteralExpr.of(lhsLong <= rhsNumber.longValue());
-                    case GT -> LiteralExpr.of(lhsLong > rhsNumber.longValue());
-                    case GE -> LiteralExpr.of(lhsLong >= rhsNumber.longValue());
-                    // Arithmetic operations
-                    case ADD -> LiteralExpr.of(lhsLong + rhsNumber.longValue());
-                    case SUB -> LiteralExpr.of(lhsLong - rhsNumber.longValue());
-                    case MUL -> LiteralExpr.of(lhsLong * rhsNumber.longValue());
-                    case DIV -> LiteralExpr.of(lhsLong / rhsNumber.longValue());
-                    case REM -> LiteralExpr.of(lhsLong % rhsNumber.longValue());
-                    // Bitwise operations
-                    case LSH -> LiteralExpr.of(lhsLong << rhsNumber.intValue());
-                    case RSH -> LiteralExpr.of(lhsLong >> rhsNumber.intValue());
-                    case URSH -> LiteralExpr.of(lhsLong >>> rhsNumber.intValue());
-                    case AND -> LiteralExpr.of(lhsLong & rhsNumber.longValue());
-                    case OR -> LiteralExpr.of(lhsLong | rhsNumber.longValue());
-                    case XOR -> LiteralExpr.of(lhsLong ^ rhsNumber.longValue());
-                    default -> throw new IllegalStateException(String.format(
-                        "Unsupported numeric binary expression: %s %s %s",
-                        lhsValue,
-                        op,
-                        rhsValue));
-                };
-            }
-            else if (lhsNumber instanceof Float lhsFloat) {
-                return switch (op) {
-                    // Comparisons
-                    case EQ -> LiteralExpr.of(lhsFloat == rhsNumber.floatValue());
-                    case NE -> LiteralExpr.of(lhsFloat != rhsNumber.floatValue());
-                    case LT -> LiteralExpr.of(lhsFloat < rhsNumber.floatValue());
-                    case LE -> LiteralExpr.of(lhsFloat <= rhsNumber.floatValue());
-                    case GT -> LiteralExpr.of(lhsFloat > rhsNumber.floatValue());
-                    case GE -> LiteralExpr.of(lhsFloat >= rhsNumber.floatValue());
-                    // Arithmetic operations
-                    case ADD -> LiteralExpr.of(lhsFloat + rhsNumber.floatValue());
-                    case SUB -> LiteralExpr.of(lhsFloat - rhsNumber.floatValue());
-                    case MUL -> LiteralExpr.of(lhsFloat * rhsNumber.floatValue());
-                    case DIV -> LiteralExpr.of(lhsFloat / rhsNumber.floatValue());
-                    case REM -> LiteralExpr.of(lhsFloat % rhsNumber.floatValue());
-                    default -> throw new IllegalStateException(String.format(
-                        "Unsupported numeric binary expression: %s %s %s",
-                        lhsValue,
-                        op,
-                        rhsValue));
-                };
-            }
-            else if (lhsNumber instanceof Double lhsDouble) {
-                return switch (op) {
-                    // Comparisons
-                    case EQ -> LiteralExpr.of(lhsDouble == rhsNumber.doubleValue());
-                    case NE -> LiteralExpr.of(lhsDouble != rhsNumber.doubleValue());
-                    case LT -> LiteralExpr.of(lhsDouble < rhsNumber.doubleValue());
-                    case LE -> LiteralExpr.of(lhsDouble <= rhsNumber.doubleValue());
-                    case GT -> LiteralExpr.of(lhsDouble > rhsNumber.doubleValue());
-                    case GE -> LiteralExpr.of(lhsDouble >= rhsNumber.doubleValue());
-                    // Arithmetic operations
-                    case ADD -> LiteralExpr.of(lhsDouble + rhsNumber.doubleValue());
-                    case SUB -> LiteralExpr.of(lhsDouble - rhsNumber.doubleValue());
-                    case MUL -> LiteralExpr.of(lhsDouble * rhsNumber.doubleValue());
-                    case DIV -> LiteralExpr.of(lhsDouble / rhsNumber.doubleValue());
-                    case REM -> LiteralExpr.of(lhsDouble % rhsNumber.doubleValue());
-                    default -> throw new IllegalStateException(String.format(
-                        "Unsupported numeric binary expression: %s %s %s",
-                        lhsValue,
-                        op,
-                        rhsValue));
-                };
-            }
+            context.pushValue(evaluateForNumber(lhsNumber, context));
+            return;
         }
-        throw new IllegalStateException(String.format("Unsupported binary expression operands: %s %s %s",
+        throw new EvaluationException(String.format("Unsupported binary expression operands: %s %s %s",
             lhsValue,
             op,
-            getRhs().evaluateAsConst(context, Object.class)));
+            getRhs().evaluateAsConst(context, Object.class)), this);
     }
 
     public enum Op {

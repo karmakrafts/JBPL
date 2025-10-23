@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
@@ -31,7 +32,7 @@ public final class InvokeInstruction extends AbstractExprContainer implements In
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
         final var signature = getSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
         final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class);

@@ -8,21 +8,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.function.Function;
 
-public final class NamedResolver<T> extends ScopeAwareElementVisitor {
+public final class NamedResolver<T, X extends Throwable> extends ScopeAwareElementVisitor {
     private final Class<T> type;
-    private final Function<T, String> nameGetter;
+    private final XFunction<T, String, X> nameGetter;
     private final HashMap<Scope, HashMap<String, T>> elements = new HashMap<>();
 
-    private NamedResolver(final @NotNull Class<T> type, final @NotNull Function<T, String> nameGetter) {
+    private NamedResolver(final @NotNull Class<T> type, final @NotNull XFunction<T, String, X> nameGetter) {
         this.type = type;
         this.nameGetter = nameGetter;
     }
 
-    public static <T> @NotNull NamedResolver<T> analyze(final @NotNull AssemblyFile file,
-                                                        final @NotNull Class<T> type,
-                                                        final @NotNull Function<T, String> nameGetter) {
+    public static <T, X extends Throwable> @NotNull NamedResolver<T, X> analyze(final @NotNull AssemblyFile file,
+                                                                                final @NotNull Class<T> type,
+                                                                                final @NotNull XFunction<T, String, X> nameGetter) {
         final var analyzer = new NamedResolver<>(type, nameGetter);
         file.accept(analyzer);
         return analyzer;
@@ -37,11 +36,11 @@ public final class NamedResolver<T> extends ScopeAwareElementVisitor {
         final var scope = getScope();
         final var scopeMap = elements.computeIfAbsent(scope, s -> new HashMap<>());
         final var typedElement = (T) element;
-        scopeMap.put(nameGetter.apply(typedElement), typedElement);
+        scopeMap.put(ExceptionUtils.propagateUnchecked(nameGetter).apply(typedElement), typedElement);
         return element;
     }
 
-    public void inject(final @NotNull Scope scope, final @NotNull T value) {
+    public void inject(final @NotNull Scope scope, final @NotNull T value) throws X {
         elements.computeIfAbsent(scope, s -> new HashMap<>()).put(nameGetter.apply(value), value);
     }
 

@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.element;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -54,9 +55,12 @@ public interface ElementContainer extends Element {
     }
 
     @Override
-    default void evaluate(final @NotNull AssemblerContext context) {
+    default void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         for (final var element : getElements()) {
             element.evaluate(context);
+            if (context.clearRet()) {
+                break;
+            }
         }
     }
 }

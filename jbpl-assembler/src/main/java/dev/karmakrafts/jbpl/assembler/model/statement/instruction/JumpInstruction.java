@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +47,7 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) {
+    public void evaluate(@NotNull AssemblerContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
         final var target = getTarget();
         final var label = context.getOrCreateLabelNode(target.evaluateAsConst(context, String.class));

@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.ArrayExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ public record ArrayType(Type elementType) implements Type {
     }
 
     @Override
-    public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
+    public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) throws EvaluationException {
         if (!elementType.getCategory().isMaterializable()) {
             throw new UnsupportedOperationException(String.format("Array of type %s cannot be materialized",
                 elementType));

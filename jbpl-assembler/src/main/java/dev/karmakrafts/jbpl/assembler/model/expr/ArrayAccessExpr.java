@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.ArrayType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -32,24 +33,24 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
         addExpression(index);
     }
 
-    public void setReference(final @NotNull Expr reference) {
-        getExpressions().set(REFERENCE_INDEX, reference);
-    }
-
     public @NotNull Expr getReference() {
         return getExpressions().get(REFERENCE_INDEX);
     }
 
-    public void setIndex(final @NotNull Expr index) {
-        getExpressions().set(INDEX_INDEX, index);
+    public void setReference(final @NotNull Expr reference) {
+        getExpressions().set(REFERENCE_INDEX, reference);
     }
 
     public @NotNull Expr getIndex() {
         return getExpressions().get(INDEX_INDEX);
     }
 
+    public void setIndex(final @NotNull Expr index) {
+        getExpressions().set(INDEX_INDEX, index);
+    }
+
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
         final var type = getReference().getType(context);
         if (!(type instanceof ArrayType arrayType)) {
             throw new IllegalStateException("Array access requires array reference type");
@@ -58,14 +59,9 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var array = getReference().evaluateAsConst(context, Object.class);
         final var index = getIndex().evaluateAsConst(context, Integer.class);
-        return LiteralExpr.of(Array.get(array, index));
+        context.pushValue(LiteralExpr.of(Array.get(array, index)));
     }
 }

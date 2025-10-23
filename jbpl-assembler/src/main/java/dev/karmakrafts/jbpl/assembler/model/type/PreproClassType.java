@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.PreproClassExpr;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ public record PreproClassType(@NotNull String name) implements Type {
     }
 
     @Override
-    public @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context) {
+    public @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context) throws EvaluationException {
         final var scope = context.getScope();
         final var clazz = context.preproClassResolver.resolve(scope, name);
         if (clazz == null) {

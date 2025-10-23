@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.statement.CompoundStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.IncludeStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 public final class IncludeLowering implements ElementVisitor {
@@ -16,7 +17,7 @@ public final class IncludeLowering implements ElementVisitor {
 
     @Override
     public @NotNull Statement visitInclude(final @NotNull IncludeStatement includeStatement) {
-        final var file = assembler.getOrParseFile(includeStatement.path);
+        final var file = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseFile(includeStatement.path));
         final var statement = new CompoundStatement();
         statement.addElementsVerbatim(file.getElements());
         return statement;

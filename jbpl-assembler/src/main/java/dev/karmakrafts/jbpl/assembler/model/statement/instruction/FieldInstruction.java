@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
@@ -31,7 +32,7 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
         final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
         final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);

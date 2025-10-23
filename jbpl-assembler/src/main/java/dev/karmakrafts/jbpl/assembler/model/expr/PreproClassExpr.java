@@ -1,8 +1,10 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 public final class PreproClassExpr extends AbstractCallExpr implements Expr {
@@ -19,20 +21,15 @@ public final class PreproClassExpr extends AbstractCallExpr implements Expr {
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
-        super.evaluate(context);
-    }
-
-    @Override
-    public @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
         final var instance = new PreproClassExpr(type);
         instance.setParent(getParent());
         instance.setTokenRange(getTokenRange());
         // @formatter:off
         instance.addExpressions(getExpressions().stream()
-            .map(expr -> expr.evaluateAsConst(context))
+            .map(ExceptionUtils.propagateUnchecked(expr -> expr.evaluateAsConst(context)))
             .toList());
         // @formatter:on
-        return new LiteralExpr(type, instance);
+        context.pushValue(new LiteralExpr(type, instance));
     }
 }

@@ -6,7 +6,7 @@ import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class AssemblerException extends RuntimeException {
+public class AssemblerException extends Exception {
     public final AssemblyFile file;
     public final SourceRange sourceRange;
 
