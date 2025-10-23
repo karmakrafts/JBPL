@@ -13,6 +13,7 @@ import dev.karmakrafts.jbpl.assembler.model.statement.instruction.OplessInstruct
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 
 public enum PreproType implements Type {
@@ -54,5 +55,14 @@ public enum PreproType implements Type {
     @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
         throw new UnsupportedOperationException("Preprocessor types cannot be materialized");
+    }
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case FIELD_SIGNATURE -> "signature(field)";
+            case FUNCTION_SIGNATURE -> "signature(fun)";
+            default -> name().toLowerCase(Locale.ROOT);
+        };
     }
 }

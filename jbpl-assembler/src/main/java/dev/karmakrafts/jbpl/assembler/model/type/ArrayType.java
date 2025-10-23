@@ -24,4 +24,9 @@ public record ArrayType(Type elementType) implements Type {
         }
         return org.objectweb.asm.Type.getType(String.format("[%s", elementType.materialize(context).getDescriptor()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("[%s]", elementType);
+    }
 }

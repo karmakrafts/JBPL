@@ -29,6 +29,7 @@ public final class AssemblerContext {
     private final Stack<StackFrame> frameStack = new Stack<>();
     public int bytecodeVersion = Opcodes.V17;
     public int bytecodeApi = Opcodes.ASM9;
+    private boolean hasReturned = false;
 
     public AssemblerContext(final @NotNull AssemblyFile file,
                             final @NotNull Function<String, ClassNode> classResolver) {
@@ -43,6 +44,16 @@ public final class AssemblerContext {
         macroResolver = NamedResolver.analyze(file,
             MacroDecl.class,
             macro -> macro.getName().evaluateAsConst(this, String.class));
+    }
+
+    public boolean clearRet() {
+        final var result = hasReturned;
+        hasReturned = false;
+        return result;
+    }
+
+    public void ret() {
+        hasReturned = true;
     }
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {

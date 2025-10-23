@@ -27,4 +27,9 @@ public record ClassType(String name) implements Type {
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
         return org.objectweb.asm.Type.getObjectType(name);
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("<%s>", name);
+    }
 }

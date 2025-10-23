@@ -16,19 +16,43 @@
 
 package dev.karmakrafts.jbpl.assembler.model.type;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.statement.ReturnStatement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class TypeCommonizer {
     private TypeCommonizer() {
     }
 
-    public static @NotNull Optional<? extends Type> commonize(final @NotNull Collection<? extends Type> types) {
+    // TODO: check if any element exists after the last return statement
+    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull ElementContainer container,
+                                                                  final @NotNull AssemblerContext context) {
+        final var elements = container.getElements();
+        // @formatter:off
+        final var returnedTypes = elements.stream()
+            .filter(ReturnStatement.class::isInstance)
+            .map(statement -> ((ReturnStatement)statement).getValue().getType(context))
+            .toList();
+        // @formatter:on
+        if (returnedTypes.isEmpty()) {
+            // @formatter:off
+            final var expressions = elements.stream()
+                .filter(Expr.class::isInstance)
+                .map(statement -> ((Expr)statement).getType(context))
+                .collect(Collectors.toCollection(ArrayList::new));
+            // @formatter:on
+            Collections.reverse(expressions);
+            return expressions.stream().findFirst();
+        }
+        return getCommonType(returnedTypes);
+    }
+
+    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Collection<? extends Type> types) {
         final var categories = types.stream().map(Type::getCategory).collect(Collectors.toSet());
         if (categories.size() != 1) {
             return Optional.empty(); // If we found more than one type category, no commonization can occur
@@ -44,7 +68,7 @@ public final class TypeCommonizer {
         }; // @formatter:on
     }
 
-    public static @NotNull Optional<? extends Type> commonize(final @NotNull Type... types) {
-        return commonize(List.of(types));
+    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Type... types) {
+        return getCommonType(List.of(types));
     }
 }

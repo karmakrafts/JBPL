@@ -40,13 +40,13 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
-    public List<Expr> visitDefaultExpr(final @NotNull DefaultExprContext ctx) {
+    public @NotNull List<Expr> visitDefaultExpr(final @NotNull DefaultExprContext ctx) {
         final var type = ParserUtils.parseRefOrType(ctx.refOrType());
         return List.of(new DefaultExpr(type));
     }
 
     @Override
-    public List<Expr> visitArrayExpr(final @NotNull ArrayExprContext ctx) {
+    public @NotNull List<Expr> visitArrayExpr(final @NotNull ArrayExprContext ctx) {
         // @formatter:off
         final var array = ctx.refOrType() != null
             ? new ArrayExpr(ParserUtils.parseRefOrType(ctx.refOrType()))
@@ -124,8 +124,12 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             return List.of(new ArrayAccessExpr(reference, index));
         }
         else if (ctx.KW_IS() != null) {
-            final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
-            return List.of(new IsExpr(expr, TypeParser.parse(type)));
+            return List.of(new IsExpr(parse(ctx.expr(0)), TypeParser.parse(type)));
+        }
+        else if (ctx.KW_AS() != null) {
+            final var value = parse(ctx.expr(0));
+            final var targetType = LiteralExpr.of(TypeParser.parse(ctx.type())); // TODO: allow refs here
+            return List.of(new AsExpr(value, targetType));
         } // @formatter:off
         else if (type != null)              return List.of(LiteralExpr.of(TypeParser.parse(type), TokenRange.fromContext(type)));
         else if (ctx.EQEQ() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
@@ -159,7 +163,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitReference(final @NotNull ReferenceContext ctx) {
-        // TODO: This only handles top level references
         return parseReference(ctx, LiteralExpr.unit());
     }
 
@@ -176,7 +179,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitMacroCall(final @NotNull MacroCallContext ctx) {
-        // TODO: This only handles top level references
         return parseMacroCall(ctx, LiteralExpr.unit());
     }
 

@@ -32,4 +32,9 @@ public record PreproClassType(@NotNull String name) implements Type {
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
         throw new UnsupportedOperationException("Preprocessor class types cannot be materialized");
     }
+
+    @Override
+    public @NotNull String toString() {
+        return name;
+    }
 }

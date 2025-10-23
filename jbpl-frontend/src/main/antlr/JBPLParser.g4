@@ -221,6 +221,7 @@ expr:
     | EXCL expr
 
     | expr KW_IS type
+    | expr KW_AS type
 
     | ifExpr
     | arrayExpr

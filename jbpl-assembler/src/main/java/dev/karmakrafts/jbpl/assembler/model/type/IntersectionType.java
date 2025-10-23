@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public record IntersectionType(@NotNull List<Type> alternatives) implements Type {
     public static @NotNull IntersectionType unfold(final List<Type> types) {
@@ -40,4 +41,11 @@ public record IntersectionType(@NotNull List<Type> alternatives) implements Type
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
         throw new UnsupportedOperationException("Intersection types cannot be materialized");
     }
+
+    @Override
+    public @NotNull String toString() { // @formatter:off
+        return String.format("(%s)", alternatives.stream()
+            .map(Type::toString)
+            .collect(Collectors.joining("|")));
+    } // @formatter:on
 }

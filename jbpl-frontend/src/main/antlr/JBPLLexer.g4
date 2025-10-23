@@ -50,6 +50,7 @@ KW_YEET: 'yeet';
 KW_FUN: 'fun';
 KW_IF: 'if';
 KW_IS: 'is';
+KW_AS: 'as';
 KW_BY: 'by';
 
 KW_VOID: 'void';

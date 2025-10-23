@@ -107,7 +107,7 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull AssemblerContext context) { // @formatter:off
-        return elementTypeResolver.apply(context, TypeCommonizer.commonize(getExpressions().stream()
+        return elementTypeResolver.apply(context, TypeCommonizer.getCommonType(getExpressions().stream()
             .map(expr -> expr.getType(context))
             .toList()));
     } // @formatter:on

@@ -6,6 +6,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 
 public enum BuiltinType implements Type {
@@ -77,5 +78,10 @@ public enum BuiltinType implements Type {
     @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
         return materialType;
+    }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase(Locale.ROOT);
     }
 }
