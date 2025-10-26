@@ -94,7 +94,7 @@ public interface ElementContainer extends Element {
     @Override
     default void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         var hasScope = false;
-        if(this instanceof ScopeOwner scopeOwner) {
+        if (this instanceof ScopeOwner scopeOwner) {
             context.pushFrame(scopeOwner);
             hasScope = true;
         }
@@ -103,11 +103,11 @@ public interface ElementContainer extends Element {
                 continue;
             }
             element.evaluate(context);
-            if (context.hasRet()) {
+            if(context.clearRet()) {
                 break;
             }
         }
-        if(hasScope) {
+        if (hasScope) {
             context.popFrame();
         }
     }

@@ -38,9 +38,10 @@ public static fun <com/example/Example>.testing(): void {
 ^info "HELLO WORLD! ${${comp}}"
 ^info "HELLO WORLD!"
 
-^macro testing(): i32 {
+^macro testing(p: i32): i32 {
     ^define y: i32 = -10
-    ^return ${y}
+    ^return ${y} * ${p}
 }
 
-^info "Call to testing returned ${testing^()}"
+^define xxx: i32 = 10
+^info "Call to testing returned ${testing^(${y})}"

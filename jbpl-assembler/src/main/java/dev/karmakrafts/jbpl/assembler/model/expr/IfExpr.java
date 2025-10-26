@@ -112,7 +112,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
             // If the condition of this if() expression didn't evaluate to true, attempt to take one of the else if() branches..
             for (final var branch : elseIfBranches) {
                 branch.evaluate(context);
-                if (context.hasRet()) { // If the previous branch has returned, break the loop and propagate return flag
+                if (context.hasRet()) {
                     return;
                 }
             }
@@ -120,6 +120,12 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
             if (elseBranch != null) {
                 elseBranch.evaluate(context);
             }
+            return;
+        }
+        final var elements = getElements();
+        // If we have a scopeless branch, we evaluate the expression directly
+        if (elements.size() == 1 && elements.get(0) instanceof Expr expr) {
+            expr.evaluate(context);
             return;
         }
         super.evaluate(context);
@@ -163,9 +169,15 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
         }
 
         @Override
-        public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
+        public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
             final var condition = this.condition.evaluateAsConst(context, Boolean.class);
             if (!condition) {
+                return;
+            }
+            final var elements = getElements();
+            // If we have a scopeless branch, we evaluate the expression directly
+            if (elements.size() == 1 && elements.get(0) instanceof Expr expr) {
+                expr.evaluate(context);
                 return;
             }
             super.evaluate(context);
@@ -187,6 +199,17 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
     public static final class ElseBranch extends AbstractElementContainer implements ScopeOwner {
         public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
             return TypeCommonizer.getCommonType(getElements(), context).orElseThrow();
+        }
+
+        @Override
+        public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+            final var elements = getElements();
+            // If we have a scopeless branch, we evaluate the expression directly
+            if (elements.size() == 1 && elements.get(0) instanceof Expr expr) {
+                expr.evaluate(context);
+                return;
+            }
+            super.evaluate(context);
         }
 
         @Override

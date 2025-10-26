@@ -4,6 +4,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 public final class MacroCallExpr extends AbstractCallExpr implements Expr {
@@ -33,14 +34,22 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var macro = getMacro(context);
+        // We need to evaluate all call args in the current frame/context first
+        // @formatter:off
+        final var arguments = getArguments().stream()
+            .map(ExceptionUtils.unsafeFunction(expr -> (Expr)expr.evaluateAsConst(context)))
+            .toList();
+        // @formatter:on
         context.pushFrame(macro); // Create new stack frame for macro body
-        context.pushValues(getArguments()); // Push arguments into callee stack frame
+        context.pushValues(arguments); // Push arguments into callee stack frame
         macro.evaluate(context);
         context.popFrame(); // Frame data will be merged to retain result from callee frame
     }
 
     @Override
     public @NotNull MacroCallExpr copy() {
-        return copyParentAndSourceTo(new MacroCallExpr(getReceiver().copy(), name));
+        final var call = copyParentAndSourceTo(new MacroCallExpr(getReceiver().copy(), name));
+        call.addArguments(getArguments().stream().map(Expr::copy).toList());
+        return call;
     }
 }
