@@ -25,18 +25,15 @@ public static fun <com/example/Example>.testing(): void {
 
 ^define OFFSET: i32 = 20
 
-selector Testing {
-    after invokestatic
-    offset ${OFFSET}
-}
-
 ^define cond: i32 = 0
 
 ^define y: i32 = if (${cond} > 0) 44
     else if (${cond} < 0) 22
     else 88i8
 
-^info "y is: ${${y}}"
+^info "y is ${${y}}"
 
 ^define comp: i32 = ${y} <=> ${OFFSET}
+
 ^info "HELLO WORLD! ${${comp}}"
+^info "HELLO WORLD!"

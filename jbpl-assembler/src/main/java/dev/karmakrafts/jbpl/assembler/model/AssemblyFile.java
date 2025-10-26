@@ -65,13 +65,6 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     }
 
     @Override
-    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        context.pushFrame(this);
-        super.evaluate(context);
-        context.popFrame();
-    }
-
-    @Override
     public AssemblyFile copy() {
         final var result = new AssemblyFile(path); // Don't explicitly copy source tokens & range since it's hardcoded
         result.source.addAll(source); // We retain the same underlying token references

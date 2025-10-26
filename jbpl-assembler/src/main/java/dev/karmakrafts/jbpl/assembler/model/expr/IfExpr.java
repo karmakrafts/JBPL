@@ -122,9 +122,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
             }
             return;
         }
-        context.pushFrame(this); // If-scope gets its own stack frame
-        super.evaluate(context); // Only evaluate children when condition is true
-        context.popFrame();
+        super.evaluate(context);
     }
 
     @Override
@@ -170,10 +168,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
             if (!condition) {
                 return;
             }
-            context.pushFrame(this);
             super.evaluate(context);
-            context.popFrame();
-            context.ret(); // Mark this branch as the one we return from
         }
 
         @Override
@@ -192,14 +187,6 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
     public static final class ElseBranch extends AbstractElementContainer implements ScopeOwner {
         public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
             return TypeCommonizer.getCommonType(getElements(), context).orElseThrow();
-        }
-
-        @Override
-        public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-            context.pushFrame(this);
-            super.evaluate(context);
-            context.popFrame();
-            context.ret(); // Mark this branch as the one we return from
         }
 
         @Override

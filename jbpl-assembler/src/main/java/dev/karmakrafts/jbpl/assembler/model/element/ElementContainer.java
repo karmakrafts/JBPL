@@ -2,6 +2,7 @@ package dev.karmakrafts.jbpl.assembler.model.element;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -92,14 +93,22 @@ public interface ElementContainer extends Element {
 
     @Override
     default void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        var hasScope = false;
+        if(this instanceof ScopeOwner scopeOwner) {
+            context.pushFrame(scopeOwner);
+            hasScope = true;
+        }
         for (final var element : getElements()) {
             if (!element.isEvaluatedDirectly()) {
                 continue;
             }
             element.evaluate(context);
-            if (context.clearRet()) {
+            if (context.hasRet()) {
                 break;
             }
+        }
+        if(hasScope) {
+            context.popFrame();
         }
     }
 }

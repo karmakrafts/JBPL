@@ -41,7 +41,7 @@ public final class AssemblerTest {
             context.file.evaluate(context);
         }
         catch (Throwable error) {
-            throw new RuntimeException(error);
+            Assertions.fail(error);
         }
     }
 }
