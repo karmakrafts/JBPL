@@ -17,9 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
-import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
-import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.ReturnStatement;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;

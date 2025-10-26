@@ -148,16 +148,16 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
             setCondition(condition);
         }
 
+        public @NotNull Expr getCondition() {
+            return condition;
+        }
+
         public void setCondition(final @NotNull Expr condition) {
             if (this.condition != null) {
                 this.condition.setParent(null);
             }
             condition.setParent(this);
             this.condition = condition;
-        }
-
-        public @NotNull Expr getCondition() {
-            return condition;
         }
 
         public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
