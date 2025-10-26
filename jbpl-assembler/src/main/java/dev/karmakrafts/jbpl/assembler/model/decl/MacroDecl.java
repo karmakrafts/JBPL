@@ -3,14 +3,17 @@ package dev.karmakrafts.jbpl.assembler.model.decl;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
+import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class MacroDecl extends AbstractElementContainer implements Declaration, ScopeOwner, NamedElement {
     private final LinkedHashMap<Expr, Expr> parameterTypes = new LinkedHashMap<>();
@@ -104,6 +107,13 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
 
     @Override
     public @NotNull MacroDecl copy() {
-        return copyParentAndSourceTo(new MacroDecl(getName().copy(), getReturnType().copy()));
+        final var macro = copyParentAndSourceTo(new MacroDecl(getName().copy(), getReturnType().copy()));
+        // @formatter:off
+        macro.addParameters(getParameters().entrySet().stream()
+            .map(entry -> new Pair<>(entry.getKey().copy(), entry.getValue().copy()))
+            .collect(Collectors.toMap(Pair::left, Pair::right)));
+        // @formatter:on
+        macro.addElements(getElements().stream().map(Element::copy).toList());
+        return macro;
     }
 }
