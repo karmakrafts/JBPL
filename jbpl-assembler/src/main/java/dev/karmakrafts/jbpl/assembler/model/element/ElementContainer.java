@@ -103,7 +103,7 @@ public interface ElementContainer extends Element {
                 continue;
             }
             element.evaluate(context);
-            if(context.clearRet()) {
+            if (context.clearRet()) {
                 break;
             }
         }

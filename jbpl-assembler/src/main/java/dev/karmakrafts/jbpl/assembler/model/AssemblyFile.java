@@ -1,7 +1,5 @@
 package dev.karmakrafts.jbpl.assembler.model;
 
-import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
-import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
