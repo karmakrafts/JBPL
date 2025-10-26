@@ -1,7 +1,23 @@
-package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
+/*
+ * Copyright 2025 Karma Krafts & associates
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+package dev.karmakrafts.jbpl.assembler.model.instruction;
+
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
@@ -37,7 +53,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     private static @NotNull String computeFactoryDescriptor(final @NotNull ClassType type,
-                                                            final @NotNull AssemblerContext context) {
+                                                            final @NotNull EvaluationContext context) {
         return org.objectweb.asm.Type.getMethodDescriptor(type.materialize(context));
     }
 
@@ -106,12 +122,12 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     @Override
-    public @NotNull Opcode getOpcode(final @NotNull AssemblerContext context) {
+    public @NotNull Opcode getOpcode(final @NotNull EvaluationContext context) {
         return Opcode.INVOKEDYNAMIC;
     }
 
     private @NotNull Handle evaluateInvokeHandle(final @NotNull Expr expr,
-                                                 final @NotNull AssemblerContext context) throws EvaluationException {
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         final var instruction = expr.evaluateAsConst(context, Instruction.class);
         if (!(instruction instanceof InvokeInstruction invokeInstruction)) {
             throw new EvaluationException(
@@ -129,7 +145,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var instantiatedSignature = getInstantiatedSignature().evaluateAsConst(context,
             FunctionSignatureExpr.class);
         final var samSignature = getSAMSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
@@ -141,13 +157,13 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             .evaluateAsConst(context, Type.class)
             .materialize(context);
         final var samParamTypes = samSignature.getFunctionParameters().stream()
-            .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
+            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         final var returnType = instantiatedSignature.getFunctionReturnType()
             .evaluateAsConst(context, Type.class)
             .materialize(context);
         final var paramTypes = instantiatedSignature.getFunctionParameters().stream()
-            .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
+            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         final var bsmHandle = evaluateInvokeHandle(getBSMInstruction(), context);
@@ -156,7 +172,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         final var instantiatedType = org.objectweb.asm.Type.getMethodType(returnType, paramTypes);
         // @formatter:off
         final var arguments = getArguments().stream()
-            .map(ExceptionUtils.propagateUnchecked(expr -> expr.evaluateAsConst(context, Object.class)))
+            .map(ExceptionUtils.unsafeFunction(expr -> expr.evaluateAsConst(context, Object.class)))
             .toList();
         // @formatter:on
         // Compose BSM arguments
@@ -169,5 +185,13 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             factoryDescriptor,
             bsmHandle,
             joinedArguments.toArray(Object[]::new)));
+    }
+
+    @Override
+    public @NotNull InvokeDynamicInstruction copy() {
+        return copyParentAndSourceTo(new InvokeDynamicInstruction(getInstantiatedSignature().copy(),
+            getSAMSignature().copy(),
+            getBSMInstruction().copy(),
+            getTargetInstruction().copy()));
     }
 }

@@ -1,6 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.element;
 
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

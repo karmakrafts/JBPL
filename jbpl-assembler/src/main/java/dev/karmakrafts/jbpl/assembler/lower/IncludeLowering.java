@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.lower;
 
 import dev.karmakrafts.jbpl.assembler.Assembler;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.statement.CompoundStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.IncludeStatement;
@@ -17,9 +18,9 @@ public final class IncludeLowering implements ElementVisitor {
 
     @Override
     public @NotNull Statement visitInclude(final @NotNull IncludeStatement includeStatement) {
-        final var file = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseFile(includeStatement.path));
+        final var includedFile = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseFile(includeStatement.path));
         final var statement = new CompoundStatement();
-        statement.addElementsVerbatim(file.getElements());
+        statement.addElementsVerbatim(includedFile.getElements().stream().map(Element::copy).toList());
         return statement;
     }
 }

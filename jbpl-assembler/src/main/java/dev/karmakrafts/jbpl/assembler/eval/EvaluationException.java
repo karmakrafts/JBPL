@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler;
+package dev.karmakrafts.jbpl.assembler.eval;
 
+import dev.karmakrafts.jbpl.assembler.AssemblerException;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
-import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
+import dev.karmakrafts.jbpl.assembler.source.SourceRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

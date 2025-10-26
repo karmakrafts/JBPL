@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         return getValue().getType(context);
     }
 
@@ -83,7 +83,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
         final var constValue = value.evaluateAsConst(context, Object.class);
         final var type = value.getType(context);
@@ -96,6 +96,11 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
             return;
         }
         throw new EvaluationException(String.format("Unary operator %s cannot be applied to %s", op, value), this);
+    }
+
+    @Override
+    public @NotNull UnaryExpr copy() {
+        return copyParentAndSourceTo(new UnaryExpr(getValue().copy(), op));
     }
 
     public enum Op {

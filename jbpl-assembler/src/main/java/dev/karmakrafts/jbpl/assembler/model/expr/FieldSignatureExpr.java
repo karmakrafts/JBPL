@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -18,12 +18,12 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) {
         return PreproType.FIELD_SIGNATURE;
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var owner = getFieldOwner().evaluateAsConst(context);
         final var name = getFieldName().evaluateAsConst(context);
         final var type = getFieldType().evaluateAsConst(context);
@@ -34,7 +34,7 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
     }
 
     @Override
-    public @NotNull String evaluateAsConstDescriptor(final @NotNull AssemblerContext context) throws EvaluationException {
+    public @NotNull String evaluateAsConstDescriptor(final @NotNull EvaluationContext context) throws EvaluationException {
         return getFieldType().evaluateAsConst(context, Type.class).materialize(context).getDescriptor();
     }
 
@@ -48,5 +48,12 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
 
     public @NotNull Expr getFieldType() {
         return getExpressions().get(TYPE_INDEX);
+    }
+
+    @Override
+    public @NotNull FieldSignatureExpr copy() {
+        return copyParentAndSourceTo(new FieldSignatureExpr(getFieldOwner().copy(),
+            getFieldName().copy(),
+            getFieldType().copy()));
     }
 }

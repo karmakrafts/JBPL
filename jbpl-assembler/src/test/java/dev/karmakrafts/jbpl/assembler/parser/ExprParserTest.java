@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 
-public class ExprParserTest extends AbstractParserTest {
+public final class ExprParserTest extends AbstractParserTest {
     private void runLiteralTest(final @NotNull Object expectedValue, final @NotNull String actualValue) {
         final var result = parse(actualValue);
         result.shouldSucceed();

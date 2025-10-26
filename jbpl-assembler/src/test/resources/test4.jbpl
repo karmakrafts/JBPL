@@ -1,2 +1,42 @@
-^define TEST3: i32 = 42
-^define TEST4: f32 = 3.141592654f32
+^define z: i32 = 10
+^info "Testing: ${${z} << 1 << 1}"
+^define str: string = ${z} as string
+^define x: i32 = (${str} as i32) << 1
+^info "Cast: ${${str}}"
+^info "Parse: ${${x}}"
+
+^define t1: type = typeof(i32)
+^define t2: type = typeof(f32)
+^define intersect: type = ${t1} + ${t2}
+^define intersect2: type = typeof((i32 | i64 | bool | void))
+^define t3: type = ${intersect} - typeof(f32)
+^info "Type is ${${t3}}"
+
+^info ${t3}
+
+^define d: i32 = default(${t1})
+^info ${d}
+
+public static field <com/example/Example>.test: i32 = 0
+
+public static fun <com/example/Example>.testing(): void {
+    return
+}
+
+^define OFFSET: i32 = 20
+
+selector Testing {
+    after invokestatic
+    offset ${OFFSET}
+}
+
+^define cond: i32 = 0
+
+^define y: i32 = if (${cond} > 0) 44
+    else if (${cond} < 0) 22
+    else 88i8
+
+^info "y is: ${${y}}"
+
+^define comp: i32 = ${y} <=> ${OFFSET}
+^info "HELLO WORLD! ${${comp}}"

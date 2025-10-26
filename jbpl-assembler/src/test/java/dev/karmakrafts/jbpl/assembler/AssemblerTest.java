@@ -1,31 +1,47 @@
 package dev.karmakrafts.jbpl.assembler;
 
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.tree.ClassNode;
 
-public class AssemblerTest {
+public final class AssemblerTest {
     @Test
     public void loadEmpty() {
         final var assembler = Assembler.createFromResources("");
-        final var file = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseAndLowerFile("test0.jbpl",
-            n -> new ClassNode()).file);
+        final var context = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseAndLowerFile("test0.jbpl",
+            n -> new ClassNode()));
+        try {
+            context.file.evaluate(context);
+        }
+        catch (Throwable error) {
+            Assertions.fail(error);
+        }
     }
 
     @Test
     public void loadFromResource() {
         final var assembler = Assembler.createFromResources("");
-        final var file = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseAndLowerFile("test1.jbpl",
-            n -> new ClassNode()).file);
-        System.out.println(file.getElements());
+        final var context = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseAndLowerFile("test1.jbpl",
+            n -> new ClassNode()));
+        try {
+            context.file.evaluate(context);
+        }
+        catch (Throwable error) {
+            Assertions.fail(error);
+        }
     }
 
     @Test
     public void loadFromResourcesRecursively() {
         final var assembler = Assembler.createFromResources("");
-        // This should also pull in the contents of test2.jbpl
-        final var file = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseAndLowerFile("test3.jbpl",
-            n -> new ClassNode()).file);
-        System.out.println(file.getElements());
+        final var context = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseAndLowerFile("test3.jbpl",
+            n -> new ClassNode()));
+        try {
+            context.file.evaluate(context);
+        }
+        catch (Throwable error) {
+            throw new RuntimeException(error);
+        }
     }
 }

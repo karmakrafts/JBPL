@@ -1,27 +1,30 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 public interface Expr extends Statement {
-    @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException;
+    @Override
+    @NotNull Expr copy();
 
-    default @NotNull LiteralExpr evaluateAsConst(final @NotNull AssemblerContext context) throws EvaluationException {
+    @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException;
+
+    default @NotNull LiteralExpr evaluateAsConst(final @NotNull EvaluationContext context) throws EvaluationException {
         // After evaluation
         evaluate(context);
         return (LiteralExpr) context.popValue();
     }
 
-    default <T> @NotNull T evaluateAsConst(final @NotNull AssemblerContext context,
+    default <T> @NotNull T evaluateAsConst(final @NotNull EvaluationContext context,
                                            final @NotNull Class<T> type) throws EvaluationException {
         return type.cast(evaluateAsConst(context).value);
     }
 
-    default @NotNull Object evaluateAsConstAndMaterialize(final @NotNull AssemblerContext context) throws EvaluationException {
+    default @NotNull Object evaluateAsConstAndMaterialize(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getType(context);
         if (type == PreproType.TYPE) {
             // Const types are materialized after unwrapping

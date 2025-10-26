@@ -16,8 +16,8 @@
 
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +48,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         return getType().evaluateAsConst(context, Type.class);
     }
 
@@ -127,7 +127,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getType(context);
         // Always return unit literal for void type so we can have proper generic evaluation
         if (type == BuiltinType.VOID) {
@@ -165,5 +165,10 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
             return;
         }
         throw new EvaluationException(String.format("Cannot cast %s into %s", valueType, type), this);
+    }
+
+    @Override
+    public @NotNull AsExpr copy() {
+        return copyParentAndSourceTo(new AsExpr(getValue().copy(), getType().copy()));
     }
 }

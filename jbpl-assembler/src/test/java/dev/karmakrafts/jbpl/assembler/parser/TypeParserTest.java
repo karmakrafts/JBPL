@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Objects;
 
-public class TypeParserTest extends AbstractParserTest {
+public final class TypeParserTest extends AbstractParserTest {
     private void runTest(final @NotNull Type expectedType, final @NotNull String actualType) {
         final var result = parse(actualType);
         result.shouldSucceed();

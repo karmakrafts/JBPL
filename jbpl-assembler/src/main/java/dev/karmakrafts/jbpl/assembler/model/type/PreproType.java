@@ -1,15 +1,15 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.decl.InjectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.OplessInstruction;
+import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
+import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
+import dev.karmakrafts.jbpl.assembler.model.instruction.OplessInstruction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public enum PreproType implements Type {
     }
 
     @Override
-    public @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context) {
+    public @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) {
         return switch (this) {
             case TYPE -> LiteralExpr.of(BuiltinType.VOID);
             case OPCODE -> LiteralExpr.of(Opcode.NOP);
@@ -53,7 +53,7 @@ public enum PreproType implements Type {
     }
 
     @Override
-    public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
+    public @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) {
         throw new UnsupportedOperationException("Preprocessor types cannot be materialized");
     }
 

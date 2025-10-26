@@ -5,8 +5,10 @@ import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl.InstructionCondition;
 import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl.OpcodeCondition;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
+import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
+import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
+import dev.karmakrafts.jbpl.assembler.model.instruction.*;
 import dev.karmakrafts.jbpl.assembler.model.statement.*;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.*;
 import org.jetbrains.annotations.NotNull;
 
 public interface ElementVisitor {
@@ -31,10 +33,7 @@ public interface ElementVisitor {
     }
 
     default <E extends ExprContainer> @NotNull E visitExprContainer(final @NotNull E container) {
-        final var transformedExpressions = container.getExpressions().stream().map(this::visitExpr).toList();
-        container.clearExpressions();
-        container.addExpressions(transformedExpressions);
-        return container;
+        return visitElementContainer(container);
     }
 
     default <E extends ElementContainer> @NotNull E visitElementContainer(final @NotNull E container) {
@@ -45,10 +44,7 @@ public interface ElementVisitor {
     }
 
     default <E extends StatementContainer> @NotNull E visitStatementContainer(final @NotNull E container) {
-        final var transformedStatements = container.getStatements().stream().map(this::visitStatement).toList();
-        container.clearStatements();
-        container.addStatements(transformedStatements);
-        return container;
+        return visitElementContainer(container);
     }
 
     default @NotNull Declaration visitDeclaration(final @NotNull Declaration declaration) {
@@ -187,7 +183,22 @@ public interface ElementVisitor {
     }
 
     default @NotNull Expr visitIfExpr(final @NotNull IfExpr ifExpr) {
-        return visitStatementContainer(ifExpr);
+        final var elseIfBranches = ifExpr.getElseIfBranches().stream().map(this::visitElseIfBranch).toList();
+        ifExpr.clearElseIfBranches();
+        ifExpr.addElseIfBranches(elseIfBranches);
+        final var elseBranch = ifExpr.getElseBranch();
+        if (elseBranch != null) {
+            ifExpr.setElseBranch(visitElseBranch(elseBranch));
+        }
+        return visitElementContainer(ifExpr);
+    }
+
+    default @NotNull ElseIfBranch visitElseIfBranch(final @NotNull ElseIfBranch branch) {
+        return branch;
+    }
+
+    default @NotNull ElseBranch visitElseBranch(final @NotNull ElseBranch branch) {
+        return branch;
     }
 
     default @NotNull Expr visitArrayAccessExpr(final @NotNull ArrayAccessExpr arrayAccessExpr) {
@@ -295,10 +306,24 @@ public interface ElementVisitor {
         else if (statement instanceof VersionStatement versionStatement) {
             return visitVersionStatement(versionStatement);
         }
+        else if (statement instanceof InfoStatement infoStatement) {
+            return visitInfoStatement(infoStatement);
+        }
+        else if (statement instanceof ErrorStatement errorStatement) {
+            return visitErrorStatement(errorStatement);
+        }
         else if (statement instanceof Expr expr) {
             return visitExpr(expr);
         }
         throw new IllegalStateException(String.format("Unsupported statement type %s", statement.getClass()));
+    }
+
+    default @NotNull Statement visitInfoStatement(final @NotNull InfoStatement infoStatement) {
+        return visitExprContainer(infoStatement);
+    }
+
+    default @NotNull Statement visitErrorStatement(final @NotNull ErrorStatement errorStatement) {
+        return visitExprContainer(errorStatement);
     }
 
     default @NotNull Statement visitVersionStatement(final @NotNull VersionStatement versionStatement) {

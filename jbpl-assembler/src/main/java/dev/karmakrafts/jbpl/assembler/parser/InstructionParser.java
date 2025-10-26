@@ -1,8 +1,8 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.*;
+import dev.karmakrafts.jbpl.assembler.model.instruction.*;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;

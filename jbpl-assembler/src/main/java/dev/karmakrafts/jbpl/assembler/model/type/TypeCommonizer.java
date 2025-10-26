@@ -16,8 +16,9 @@
 
 package dev.karmakrafts.jbpl.assembler.model.type;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.ReturnStatement;
@@ -32,20 +33,19 @@ public final class TypeCommonizer {
     }
 
     // TODO: check if any element exists after the last return statement
-    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull ElementContainer container,
-                                                                  final @NotNull AssemblerContext context) throws EvaluationException {
-        final var elements = container.getElements();
+    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull List<? extends Element> elements,
+                                                                  final @NotNull EvaluationContext context) {
         // @formatter:off
         final var returnedTypes = elements.stream()
             .filter(ReturnStatement.class::isInstance)
-            .map(ExceptionUtils.propagateUnchecked(statement -> ((ReturnStatement)statement).getValue().getType(context)))
+            .map(ExceptionUtils.unsafeFunction(statement -> ((ReturnStatement)statement).getValue().getType(context)))
             .toList();
         // @formatter:on
         if (returnedTypes.isEmpty()) {
             // @formatter:off
             final var expressions = elements.stream()
                 .filter(Expr.class::isInstance)
-                .map(ExceptionUtils.propagateUnchecked(statement -> ((Expr)statement).getType(context)))
+                .map(ExceptionUtils.unsafeFunction(statement -> ((Expr)statement).getType(context)))
                 .collect(Collectors.toCollection(ArrayList::new));
             // @formatter:on
             Collections.reverse(expressions);

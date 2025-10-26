@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -16,20 +16,25 @@ public final class PreproClassExpr extends AbstractCallExpr implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) {
         return type;
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var instance = new PreproClassExpr(type);
         instance.setParent(getParent());
         instance.setTokenRange(getTokenRange());
         // @formatter:off
         instance.addExpressions(getExpressions().stream()
-            .map(ExceptionUtils.propagateUnchecked(expr -> expr.evaluateAsConst(context)))
+            .map(ExceptionUtils.unsafeFunction(expr -> expr.evaluateAsConst(context)))
             .toList());
         // @formatter:on
         context.pushValue(new LiteralExpr(type, instance));
+    }
+
+    @Override
+    public @NotNull PreproClassExpr copy() {
+        return copyParentAndSourceTo(new PreproClassExpr(type));
     }
 }

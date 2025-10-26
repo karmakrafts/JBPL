@@ -1,19 +1,21 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.Order;
-import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
-import dev.karmakrafts.jbpl.assembler.model.SourceOwner;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
+import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
+import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
+import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.Order;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public final class SelectorDecl extends AbstractExprContainer implements Declaration, ScopeOwner {
+public final class SelectorDecl extends AbstractExprContainer implements Declaration, ScopeOwner, NamedElement {
     public static final int NAME_INDEX = 0;
     public static final int OFFSET_INDEX = 1;
     public final ArrayList<Condition> conditions = new ArrayList<>();
@@ -40,8 +42,17 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
+        return getName().evaluateAsConst(context, String.class);
+    }
 
+    @Override
+    public void evaluate(final @NotNull EvaluationContext context) {
+    }
+
+    @Override
+    public @NotNull SelectorDecl copy() {
+        return copyParentAndSourceTo(new SelectorDecl(getName().copy(), getOffset().copy()));
     }
 
     public sealed interface Condition extends SourceOwner {

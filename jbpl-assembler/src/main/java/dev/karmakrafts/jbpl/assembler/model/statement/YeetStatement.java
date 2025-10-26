@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
@@ -16,7 +16,7 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var target = getTarget();
         if (target instanceof LiteralExpr literalExpr) {
             var type = (ClassType) literalExpr.value;
@@ -29,7 +29,7 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
             final var returnType = result.getFunctionReturnType().evaluateAsConst(context, Type.class);
             // @formatter:off
             final var paramTypes = result.getFunctionParameters().stream()
-                .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class)))
+                .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class)))
                 .toArray(Type[]::new);
             // @formatter:on
             context.removeFunction(owner.name(), name, returnType, paramTypes);
@@ -50,5 +50,10 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
 
     public void setTarget(final @NotNull Expr name) {
         getExpressions().set(TARGET_INDEX, name);
+    }
+
+    @Override
+    public @NotNull YeetStatement copy() {
+        return copyParentAndSourceTo(new YeetStatement(getTarget().copy()));
     }
 }

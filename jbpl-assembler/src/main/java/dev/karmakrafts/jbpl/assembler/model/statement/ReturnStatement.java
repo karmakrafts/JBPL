@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
@@ -23,14 +23,19 @@ public final class ReturnStatement extends AbstractExprContainer implements Stat
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
         final var type = value.getType(context);
         if (type == BuiltinType.VOID) {
             context.ret();
             return;
         }
-        context.pushValue(value);
+        context.pushValue(value.evaluateAsConst(context));
         context.ret();
+    }
+
+    @Override
+    public @NotNull ReturnStatement copy() {
+        return new ReturnStatement(getValue().copy());
     }
 }

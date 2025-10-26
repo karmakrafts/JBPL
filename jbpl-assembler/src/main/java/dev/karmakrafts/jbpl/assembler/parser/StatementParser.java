@@ -1,8 +1,8 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.model.statement.*;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;
@@ -40,6 +40,18 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
         final var valueNode = ctx.expr();
         final var value = valueNode != null ? ExprParser.parse(valueNode) : LiteralExpr.unit();
         return List.of(new ReturnStatement(value));
+    }
+
+    @Override
+    public List<Statement> visitInfoStatement(final @NotNull InfoStatementContext ctx) {
+        final var value = ExprParser.parse(ctx.expr());
+        return List.of(new InfoStatement(value));
+    }
+
+    @Override
+    public List<Statement> visitErrorStatement(ErrorStatementContext ctx) {
+        final var value = ExprParser.parse(ctx.expr());
+        return List.of(new ErrorStatement(value));
     }
 
     @Override

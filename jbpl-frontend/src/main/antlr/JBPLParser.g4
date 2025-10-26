@@ -73,6 +73,16 @@ include:
     simpleStringLiteral
     ;
 
+infoStatement:
+    KW_PREPRO_INFO
+    expr
+    ;
+
+errorStatement:
+    KW_PREPRO_ERROR
+    expr
+    ;
+
 versionStatement:
     KW_VERSION
     expr
@@ -194,6 +204,7 @@ expr:
     | expr NL*? DOT NL*? macroCall
     | expr NL*? DOT NL*? reference
 
+    | expr NL*? SPACESHIP NL*? expr
     | expr NL*? AMPAMP NL*? expr
     | expr NL*? PIPEPIPE NL*? expr
     | expr NL*? AMP NL*? expr
@@ -461,6 +472,8 @@ statement:
     | returnStatement
     | yeetStatement
     | versionStatement
+    | infoStatement
+    | errorStatement
     | label
     | local
     | instruction

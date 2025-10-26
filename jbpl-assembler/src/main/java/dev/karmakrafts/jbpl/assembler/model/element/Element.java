@@ -1,16 +1,23 @@
 package dev.karmakrafts.jbpl.assembler.model.element;
 
-import dev.karmakrafts.jbpl.assembler.Evaluable;
+import dev.karmakrafts.jbpl.assembler.eval.Evaluable;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.SourceOwner;
-import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;
-import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
+import dev.karmakrafts.jbpl.assembler.source.SourceLocation;
+import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
+import dev.karmakrafts.jbpl.assembler.source.SourceRange;
+import dev.karmakrafts.jbpl.assembler.util.Copyable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
 
-public interface Element extends SourceOwner, Evaluable {
+public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
+    default <E extends Element> @NotNull E copyParentAndSourceTo(final @NotNull E element) {
+        element.setParent(getParent());
+        element.setTokenRange(getTokenRange());
+        return element;
+    }
+
     @Nullable ElementContainer getParent();
 
     void setParent(final @Nullable ElementContainer parent);

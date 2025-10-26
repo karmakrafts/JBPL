@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -24,12 +24,17 @@ public final class IsExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) {
         return BuiltinType.BOOL;
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         context.pushValue(LiteralExpr.of(getValue().getType(context).equals(type)));
+    }
+
+    @Override
+    public @NotNull IsExpr copy() {
+        return copyParentAndSourceTo(new IsExpr(getValue().copy(), type));
     }
 }

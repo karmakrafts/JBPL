@@ -1,10 +1,12 @@
 package dev.karmakrafts.jbpl.assembler.model.element;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public interface ElementContainer extends Element {
     /**
@@ -40,6 +42,40 @@ public interface ElementContainer extends Element {
 
     @NotNull List<? extends Element> getElements();
 
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull Optional<E> findElement(final @NotNull Class<E> type, final @NotNull Predicate<E> filter) { // @formatter:off
+        return getElements().stream()
+            .filter(type::isInstance)
+            .map(element -> (E) element)
+            .filter(filter)
+            .findFirst();
+    } // @formatter:on
+
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull Optional<E> findElement(final @NotNull Class<E> type) { // @formatter:off
+        return getElements().stream()
+            .filter(type::isInstance)
+            .map(element -> (E)element)
+            .findFirst();
+    } // @formatter:on
+
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull List<E> findElements(final @NotNull Class<E> type, final @NotNull Predicate<E> filter) { // @formatter:off
+        return getElements().stream()
+            .filter(type::isInstance)
+            .map(element -> (E)element)
+            .filter(filter)
+            .toList();
+    } // @formatter:on
+
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull List<E> findElements(final @NotNull Class<E> type) { // @formatter:off
+        return getElements().stream()
+            .filter(type::isInstance)
+            .map(element -> (E)element)
+            .toList();
+    } // @formatter:on
+
     default void acceptChildren(final @NotNull ElementVisitor visitor) {
         for (final var element : getElements()) {
             visitor.visitElement(element);
@@ -55,8 +91,11 @@ public interface ElementContainer extends Element {
     }
 
     @Override
-    default void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    default void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         for (final var element : getElements()) {
+            if (!element.isEvaluatedDirectly()) {
+                continue;
+            }
             element.evaluate(context);
             if (context.clearRet()) {
                 break;

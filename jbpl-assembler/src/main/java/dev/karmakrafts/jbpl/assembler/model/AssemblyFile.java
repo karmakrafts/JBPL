@@ -1,10 +1,14 @@
 package dev.karmakrafts.jbpl.assembler.model;
 
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
-import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;
-import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
+import dev.karmakrafts.jbpl.assembler.source.SourceLocation;
+import dev.karmakrafts.jbpl.assembler.source.SourceRange;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,12 +55,27 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     }
 
     @Override
-    public @Nullable ElementContainer getParent() {
-        return null;
+    public @NotNull ElementContainer getParent() {
+        return this;
     }
 
     @Override
     public void setParent(final @Nullable ElementContainer parent) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        context.pushFrame(this);
+        super.evaluate(context);
+        context.popFrame();
+    }
+
+    @Override
+    public AssemblyFile copy() {
+        final var result = new AssemblyFile(path); // Don't explicitly copy source tokens & range since it's hardcoded
+        result.source.addAll(source); // We retain the same underlying token references
+        result.addElements(getElements().stream().map(Element::copy).toList());
+        return result;
     }
 }

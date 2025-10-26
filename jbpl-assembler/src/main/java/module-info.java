@@ -13,9 +13,11 @@ module dev.karmakrafts.jbpl.assembler {
     exports dev.karmakrafts.jbpl.assembler.model;
     exports dev.karmakrafts.jbpl.assembler.model.decl;
     exports dev.karmakrafts.jbpl.assembler.model.expr;
-    exports dev.karmakrafts.jbpl.assembler.model.source;
+    exports dev.karmakrafts.jbpl.assembler.source;
     exports dev.karmakrafts.jbpl.assembler.model.statement;
-    exports dev.karmakrafts.jbpl.assembler.model.statement.instruction;
+    exports dev.karmakrafts.jbpl.assembler.model.instruction;
     exports dev.karmakrafts.jbpl.assembler.model.type;
     exports dev.karmakrafts.jbpl.assembler.model.element;
+    exports dev.karmakrafts.jbpl.assembler.scope;
+    exports dev.karmakrafts.jbpl.assembler.eval;
 }

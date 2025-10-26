@@ -16,8 +16,8 @@
 
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.ArrayType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -50,18 +50,23 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getReference().getType(context);
         if (!(type instanceof ArrayType arrayType)) {
-            throw new IllegalStateException("Array access requires array reference type");
+            throw new EvaluationException("Array access requires array reference type", this);
         }
         return arrayType.elementType(); // We unwrap one layer of array so return element type
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var array = getReference().evaluateAsConst(context, Object.class);
         final var index = getIndex().evaluateAsConst(context, Integer.class);
         context.pushValue(LiteralExpr.of(Array.get(array, index)));
+    }
+
+    @Override
+    public @NotNull ArrayAccessExpr copy() {
+        return copyParentAndSourceTo(new ArrayAccessExpr(getReference().copy(), getIndex().copy()));
     }
 }

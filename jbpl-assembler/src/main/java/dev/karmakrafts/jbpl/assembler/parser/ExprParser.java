@@ -1,8 +1,11 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
+import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
@@ -26,6 +29,12 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         expr.setTokenRange(TokenRange.fromContext(ctx));
         return expr;
     }
+
+    private static @NotNull List<Element> parseIfBody(final @NotNull IfBodyContext ctx) { // @formatter:off
+        return ctx.bodyElement().stream()
+            .map(ElementParser::parse)
+            .toList();
+    } // @formatter:on
 
     @Override
     protected @NotNull List<Expr> defaultResult() {
@@ -52,13 +61,18 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             ? new ArrayExpr(ParserUtils.parseRefOrType(ctx.refOrType()))
             : new ArrayExpr();
         // @formatter:on
-        array.addExpressions(ctx.expr().stream().map(ExprParser::parse).toList());
+        array.addValues(ctx.expr().stream().map(ExprParser::parse).toList());
         return List.of(array);
     }
 
     @Override
     public @NotNull List<Expr> visitTypeOfExpr(final @NotNull TypeOfExprContext ctx) {
-        return List.of(new TypeOfExpr(parse(ctx.expr())));
+        // @formatter:off
+        final var type = ctx.type() != null
+            ? LiteralExpr.of(TypeParser.parse(ctx.type()))
+            : ExprParser.parse(ctx.expr());
+        // @formatter:on
+        return List.of(new TypeOfExpr(type));
     }
 
     @Override
@@ -83,6 +97,41 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return List.of(instantiation);
     }
 
+    @Override
+    public List<Expr> visitIfExpr(final @NotNull IfExprContext ctx) {
+        final var condition = ExprParser.parse(ctx.expr());
+        final var expr = new IfExpr(condition);
+        // @formatter:off
+        expr.addElements(ctx.bodyElement() != null
+            ? List.of(ElementParser.parse(ctx.bodyElement()))
+            : parseIfBody(ctx.ifBody()));
+        // @formatter:on
+        final var elseIfBranches = ctx.elseIfBranch();
+        for (final var branchNode : elseIfBranches) {
+            final var branchCondition = ExprParser.parse(branchNode.expr());
+            final var branch = new ElseIfBranch(branchCondition);
+            branch.setTokenRange(TokenRange.fromContext(branchNode));
+            // @formatter:off
+            branch.addElements(branchNode.bodyElement() != null
+                ? List.of(ElementParser.parse(branchNode.bodyElement()))
+                : parseIfBody(branchNode.ifBody()));
+            // @formatter:on
+            expr.addElseIfBranch(branch);
+        }
+        final var elseBranchNode = ctx.elseBranch();
+        if (elseBranchNode != null) {
+            final var branch = new ElseBranch();
+            branch.setTokenRange(TokenRange.fromContext(elseBranchNode));
+            // @formatter:off
+            branch.addElements(elseBranchNode.bodyElement() != null
+                ? List.of(ElementParser.parse(elseBranchNode.bodyElement()))
+                : parseIfBody(elseBranchNode.ifBody()));
+            // @formatter:on
+            expr.setElseBranch(branch);
+        }
+        return List.of(expr);
+    }
+
     private @NotNull List<Expr> parseBinaryExpr(final @NotNull ExprContext ctx, final @NotNull BinaryExpr.Op op) {
         final var expressions = ctx.expr();
         final var lhs = parse(expressions.get(0));
@@ -100,7 +149,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                                                                 final @NotNull UnaryExpr.Op unaryOp) {
         final var expressions = ctx.expr();
         if (expressions.size() == 1) {
-            return parseUnaryExpr(expressions.get(0), unaryOp);
+            return parseUnaryExpr(ctx, unaryOp);
         }
         return parseBinaryExpr(ctx, binaryOp);
     }
@@ -138,6 +187,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         else if (ctx.LEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.LE);
         else if (ctx.R_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.GT);
         else if (ctx.GEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.GE);
+        else if (ctx.SPACESHIP() != null)   return parseBinaryExpr(ctx, BinaryExpr.Op.CMP);
         else if (ctx.PLUS() != null)        return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.ADD, UnaryExpr.Op.PLUS);
         else if (ctx.MINUS() != null)       return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.SUB, UnaryExpr.Op.MINUS);
         else if (ctx.ASTERISK() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.MUL);

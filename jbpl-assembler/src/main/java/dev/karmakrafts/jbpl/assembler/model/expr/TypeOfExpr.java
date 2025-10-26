@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -22,12 +22,24 @@ public final class TypeOfExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) {
         return PreproType.TYPE;
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
-        context.pushValue(LiteralExpr.of(getValue().getType(context)));
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var value = getValue();
+        final var type = value.getType(context);
+        if (type == PreproType.TYPE) {
+            // If the passed in expression already is a type literal, just forward it
+            context.pushValue(value);
+            return;
+        }
+        context.pushValue(LiteralExpr.of(type));
+    }
+
+    @Override
+    public @NotNull TypeOfExpr copy() {
+        return copyParentAndSourceTo(new TypeOfExpr(getValue().copy()));
     }
 }

@@ -1,6 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +9,12 @@ public final class EmptyDecl extends AbstractElement implements Declaration {
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull EvaluationContext context) {
 
+    }
+
+    @Override
+    public @NotNull EmptyDecl copy() {
+        return copyParentAndSourceTo(new EmptyDecl());
     }
 }

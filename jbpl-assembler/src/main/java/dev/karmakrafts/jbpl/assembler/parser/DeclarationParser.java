@@ -1,12 +1,12 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
-import dev.karmakrafts.jbpl.assembler.model.Order;
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Instruction;
+import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.Order;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;

@@ -1,6 +1,8 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class PreproClassDecl extends AbstractExprContainer implements Declaration {
+public final class PreproClassDecl extends AbstractExprContainer implements Declaration, NamedElement {
     public String name;
 
     public PreproClassDecl(final @NotNull String name) {
@@ -79,6 +81,16 @@ public final class PreproClassDecl extends AbstractExprContainer implements Decl
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
+        return name;
+    }
+
+    @Override
+    public void evaluate(final @NotNull EvaluationContext context) {
+    }
+
+    @Override
+    public @NotNull PreproClassDecl copy() {
+        return copyParentAndSourceTo(new PreproClassDecl(getName()));
     }
 }

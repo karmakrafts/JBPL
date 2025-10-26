@@ -1,13 +1,14 @@
 package dev.karmakrafts.jbpl.assembler;
 
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.lower.CompoundLowering;
 import dev.karmakrafts.jbpl.assembler.lower.IncludeLowering;
 import dev.karmakrafts.jbpl.assembler.lower.NoopRemovalLowering;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.source.SourceLocation;
-import dev.karmakrafts.jbpl.assembler.model.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
+import dev.karmakrafts.jbpl.assembler.source.SourceLocation;
+import dev.karmakrafts.jbpl.assembler.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
 import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
@@ -27,6 +28,7 @@ import java.nio.charset.CodingErrorAction;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class Assembler {
@@ -65,19 +67,31 @@ public final class Assembler {
         Opcodes.ASM10_EXPERIMENTAL);
 
     private final Function<String, ReadableByteChannel> resourceProvider;
+    private final Consumer<String> infoConsumer;
+    private final Consumer<String> errorConsumer;
     private final HashMap<String, AssemblyFile> files = new HashMap<>();
     private final IncludeLowering includeLowering = new IncludeLowering(this);
 
-    public Assembler(final @NotNull Function<String, ReadableByteChannel> resourceProvider) {
+    public Assembler(final @NotNull Function<String, ReadableByteChannel> resourceProvider,
+                     final @NotNull Consumer<String> infoConsumer,
+                     final @NotNull Consumer<String> errorConsumer) {
         this.resourceProvider = resourceProvider;
+        this.infoConsumer = infoConsumer;
+        this.errorConsumer = errorConsumer;
     }
 
     @SuppressWarnings("all")
-    public static Assembler createFromResources(final @NotNull String basePath) {
+    public static Assembler createFromResources(final @NotNull String basePath,
+                                                final @NotNull Consumer<String> infoConsumer,
+                                                final @NotNull Consumer<String> errorConsumer) {
         return new Assembler(path -> {
             final var stream = Assembler.class.getResourceAsStream(String.format("%s/%s", basePath, path));
             return Channels.newChannel(stream);
-        });
+        }, infoConsumer, errorConsumer);
+    }
+
+    public static Assembler createFromResources(final @NotNull String basePath) {
+        return createFromResources(basePath, System.out::println, System.err::println);
     }
 
     public @NotNull AssemblyFile getOrParseFile(final @NotNull String path) throws ParserException {
@@ -113,16 +127,15 @@ public final class Assembler {
         }
     }
 
-    private void validatePreLowering(final @NotNull AssemblerContext context) throws ValidationException {
-        final var file = context.file;
+    private void validateFile(final @NotNull AssemblyFile file) throws ValidationException {
         file.accept(new VersionValidationVisitor());
     }
 
-    private void validatePostLowering(final @NotNull AssemblerContext context) throws ValidationException {
+    private void validatePostLowering(final @NotNull EvaluationContext context) throws ValidationException {
         validateBytecodeVersion(context);
     }
 
-    private void validateBytecodeVersion(final @NotNull AssemblerContext context) throws ValidationException {
+    private void validateBytecodeVersion(final @NotNull EvaluationContext context) throws ValidationException {
         final var version = context.bytecodeVersion;
         if (!BYTECODE_VERSIONS.contains(version)) {
             final var message = String.format("%d is not a valid class file version", version);
@@ -130,19 +143,19 @@ public final class Assembler {
         }
     }
 
-    private @NotNull AssemblerContext lower(final @NotNull AssemblyFile file,
-                                            final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
-        final var context = new AssemblerContext(file, classResolver);
-        validatePreLowering(context);
+    private @NotNull EvaluationContext lower(final @NotNull AssemblyFile file,
+                                             final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
+        validateFile(file);
         file.transform(includeLowering);
         file.transform(CompoundLowering.INSTANCE);
         file.transform(NoopRemovalLowering.INSTANCE);
+        final var context = new EvaluationContext(file, classResolver, infoConsumer, errorConsumer);
         validatePostLowering(context);
         return context;
     }
 
-    public @NotNull AssemblerContext getOrParseAndLowerFile(final @NotNull String path,
-                                                            final @NotNull Function<String, ClassNode> classResolver) throws ValidationException, ParserException {
+    public @NotNull EvaluationContext getOrParseAndLowerFile(final @NotNull String path,
+                                                             final @NotNull Function<String, ClassNode> classResolver) throws ValidationException, ParserException {
         return lower(getOrParseFile(path), classResolver);
     }
 

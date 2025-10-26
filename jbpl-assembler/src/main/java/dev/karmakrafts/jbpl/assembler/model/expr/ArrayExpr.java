@@ -16,8 +16,8 @@
 
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeCommonizer;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeMapper;
@@ -35,11 +35,11 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
     public static final int VALUES_INDEX = 1;
 
     public final boolean hasInferredType;
-    private final XBiFunction<AssemblerContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver;
+    private final XBiFunction<EvaluationContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver;
     private boolean hasUnresolvedType = false; // Whether the type is an Expr or not
     private int valueIndex = 0;
 
-    private ArrayExpr(final @NotNull XBiFunction<AssemblerContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver,
+    private ArrayExpr(final @NotNull XBiFunction<EvaluationContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver,
                       final boolean hasInferredType) {
         this.elementTypeResolver = elementTypeResolver;
         this.hasInferredType = hasInferredType;
@@ -90,40 +90,60 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
     }
 
     public void addValue(final @NotNull Expr value) {
-        getExpressions().add(VALUES_INDEX + valueIndex++, value);
+        if (hasUnresolvedType) {
+            getExpressions().add(VALUES_INDEX + valueIndex++, value);
+            return;
+        }
+        getExpressions().add(valueIndex++, value);
     }
 
     public void addValues(final @NotNull Collection<Expr> values) {
-        getExpressions().addAll(VALUES_INDEX + valueIndex, values);
-        valueIndex++;
+        if (hasUnresolvedType) {
+            getExpressions().addAll(VALUES_INDEX + valueIndex, values);
+            return;
+        }
+        getExpressions().addAll(valueIndex++, values);
+        valueIndex += values.size();
     }
 
     public @NotNull Expr getValue(final int index) {
-        return getExpressions().get(VALUES_INDEX + index);
+        if (hasUnresolvedType) {
+            return getExpressions().get(VALUES_INDEX + index);
+        }
+        return getExpressions().get(index);
     }
 
     public @NotNull List<Expr> getValues() {
         final var expressions = getExpressions();
-        return expressions.subList(VALUES_INDEX, expressions.size() - 1);
+        if (hasUnresolvedType) {
+            return expressions.subList(VALUES_INDEX, expressions.size());
+        }
+        return expressions;
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) throws EvaluationException { // @formatter:off
+    public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException { // @formatter:off
         return elementTypeResolver.apply(context, TypeCommonizer.getCommonType(getExpressions().stream()
-            .map(ExceptionUtils.propagateUnchecked(expr -> expr.getType(context)))
+            .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
             .toList()));
     } // @formatter:on
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getType(context);
-        final var clazz = TypeMapper.map(type); // Map type to runtime class
         final var values = getValues();
         final var size = values.size();
-        final var array = Array.newInstance(clazz.componentType(), size);
+        final var array = Array.newInstance(TypeMapper.map(type), size);
         for (var i = 0; i < size; ++i) {
             Array.set(array, i, values.get(i).evaluateAsConst(context, Object.class));
         }
         context.pushValue(LiteralExpr.of(array));
+    }
+
+    @Override
+    public @NotNull ArrayExpr copy() {
+        final var result = copyParentAndSourceTo(new ArrayExpr(elementTypeResolver, hasInferredType));
+        result.addValues(getValues().stream().map(Expr::copy).toList());
+        return result;
     }
 }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
+package dev.karmakrafts.jbpl.assembler.model.instruction;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -42,15 +42,20 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
     }
 
     @Override
-    public @NotNull Opcode getOpcode(final @NotNull AssemblerContext context) {
+    public @NotNull Opcode getOpcode(final @NotNull EvaluationContext context) {
         return opcode;
     }
 
     @Override
-    public void evaluate(@NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
         final var target = getTarget();
         final var label = context.getOrCreateLabelNode(target.evaluateAsConst(context, String.class));
         context.emit(new JumpInsnNode(encodedOpcode, label));
+    }
+
+    @Override
+    public @NotNull JumpInstruction copy() {
+        return copyParentAndSourceTo(new JumpInstruction(opcode, getTarget().copy()));
     }
 }

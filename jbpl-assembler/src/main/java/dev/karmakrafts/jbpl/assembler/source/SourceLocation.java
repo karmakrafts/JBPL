@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler;
+package dev.karmakrafts.jbpl.assembler.source;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface Evaluable {
-    void evaluate(final @NotNull AssemblerContext context) throws EvaluationException;
+public record SourceLocation(@NotNull String path, int line, int column) {
+
 }

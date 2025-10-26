@@ -1,10 +1,10 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import org.jetbrains.annotations.NotNull;
 
 public final class InjectorDecl extends AbstractStatementContainer implements Declaration, ScopeOwner {
@@ -43,7 +43,12 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull EvaluationContext context) {
 
+    }
+
+    @Override
+    public @NotNull InjectorDecl copy() {
+        return copyParentAndSourceTo(new InjectorDecl(target.copy(), selector.copy()));
     }
 }

@@ -1,6 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,12 +33,12 @@ public record IntersectionType(@NotNull List<Type> alternatives) implements Type
     }
 
     @Override
-    public @NotNull Expr createDefaultValue(final @NotNull AssemblerContext context) {
+    public @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) {
         throw new UnsupportedOperationException("Intersection types do not have a default value");
     }
 
     @Override
-    public @NotNull org.objectweb.asm.Type materialize(final @NotNull AssemblerContext context) {
+    public @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) {
         throw new UnsupportedOperationException("Intersection types cannot be materialized");
     }
 

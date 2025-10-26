@@ -3,7 +3,7 @@ package dev.karmakrafts.jbpl.assembler.util;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
-import dev.karmakrafts.jbpl.assembler.model.statement.instruction.Opcode;
+import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.parser.ExprParser;
 import dev.karmakrafts.jbpl.assembler.parser.TypeParser;
 import dev.karmakrafts.jbpl.frontend.JBPLParser;

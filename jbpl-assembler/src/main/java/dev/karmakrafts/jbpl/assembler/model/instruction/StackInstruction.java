@@ -1,7 +1,23 @@
-package dev.karmakrafts.jbpl.assembler.model.statement.instruction;
+/*
+ * Copyright 2025 Karma Krafts & associates
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+package dev.karmakrafts.jbpl.assembler.model.instruction;
+
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -29,12 +45,12 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
     }
 
     @Override
-    public @NotNull Opcode getOpcode(final @NotNull AssemblerContext context) {
+    public @NotNull Opcode getOpcode(final @NotNull EvaluationContext context) {
         return opcode;
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = getOpcode(context).encodedValue;
         final var slotIdObject = getSlot().evaluateAsConst(context, Object.class);
         if (slotIdObject instanceof Integer slotId) {
@@ -42,5 +58,10 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
         }
         // If we fall through the above case, we need to resolve the local using pre-defined locals in the sack frame
         // TODO: context.emit(new VarInsnNode(encodedOpcode, index));
+    }
+
+    @Override
+    public @NotNull StackInstruction copy() {
+        return copyParentAndSourceTo(new StackInstruction(opcode, getSlot().copy()));
     }
 }

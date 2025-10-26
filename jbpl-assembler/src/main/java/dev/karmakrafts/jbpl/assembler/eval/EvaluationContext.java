@@ -1,50 +1,67 @@
-package dev.karmakrafts.jbpl.assembler;
+/*
+ * Copyright 2025 Karma Krafts & associates
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.ScopeOwner;
-import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
-import dev.karmakrafts.jbpl.assembler.model.decl.PreproClassDecl;
-import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
+import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
-import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.scope.Scope;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
-import dev.karmakrafts.jbpl.assembler.util.NamedResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-public final class AssemblerContext {
+public final class EvaluationContext {
     public final AssemblyFile file;
     public final Function<String, ClassNode> classResolver;
-    public final NamedResolver<PreproClassDecl, EvaluationException> preproClassResolver;
-    public final NamedResolver<DefineStatement, EvaluationException> defineResolver;
-    public final NamedResolver<SelectorDecl, EvaluationException> selectorResolver;
-    public final NamedResolver<MacroDecl, EvaluationException> macroResolver;
+    public final Consumer<String> infoConsumer;
+    public final Consumer<String> errorConsumer;
     public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
     private final Stack<StackFrame> frameStack = new Stack<>();
     public int bytecodeVersion = Opcodes.V17;
     public int bytecodeApi = Opcodes.ASM9;
     private boolean hasReturned = false;
 
-    public AssemblerContext(final @NotNull AssemblyFile file,
-                            final @NotNull Function<String, ClassNode> classResolver) {
+    public EvaluationContext(final @NotNull AssemblyFile file,
+                             final @NotNull Function<String, ClassNode> classResolver,
+                             final @NotNull Consumer<String> infoConsumer,
+                             final @NotNull Consumer<String> errorConsumer) {
         this.file = file;
         this.classResolver = classResolver;
-        pushFrame(file); // We always require a root frame for the file itself
-        preproClassResolver = NamedResolver.analyze(file, PreproClassDecl.class, PreproClassDecl::getName);
-        defineResolver = NamedResolver.analyze(file, DefineStatement.class, DefineStatement::getName);
-        selectorResolver = NamedResolver.analyze(file,
-            SelectorDecl.class,
-            selector -> selector.getName().evaluateAsConst(this, String.class));
-        macroResolver = NamedResolver.analyze(file,
-            MacroDecl.class,
-            macro -> macro.getName().evaluateAsConst(this, String.class));
+        this.infoConsumer = infoConsumer;
+        this.errorConsumer = errorConsumer;
+    }
+
+    // TODO: move this someplace else, but ScopeResolver is not a good one..
+    public <E extends NamedElement> @Nullable E resolveByName(final @NotNull Class<E> type,
+                                                              final @NotNull String name) {
+        return peekFrame().scopeResolver.resolve(type,
+            ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
+    }
+
+    public boolean hasRet() {
+        return hasReturned;
     }
 
     public boolean clearRet() {
@@ -111,7 +128,7 @@ public final class AssemblerContext {
         transformClass(className, node -> {
             // @formatter:off
             final var target = node.methods.stream()
-                .filter(method -> org.objectweb.asm.Type.getMethodType(method.desc).equals(type))
+                .filter(method -> method.name.equals(name) && org.objectweb.asm.Type.getMethodType(method.desc).equals(type))
                 .findFirst()
                 .orElseThrow();
             // @formatter:on
@@ -127,7 +144,7 @@ public final class AssemblerContext {
         final var mReturnType = returnType.materialize(this);
         // @formatter:off
         final var mParamTypes = Arrays.stream(paramTypes)
-            .map(ExceptionUtils.propagateUnchecked(type -> type.materialize(this)))
+            .map(ExceptionUtils.unsafeFunction(type -> type.materialize(this)))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         removeFunction(className, name, org.objectweb.asm.Type.getMethodType(mReturnType, mParamTypes));
@@ -153,16 +170,13 @@ public final class AssemblerContext {
     public void popFrame() {
         final var lastFrame = frameStack.pop();
         // If the popped frames owner doesn't request frame data to be merged, we return early
-        if (!lastFrame.scope.owner().mergeFrameInstructionsOnFrameExit()) {
+        if (!lastFrame.scope.owner().mergeFrameDataOnFrameExit()) {
             return;
         }
-        // Otherwise we merge the instruction buffer; locals and labels are never merged
-        final var lastInstructionBuffer = lastFrame.instructionBuffer;
-        if (lastInstructionBuffer.size() == 0) {
-            return;
-        }
+        // Otherwise we merge the value stack and instruction buffer; locals and labels are never merged
         final var currentFrame = frameStack.peek();
-        currentFrame.instructionBuffer.add(lastInstructionBuffer);
+        currentFrame.instructionBuffer.add(lastFrame.instructionBuffer);
+        currentFrame.valueStack.addAll(lastFrame.valueStack);
     }
 
     public @NotNull Scope getScope() {
@@ -188,6 +202,7 @@ public final class AssemblerContext {
         for (var i = 0; i < count; ++i) {
             values.add(popValue());
         }
+        Collections.reverse(values);
         return values;
     }
 
@@ -203,21 +218,5 @@ public final class AssemblerContext {
         final var list = new InsnList();
         list.add(getInstructionBuffer());
         return list;
-    }
-
-    public static final class StackFrame {
-        public final Scope scope;
-        public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
-        public final InsnList instructionBuffer = new InsnList();
-        public final HashMap<String, LocalStatement> locals = new HashMap<>();
-        private final HashMap<String, LabelNode> labelNodes = new HashMap<>();
-
-        public StackFrame(final @NotNull Scope scope) {
-            this.scope = scope;
-        }
-
-        public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
-            return labelNodes.computeIfAbsent(name, n -> new LabelNode());
-        }
     }
 }

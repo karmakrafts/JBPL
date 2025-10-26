@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -25,18 +25,18 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) {
         return PreproType.FUNCTION_SIGNATURE;
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var owner = getFunctionOwner().evaluateAsConst(context);
         final var name = getFunctionName().evaluateAsConst(context);
         final var returnType = getFunctionReturnType().evaluateAsConst(context);
         // @formatter:off
         final var paramTypes = getFunctionParameters().stream()
-            .map(ExceptionUtils.propagateUnchecked(expr -> expr.evaluateAsConst(context)))
+            .map(ExceptionUtils.unsafeFunction(expr -> expr.evaluateAsConst(context)))
             .toList();
         // @formatter:on
         final var signature = new FunctionSignatureExpr(owner, name, returnType);
@@ -47,11 +47,11 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
     }
 
     @Override
-    public @NotNull String evaluateAsConstDescriptor(final @NotNull AssemblerContext context) throws EvaluationException {
+    public @NotNull String evaluateAsConstDescriptor(final @NotNull EvaluationContext context) throws EvaluationException {
         final var returnType = getFunctionReturnType().evaluateAsConst(context, Type.class).materialize(context);
         // @formatter:off
         final var paramTypes = getFunctionParameters().stream()
-            .map(ExceptionUtils.propagateUnchecked(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
+            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         return org.objectweb.asm.Type.getMethodDescriptor(returnType, paramTypes);
@@ -84,5 +84,12 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
 
     public @NotNull Expr getFunctionReturnType() {
         return getExpressions().get(RETURN_TYPE_INDEX);
+    }
+
+    @Override
+    public @NotNull FunctionSignatureExpr copy() {
+        return copyParentAndSourceTo(new FunctionSignatureExpr(getFunctionOwner().copy(),
+            getFunctionName().copy(),
+            getFunctionReturnType().copy()));
     }
 }

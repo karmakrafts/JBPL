@@ -1,11 +1,12 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
-import dev.karmakrafts.jbpl.assembler.model.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeMapper;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.Copyable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,12 +43,12 @@ public final class LiteralExpr extends AbstractElement implements Expr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull AssemblerContext context) {
+    public @NotNull Type getType(final @NotNull EvaluationContext context) {
         return type;
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public void evaluate(final @NotNull EvaluationContext context) {
         context.pushValue(this); // Literals push themselves on the stack
     }
 
@@ -67,5 +68,14 @@ public final class LiteralExpr extends AbstractElement implements Expr {
     @Override
     public @NotNull String toString() {
         return String.format("LiteralExpr[type=%s,value=%s]", type, value);
+    }
+
+    @Override
+    public @NotNull LiteralExpr copy() {
+        // If underlying const value implement Copyable, make a copy as well
+        if (value instanceof Copyable<?> copyable) {
+            return copyParentAndSourceTo(new LiteralExpr(type, copyable.copy()));
+        }
+        return copyParentAndSourceTo(new LiteralExpr(type, value));
     }
 }

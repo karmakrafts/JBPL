@@ -63,6 +63,7 @@ KW_F32: 'f32';
 KW_F64: 'f64';
 KW_I8: 'i8';
 
+SPACESHIP: '<=>';
 EQEQ: '==';
 NEQ: '!=';
 LEQ: '<=';

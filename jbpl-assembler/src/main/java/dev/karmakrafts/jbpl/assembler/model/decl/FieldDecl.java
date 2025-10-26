@@ -1,7 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model.decl;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
-import dev.karmakrafts.jbpl.assembler.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -19,7 +19,7 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     public final EnumSet<AccessModifier> accessModifiers = EnumSet.noneOf(AccessModifier.class);
 
-    public FieldDecl(final @NotNull FieldSignatureExpr signature) {
+    public FieldDecl(final @NotNull Expr signature) {
         addExpression(signature);
         addExpression(LiteralExpr.unit()); // Initializer
     }
@@ -32,23 +32,28 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
         elements.set(INITIALIZER_INDEX, initializer);
     }
 
-    public @NotNull Expr getSignature() {
-        return getExpressions().get(SIGNATURE_INDEX);
+    public @NotNull FieldSignatureExpr getSignature() {
+        return (FieldSignatureExpr) getExpressions().get(SIGNATURE_INDEX);
     }
 
-    public void setSignature(final @NotNull Expr signature) {
+    public void setSignature(final @NotNull FieldSignatureExpr signature) {
         getExpressions().set(SIGNATURE_INDEX, signature);
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) throws EvaluationException {
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
         final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
         final var modifier = AccessModifier.combine(accessModifiers);
         final var name = signature.getFieldName().evaluateAsConst(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
         final var initialValue = getInitializer().evaluateAsConstAndMaterialize(context);
-        final var node = new FieldNode(context.bytecodeVersion, modifier, name, descriptor, descriptor, initialValue);
+        final var node = new FieldNode(context.bytecodeApi, modifier, name, descriptor, descriptor, initialValue);
         context.addField(owner.name(), node);
+    }
+
+    @Override
+    public @NotNull FieldDecl copy() {
+        return copyParentAndSourceTo(new FieldDecl(getSignature().copy()));
     }
 }

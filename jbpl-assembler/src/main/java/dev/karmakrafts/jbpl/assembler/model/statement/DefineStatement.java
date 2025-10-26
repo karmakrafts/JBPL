@@ -1,12 +1,13 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
-import dev.karmakrafts.jbpl.assembler.AssemblerContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
-public final class DefineStatement extends AbstractExprContainer implements Statement {
+public final class DefineStatement extends AbstractExprContainer implements Statement, NamedElement {
     public static final int VALUE_INDEX = 0;
     public String name;
     public Type type;
@@ -30,6 +31,16 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     }
 
     @Override
-    public void evaluate(final @NotNull AssemblerContext context) {
+    public @NotNull String getName(final @NotNull EvaluationContext context) {
+        return name;
+    }
+
+    @Override
+    public void evaluate(final @NotNull EvaluationContext context) {
+    }
+
+    @Override
+    public @NotNull DefineStatement copy() {
+        return copyParentAndSourceTo(new DefineStatement(name, type, getValue().copy()));
     }
 }
