@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +38,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return getMacro(context).getReturnType().evaluateAsConst(context, Type.class);
     }
 
-    private @NotNull List<Pair<@Nullable String, LiteralExpr>> resolveArguments(final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull List<Pair<@Nullable String, LiteralExpr>> evaluateArguments(final @NotNull EvaluationContext context) throws EvaluationException {
         // @formatter:off
         return getArguments().stream()
             .map(ExceptionUtils.unsafeFunction(pair -> {
@@ -53,11 +53,12 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         // @formatter:on
     }
 
-    private @NotNull Map<String, Expr> remapArguments(final @NotNull EvaluationContext context,
-                                                      final @NotNull MacroDecl macro) throws EvaluationException {
-        final var resolvedArgs = resolveArguments(context);
-        final var arguments = new LinkedHashMap<String, Expr>();
-        final var parameters = new ArrayList<>(macro.resolveParameters(context).entrySet());
+    private @NotNull Map<String, Expr> resolveArguments(final @NotNull EvaluationContext context,
+                                                        final @NotNull MacroDecl macro,
+                                                        final @NotNull Map<String, Type> resolvedParameters) throws EvaluationException {
+        final var resolvedArgs = evaluateArguments(context);
+        final var arguments = new HashMap<String, Expr>();
+        final var parameters = new ArrayList<>(resolvedParameters.entrySet());
         var currentArgIndex = 0;
         for (final var resolvedArg : resolvedArgs) {
             final var name = resolvedArg.left();
@@ -84,10 +85,21 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return arguments;
     }
 
+    private @NotNull List<Expr> remapArguments(final @NotNull EvaluationContext context,
+                                               final @NotNull MacroDecl macro) throws EvaluationException {
+        final var params = macro.resolveParameters(context);
+        final var arguments = resolveArguments(context, macro, params);
+        final var sequentialArguments = new ArrayList<Expr>();
+        for (final var paramName : params.keySet()) {
+            sequentialArguments.add(arguments.get(paramName));
+        }
+        return sequentialArguments;
+    }
+
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var macro = getMacro(context);
-        final var arguments = remapArguments(context, macro).values();
+        final var arguments = remapArguments(context, macro);
         context.pushFrame(macro); // Create new stack frame for macro body
         context.pushValues(arguments); // Push arguments into callee stack frame
         macro.evaluate(context);

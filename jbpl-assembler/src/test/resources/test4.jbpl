@@ -59,3 +59,9 @@ public static fun <com/example/Example>.testing(): void {
 ^info "Value from sub-array is ${${sub_arr}[0]}"
 
 public static field <com/example/Example>.test: i32 = ${md_arr}[0][0]
+
+^macro print_pos(x: i32, y: i32, z: i32) {
+    ^info "Position at [${${x}}, ${${y}}, ${${z}}]"
+}
+
+print_pos^(z: 2, x: 4, y: 6)
