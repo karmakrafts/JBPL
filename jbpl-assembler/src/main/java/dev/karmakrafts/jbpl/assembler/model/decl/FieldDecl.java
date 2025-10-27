@@ -7,7 +7,9 @@ import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.FieldNode;
 
@@ -21,7 +23,7 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     public FieldDecl(final @NotNull Expr signature) {
         addExpression(signature);
-        addExpression(LiteralExpr.unit()); // Initializer
+        addExpression(LiteralExpr.unit());
     }
 
     public @NotNull Expr getInitializer() {
@@ -51,7 +53,15 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
         final var modifier = AccessModifier.combine(accessModifiers);
         final var name = signature.getFieldName().evaluateAsConst(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
-        final var initialValue = getInitializer().evaluateAsConstAndMaterialize(context);
+        final var initializer = getInitializer();
+        final var initializerType = initializer.getType(context);
+        final var fieldType = signature.getFieldType().evaluateAsConst(context, Type.class);
+        // @formatter:off
+        // Handle cases where the initializer never gets updated from unit-expr by creating default value from field type
+        final var initialValue = initializerType == BuiltinType.VOID
+            ? fieldType.createDefaultValue(context).evaluateAsConstAndMaterialize(context)
+            : initializer.evaluateAsConstAndMaterialize(context);
+        // @formatter:on
         final var node = new FieldNode(context.bytecodeApi, modifier, name, descriptor, descriptor, initialValue);
         context.addField(owner.name(), node);
     }
