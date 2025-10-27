@@ -54,7 +54,6 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     }
 
     private @NotNull Map<String, Expr> resolveArguments(final @NotNull EvaluationContext context,
-                                                        final @NotNull MacroDecl macro,
                                                         final @NotNull Map<String, Type> resolvedParameters) throws EvaluationException {
         final var resolvedArgs = evaluateArguments(context);
         final var arguments = new HashMap<String, Expr>();
@@ -88,7 +87,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     private @NotNull List<Expr> remapArguments(final @NotNull EvaluationContext context,
                                                final @NotNull MacroDecl macro) throws EvaluationException {
         final var params = macro.resolveParameters(context);
-        final var arguments = resolveArguments(context, macro, params);
+        final var arguments = resolveArguments(context, params);
         final var sequentialArguments = new ArrayList<Expr>();
         for (final var paramName : params.keySet()) {
             sequentialArguments.add(arguments.get(paramName));

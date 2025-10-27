@@ -12,6 +12,10 @@ public sealed interface Type permits ArrayType, BuiltinType, ClassType, Intersec
 
     @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) throws EvaluationException;
 
+    default boolean isAssignableFrom(final @NotNull Type other) {
+        return equals(other);
+    }
+
     default @NotNull ArrayType array() {
         return new ArrayType(this);
     }

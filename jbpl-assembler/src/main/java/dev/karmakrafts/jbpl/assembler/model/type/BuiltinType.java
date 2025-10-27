@@ -84,4 +84,17 @@ public enum BuiltinType implements Type {
     public String toString() {
         return name().toLowerCase(Locale.ROOT);
     }
+
+    @Override
+    public boolean isAssignableFrom(final @NotNull Type other) {
+        return switch (category) {
+            // We need to take into account implicit widening conversions here
+            case INTEGER, FLOAT -> switch (other.getCategory()) {
+                // If the incoming type is smaller than the type we assign to, we allow assignment
+                case INTEGER, FLOAT -> ((BuiltinType) other).ordinal() <= ordinal();
+                default -> Type.super.isAssignableFrom(other);
+            };
+            default -> Type.super.isAssignableFrom(other);
+        };
+    }
 }
