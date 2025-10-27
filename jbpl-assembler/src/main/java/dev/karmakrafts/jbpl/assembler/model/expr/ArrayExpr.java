@@ -125,15 +125,15 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException { // @formatter:off
         return elementTypeResolver.apply(context, TypeCommonizer.getCommonType(getExpressions().stream()
             .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
-            .toList()));
+            .toList())).array();
     } // @formatter:on
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var type = getType(context);
+        final var type = TypeMapper.map(getType(context));
         final var values = getValues();
         final var size = values.size();
-        final var array = Array.newInstance(TypeMapper.map(type), size);
+        final var array = Array.newInstance(type.componentType(), size);
         for (var i = 0; i < size; ++i) {
             Array.set(array, i, values.get(i).evaluateAsConst(context, Object.class));
         }

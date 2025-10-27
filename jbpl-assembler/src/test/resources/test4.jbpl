@@ -45,3 +45,13 @@ public static fun <com/example/Example>.testing(): void {
 
 ^define xxx: i32 = 10
 ^info "Call to testing returned ${testing^(${y})}"
+
+^info "xxx is i32: ${${xxx} is i32}"
+
+^define arr: [i32] = []{0, 1, 2, 4, 8, 16}
+^define arr_idx: i32 = 2
+^info "Value 2 from arr is ${${arr}[${arr_idx}]}"
+
+^define md_arr: [[i32]] = []{[]{0}, []{1}}
+^define sub_arr: [i32] = ${md_arr}[0]
+^info "Value from sub-array is ${${sub_arr}}"
