@@ -29,7 +29,9 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     }
 
     public void setInitializer(final @NotNull Expr initializer) {
-        elements.set(INITIALIZER_INDEX, initializer);
+        getInitializer().setParent(null);
+        initializer.setParent(this);
+        getExpressions().set(INITIALIZER_INDEX, initializer);
     }
 
     public @NotNull FieldSignatureExpr getSignature() {
@@ -37,6 +39,8 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     }
 
     public void setSignature(final @NotNull FieldSignatureExpr signature) {
+        getSignature().setParent(null);
+        signature.setParent(this);
         getExpressions().set(SIGNATURE_INDEX, signature);
     }
 
@@ -54,6 +58,9 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     @Override
     public @NotNull FieldDecl copy() {
-        return copyParentAndSourceTo(new FieldDecl(getSignature().copy()));
+        final var field = copyParentAndSourceTo(new FieldDecl(getSignature().copy()));
+        field.accessModifiers.addAll(accessModifiers);
+        field.addExpressions(getExpressions().stream().map(Expr::copy).toList());
+        return copyParentAndSourceTo(field);
     }
 }
