@@ -1,9 +1,11 @@
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +13,7 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     public static final int VALUE_INDEX = 0;
     public String name;
     public Type type;
+    private LiteralExpr evaluatedValue;
 
     public DefineStatement(final @NotNull String name, final @NotNull Type type, final @NotNull Expr value) {
         this.name = name;
@@ -33,6 +36,13 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) {
         return name;
+    }
+
+    public @NotNull LiteralExpr getOrEvaluateValue(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (evaluatedValue != null) {
+            return evaluatedValue;
+        }
+        return evaluatedValue = getValue().evaluateAsConst(context);
     }
 
     @Override

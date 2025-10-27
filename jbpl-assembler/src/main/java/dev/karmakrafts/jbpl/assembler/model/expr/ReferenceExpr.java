@@ -46,7 +46,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
             return;
         }
         // Otherwise resolve as define
-        context.pushValue(getDefine(context).getValue().evaluateAsConst(context));
+        context.pushValue(getDefine(context).getOrEvaluateValue(context));
     }
 
     @Override
