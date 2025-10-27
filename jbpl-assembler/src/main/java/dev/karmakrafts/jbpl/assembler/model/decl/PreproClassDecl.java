@@ -5,20 +5,28 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class PreproClassDecl extends AbstractExprContainer implements Declaration, NamedElement {
-    public String name;
+    public static final int NAME_INDEX = 0;
 
-    public PreproClassDecl(final @NotNull String name) {
-        this.name = name;
+    public PreproClassDecl(final @NotNull Expr name) {
+        addExpression(name);
     }
 
-    public @NotNull String getName() {
-        return name;
+    public @NotNull Expr getName() {
+        return getExpressions().get(NAME_INDEX);
+    }
+
+    public void setName(final @NotNull Expr name) {
+        getName().setParent(null);
+        name.setParent(this);
+        getExpressions().set(NAME_INDEX, name);
     }
 
     public void addFields(final @NotNull Map<Expr, Expr> fields) {
@@ -38,6 +46,12 @@ public final class PreproClassDecl extends AbstractExprContainer implements Decl
     public void addField(final @NotNull Expr name, final @NotNull Expr type) {
         addExpression(name);
         addExpression(type);
+    }
+
+    public void addFields(final @NotNull Iterable<Pair<Expr, Expr>> fields) {
+        for (final var pair : fields) {
+            addField(pair.left(), pair.right());
+        }
     }
 
     public @NotNull Expr getFieldName(final int index) {
@@ -82,7 +96,7 @@ public final class PreproClassDecl extends AbstractExprContainer implements Decl
 
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
-        return name;
+        return getName().evaluateAsConst(context, String.class);
     }
 
     @Override
@@ -91,6 +105,12 @@ public final class PreproClassDecl extends AbstractExprContainer implements Decl
 
     @Override
     public @NotNull PreproClassDecl copy() {
-        return copyParentAndSourceTo(new PreproClassDecl(getName()));
+        final var clazz = copyParentAndSourceTo(new PreproClassDecl(getName().copy()));
+        // @formatter:off
+        clazz.addFields(getFields().entrySet().stream()
+            .map(entry -> new Pair<>(entry.getKey().copy(), entry.getValue().copy()))
+            .collect(Collectors.toMap(Pair::left, Pair::right)));
+        // @formatter:on
+        return clazz;
     }
 }

@@ -155,7 +155,7 @@ enumDecl:
 
 preproClass:
     KW_PREPRO_CLASS
-    IDENT
+    refOrName
     L_PAREN
     (parameter
     (COMMA

@@ -111,7 +111,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
 
     @Override
     public @NotNull List<Declaration> visitPreproClass(final @NotNull PreproClassContext ctx) {
-        final var name = ctx.IDENT().getText();
+        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
         final var clazz = new PreproClassDecl(name);
         clazz.addFields(ParserUtils.parseParameters(ctx.parameter()));
         return List.of(clazz);
