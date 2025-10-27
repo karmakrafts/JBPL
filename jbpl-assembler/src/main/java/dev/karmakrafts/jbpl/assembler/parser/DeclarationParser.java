@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.Order;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
@@ -93,7 +94,11 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitMacro(final @NotNull MacroContext ctx) {
         final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        final var returnType = ParserUtils.parseRefOrType(ctx.refOrType());
+        // @formatter:off
+        final var returnType = ctx.refOrType() != null
+            ? ParserUtils.parseRefOrType(ctx.refOrType())
+            : LiteralExpr.of(BuiltinType.VOID);
+        // @formatter:on
         final var macro = new MacroDecl(name, returnType);
         // @formatter:off
         macro.addElements(ctx.bodyElement().stream()
