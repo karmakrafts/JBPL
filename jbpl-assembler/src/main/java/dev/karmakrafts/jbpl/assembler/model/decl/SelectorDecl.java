@@ -8,6 +8,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
+import dev.karmakrafts.jbpl.assembler.source.SourceOrigin;
 import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
@@ -63,7 +64,7 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         return selector;
     }
 
-    public sealed interface Condition extends SourceOwner, Copyable<Condition> {
+    public interface Condition extends SourceOwner, Copyable<Condition> {
         @NotNull Order order();
     }
 
@@ -96,6 +97,11 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         public @NotNull OpcodeCondition copy() {
             return copySourcesTo(new OpcodeCondition(order, opcode));
         }
+
+        @Override
+        public @NotNull SourceOrigin getOrigin() {
+            return new SourceOrigin.Synthetic(); // TODO: fix this
+        }
     }
 
     public static final class InstructionCondition implements Condition {
@@ -126,6 +132,11 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         @Override
         public @NotNull InstructionCondition copy() {
             return copySourcesTo(new InstructionCondition(order, instruction));
+        }
+
+        @Override
+        public @NotNull SourceOrigin getOrigin() {
+            return new SourceOrigin.Synthetic(); // TODO: fix this
         }
     }
 }

@@ -52,4 +52,9 @@ public record Scope( // @formatter:off
         }
         return null;
     }
+
+    @Override
+    public @NotNull String toString() {
+        return owner.toString();
+    }
 }

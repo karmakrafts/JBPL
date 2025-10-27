@@ -77,4 +77,9 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
         result.addElements(getElements().stream().map(Element::copy).toList());
         return result;
     }
+
+    @Override
+    public String toString() {
+        return path;
+    }
 }

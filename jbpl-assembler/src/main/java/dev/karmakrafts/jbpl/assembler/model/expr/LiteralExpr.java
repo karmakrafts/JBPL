@@ -67,7 +67,7 @@ public final class LiteralExpr extends AbstractElement implements Expr {
 
     @Override
     public @NotNull String toString() {
-        return String.format("LiteralExpr[type=%s,value=%s]", type, value);
+        return value.toString();
     }
 
     @Override

@@ -16,17 +16,12 @@
 
 package dev.karmakrafts.jbpl.assembler.source;
 
-import org.jetbrains.annotations.NotNull;
+import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 
-public interface SourceOwner {
-    @NotNull SourceOrigin getOrigin();
-
-    @NotNull TokenRange getTokenRange();
-
-    void setTokenRange(final @NotNull TokenRange tokenRange);
-
-    default <O extends SourceOwner> @NotNull O copySourcesTo(final @NotNull O element) {
-        element.setTokenRange(getTokenRange());
-        return element;
-    }
+public sealed interface SourceOrigin {
+    // @formatter:off
+    record File(AssemblyFile file) implements SourceOrigin { }
+    record Include(AssemblyFile file, AssemblyFile includedFile) implements SourceOrigin { }
+    record Synthetic() implements SourceOrigin { }
+    // @formatter:on
 }

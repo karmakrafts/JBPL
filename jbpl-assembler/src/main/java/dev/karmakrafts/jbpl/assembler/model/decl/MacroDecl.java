@@ -137,4 +137,9 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
         macro.addElements(getElements().stream().map(Element::copy).toList());
         return macro;
     }
+
+    @Override
+    public String toString() {
+        return String.format("^macro %s(...)", name);
+    }
 }
