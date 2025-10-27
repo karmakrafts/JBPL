@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
+import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +49,9 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
 
     @Override
     public @NotNull FunctionDecl copy() {
-        return copyParentAndSourceTo(new FunctionDecl(getSignature().copy()));
+        final var function = copyParentAndSourceTo(new FunctionDecl(getSignature().copy()));
+        function.accessModifiers.addAll(accessModifiers);
+        function.addStatements(getStatements().stream().map(Statement::copy).toList());
+        return copyParentAndSourceTo(function);
     }
 }
