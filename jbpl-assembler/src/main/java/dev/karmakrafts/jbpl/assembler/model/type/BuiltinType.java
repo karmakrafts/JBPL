@@ -50,7 +50,7 @@ public enum BuiltinType implements Type {
     }
 
     public static @NotNull Optional<BuiltinType> findByBoxedType(final @NotNull Class<?> boxedType) {
-        return Arrays.stream(values()).filter(t -> t.type == boxedType).findFirst();
+        return Arrays.stream(values()).filter(t -> t.boxedType == boxedType).findFirst();
     }
 
     @Override

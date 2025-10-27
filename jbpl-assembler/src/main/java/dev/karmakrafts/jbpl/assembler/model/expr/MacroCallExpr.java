@@ -54,7 +54,8 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     }
 
     private @NotNull Map<String, Expr> resolveArguments(final @NotNull EvaluationContext context,
-                                                        final @NotNull Map<String, Type> resolvedParameters) throws EvaluationException {
+                                                        final @NotNull Map<String, Type> resolvedParameters,
+                                                        final @NotNull MacroDecl macro) throws EvaluationException {
         final var resolvedArgs = evaluateArguments(context);
         final var arguments = new HashMap<String, Expr>();
         final var parameters = new ArrayList<>(resolvedParameters.entrySet());
@@ -71,13 +72,30 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     .orElseThrow(EvaluationException::new); // TODO: add better error messagge
                 // @formatter:on
                 final var paramType = parameter.getValue();
-                // TODO: typechecking goes here
+                if (!paramType.isAssignableFrom(valueType)) {
+                    throw new EvaluationException(String.format(
+                        "Mismatched argument type %s for parameter %s: %s in macro %s",
+                        valueType,
+                        name,
+                        paramType,
+                        macro.getName(context)), value // TODO: is this a good target?
+                    );
+                }
                 arguments.put(name, value);
                 currentArgIndex = parameters.indexOf(parameter) + 1;
                 continue;
             }
             final var parameter = parameters.get(currentArgIndex);
-            // TODO: type checking goes here
+            final var paramType = parameter.getValue();
+            if (!paramType.isAssignableFrom(valueType)) {
+                throw new EvaluationException(String.format(
+                    "Mismatched argument type %s for parameter %s: %s in macro %s",
+                    valueType,
+                    parameter.getKey(),
+                    paramType,
+                    macro.getName(context)), value // TODO: is this a good target?
+                );
+            }
             arguments.put(parameter.getKey(), value);
             currentArgIndex++;
         }
@@ -87,7 +105,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     private @NotNull List<Expr> remapArguments(final @NotNull EvaluationContext context,
                                                final @NotNull MacroDecl macro) throws EvaluationException {
         final var params = macro.resolveParameters(context);
-        final var arguments = resolveArguments(context, params);
+        final var arguments = resolveArguments(context, params, macro);
         final var sequentialArguments = new ArrayList<Expr>();
         for (final var paramName : params.keySet()) {
             sequentialArguments.add(arguments.get(paramName));
