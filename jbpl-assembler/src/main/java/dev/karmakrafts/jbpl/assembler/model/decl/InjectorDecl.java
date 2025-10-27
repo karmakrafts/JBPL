@@ -4,6 +4,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
+import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,11 +45,13 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) {
-
+        // TODO: implement this
     }
 
     @Override
     public @NotNull InjectorDecl copy() {
-        return copyParentAndSourceTo(new InjectorDecl(target.copy(), selector.copy()));
+        final var injector = copyParentAndSourceTo(new InjectorDecl(target.copy(), selector.copy()));
+        injector.addStatements(getStatements().stream().map(Statement::copy).toList());
+        return injector;
     }
 }
