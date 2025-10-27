@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public final class AssemblyFile extends AbstractElementContainer implements ScopeOwner {
     public final String path;
@@ -21,7 +22,14 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
         this.path = path;
     }
 
-    public @NotNull SourceRange getSourceRange(final TokenRange range) {
+    public @NotNull List<Token> getTokens(final @NotNull TokenRange range) {
+        if (range.isUndefined() || range.isSynthetic()) {
+            return List.of();
+        }
+        return source.subList(range.start(), range.end() + 1); // subList toIndex is exclusive
+    }
+
+    public @NotNull SourceRange getSourceRange(final @NotNull TokenRange range) {
         if (range.isUndefined() || range.isSynthetic()) {
             return new SourceRange(path, 0, 0, 0, 0);
         }
@@ -34,7 +42,7 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
             lastToken.getCharPositionInLine());
     }
 
-    public @NotNull SourceLocation getSourceLocation(final TokenRange range) {
+    public @NotNull SourceLocation getSourceLocation(final @NotNull TokenRange range) {
         if (range.isUndefined() || range.isSynthetic()) {
             return new SourceLocation(path, 0, 0);
         }

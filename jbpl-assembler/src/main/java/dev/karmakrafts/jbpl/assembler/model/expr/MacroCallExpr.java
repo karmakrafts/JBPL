@@ -69,17 +69,16 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                 final var parameter = parameters.stream()
                     .filter(entry -> entry.getKey().equals(name))
                     .findFirst()
-                    .orElseThrow(EvaluationException::new); // TODO: add better error messagge
+                    .orElseThrow(EvaluationException::new); // TODO: add better error message
                 // @formatter:on
                 final var paramType = parameter.getValue();
                 if (!paramType.isAssignableFrom(valueType)) {
                     throw new EvaluationException(String.format(
-                        "Mismatched argument type %s for parameter %s: %s in macro %s",
+                        "Mismatched argument type %s for parameter %s: %s in call to macro %s",
                         valueType,
                         name,
                         paramType,
-                        macro.getName(context)), value // TODO: is this a good target?
-                    );
+                        macro.getName(context)), this, value);
                 }
                 arguments.put(name, value);
                 currentArgIndex = parameters.indexOf(parameter) + 1;
@@ -89,12 +88,11 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
             final var paramType = parameter.getValue();
             if (!paramType.isAssignableFrom(valueType)) {
                 throw new EvaluationException(String.format(
-                    "Mismatched argument type %s for parameter %s: %s in macro %s",
+                    "Mismatched argument type %s for parameter %s: %s in call to macro %s",
                     valueType,
                     parameter.getKey(),
                     paramType,
-                    macro.getName(context)), value // TODO: is this a good target?
-                );
+                    macro.getName(context)), this, value);
             }
             arguments.put(parameter.getKey(), value);
             currentArgIndex++;

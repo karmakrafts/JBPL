@@ -7,8 +7,7 @@ import dev.karmakrafts.jbpl.assembler.lower.NoopRemovalLowering;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
-import dev.karmakrafts.jbpl.assembler.source.SourceLocation;
-import dev.karmakrafts.jbpl.assembler.source.SourceRange;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
 import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
@@ -180,8 +179,11 @@ public final class Assembler {
                                 final int charPositionInLine,
                                 final @NotNull String msg,
                                 final @NotNull RecognitionException e) {
-            final var location = new SourceLocation(file.path, line, charPositionInLine);
-            throw new SyntaxError(new ParserException(msg, e, file, SourceRange.of(location)));
+            final var token = (Token) offendingSymbol;
+            if (token == null) { // TODO: improve this..
+                throw new SyntaxError(new ParserException(msg, e, file, null));
+            }
+            throw new SyntaxError(new ParserException(msg, e, file, TokenRange.fromToken(token)));
         }
 
         @Override
