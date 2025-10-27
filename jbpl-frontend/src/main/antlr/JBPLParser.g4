@@ -121,11 +121,22 @@ macroCall:
     IDENT
     CARET
     L_PAREN
-    (expr
+    (argument
     (COMMA
-    expr)*
+    argument)*
     )?
     R_PAREN
+    ;
+
+argument:
+    namedArgument
+    | expr
+    ;
+
+namedArgument:
+    refOrName
+    COLON
+    expr
     ;
 
 classDecl:
@@ -188,9 +199,9 @@ intersectionType:
 preproClassInstantiation:
     IDENT
     L_PAREN
-    (expr
+    (argument
     (COMMA
-    expr)*
+    argument)*
     )?
     R_PAREN
     ;

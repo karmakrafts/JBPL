@@ -17,5 +17,13 @@
 package dev.karmakrafts.jbpl.assembler.util;
 
 public interface Copyable<C extends Copyable<C>> {
+    @SuppressWarnings("unchecked")
+    static <T> T copyIfPossible(final T value) {
+        if (value instanceof Copyable<?> copyable) {
+            return (T) copyable.copy();
+        }
+        return value;
+    }
+
     C copy();
 }

@@ -4,10 +4,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class CollectionUtils {
     private CollectionUtils() {
+    }
+
+    public static <T> int indexOf(final @NotNull List<T> elements, final @NotNull Predicate<T> predicate) {
+        for (var i = 0; i < elements.size(); i++) {
+            if (!predicate.test(elements.get(i))) {
+                continue;
+            }
+            return i;
+        }
+        return -1;
     }
 
     public static <T, C extends Collection<T>> @NotNull C intersect(final @NotNull C a,

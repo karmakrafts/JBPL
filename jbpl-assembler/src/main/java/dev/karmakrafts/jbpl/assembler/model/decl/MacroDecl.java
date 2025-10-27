@@ -6,6 +6,7 @@ import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -76,6 +77,20 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
         return parameterTypes;
     }
 
+    public @NotNull Map<String, Type> resolveParameters(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var params = getParameters().entrySet();
+        if (params.isEmpty()) {
+            return Map.of();
+        }
+        final var resolvedParams = new LinkedHashMap<String, Type>();
+        for (final var entry : params) {
+            final var name = entry.getKey().evaluateAsConst(context, String.class);
+            final var type = entry.getValue().evaluateAsConst(context, Type.class);
+            resolvedParams.put(name, type);
+        }
+        return resolvedParams;
+    }
+
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
         return name.evaluateAsConst(context, String.class);
@@ -85,17 +100,17 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         // Pop as many args as we have param types from callee frame
         final var argumentValues = context.popValues(parameterTypes.size());
+        final var paramNames = resolveParameters(context).keySet();
         final var arguments = new HashMap<String, Expr>();
         var index = 0;
-        for (final var entry : parameterTypes.entrySet()) {
-            final var name = entry.getKey().evaluateAsConst(context, String.class);
+        for (final var name : paramNames) {
             arguments.put(name, argumentValues.get(index++));
         }
         context.peekFrame().arguments.putAll(arguments); // Make current macro args available to child elements
         final var elements = getElements();
         for (final var element : elements) {
             element.evaluate(context);
-            if (context.clearRet()) {
+            if (context.clearRet()) { // Macro scope always clears the return flag
                 break;
             }
         }

@@ -11,12 +11,27 @@ import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public final class ParserUtils {
     private ParserUtils() {
     }
+
+    public static @NotNull Pair<@Nullable Expr, Expr> parseArgument(final @NotNull ArgumentContext ctx) {
+        final var namedCtx = ctx.namedArgument();
+        if (namedCtx != null) {
+            return new Pair<>(ParserUtils.parseRefOrName(namedCtx.refOrName()), ExprParser.parse(namedCtx.expr()));
+        }
+        return new Pair<>(null, ExprParser.parse(ctx.expr()));
+    }
+
+    public static @NotNull List<Pair<@Nullable Expr, Expr>> parseArguments(final @NotNull List<ArgumentContext> args) { // @formatter:off
+        return args.stream()
+            .map(ParserUtils::parseArgument)
+            .toList();
+    } // @formatter:on
 
     public static @NotNull Optional<AccessModifier> parseAccessModifier(final @NotNull AccessModifierContext ctx) {
         // @formatter:off

@@ -9,6 +9,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
 import dev.karmakrafts.jbpl.assembler.model.instruction.*;
 import dev.karmakrafts.jbpl.assembler.model.statement.*;
+import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 public interface ElementVisitor {
@@ -178,6 +179,25 @@ public interface ElementVisitor {
         throw new IllegalStateException("Unsupported expression type");
     }
 
+    // For macro calls & prepro class instantiations
+    default @NotNull Expr visitCallExpr(final @NotNull AbstractCallExpr callExpr) {
+        // @formatter:off
+        final var arguments = callExpr.getArguments().stream()
+            .map(pair -> {
+                final var name = pair.left();
+                final var argument = pair.right();
+                if(name != null) {
+                    return new Pair<>(visitExpr(name), visitExpr(argument));
+                }
+                return new Pair<>((Expr)null, visitExpr(argument));
+            })
+            .toList();
+        // @formatter:on
+        callExpr.clearArguments();
+        callExpr.addArguments(arguments);
+        return visitExprContainer(callExpr);
+    }
+
     default @NotNull Expr visitAsExpr(final @NotNull AsExpr asExpr) {
         return visitExprContainer(asExpr);
     }
@@ -264,11 +284,11 @@ public interface ElementVisitor {
     }
 
     default @NotNull Expr visitMacroCallExpr(final @NotNull MacroCallExpr macroCallExpr) {
-        return visitExprContainer(macroCallExpr);
+        return visitCallExpr(macroCallExpr);
     }
 
     default @NotNull Expr visitClassInstantiationExpr(final @NotNull PreproClassExpr preproClassExpr) {
-        return visitExprContainer(preproClassExpr);
+        return visitCallExpr(preproClassExpr);
     }
 
     default @NotNull Expr visitReferenceExpr(final @NotNull ReferenceExpr referenceExpr) {
@@ -327,7 +347,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull Statement visitVersionStatement(final @NotNull VersionStatement versionStatement) {
-        return versionStatement;
+        return visitExprContainer(versionStatement);
     }
 
     default @NotNull Statement visitCompoundStatement(final @NotNull CompoundStatement compoundStatement) {

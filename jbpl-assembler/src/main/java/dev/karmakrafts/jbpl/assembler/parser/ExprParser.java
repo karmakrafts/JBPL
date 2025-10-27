@@ -89,11 +89,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public @NotNull List<Expr> visitPreproClassInstantiation(final @NotNull PreproClassInstantiationContext ctx) {
         final var type = new PreproClassType(ctx.IDENT().getText());
         final var instantiation = new PreproClassExpr(type);
-        // @formatter:off
-        instantiation.addArguments(ctx.expr().stream()
-            .map(ExprParser::parse)
-            .toList());
-        // @formatter:on
+        instantiation.addArguments(ParserUtils.parseArguments(ctx.argument()));
         return List.of(instantiation);
     }
 
@@ -219,11 +215,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     private @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx, final @NotNull Expr receiver) {
         final var name = ctx.IDENT().getText();
         final var call = new MacroCallExpr(receiver, name);
-        // @formatter:off
-        call.addArguments(ctx.expr().stream()
-            .map(ExprParser::parse)
-            .toList());
-        // @formatter:on
+        call.addArguments(ParserUtils.parseArguments(ctx.argument()));
         return List.of(call);
     }
 

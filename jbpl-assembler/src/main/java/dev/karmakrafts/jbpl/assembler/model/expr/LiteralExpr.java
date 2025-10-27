@@ -72,10 +72,6 @@ public final class LiteralExpr extends AbstractElement implements Expr {
 
     @Override
     public @NotNull LiteralExpr copy() {
-        // If underlying const value implement Copyable, make a copy as well
-        if (value instanceof Copyable<?> copyable) {
-            return copyParentAndSourceTo(new LiteralExpr(type, copyable.copy()));
-        }
-        return copyParentAndSourceTo(new LiteralExpr(type, value));
+        return copyParentAndSourceTo(new LiteralExpr(type, Copyable.copyIfPossible(value)));
     }
 }

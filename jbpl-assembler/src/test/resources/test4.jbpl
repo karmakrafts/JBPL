@@ -17,8 +17,6 @@
 ^define d: i32 = default(${t1})
 ^info ${d}
 
-public static field <com/example/Example>.test: i32 = 0
-
 public static fun <com/example/Example>.testing(): void {
     return
 }
@@ -38,8 +36,12 @@ public static fun <com/example/Example>.testing(): void {
 ^info "HELLO WORLD! ${${comp}}"
 ^info "HELLO WORLD!"
 
+^macro testing2(): i32 {
+    ^return -10
+}
+
 ^macro testing(p: i32): i32 {
-    ^define y: i32 = -10
+    ^define y: i32 = testing2^()
     ^return ${y} * ${p}
 }
 
@@ -54,4 +56,6 @@ public static fun <com/example/Example>.testing(): void {
 
 ^define md_arr: [[i32]] = []{[]{0}, []{1}}
 ^define sub_arr: [i32] = ${md_arr}[0]
-^info "Value from sub-array is ${${sub_arr}}"
+^info "Value from sub-array is ${${sub_arr}[0]}"
+
+public static field <com/example/Example>.test: i32 = ${md_arr}[0][0]

@@ -5,7 +5,14 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
+import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     public String name;
@@ -31,15 +38,56 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return getMacro(context).getReturnType().evaluateAsConst(context, Type.class);
     }
 
+    private @NotNull List<Pair<@Nullable String, LiteralExpr>> resolveArguments(final @NotNull EvaluationContext context) throws EvaluationException {
+        // @formatter:off
+        return getArguments().stream()
+            .map(ExceptionUtils.unsafeFunction(pair -> {
+                final var name = pair.left();
+                final var value = pair.right().evaluateAsConst(context);
+                if(name != null) {
+                    return new Pair<>(name.evaluateAsConst(context, String.class), value);
+                }
+                return new Pair<>((String)null, value);
+            }))
+            .toList();
+        // @formatter:on
+    }
+
+    private @NotNull Map<String, Expr> remapArguments(final @NotNull EvaluationContext context,
+                                                      final @NotNull MacroDecl macro) throws EvaluationException {
+        final var resolvedArgs = resolveArguments(context);
+        final var arguments = new LinkedHashMap<String, Expr>();
+        final var parameters = new ArrayList<>(macro.resolveParameters(context).entrySet());
+        var currentArgIndex = 0;
+        for (final var resolvedArg : resolvedArgs) {
+            final var name = resolvedArg.left();
+            final var value = resolvedArg.right();
+            final var valueType = value.getType(context);
+            if (name != null) {
+                // @formatter:off
+                final var parameter = parameters.stream()
+                    .filter(entry -> entry.getKey().equals(name))
+                    .findFirst()
+                    .orElseThrow(EvaluationException::new); // TODO: add better error messagge
+                // @formatter:on
+                final var paramType = parameter.getValue();
+                // TODO: typechecking goes here
+                arguments.put(name, value);
+                currentArgIndex = parameters.indexOf(parameter) + 1;
+                continue;
+            }
+            final var parameter = parameters.get(currentArgIndex);
+            // TODO: type checking goes here
+            arguments.put(parameter.getKey(), value);
+            currentArgIndex++;
+        }
+        return arguments;
+    }
+
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var macro = getMacro(context);
-        // We need to evaluate all call args in the current frame/context first
-        // @formatter:off
-        final var arguments = getArguments().stream()
-            .map(ExceptionUtils.unsafeFunction(expr -> (Expr)expr.evaluateAsConst(context)))
-            .toList();
-        // @formatter:on
+        final var arguments = remapArguments(context, macro).values();
         context.pushFrame(macro); // Create new stack frame for macro body
         context.pushValues(arguments); // Push arguments into callee stack frame
         macro.evaluate(context);
@@ -49,7 +97,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     @Override
     public @NotNull MacroCallExpr copy() {
         final var call = copyParentAndSourceTo(new MacroCallExpr(getReceiver().copy(), name));
-        call.addArguments(getArguments().stream().map(Expr::copy).toList());
+        call.addArguments(getArguments().stream().map(Pair::copy).toList());
         return call;
     }
 }
