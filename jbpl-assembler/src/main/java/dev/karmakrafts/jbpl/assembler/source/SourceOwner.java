@@ -22,4 +22,9 @@ public interface SourceOwner {
     @NotNull TokenRange getTokenRange();
 
     void setTokenRange(final @NotNull TokenRange tokenRange);
+
+    default <O extends SourceOwner> @NotNull O copySourcesTo(final @NotNull O element) {
+        element.setTokenRange(getTokenRange());
+        return element;
+    }
 }

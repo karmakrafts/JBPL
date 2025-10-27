@@ -10,6 +10,7 @@ import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.Copyable;
 import dev.karmakrafts.jbpl.assembler.util.Order;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +31,8 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
     }
 
     public void setName(final @NotNull Expr name) {
+        getName().setParent(null);
+        name.setParent(this);
         getExpressions().set(NAME_INDEX, name);
     }
 
@@ -38,6 +41,8 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
     }
 
     public void setOffset(final @NotNull Expr offset) {
+        getOffset().setParent(null);
+        offset.setParent(this);
         getExpressions().set(OFFSET_INDEX, offset);
     }
 
@@ -48,14 +53,17 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) {
+        // TODO: implement this
     }
 
     @Override
     public @NotNull SelectorDecl copy() {
-        return copyParentAndSourceTo(new SelectorDecl(getName().copy(), getOffset().copy()));
+        final var selector = copyParentAndSourceTo(new SelectorDecl(getName().copy(), getOffset().copy()));
+        selector.conditions.addAll(conditions.stream().map(Condition::copy).toList());
+        return selector;
     }
 
-    public sealed interface Condition extends SourceOwner {
+    public sealed interface Condition extends SourceOwner, Copyable<Condition> {
         @NotNull Order order();
     }
 
@@ -83,6 +91,11 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         public @NotNull Order order() {
             return order;
         }
+
+        @Override
+        public @NotNull OpcodeCondition copy() {
+            return copySourcesTo(new OpcodeCondition(order, opcode));
+        }
     }
 
     public static final class InstructionCondition implements Condition {
@@ -108,6 +121,11 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         @Override
         public @NotNull Order order() {
             return order;
+        }
+
+        @Override
+        public @NotNull InstructionCondition copy() {
+            return copySourcesTo(new InstructionCondition(order, instruction));
         }
     }
 }

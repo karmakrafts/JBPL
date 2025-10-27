@@ -14,8 +14,7 @@ import java.util.Stack;
 public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
     default <E extends Element> @NotNull E copyParentAndSourceTo(final @NotNull E element) {
         element.setParent(getParent());
-        element.setTokenRange(getTokenRange());
-        return element;
+        return copySourcesTo(element);
     }
 
     @Nullable ElementContainer getParent();
