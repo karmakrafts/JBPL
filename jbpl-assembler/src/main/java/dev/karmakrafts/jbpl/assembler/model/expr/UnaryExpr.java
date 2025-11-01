@@ -69,8 +69,8 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
                 }
                 throw new IllegalStateException(String.format("Unsupported inverse expression operand %s", value));
             }
-            default ->
-                throw new EvaluationException(String.format("Unary operator %s cannot be applied to number", op), SourceDiagnostic.from(this));
+            default -> throw new EvaluationException(String.format("Unary operator %s cannot be applied to number", op),
+                SourceDiagnostic.from(this));
         };
     }
 
@@ -96,7 +96,8 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
             context.pushValue(evaluateForNumber(numberValue));
             return;
         }
-        throw new EvaluationException(String.format("Unary operator %s cannot be applied to %s", op, value), SourceDiagnostic.from(this));
+        throw new EvaluationException(String.format("Unary operator %s cannot be applied to %s", op, value),
+            SourceDiagnostic.from(this));
     }
 
     @Override

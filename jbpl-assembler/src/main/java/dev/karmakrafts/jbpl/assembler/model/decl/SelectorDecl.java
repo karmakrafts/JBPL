@@ -8,7 +8,6 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
-import dev.karmakrafts.jbpl.assembler.source.SourceOrigin;
 import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;

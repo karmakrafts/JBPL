@@ -18,9 +18,11 @@ package dev.karmakrafts.jbpl.assembler.source;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
+import dev.karmakrafts.jbpl.assembler.util.MathUtils;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.MultiMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,20 +66,23 @@ public record SourceDiagnostic( // @formatter:off
             final var maxAllowedLines = highlightedRange.getLineCount() + 2; // One additional line before and after
             if (sortedLines.size() > maxAllowedLines) {
                 // We need to shorten the list to only include the maximum allowed number of lines
-                // TODO: ...
+                final var maxLineIndex = sortedLines.size();
+                final var start = MathUtils.clamp(0, maxLineIndex, highlightedRange.startLine() - 1);
+                final var end = MathUtils.clamp(0, maxLineIndex, highlightedRange.endLine() + 2);
+                sortedLines = sortedLines.subList(start, end);
             }
         }
         return sortedLines;
     }
 
-    @Override
-    public @NotNull String toString() {
+    public @NotNull String render(final @Nullable String message) {
         final var renderedSourceRange = file.getSourceRange(renderedRange);
         if (highlightedRange != null && !renderedSourceRange.contains(highlightedRange)) {
             throw new IllegalStateException("Highlighted source range is outside of element source range");
         }
         final var lines = getRenderedLines();
         final var maxLineNumberLength = lines.stream().mapToInt(SourceLine::getLineNumberLength).max().orElseThrow();
+        final var highlightSpacing = maxLineNumberLength + LINE_NUMBER_SPACING;
         final var builder = new StringBuilder();
         for (final var line : lines) {
             // Build line number with uniform spacing and add line content
@@ -86,8 +91,47 @@ public record SourceDiagnostic( // @formatter:off
             builder.append(" ".repeat(lineNumberSpaceCount));
             builder.append(line);
             // If this line is within the highlighted region, render the highlight below it accordingly
-            if (highlightedRange != null && highlightedRange.containsLine(line.lineIndex())) {
-                // TODO: ...
+            final var lineIndex = line.lineIndex();
+            if (highlightedRange != null && highlightedRange.containsLine(lineIndex)) {
+                final var lineLength = line.getLength();
+                var highlightOffset = 0;
+                var highlightLength = 0;
+                if (highlightedRange.isSingleLine()) {
+                    // If we only highlight a single line, take into account start- and end column
+                    highlightOffset = highlightedRange.startColumn();
+                    highlightLength = (highlightedRange.endColumn() - highlightOffset) + 1;
+                }
+                else {
+                    // Otherwise we are dealing with a multi-line highlight
+                    if (highlightedRange.isFirstLine(lineIndex)) {
+                        // In the first line, we highlight starting at column til the end of the line
+                        highlightOffset = highlightedRange.startColumn();
+                        highlightLength = (lineLength - highlightOffset) + 1;
+                    }
+                    else if (highlightedRange.isLastLine(lineIndex)) {
+                        // In the last line, we highlight from line start to end column
+                        highlightLength = highlightedRange.endColumn();
+                    }
+                    else {
+                        // For any line in between, we highlight the entire line
+                        highlightLength = lineLength;
+                    }
+                }
+                if (highlightLength == 0) {
+                    continue; // If the line length still comes out as 0 chars, we can skip the highlight entirely
+                }
+                if (!line.endsWithNewline()) {
+                    // If the previous source line doesn't end in a \n (last line for example), we need to add one first
+                    builder.append('\n');
+                }
+                builder.append(" ".repeat(highlightSpacing + highlightOffset));
+                builder.append("^".repeat(highlightLength));
+                if (message != null) {
+                    // If a message is specified, render it next to the highlight
+                    builder.append(' ');
+                    builder.append(message);
+                }
+                builder.append('\n'); // Append an additional newline since we're not getting it from the SourceLine here
             }
         }
         return builder.toString();

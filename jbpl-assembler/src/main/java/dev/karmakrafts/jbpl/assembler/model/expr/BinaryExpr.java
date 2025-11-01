@@ -307,7 +307,8 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                                                    final @NotNull EvaluationContext context) throws EvaluationException {
         final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
         if (!(rhsValue instanceof Number rhsNumber)) {
-            throw new EvaluationException("Numeric binary expression must have a number on the right hand side!", SourceDiagnostic.from(this));
+            throw new EvaluationException("Numeric binary expression must have a number on the right hand side!",
+                SourceDiagnostic.from(this));
         }
         if (lhsNumber instanceof Byte lhsByte) {
             return evaluateForByte(lhsByte, rhsNumber);

@@ -35,7 +35,14 @@ public record SourceRange(int startLine, int startColumn, int endLine, int endCo
     }
 
     public int getLineCount() {
+        if (startLine == endLine) {
+            return 1;
+        }
         return endLine - startLine;
+    }
+
+    public boolean isSingleLine() {
+        return startLine == endLine;
     }
 
     public boolean containsLine(final int line) {
@@ -44,6 +51,14 @@ public record SourceRange(int startLine, int startColumn, int endLine, int endCo
 
     public boolean containsColumn(final int line, final int column) {
         return line >= startLine && line <= endLine && column >= startColumn && column <= endColumn;
+    }
+
+    public boolean isFirstLine(final int line) {
+        return line == startLine;
+    }
+
+    public boolean isLastLine(final int line) {
+        return line == endLine;
     }
 
     public boolean contains(final @NotNull SourceRange range) { // @formatter:off

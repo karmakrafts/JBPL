@@ -64,8 +64,8 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             case INVOKESTATIC -> Opcodes.H_INVOKESTATIC;
             case INVOKESPECIAL -> Opcodes.H_INVOKESPECIAL;
             case INVOKEINTERFACE -> Opcodes.H_INVOKEINTERFACE;
-            default ->
-                throw new EvaluationException(String.format("Unsupported invoke tag for opcode %s", opcode), SourceDiagnostic.from(this));
+            default -> throw new EvaluationException(String.format("Unsupported invoke tag for opcode %s", opcode),
+                SourceDiagnostic.from(this));
         };
     }
 

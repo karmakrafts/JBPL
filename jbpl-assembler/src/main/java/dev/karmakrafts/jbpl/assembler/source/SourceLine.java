@@ -36,11 +36,24 @@ public record SourceLine(List<Token> tokens, int lineIndex) implements Comparabl
         return Integer.toString(getLineNumber()).length();
     }
 
+    public int getLength() {
+        return toString().length();
+    }
+
+    public boolean endsWithNewline() {
+        return toString().endsWith("\n");
+    }
+
     @Override
     public @NotNull String toString() {
         if (tokens.isEmpty()) {
             return "";
         }
-        return tokens.stream().map(Token::getText).collect(Collectors.joining());
+        // @formatter:off
+        return tokens.stream()
+            .filter(token -> token.getType() != Token.EOF)
+            .map(Token::getText)
+            .collect(Collectors.joining());
+        // @formatter:on
     }
 }

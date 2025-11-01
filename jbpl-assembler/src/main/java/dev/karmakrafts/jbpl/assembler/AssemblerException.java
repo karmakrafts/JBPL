@@ -36,8 +36,12 @@ public class AssemblerException extends Exception {
             final var path = file.path;
             final var line = highlightedRange.startLine() + 1;
             final var column = highlightedRange.startColumn() + 1;
-            final var error = String.format("Assembler error in %s:%s:%s: ", path, line, column);
-            return error + getMessage() + "\n\n" + diagnostic;
+            final var error = String.format("Error while assembling %s:%s:%s: ", path, line, column);
+            var text = error + "\n\n" + diagnostic.render(getMessage());
+            if (!text.endsWith("\n")) {
+                text += '\n';
+            }
+            return text;
         }
         return super.toString();
     }
