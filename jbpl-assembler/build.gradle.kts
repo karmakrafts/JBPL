@@ -13,6 +13,7 @@ dependencies {
     api(libs.ow2.asm.tree)
     api(libs.annotations)
     implementation(projects.jbplFrontend)
+    implementation(libs.jansi)
 
     testImplementation(libs.junit.api)
     testRuntimeOnly(libs.junit.engine)

@@ -17,6 +17,7 @@ import dev.karmakrafts.jbpl.frontend.JBPLParser;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.fusesource.jansi.AnsiConsole;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -66,6 +67,10 @@ public final class Assembler {
         Opcodes.ASM8,
         Opcodes.ASM9,
         Opcodes.ASM10_EXPERIMENTAL);
+
+    static {
+        AnsiConsole.systemInstall(); // Make sure we have ANSI support enabled for all standard outputs
+    }
 
     private final Function<String, ReadableByteChannel> resourceProvider;
     private final Consumer<String> infoConsumer;

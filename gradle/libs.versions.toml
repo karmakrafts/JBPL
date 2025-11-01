@@ -10,6 +10,7 @@ antlr = "4.13.2" # https://github.com/antlr/antlr4/releases
 annotations = "26.0.2" # https://github.com/JetBrains/java-annotations/releases
 junit = "5.13.4" # https://github.com/junit-team/junit-framework/releases
 junitPlatform = "1.13.4" # https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
+jansi = "3.30.6"
 
 [libraries]
 
@@ -21,6 +22,7 @@ annotations = { module = "org.jetbrains:annotations", version.ref = "annotations
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
+jansi = { module = "org.jline:jline-terminal-jansi", version.ref = "jansi" }
 
 [plugins]
 

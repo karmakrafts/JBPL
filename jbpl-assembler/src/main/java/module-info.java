@@ -4,6 +4,7 @@ module dev.karmakrafts.jbpl.assembler {
     requires org.jetbrains.annotations;
     requires org.antlr.antlr4.runtime;
     requires dev.karmakrafts.jbpl.frontend;
+    requires org.fusesource.jansi;
 
     exports dev.karmakrafts.jbpl.assembler;
     exports dev.karmakrafts.jbpl.assembler.parser;

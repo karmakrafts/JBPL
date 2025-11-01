@@ -36,12 +36,12 @@ public static fun <com/example/Example>.testing(): void {
 ^info "HELLO WORLD! ${${comp}}"
 ^info "HELLO WORLD!"
 
-^macro testing2(): i32 {
+^macro testing2(s: string, x: i32): i32 {
     ^return -10
 }
 
 ^macro testing(p: i32): i32 {
-    ^define y: i32 = testing2^()
+    ^define y: i32 = testing2^("Testing", 200)
     ^return ${y} * ${p}
 }
 

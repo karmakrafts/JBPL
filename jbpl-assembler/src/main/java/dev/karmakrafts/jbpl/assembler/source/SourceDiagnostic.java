@@ -89,7 +89,7 @@ public record SourceDiagnostic( // @formatter:off
             final var lineNumberSpaceCount = (maxLineNumberLength - line.getLineNumberLength()) + LINE_NUMBER_SPACING;
             builder.append(line.getLineNumber());
             builder.append(" ".repeat(lineNumberSpaceCount));
-            builder.append(line);
+            builder.append(line.renderWithColor());
             // If this line is within the highlighted region, render the highlight below it accordingly
             final var lineIndex = line.lineIndex();
             if (highlightedRange != null && highlightedRange.containsLine(lineIndex)) {

@@ -44,6 +44,12 @@ public record SourceLine(List<Token> tokens, int lineIndex) implements Comparabl
         return toString().endsWith("\n");
     }
 
+    public @NotNull String renderWithColor() { // @formatter:off
+        return SourceColorizer.colorize(tokens.stream()
+            .filter(token -> token.getType() != Token.EOF)
+            .toList());
+    } // @formatter:on
+
     @Override
     public @NotNull String toString() {
         if (tokens.isEmpty()) {
