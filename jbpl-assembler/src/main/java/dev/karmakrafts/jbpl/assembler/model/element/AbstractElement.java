@@ -1,6 +1,5 @@
 package dev.karmakrafts.jbpl.assembler.model.element;
 
-import dev.karmakrafts.jbpl.assembler.source.SourceOrigin;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,11 +9,6 @@ public abstract class AbstractElement implements Element {
     public TokenRange tokenRange = TokenRange.UNDEFINED;
 
     protected AbstractElement() {
-    }
-
-    @Override
-    public @NotNull SourceOrigin getOrigin() {
-        return new SourceOrigin.File(getContainingFile()); // Default behaviour
     }
 
     @Override

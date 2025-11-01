@@ -17,43 +17,22 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerException;
-import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.element.Element;
-import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class ParserException extends AssemblerException {
-    public ParserException() {
-        super();
+    public ParserException(final @NotNull String message, final @Nullable SourceDiagnostic diagnostic) {
+        super(message, diagnostic);
     }
 
-    public ParserException(final @Nullable String message,
-                           final @Nullable AssemblyFile file,
-                           final @Nullable TokenRange tokenRange) {
-        super(message, file, tokenRange, getHighlightedRange(file, tokenRange));
+    public ParserException(final @NotNull String message,
+                           final @NotNull Throwable cause,
+                           final @Nullable SourceDiagnostic diagnostic) {
+        super(message, cause, diagnostic);
     }
 
-    public ParserException(final @Nullable String message,
-                           final @Nullable Throwable cause,
-                           final @Nullable AssemblyFile file,
-                           final @Nullable TokenRange tokenRange) {
-        super(message, cause, file, tokenRange, getHighlightedRange(file, tokenRange));
-    }
-
-    public ParserException(final @Nullable Throwable cause,
-                           final @Nullable AssemblyFile file,
-                           final @Nullable TokenRange tokenRange) {
-        super(cause, file, tokenRange, getHighlightedRange(file, tokenRange));
-    }
-
-    public ParserException(final @Nullable String message,
-                           final @Nullable Throwable cause,
-                           final @NotNull Element element) {
-        super(message, cause, element, getHighlightedRange(element.getContainingFile(), element.getTokenRange()));
-    }
-
-    public ParserException(final @Nullable String message, final @NotNull Element element) {
-        super(message, element, getHighlightedRange(element.getContainingFile(), element.getTokenRange()));
+    public ParserException(final @NotNull Throwable cause, final @Nullable SourceDiagnostic diagnostic) {
+        super(cause, diagnostic);
     }
 }

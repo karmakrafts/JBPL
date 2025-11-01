@@ -20,6 +20,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.ArrayType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
@@ -53,7 +54,7 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getReference().getType(context);
         if (!(type instanceof ArrayType arrayType)) {
-            throw new EvaluationException("Array access requires array reference type", this);
+            throw new EvaluationException("Array access requires array reference type", SourceDiagnostic.from(this));
         }
         return arrayType.elementType(); // We unwrap one layer of array so return element type
     }

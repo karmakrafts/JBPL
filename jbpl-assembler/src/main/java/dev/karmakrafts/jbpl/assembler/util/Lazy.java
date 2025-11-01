@@ -13,6 +13,16 @@ public final class Lazy<T> {
         this.factory = factory;
     }
 
+    public void reset() {
+        value = null;
+        isInitialized = false;
+    }
+
+    public void set(final T value) {
+        this.value = value;
+        isInitialized = true;
+    }
+
     public T get() {
         if (!isInitialized) {
             value = factory.get();

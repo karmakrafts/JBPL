@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler.source;
+package dev.karmakrafts.jbpl.assembler.util;
 
-import org.jetbrains.annotations.NotNull;
+public final class MathUtils {
+    private MathUtils() {
+    }
 
-public record SourceLocation(@NotNull String path, int line, int column) {
-
+    public static int clamp(final int min, final int max, int value) {
+        if (value < min) {
+            value = min;
+        }
+        else if (value > max) {
+            value = max;
+        }
+        return value;
+    }
 }

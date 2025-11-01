@@ -17,85 +17,22 @@
 package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.AssemblerException;
-import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.element.Element;
-import dev.karmakrafts.jbpl.assembler.source.SourceRange;
-import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class EvaluationException extends AssemblerException {
-    public EvaluationException() {
-        super();
+    public EvaluationException(@NotNull String message, @Nullable SourceDiagnostic diagnostic) {
+        super(message, diagnostic);
     }
 
-    public EvaluationException(final @Nullable String message,
-                               final @Nullable AssemblyFile file,
-                               final @Nullable TokenRange tokenRange,
-                               final @Nullable SourceRange highlightedRange) {
-        super(message, file, tokenRange, highlightedRange);
+    public EvaluationException(@NotNull String message,
+                               @NotNull Throwable cause,
+                               @Nullable SourceDiagnostic diagnostic) {
+        super(message, cause, diagnostic);
     }
 
-    public EvaluationException(final @Nullable String message,
-                               final @Nullable AssemblyFile file,
-                               final @Nullable TokenRange tokenRange) {
-        super(message, file, tokenRange);
-    }
-
-    public EvaluationException(final @Nullable String message,
-                               final @Nullable Throwable cause,
-                               final @Nullable AssemblyFile file,
-                               final @Nullable TokenRange tokenRange,
-                               final @Nullable SourceRange highlightedRange) {
-        super(message, cause, file, tokenRange, highlightedRange);
-    }
-
-    public EvaluationException(final @Nullable String message,
-                               final @Nullable Throwable cause,
-                               final @Nullable AssemblyFile file,
-                               final @Nullable TokenRange tokenRange) {
-        super(message, cause, file, tokenRange);
-    }
-
-    public EvaluationException(final @Nullable Throwable cause,
-                               final @Nullable AssemblyFile file,
-                               final @Nullable TokenRange tokenRange,
-                               final @Nullable SourceRange highlightedRange) {
-        super(cause, file, tokenRange, highlightedRange);
-    }
-
-    public EvaluationException(final @Nullable Throwable cause,
-                               final @Nullable AssemblyFile file,
-                               final @Nullable TokenRange tokenRange) {
-        super(cause, file, tokenRange);
-    }
-
-    public EvaluationException(final @Nullable String message,
-                               final @Nullable Throwable cause,
-                               final @NotNull Element element,
-                               final @Nullable SourceRange highlightedRange) {
-        super(message, cause, element, highlightedRange);
-    }
-
-    public EvaluationException(final @Nullable String message,
-                               final @Nullable Throwable cause,
-                               final @NotNull Element element) {
-        super(message, cause, element);
-    }
-
-    public EvaluationException(final @Nullable String message,
-                               final @NotNull Element element,
-                               final @Nullable SourceRange highlightedRange) {
-        super(message, element, highlightedRange);
-    }
-
-    public EvaluationException(final @Nullable String message,
-                               final @NotNull Element element,
-                               final @NotNull Element highlightedElement) {
-        super(message, element, highlightedElement);
-    }
-
-    public EvaluationException(final @Nullable String message, final @NotNull Element element) {
-        super(message, element);
+    public EvaluationException(@NotNull Throwable cause, @Nullable SourceDiagnostic diagnostic) {
+        super(cause, diagnostic);
     }
 }

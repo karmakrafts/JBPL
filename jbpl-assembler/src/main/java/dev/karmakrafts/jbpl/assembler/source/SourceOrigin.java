@@ -21,7 +21,7 @@ import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 public sealed interface SourceOrigin {
     // @formatter:off
     record File(AssemblyFile file) implements SourceOrigin { }
-    record Include(AssemblyFile file, AssemblyFile includedFile) implements SourceOrigin { }
+    record Include(AssemblyFile sourceFile) implements SourceOrigin { }
     record Synthetic() implements SourceOrigin { }
     // @formatter:on
 }

@@ -20,7 +20,11 @@ public final class IncludeLowering implements ElementVisitor {
     public @NotNull Statement visitInclude(final @NotNull IncludeStatement includeStatement) {
         final var includedFile = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseFile(includeStatement.path));
         final var statement = new CompoundStatement();
-        statement.addElementsVerbatim(includedFile.getElements().stream().map(Element::copy).toList());
+        // @formatter:off
+        statement.addElementsVerbatim(includedFile.getElements().stream()
+            .map(Element::copy)
+            .toList());
+        // @formatter:on
         return statement;
     }
 }

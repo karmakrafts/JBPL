@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -76,6 +77,65 @@ public interface ElementContainer extends Element {
             .map(element -> (E)element)
             .toList();
     } // @formatter:on
+
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull Optional<E> findElementInTree(final @NotNull Class<E> type,
+                                                                       final @NotNull Predicate<E> filter) {
+        final var visitor = new SimpleElementVisitor<E>(element -> {
+            if (!type.isInstance(element)) {
+                return null;
+            }
+            final var castedElement = (E) element;
+            if (!filter.test(castedElement)) {
+                return null;
+            }
+            return castedElement;
+        });
+        accept(visitor);
+        return Optional.ofNullable(visitor.getResult());
+    }
+
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull Optional<E> findElementInTree(final @NotNull Class<E> type) {
+        final var visitor = new SimpleElementVisitor<E>(element -> {
+            if (!type.isInstance(element)) {
+                return null;
+            }
+            return (E) element;
+        });
+        accept(visitor);
+        return Optional.ofNullable(visitor.getResult());
+    }
+
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull List<E> findElementsInTree(final @NotNull Class<E> type,
+                                                                    final @NotNull Predicate<E> filter) {
+        final var children = new ArrayList<E>();
+        accept(new SimpleElementVisitor<E>(element -> {
+            if (!type.isInstance(element)) {
+                return null;
+            }
+            final var castedElement = (E) element;
+            if (!filter.test(castedElement)) {
+                return null;
+            }
+            children.add(castedElement);
+            return null;
+        }));
+        return children;
+    }
+
+    @SuppressWarnings("unchecked")
+    default <E extends Element> @NotNull List<E> findElementsInTree(final @NotNull Class<E> type) {
+        final var children = new ArrayList<E>();
+        accept(new SimpleElementVisitor<E>(element -> {
+            if (!type.isInstance(element)) {
+                return null;
+            }
+            return (E) element;
+        }));
+        return children;
+    }
 
     default void acceptChildren(final @NotNull ElementVisitor visitor) {
         for (final var element : getElements()) {

@@ -7,6 +7,8 @@ import dev.karmakrafts.jbpl.assembler.lower.NoopRemovalLowering;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
+import dev.karmakrafts.jbpl.assembler.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
 import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
@@ -138,7 +140,7 @@ public final class Assembler {
         final var version = context.bytecodeVersion;
         if (!BYTECODE_VERSIONS.contains(version)) {
             final var message = String.format("%d is not a valid class file version", version);
-            throw new ValidationException(message, (AssemblyFile) null, null);
+            throw new ValidationException(message, null);
         }
     }
 
@@ -181,9 +183,13 @@ public final class Assembler {
                                 final @NotNull RecognitionException e) {
             final var token = (Token) offendingSymbol;
             if (token == null) { // TODO: improve this..
-                throw new SyntaxError(new ParserException(msg, e, file, null));
+                throw new SyntaxError(new ParserException(msg, e, null));
             }
-            throw new SyntaxError(new ParserException(msg, e, file, TokenRange.fromToken(token)));
+            throw new SyntaxError(new ParserException(msg,
+                e,
+                new SourceDiagnostic(file,
+                    TokenRange.fromToken(token),
+                    SourceRange.from(line - 1, charPositionInLine))));
         }
 
         @Override

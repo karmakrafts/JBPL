@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +41,8 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
             context.removeField(owner.name(), name);
         }
         else {
-            throw new EvaluationException(String.format("Unsupported target type for yeet: %s", target), this);
+            throw new EvaluationException(String.format("Unsupported target type for yeet: %s", target),
+                SourceDiagnostic.from(this));
         }
     }
 

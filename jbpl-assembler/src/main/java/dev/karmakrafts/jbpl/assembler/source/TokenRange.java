@@ -69,6 +69,10 @@ public record TokenRange(int start, int end) {
         return new TokenRange(start, end);
     }
 
+    public boolean contains(final @NotNull TokenRange range) {
+        return range.start >= start && range.end <= end;
+    }
+
     public boolean isUndefined() {
         return start == UNDEFINED_INDEX || end == UNDEFINED_INDEX;
     }

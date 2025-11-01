@@ -71,7 +71,7 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
     public static final class OpcodeCondition implements Condition {
         public Order order;
         public Opcode opcode;
-        public TokenRange tokenRange = TokenRange.UNDEFINED;
+        private TokenRange tokenRange = TokenRange.UNDEFINED;
 
         public OpcodeCondition(final @NotNull Order order, final @NotNull Opcode opcode) {
             this.order = order;
@@ -97,17 +97,12 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         public @NotNull OpcodeCondition copy() {
             return copySourcesTo(new OpcodeCondition(order, opcode));
         }
-
-        @Override
-        public @NotNull SourceOrigin getOrigin() {
-            return new SourceOrigin.Synthetic(); // TODO: fix this
-        }
     }
 
     public static final class InstructionCondition implements Condition {
         public Order order;
         public Instruction instruction;
-        public TokenRange tokenRange = TokenRange.UNDEFINED;
+        private TokenRange tokenRange = TokenRange.UNDEFINED;
 
         public InstructionCondition(final @NotNull Order order, final @NotNull Instruction instruction) {
             this.order = order;
@@ -132,11 +127,6 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         @Override
         public @NotNull InstructionCondition copy() {
             return copySourcesTo(new InstructionCondition(order, instruction));
-        }
-
-        @Override
-        public @NotNull SourceOrigin getOrigin() {
-            return new SourceOrigin.Synthetic(); // TODO: fix this
         }
     }
 }

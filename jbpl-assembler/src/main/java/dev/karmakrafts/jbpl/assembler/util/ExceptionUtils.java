@@ -18,7 +18,6 @@ package dev.karmakrafts.jbpl.assembler.util;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -44,9 +43,5 @@ public final class ExceptionUtils {
 
     public static <T, R> @NotNull Function<T, R> unsafeFunction(final @NotNull XFunction<T, R, ?> function) {
         return value -> rethrowUnchecked(() -> function.apply(value));
-    }
-
-    public static <T, U, R> @NotNull BiFunction<T, U, R> unsafeFunction(final @NotNull XBiFunction<T, U, R, ?> function) {
-        return (t, u) -> rethrowUnchecked(() -> function.apply(t, u));
     }
 }

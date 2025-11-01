@@ -42,7 +42,7 @@ public static fun <com/example/Example>.testing(): void {
 
 ^macro testing(p: i32): i32 {
     ^define y: i32 = testing2^()
-    ^return ${undefined} * ${p}
+    ^return ${y} * ${p}
 }
 
 ^define xxx: i32 = 10

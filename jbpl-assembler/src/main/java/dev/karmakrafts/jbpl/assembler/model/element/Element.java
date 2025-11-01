@@ -2,13 +2,14 @@ package dev.karmakrafts.jbpl.assembler.model.element;
 
 import dev.karmakrafts.jbpl.assembler.eval.Evaluable;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.source.SourceLocation;
 import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
 import dev.karmakrafts.jbpl.assembler.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Stack;
 
 public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
@@ -50,11 +51,11 @@ public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
         throw new IllegalStateException("Could not find parent file for element");
     }
 
-    default @NotNull SourceLocation getSourceLocation() {
-        return getContainingFile().getSourceLocation(getTokenRange());
-    }
-
     default @NotNull SourceRange getSourceRange() {
         return getContainingFile().getSourceRange(getTokenRange());
+    }
+
+    default @NotNull List<Token> getTokens() {
+        return getContainingFile().getTokens(getTokenRange());
     }
 }

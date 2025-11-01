@@ -4,6 +4,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,8 +27,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         final var define = context.resolveByName(DefineStatement.class, name);
         if (define == null) {
             throw new EvaluationException(String.format("Could not find define '%s' in scope %s", name, scope),
-                Objects.requireNonNull(getParent()),
-                this);
+                SourceDiagnostic.from(Objects.requireNonNull(getParent()), this));
         }
         return define;
     }

@@ -20,6 +20,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 
 public final class AsExpr extends AbstractExprContainer implements Expr {
@@ -65,10 +66,11 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case F64 -> LiteralExpr.of(number.doubleValue(), getTokenRange());
                 case CHAR -> LiteralExpr.of((char) number.intValue(), getTokenRange());
                 case BOOL -> LiteralExpr.of(number.longValue() != 0, getTokenRange());
-                default -> throw new EvaluationException(String.format("Cannot cast numeric type into %s", type), this);
+                default -> throw new EvaluationException(String.format("Cannot cast numeric type into %s", type),
+                    SourceDiagnostic.from(this));
             };
         }
-        throw new EvaluationException(String.format("Cannot cast numeric type into %s", type), this);
+        throw new EvaluationException(String.format("Cannot cast numeric type into %s", type), SourceDiagnostic.from(this));
     }
 
     private @NotNull LiteralExpr castFromBoolean(final @NotNull Type type,
@@ -82,10 +84,10 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case I64 -> LiteralExpr.of(bool ? 1L : 0L, getTokenRange());
                 case F32 -> LiteralExpr.of(bool ? 1F : 0F, getTokenRange());
                 case F64 -> LiteralExpr.of(bool ? 1.0 : 0.0, getTokenRange());
-                default -> throw new EvaluationException(String.format("Cannot cast boolean into %s", type), this);
+                default -> throw new EvaluationException(String.format("Cannot cast boolean into %s", type), SourceDiagnostic.from(this));
             };
         }
-        throw new EvaluationException(String.format("Cannot cast boolean into %s", type), this);
+        throw new EvaluationException(String.format("Cannot cast boolean into %s", type), SourceDiagnostic.from(this));
     }
 
     private @NotNull LiteralExpr castFromString(final @NotNull Type type,
@@ -101,10 +103,10 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case F64 -> LiteralExpr.of(Double.parseDouble(string), getTokenRange());
                 case BOOL -> LiteralExpr.of(Boolean.parseBoolean(string), getTokenRange());
                 case CHAR -> LiteralExpr.of(string.charAt(0), getTokenRange());
-                default -> throw new EvaluationException(String.format("Cannot cast string into %s", type), this);
+                default -> throw new EvaluationException(String.format("Cannot cast string into %s", type), SourceDiagnostic.from(this));
             };
         }
-        throw new EvaluationException(String.format("Cannot cast string into %s", type), this);
+        throw new EvaluationException(String.format("Cannot cast string into %s", type), SourceDiagnostic.from(this));
     }
 
     private @NotNull LiteralExpr castFromChar(final @NotNull Type type,
@@ -120,10 +122,10 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case F64 -> LiteralExpr.of(Double.parseDouble(value.toString()), getTokenRange());
                 case BOOL -> LiteralExpr.of(Boolean.parseBoolean(value.toString()), getTokenRange());
                 case CHAR -> LiteralExpr.of(value.toString(), getTokenRange());
-                default -> throw new EvaluationException(String.format("Cannot cast string into %s", type), this);
+                default -> throw new EvaluationException(String.format("Cannot cast string into %s", type), SourceDiagnostic.from(this));
             };
         }
-        throw new EvaluationException(String.format("Cannot cast string into %s", type), this);
+        throw new EvaluationException(String.format("Cannot cast string into %s", type), SourceDiagnostic.from(this));
     }
 
     @Override
@@ -164,7 +166,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
             context.pushValue(castFromChar(type, character));
             return;
         }
-        throw new EvaluationException(String.format("Cannot cast %s into %s", valueType, type), this);
+        throw new EvaluationException(String.format("Cannot cast %s into %s", valueType, type), SourceDiagnostic.from(this));
     }
 
     @Override

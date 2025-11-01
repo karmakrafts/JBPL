@@ -4,6 +4,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 
 public final class UnaryExpr extends AbstractExprContainer implements Expr {
@@ -69,7 +70,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
                 throw new IllegalStateException(String.format("Unsupported inverse expression operand %s", value));
             }
             default ->
-                throw new EvaluationException(String.format("Unary operator %s cannot be applied to number", op), this);
+                throw new EvaluationException(String.format("Unary operator %s cannot be applied to number", op), SourceDiagnostic.from(this));
         };
     }
 
@@ -78,7 +79,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
             case NOT -> LiteralExpr.of(!value);
             default ->
                 throw new EvaluationException(String.format("Unary operator %s cannot be applied to boolean", op),
-                    this);
+                    SourceDiagnostic.from(this));
         };
     }
 
@@ -95,7 +96,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
             context.pushValue(evaluateForNumber(numberValue));
             return;
         }
-        throw new EvaluationException(String.format("Unary operator %s cannot be applied to %s", op, value), this);
+        throw new EvaluationException(String.format("Unary operator %s cannot be applied to %s", op, value), SourceDiagnostic.from(this));
     }
 
     @Override

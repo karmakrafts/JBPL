@@ -16,15 +16,31 @@
 
 package dev.karmakrafts.jbpl.assembler.source;
 
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
-public interface SourceOwner {
-    @NotNull TokenRange getTokenRange();
+import java.util.List;
+import java.util.stream.Collectors;
 
-    void setTokenRange(final @NotNull TokenRange tokenRange);
+public record SourceLine(List<Token> tokens, int lineIndex) implements Comparable<SourceLine> {
+    @Override
+    public int compareTo(final @NotNull SourceLine o) {
+        return Integer.compare(lineIndex, o.lineIndex);
+    }
 
-    default <O extends SourceOwner> @NotNull O copySourcesTo(final @NotNull O element) {
-        element.setTokenRange(getTokenRange());
-        return element;
+    public int getLineNumber() {
+        return lineIndex + 1;
+    }
+
+    public int getLineNumberLength() {
+        return Integer.toString(getLineNumber()).length();
+    }
+
+    @Override
+    public @NotNull String toString() {
+        if (tokens.isEmpty()) {
+            return "";
+        }
+        return tokens.stream().map(Token::getText).collect(Collectors.joining());
     }
 }

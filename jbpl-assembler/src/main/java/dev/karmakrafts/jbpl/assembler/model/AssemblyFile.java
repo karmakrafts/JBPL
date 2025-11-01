@@ -4,7 +4,6 @@ import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
-import dev.karmakrafts.jbpl.assembler.source.SourceLocation;
 import dev.karmakrafts.jbpl.assembler.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import org.antlr.v4.runtime.Token;
@@ -30,24 +29,26 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     }
 
     public @NotNull SourceRange getSourceRange(final @NotNull TokenRange range) {
-        if (range.isUndefined() || range.isSynthetic()) {
-            return new SourceRange(path, 0, 0, 0, 0);
+        if (range.isUndefined()) {
+            return SourceRange.UNDEFINED;
         }
-        final var firstToken = source.get(range.start());
+        if (range.isSynthetic()) {
+            return SourceRange.SYNTHETIC;
+        }
+        final var startIndex = range.start();
+        final var endIndex = range.end();
+        final var firstToken = source.get(startIndex);
+        if (startIndex == endIndex) {
+            final var lineIndex = firstToken.getLine() - 1;
+            final var startColumn = firstToken.getCharPositionInLine();
+            final var endColumn = startColumn + (firstToken.getText().length() - 1);
+            return new SourceRange(lineIndex, startColumn, lineIndex, endColumn);
+        }
         final var lastToken = source.get(range.end());
-        return new SourceRange(path,
-            firstToken.getLine(),
+        return new SourceRange(firstToken.getLine() - 1,
             firstToken.getCharPositionInLine(),
-            lastToken.getLine(),
+            lastToken.getLine() - 1,
             lastToken.getCharPositionInLine());
-    }
-
-    public @NotNull SourceLocation getSourceLocation(final @NotNull TokenRange range) {
-        if (range.isUndefined() || range.isSynthetic()) {
-            return new SourceLocation(path, 0, 0);
-        }
-        final var firstToken = source.get(range.start());
-        return new SourceLocation(path, firstToken.getLine(), firstToken.getCharPositionInLine());
     }
 
     @Override

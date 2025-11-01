@@ -23,6 +23,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Handle;
@@ -64,7 +65,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             case INVOKESPECIAL -> Opcodes.H_INVOKESPECIAL;
             case INVOKEINTERFACE -> Opcodes.H_INVOKEINTERFACE;
             default ->
-                throw new EvaluationException(String.format("Unsupported invoke tag for opcode %s", opcode), this);
+                throw new EvaluationException(String.format("Unsupported invoke tag for opcode %s", opcode), SourceDiagnostic.from(this));
         };
     }
 
@@ -132,7 +133,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         if (!(instruction instanceof InvokeInstruction invokeInstruction)) {
             throw new EvaluationException(
                 "Invoke handle requires INVOKESTATIC, INVOKEVIRTUAL, INVOKESPECIAL or INVOKEINTERFACE target",
-                this);
+                SourceDiagnostic.from(this));
         }
         final var opcode = invokeInstruction.getOpcode(context);
         final var tag = getInvokeTag(opcode);

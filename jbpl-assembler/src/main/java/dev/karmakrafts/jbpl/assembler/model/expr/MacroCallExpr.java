@@ -4,6 +4,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +70,10 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                 final var parameter = parameters.stream()
                     .filter(entry -> entry.getKey().equals(name))
                     .findFirst()
-                    .orElseThrow(EvaluationException::new); // TODO: add better error message
+                    .orElseThrow(() -> new EvaluationException(
+                        String.format("No parameter named '%s' in macro %s", name, ExceptionUtils.rethrowUnchecked(() -> macro.getName(context))),
+                        SourceDiagnostic.from(this) // TODO: Improve this to highlight the actual parameter
+                    ));
                 // @formatter:on
                 final var paramType = parameter.getValue();
                 if (!paramType.isAssignableFrom(valueType)) {
@@ -78,7 +82,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                         valueType,
                         name,
                         paramType,
-                        macro.getName(context)), this, value);
+                        macro.getName(context)), SourceDiagnostic.from(this, value));
                 }
                 arguments.put(name, value);
                 currentArgIndex = parameters.indexOf(parameter) + 1;
@@ -92,7 +96,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     valueType,
                     parameter.getKey(),
                     paramType,
-                    macro.getName(context)), this, value);
+                    macro.getName(context)), SourceDiagnostic.from(this, value));
             }
             arguments.put(parameter.getKey(), value);
             currentArgIndex++;

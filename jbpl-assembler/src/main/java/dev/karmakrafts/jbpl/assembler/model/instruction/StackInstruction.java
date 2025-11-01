@@ -29,7 +29,7 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
 
     /**
      * @param opcode The wanted opcode
-     * @param slot   Either a constant index or the name of a previously defined local.
+     * @param slot   Either a constant lineIndex or the name of a previously defined local.
      */
     public StackInstruction(final @NotNull Opcode opcode, final @NotNull Expr slot) {
         this.opcode = opcode;
@@ -57,7 +57,7 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
             context.emit(new VarInsnNode(encodedOpcode, slotId));
         }
         // If we fall through the above case, we need to resolve the local using pre-defined locals in the sack frame
-        // TODO: context.emit(new VarInsnNode(encodedOpcode, index));
+        // TODO: context.emit(new VarInsnNode(encodedOpcode, lineIndex));
     }
 
     @Override
