@@ -27,7 +27,7 @@ pluginManagement {
     }
 }
 
-@Suppress("UnstableApiUsage")
+@Suppress("UnstableApiUsage") //
 dependencyResolutionManagement {
     repositories {
         google()
@@ -39,4 +39,5 @@ dependencyResolutionManagement {
 
 include("jbpl-frontend")
 include("jbpl-assembler")
+include("jbpl-assembler-cli")
 include("jbpl-intellij-plugin")

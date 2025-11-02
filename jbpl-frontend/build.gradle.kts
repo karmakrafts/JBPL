@@ -25,6 +25,9 @@ dependencies {
 }
 
 tasks {
+    withType<Jar> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
     generateGrammarSource {
         val outputPackage = "${rootProject.group}.frontend"
         val outputPath = outputPackage.replace(".", "/")

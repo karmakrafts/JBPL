@@ -11,6 +11,7 @@ annotations = "26.0.2" # https://github.com/JetBrains/java-annotations/releases
 junit = "5.13.4" # https://github.com/junit-team/junit-framework/releases
 junitPlatform = "1.13.4" # https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
 jansi = "3.30.6"
+shadow = "9.2.2"
 
 [libraries]
 
@@ -28,3 +29,4 @@ jansi = { module = "org.jline:jline-terminal-jansi", version.ref = "jansi" }
 
 karmaConventions = { id = "dev.karmakrafts.conventions.karma-conventions", version.ref = "karmaConventions" }
 gradleNexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexus" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
