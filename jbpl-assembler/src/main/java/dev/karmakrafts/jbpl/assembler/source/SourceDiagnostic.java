@@ -34,6 +34,24 @@ public record SourceDiagnostic( // @formatter:off
 ) { // @formatter:on
     private static final int LINE_NUMBER_SPACING = 2;
 
+    public static @NotNull SourceDiagnostic from(final @NotNull AssemblyFile file, final @NotNull Token token) {
+        final var tokenRange = TokenRange.fromToken(token);
+        final var line = token.getLine();
+        // @formatter:off
+        final var lineTokenIndices = file.getTokens().stream()
+            .filter(t -> t.getLine() == line)
+            .toList();
+        final var lineStartToken = lineTokenIndices.isEmpty()
+            ? token
+            : lineTokenIndices.get(0);
+        final var lineEndToken = lineTokenIndices.isEmpty()
+            ? token
+            : lineTokenIndices.get(lineTokenIndices.size() - 1);
+        // @formatter:on
+        final var lineTokenRange = TokenRange.fromTokens(lineStartToken, lineEndToken);
+        return new SourceDiagnostic(file, lineTokenRange, file.getSourceRange(tokenRange));
+    }
+
     public static @NotNull SourceDiagnostic from(final @NotNull Element renderedElement,
                                                  final @NotNull Element highlightedElement) {
         final var file = renderedElement.getContainingFile();

@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.parser.ExprParser;
+import dev.karmakrafts.jbpl.assembler.parser.ParserException;
 import dev.karmakrafts.jbpl.assembler.parser.TypeParser;
 import dev.karmakrafts.jbpl.frontend.JBPLParser;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
@@ -13,13 +14,16 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public final class ParserUtils {
     private ParserUtils() {
     }
 
-    public static @NotNull Pair<@Nullable Expr, Expr> parseArgument(final @NotNull ArgumentContext ctx) {
+    public static @NotNull Pair<@Nullable Expr, Expr> parseArgument(final @NotNull ArgumentContext ctx) throws ParserException {
         final var namedCtx = ctx.namedArgument();
         if (namedCtx != null) {
             return new Pair<>(ParserUtils.parseRefOrName(namedCtx.refOrName()), ExprParser.parse(namedCtx.expr()));
@@ -27,9 +31,9 @@ public final class ParserUtils {
         return new Pair<>(null, ExprParser.parse(ctx.expr()));
     }
 
-    public static @NotNull List<Pair<@Nullable Expr, Expr>> parseArguments(final @NotNull List<ArgumentContext> args) { // @formatter:off
+    public static @NotNull List<Pair<@Nullable Expr, Expr>> parseArguments(final @NotNull List<ArgumentContext> args) throws ParserException { // @formatter:off
         return args.stream()
-            .map(ParserUtils::parseArgument)
+            .map(ExceptionUtils.unsafeFunction(ParserUtils::parseArgument))
             .toList();
     } // @formatter:on
 
@@ -41,7 +45,7 @@ public final class ParserUtils {
         // @formatter:on
     }
 
-    public static @NotNull Expr parseFunctionName(final @NotNull FunctionNameContext ctx) {
+    public static @NotNull Expr parseFunctionName(final @NotNull FunctionNameContext ctx) throws ParserException {
         final var specialName = ctx.specialFunctionName();
         // @formatter:off
         return specialName != null
@@ -50,16 +54,16 @@ public final class ParserUtils {
         // @formatter:on
     }
 
-    public static @NotNull Expr parseSignatureOwner(final @NotNull SignatureOwnerContext ctx) {
+    public static @NotNull Expr parseSignatureOwner(final @NotNull SignatureOwnerContext ctx) throws ParserException {
         final var ref = ctx.reference();
         // @formatter:off
         return ref != null
             ? ExprParser.parse(ref)
-            : LiteralExpr.of(TypeParser.parse(ctx.classType()));
+            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.classType())));
         // @formatter:on
     }
 
-    public static @NotNull Expr parseRefOrName(final @NotNull JBPLParser.RefOrNameContext ctx) {
+    public static @NotNull Expr parseRefOrName(final @NotNull JBPLParser.RefOrNameContext ctx) throws ParserException {
         final var ref = ctx.reference();
         // @formatter:off
         return ref != null
@@ -68,7 +72,17 @@ public final class ParserUtils {
         // @formatter:on
     }
 
-    public static @NotNull Optional<Opcode> parseOpcode(final @NotNull ParserRuleContext ctx) {
+    public static @NotNull Opcode parseOpcode(final @NotNull ParserRuleContext ctx) throws ParserException {
+        final var text = ctx.getText();
+        // @formatter:off
+        return Arrays.stream(Opcode.values())
+            .filter(op -> op.name().equalsIgnoreCase(text))
+            .findFirst()
+            .orElseThrow(() -> new ParserException(String.format("Could not parse opcode '%s'", ctx.getText()), null));
+        // @formatter:on
+    }
+
+    public static @NotNull Optional<Opcode> maybeParseOpcode(final @NotNull ParserRuleContext ctx) {
         final var text = ctx.getText();
         // @formatter:off
         return Arrays.stream(Opcode.values())
@@ -77,31 +91,32 @@ public final class ParserUtils {
         // @formatter:on
     }
 
-    public static @NotNull Optional<Opcode> parseOpcode(final @NotNull TerminalNode node) {
+    public static @NotNull Opcode parseOpcode(final @NotNull TerminalNode node) throws ParserException {
         final var text = node.getText();
         // @formatter:off
         return Arrays.stream(Opcode.values())
             .filter(op -> op.name().equalsIgnoreCase(text))
-            .findFirst();
+            .findFirst()
+            .orElseThrow(() -> new ParserException(String.format("Could not parse opcode '%s'", node.getText()), null));
         // @formatter:on
     }
 
-    public static @NotNull Expr parseRefOrType(final @NotNull RefOrTypeContext ctx) {
+    public static @NotNull Expr parseRefOrType(final @NotNull RefOrTypeContext ctx) throws ParserException {
         final var typeRef = ctx.reference();
         // @formatter:off
         return typeRef != null
             ? ExprParser.parse(typeRef)
-            : LiteralExpr.of(TypeParser.parse(ctx.type()));
+            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.type())));
         // @formatter:on
     }
 
-    public static @NotNull Map<Expr, Expr> parseParameters(final @NotNull List<ParameterContext> params) {
-        final var mappedParameters = new LinkedHashMap<Expr, Expr>();
+    public static @NotNull List<Pair<Expr, Expr>> parseParameters(final @NotNull List<ParameterContext> params) throws ParserException {
+        final var paramPairs = new ArrayList<Pair<Expr, Expr>>();
         for (final var param : params) {
             final var name = parseRefOrName(param.refOrName());
             final var type = parseRefOrType(param.refOrType());
-            mappedParameters.put(name, type);
+            paramPairs.add(new Pair<>(name, type));
         }
-        return mappedParameters;
+        return paramPairs;
     }
 }

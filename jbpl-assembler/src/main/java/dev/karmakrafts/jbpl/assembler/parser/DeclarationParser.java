@@ -7,6 +7,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.Order;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
@@ -24,8 +25,12 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     private DeclarationParser() {
     }
 
-    public static @NotNull Declaration parse(final @NotNull ParserRuleContext ctx) {
-        final var declaration = ctx.accept(INSTANCE).stream().findFirst().orElseThrow();
+    public static @NotNull Declaration parse(final @NotNull ParserRuleContext ctx) throws ParserException {
+        // @formatter:off
+        final var declaration = ctx.accept(INSTANCE).stream()
+            .findFirst()
+            .orElseThrow(() -> new ParserException("Could not parse declaration", null));
+        // @formatter:on
         declaration.setTokenRange(TokenRange.fromContext(ctx));
         return declaration;
     }
@@ -44,109 +49,123 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
 
     @Override
     public @NotNull List<Declaration> visitInjector(final @NotNull InjectorContext ctx) {
-        final var signature = (FunctionSignatureExpr) ExprParser.parse(ctx.functionSignature());
-        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        final var injector = new InjectorDecl(signature, name);
-        // @formatter:off
-        injector.addStatements(ctx.statement().stream()
-            .map(StatementParser::parse)
-            .toList());
-        // @formatter:on
-        return List.of(injector);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var signature = (FunctionSignatureExpr) ExprParser.parse(ctx.functionSignature());
+            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var injector = new InjectorDecl(signature, name);
+            // @formatter:off
+            injector.addStatements(ctx.statement().stream()
+                .map(ExceptionUtils.unsafeFunction(StatementParser::parse))
+                .toList());
+            // @formatter:on
+            return List.of(injector);
+        });
     }
 
     private @NotNull SelectorDecl.Condition parseSelectorCondition(final @NotNull SelectionStatementContext ctx) {
-        final var order = ctx.KW_BEFORE() != null ? Order.BEFORE : Order.AFTER;
-        final var instructionCtx = ctx.instruction();
-        if (instructionCtx != null) {
-            final var statement = StatementParser.parse(instructionCtx);
-            if (!(statement instanceof Instruction instruction)) {
-                throw new IllegalStateException("Selector condition is not an instruction");
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var order = ctx.KW_BEFORE() != null ? Order.BEFORE : Order.AFTER;
+            final var instructionCtx = ctx.instruction();
+            if (instructionCtx != null) {
+                final var statement = StatementParser.parse(instructionCtx);
+                if (!(statement instanceof Instruction instruction)) {
+                    throw new IllegalStateException("Selector condition is not an instruction");
+                }
+                final var condition = new SelectorDecl.InstructionCondition(order, instruction);
+                condition.setTokenRange(TokenRange.fromContext(ctx));
+                return condition;
             }
-            final var condition = new SelectorDecl.InstructionCondition(order, instruction);
+            final var opcode = ParserUtils.parseOpcode(ctx.opcode());
+            final var condition = new SelectorDecl.OpcodeCondition(order, opcode);
             condition.setTokenRange(TokenRange.fromContext(ctx));
             return condition;
-        }
-        final var opcode = ParserUtils.parseOpcode(ctx.opcode()).orElseThrow();
-        final var condition = new SelectorDecl.OpcodeCondition(order, opcode);
-        condition.setTokenRange(TokenRange.fromContext(ctx));
-        return condition;
+        });
     }
 
     @Override
     public @NotNull List<Declaration> visitSelector(final @NotNull SelectorContext ctx) {
-        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        // @formatter:off
-        final var offset = ctx.selectionOffset().stream()
-            .findFirst()
-            .map(ExprParser::parse)
-            .orElseGet(() -> LiteralExpr.of(0));
-        // @formatter:on
-        final var selector = new SelectorDecl(name, offset);
-        // @formatter:off
-        selector.conditions.addAll(ctx.selectionStatement().stream()
-            .map(this::parseSelectorCondition)
-            .toList());
-        // @formatter:on
-        return List.of(selector);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            // @formatter:off
+            final var offset = ctx.selectionOffset().stream()
+                .findFirst()
+                .map(ExceptionUtils.unsafeFunction(ExprParser::parse))
+                .orElseGet(() -> LiteralExpr.of(0));
+            // @formatter:on
+            final var selector = new SelectorDecl(name, offset);
+            // @formatter:off
+            selector.conditions.addAll(ctx.selectionStatement().stream()
+                .map(this::parseSelectorCondition)
+                .toList());
+            // @formatter:on
+            return List.of(selector);
+        });
     }
 
     @Override
     public @NotNull List<Declaration> visitMacro(final @NotNull MacroContext ctx) {
-        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        // @formatter:off
-        final var returnType = ctx.refOrType() != null
-            ? ParserUtils.parseRefOrType(ctx.refOrType())
-            : LiteralExpr.of(BuiltinType.VOID);
-        // @formatter:on
-        final var macro = new MacroDecl(name, returnType);
-        // @formatter:off
-        macro.addElements(ctx.bodyElement().stream()
-            .map(ElementParser::parse)
-            .toList());
-        // @formatter:on
-        macro.addParameters(ParserUtils.parseParameters(ctx.parameter()));
-        return List.of(macro);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            // @formatter:off
+            final var returnType = ctx.refOrType() != null
+                ? ParserUtils.parseRefOrType(ctx.refOrType())
+                : LiteralExpr.of(BuiltinType.VOID);
+            // @formatter:on
+            final var macro = new MacroDecl(name, returnType);
+            // @formatter:off
+            macro.addElements(ctx.bodyElement().stream()
+                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
+                .toList());
+            // @formatter:on
+            macro.addParameters(ParserUtils.parseParameters(ctx.parameter()));
+            return List.of(macro);
+        });
     }
 
     @Override
     public @NotNull List<Declaration> visitPreproClass(final @NotNull PreproClassContext ctx) {
-        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        final var clazz = new PreproClassDecl(name);
-        clazz.addFields(ParserUtils.parseParameters(ctx.parameter()));
-        return List.of(clazz);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var clazz = new PreproClassDecl(name);
+            clazz.addFields(ParserUtils.parseParameters(ctx.parameter()));
+            return List.of(clazz);
+        });
     }
 
     @Override
     public @NotNull List<Declaration> visitFunction(final @NotNull FunctionContext ctx) {
-        final var signature = (FunctionSignatureExpr) ExprParser.parse(ctx.functionSignature());
-        final var function = new FunctionDecl(signature);
-        // @formatter:off
-        function.accessModifiers.addAll(ctx.accessModifier().stream()
-            .map(ParserUtils::parseAccessModifier)
-            .map(Optional::orElseThrow)
-            .toList());
-        function.addStatements(ctx.statement().stream()
-            .map(StatementParser::parse)
-            .toList());
-        // @formatter:on
-        return List.of(function);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var signature = (FunctionSignatureExpr) ExprParser.parse(ctx.functionSignature());
+            final var function = new FunctionDecl(signature);
+            // @formatter:off
+            function.accessModifiers.addAll(ctx.accessModifier().stream()
+                .map(ParserUtils::parseAccessModifier)
+                .map(Optional::orElseThrow)
+                .toList());
+            function.addStatements(ctx.statement().stream()
+                .map(ExceptionUtils.unsafeFunction(StatementParser::parse))
+                .toList());
+            // @formatter:on
+            return List.of(function);
+        });
     }
 
     @Override
     public @NotNull List<Declaration> visitField(final @NotNull FieldContext ctx) {
-        final var signature = (FieldSignatureExpr) ExprParser.parse(ctx.fieldSignature());
-        final var field = new FieldDecl(signature);
-        final var initializer = ctx.expr();
-        if (initializer != null) {
-            field.setInitializer(ExprParser.parse(initializer));
-        }
-        // @formatter:off
-        field.accessModifiers.addAll(ctx.accessModifier().stream()
-            .map(ParserUtils::parseAccessModifier)
-            .map(Optional::orElseThrow)
-            .toList());
-        // @formatter:on
-        return List.of(field);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var signature = (FieldSignatureExpr) ExprParser.parse(ctx.fieldSignature());
+            final var field = new FieldDecl(signature);
+            final var initializer = ctx.expr();
+            if (initializer != null) {
+                field.setInitializer(ExprParser.parse(initializer));
+            }
+            // @formatter:off
+            field.accessModifiers.addAll(ctx.accessModifier().stream()
+                .map(ParserUtils::parseAccessModifier)
+                .map(Optional::orElseThrow)
+                .toList());
+            // @formatter:on
+            return List.of(field);
+        });
     }
 }

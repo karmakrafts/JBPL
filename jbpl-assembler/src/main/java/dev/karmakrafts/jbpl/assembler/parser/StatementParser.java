@@ -3,6 +3,7 @@ package dev.karmakrafts.jbpl.assembler.parser;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.*;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;
@@ -19,58 +20,76 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     private StatementParser() {
     }
 
-    public static @NotNull Statement parse(final @NotNull ParserRuleContext ctx) {
-        final var statement = ctx.accept(INSTANCE).stream().findFirst().orElseThrow();
+    public static @NotNull Statement parse(final @NotNull ParserRuleContext ctx) throws ParserException {
+        // @formatter:off
+        final var statement = ctx.accept(INSTANCE).stream()
+            .findFirst()
+            .orElseThrow(() -> new ParserException("Could not parse statement", null));
+        // @formatter:on
         statement.setTokenRange(TokenRange.fromContext(ctx));
         return statement;
     }
 
     @Override
     public @NotNull List<Statement> visitExpr(final @NotNull ExprContext ctx) {
-        return List.of(ExprParser.parse(ctx));
+        return List.of(ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx)));
     }
 
     @Override
     public @NotNull List<Statement> visitInstruction(final @NotNull InstructionContext ctx) {
-        return List.of(InstructionParser.parse(ctx));
+        return List.of(ExceptionUtils.rethrowUnchecked(() -> InstructionParser.parse(ctx)));
     }
 
     @Override
     public @NotNull List<Statement> visitReturnStatement(final @NotNull ReturnStatementContext ctx) {
-        final var valueNode = ctx.expr();
-        final var value = valueNode != null ? ExprParser.parse(valueNode) : LiteralExpr.unit();
-        return List.of(new ReturnStatement(value));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var valueNode = ctx.expr();
+            // @formatter:off
+            final var value = valueNode != null
+                ? ExprParser.parse(valueNode)
+                : LiteralExpr.unit();
+            // @formatter:on
+            return List.of(new ReturnStatement(value));
+        });
     }
 
     @Override
     public List<Statement> visitInfoStatement(final @NotNull InfoStatementContext ctx) {
-        final var value = ExprParser.parse(ctx.expr());
-        return List.of(new InfoStatement(value));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var value = ExprParser.parse(ctx.expr());
+            return List.of(new InfoStatement(value));
+        });
     }
 
     @Override
     public List<Statement> visitErrorStatement(ErrorStatementContext ctx) {
-        final var value = ExprParser.parse(ctx.expr());
-        return List.of(new ErrorStatement(value));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var value = ExprParser.parse(ctx.expr());
+            return List.of(new ErrorStatement(value));
+        });
     }
 
     @Override
     public List<Statement> visitVersionStatement(final @NotNull VersionStatementContext ctx) {
-        final var version = ExprParser.parse(ctx.expr());
-        return List.of(new VersionStatement(version));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var version = ExprParser.parse(ctx.expr());
+            return List.of(new VersionStatement(version));
+        });
     }
 
     @Override
     public List<Statement> visitYeetStatement(final @NotNull YeetStatementContext ctx) {
-        final var classType = ctx.classType();
-        if (classType != null) {
-            return List.of(new YeetStatement(LiteralExpr.of(TypeParser.parse(classType))));
-        }
-        final var fieldSignature = ctx.fieldSignature();
-        if (fieldSignature != null) {
-            return List.of(new YeetStatement(ExprParser.parse(fieldSignature)));
-        }
-        return List.of(new YeetStatement(ExprParser.parse(ctx.functionSignature())));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var classType = ctx.classType();
+            if (classType != null) {
+                return List.of(new YeetStatement(LiteralExpr.of(TypeParser.parse(classType))));
+            }
+            final var fieldSignature = ctx.fieldSignature();
+            if (fieldSignature != null) {
+                return List.of(new YeetStatement(ExprParser.parse(fieldSignature)));
+            }
+            return List.of(new YeetStatement(ExprParser.parse(ctx.functionSignature())));
+        });
     }
 
     @Override
@@ -85,21 +104,27 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
 
     @Override
     public @NotNull List<Statement> visitLabel(final @NotNull LabelContext ctx) {
-        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        return List.of(new LabelStatement(name));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            return List.of(new LabelStatement(name));
+        });
     }
 
     @Override
     public @NotNull List<Statement> visitLocal(final @NotNull LocalContext ctx) {
-        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        return List.of(new LocalStatement(name));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            return List.of(new LocalStatement(name));
+        });
     }
 
     @Override
     public @NotNull List<Statement> visitDefine(final @NotNull DefineContext ctx) {
-        final var name = ctx.IDENT().getText();
-        final var type = TypeParser.parse(ctx.type());
-        final var value = ExprParser.parse(ctx.expr());
-        return List.of(new DefineStatement(name, type, value));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ctx.IDENT().getText();
+            final var type = TypeParser.parse(ctx.type());
+            final var value = ExprParser.parse(ctx.expr());
+            return List.of(new DefineStatement(name, type, value));
+        });
     }
 }

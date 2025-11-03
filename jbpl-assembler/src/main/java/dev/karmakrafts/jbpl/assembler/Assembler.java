@@ -8,8 +8,7 @@ import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
-import dev.karmakrafts.jbpl.assembler.source.SourceRange;
-import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
 import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
@@ -118,7 +117,7 @@ public final class Assembler {
                     parser.addErrorListener(errorListener);
                     // @formatter:off
                     file.addElements(parser.file().bodyElement().stream()
-                        .map(ElementParser::parse)
+                        .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
                         .toList());
                     // @formatter:on
                     return file;
@@ -129,7 +128,7 @@ public final class Assembler {
             });
         }
         catch (SyntaxError error) {
-            throw error.cause;
+            throw error.cause; // Syntax errors get unwrapped and rethrown as ParserException
         }
     }
 
@@ -190,11 +189,12 @@ public final class Assembler {
             if (token == null) { // TODO: improve this..
                 throw new SyntaxError(new ParserException(msg, e, null));
             }
-            throw new SyntaxError(new ParserException(msg,
-                e,
-                new SourceDiagnostic(file,
-                    TokenRange.fromToken(token),
-                    SourceRange.from(line - 1, charPositionInLine))));
+            if (e instanceof NoViableAltException noViableAltException) {
+                throw new SyntaxError(new ParserException(msg,
+                    e,
+                    SourceDiagnostic.from(file, noViableAltException.getStartToken())));
+            }
+            throw new SyntaxError(new ParserException(msg, e, SourceDiagnostic.from(file, token)));
         }
 
         @Override

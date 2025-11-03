@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.type.*;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -16,9 +17,11 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
     private TypeParser() {
     }
 
-    public static @NotNull Type parse(final @NotNull ParserRuleContext ctx) {
-        return ctx.accept(INSTANCE).stream().findFirst().orElseThrow();
-    }
+    public static @NotNull Type parse(final @NotNull ParserRuleContext ctx) throws ParserException { // @formatter:off
+        return ctx.accept(INSTANCE).stream()
+            .findFirst()
+            .orElseThrow(() -> new ParserException("Could not parse type", null));
+    } // @formatter:on
 
     @Override
     protected @NotNull List<Type> defaultResult() {
@@ -83,7 +86,7 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
 
     @Override
     public @NotNull List<Type> visitArrayType(final @NotNull ArrayTypeContext ctx) {
-        return List.of(parse(ctx.type()).array());
+        return List.of(ExceptionUtils.rethrowUnchecked(() -> parse(ctx.type()).array()));
     }
 
     @Override

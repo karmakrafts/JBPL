@@ -5,6 +5,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ public final class ExprParserTest extends AbstractParserTest {
         Assertions.assertTrue(element.isPresent());
         final var expr = element.get().statement().expr();
         Assertions.assertNotNull(expr);
-        final var parseExpr = ExprParser.parse(expr);
+        final var parseExpr = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(expr));
         if (!(parseExpr instanceof LiteralExpr literalExpr)) {
             Assertions.fail();
             return;
@@ -97,7 +98,7 @@ public final class ExprParserTest extends AbstractParserTest {
         final var expectedField = new FieldSignatureExpr(LiteralExpr.of(new ClassType("com/example/Test")),
             LiteralExpr.of("myField"),
             LiteralExpr.of(BuiltinType.I32));
-        Assertions.assertEquals(expectedField, ExprParser.parse(signature));
+        Assertions.assertEquals(expectedField, ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(signature)));
     }
 
     @Test
@@ -114,7 +115,7 @@ public final class ExprParserTest extends AbstractParserTest {
             LiteralExpr.of("myFunction"),
             LiteralExpr.of(BuiltinType.I32));
         expectedField.addExpression(LiteralExpr.of(BuiltinType.F32));
-        final var expr = ExprParser.parse(signature);
+        final var expr = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(signature));
         Assertions.assertEquals(expectedField, expr);
     }
 }

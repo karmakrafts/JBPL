@@ -6,6 +6,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
@@ -24,15 +25,19 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     private ExprParser() {
     }
 
-    public static @NotNull Expr parse(final @NotNull ParserRuleContext ctx) {
-        final var expr = ctx.accept(INSTANCE).stream().findFirst().orElseThrow();
+    public static @NotNull Expr parse(final @NotNull ParserRuleContext ctx) throws ParserException {
+        // @formatter:off
+        final var expr = ctx.accept(INSTANCE).stream()
+            .findFirst()
+            .orElseThrow(() -> new ParserException("Could not parse expression", null));
+        // @formatter:on
         expr.setTokenRange(TokenRange.fromContext(ctx));
         return expr;
     }
 
     private static @NotNull List<Element> parseIfBody(final @NotNull IfBodyContext ctx) { // @formatter:off
         return ctx.bodyElement().stream()
-            .map(ElementParser::parse)
+            .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
             .toList();
     } // @formatter:on
 
@@ -50,94 +55,110 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitDefaultExpr(final @NotNull DefaultExprContext ctx) {
-        final var type = ParserUtils.parseRefOrType(ctx.refOrType());
-        return List.of(new DefaultExpr(type));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var type = ParserUtils.parseRefOrType(ctx.refOrType());
+            return List.of(new DefaultExpr(type));
+        });
     }
 
     @Override
     public @NotNull List<Expr> visitArrayExpr(final @NotNull ArrayExprContext ctx) {
-        // @formatter:off
-        final var array = ctx.refOrType() != null
-            ? new ArrayExpr(ParserUtils.parseRefOrType(ctx.refOrType()))
-            : new ArrayExpr();
-        // @formatter:on
-        array.addValues(ctx.expr().stream().map(ExprParser::parse).toList());
-        return List.of(array);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            // @formatter:off
+            final var array = ctx.refOrType() != null
+                ? new ArrayExpr(ParserUtils.parseRefOrType(ctx.refOrType()))
+                : new ArrayExpr();
+            // @formatter:on
+            array.addValues(ctx.expr().stream().map(ExceptionUtils.unsafeFunction(ExprParser::parse)).toList());
+            return List.of(array);
+        });
     }
 
     @Override
     public @NotNull List<Expr> visitTypeOfExpr(final @NotNull TypeOfExprContext ctx) {
-        // @formatter:off
-        final var type = ctx.type() != null
-            ? LiteralExpr.of(TypeParser.parse(ctx.type()))
-            : ExprParser.parse(ctx.expr());
-        // @formatter:on
-        return List.of(new TypeOfExpr(type));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            // @formatter:off
+            final var type = ctx.type() != null
+                ? LiteralExpr.of(TypeParser.parse(ctx.type()))
+                : ExprParser.parse(ctx.expr());
+            // @formatter:on
+            return List.of(new TypeOfExpr(type));
+        });
     }
 
     @Override
     public @NotNull List<Expr> visitOpcodeOfExpr(final @NotNull OpcodeOfExprContext ctx) {
-        final var opcodeNode = ctx.opcode();
-        if (opcodeNode != null) {
-            final var opcode = ParserUtils.parseOpcode(opcodeNode).orElseThrow();
-            return List.of(new OpcodeOfExpr(LiteralExpr.of(opcode, TokenRange.fromContext(opcodeNode))));
-        }
-        return List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr())));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var opcodeNode = ctx.opcode();
+            if (opcodeNode != null) {
+                final var opcode = ParserUtils.parseOpcode(opcodeNode);
+                return List.of(new OpcodeOfExpr(LiteralExpr.of(opcode, TokenRange.fromContext(opcodeNode))));
+            }
+            return List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr())));
+        });
     }
 
     @Override
     public @NotNull List<Expr> visitPreproClassInstantiation(final @NotNull PreproClassInstantiationContext ctx) {
-        final var type = new PreproClassType(ctx.IDENT().getText());
-        final var instantiation = new PreproClassExpr(type);
-        instantiation.addArguments(ParserUtils.parseArguments(ctx.argument()));
-        return List.of(instantiation);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var type = new PreproClassType(ctx.IDENT().getText());
+            final var instantiation = new PreproClassExpr(type);
+            instantiation.addArguments(ParserUtils.parseArguments(ctx.argument()));
+            return List.of(instantiation);
+        });
     }
 
     @Override
     public List<Expr> visitIfExpr(final @NotNull IfExprContext ctx) {
-        final var condition = ExprParser.parse(ctx.expr());
-        final var expr = new IfExpr(condition);
-        // @formatter:off
-        expr.addElements(ctx.bodyElement() != null
-            ? List.of(ElementParser.parse(ctx.bodyElement()))
-            : parseIfBody(ctx.ifBody()));
-        // @formatter:on
-        final var elseIfBranches = ctx.elseIfBranch();
-        for (final var branchNode : elseIfBranches) {
-            final var branchCondition = ExprParser.parse(branchNode.expr());
-            final var branch = new ElseIfBranch(branchCondition);
-            branch.setTokenRange(TokenRange.fromContext(branchNode));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var condition = parse(ctx.expr());
+            final var expr = new IfExpr(condition);
             // @formatter:off
-            branch.addElements(branchNode.bodyElement() != null
-                ? List.of(ElementParser.parse(branchNode.bodyElement()))
-                : parseIfBody(branchNode.ifBody()));
+            expr.addElements(ctx.bodyElement() != null
+                ? List.of(ElementParser.parse(ctx.bodyElement()))
+                : parseIfBody(ctx.ifBody()));
             // @formatter:on
-            expr.addElseIfBranch(branch);
-        }
-        final var elseBranchNode = ctx.elseBranch();
-        if (elseBranchNode != null) {
-            final var branch = new ElseBranch();
-            branch.setTokenRange(TokenRange.fromContext(elseBranchNode));
-            // @formatter:off
-            branch.addElements(elseBranchNode.bodyElement() != null
-                ? List.of(ElementParser.parse(elseBranchNode.bodyElement()))
-                : parseIfBody(elseBranchNode.ifBody()));
-            // @formatter:on
-            expr.setElseBranch(branch);
-        }
-        return List.of(expr);
+            final var elseIfBranches = ctx.elseIfBranch();
+            for (final var branchNode : elseIfBranches) {
+                final var branchCondition = parse(branchNode.expr());
+                final var branch = new ElseIfBranch(branchCondition);
+                branch.setTokenRange(TokenRange.fromContext(branchNode));
+                // @formatter:off
+                branch.addElements(branchNode.bodyElement() != null
+                    ? List.of(ElementParser.parse(branchNode.bodyElement()))
+                    : parseIfBody(branchNode.ifBody()));
+                // @formatter:on
+                expr.addElseIfBranch(branch);
+            }
+            final var elseBranchNode = ctx.elseBranch();
+            if (elseBranchNode != null) {
+                final var branch = new ElseBranch();
+                branch.setTokenRange(TokenRange.fromContext(elseBranchNode));
+                // @formatter:off
+                branch.addElements(elseBranchNode.bodyElement() != null
+                    ? List.of(ElementParser.parse(elseBranchNode.bodyElement()))
+                    : parseIfBody(elseBranchNode.ifBody()));
+                // @formatter:on
+                expr.setElseBranch(branch);
+            }
+            return List.of(expr);
+        });
     }
 
     private @NotNull List<Expr> parseBinaryExpr(final @NotNull ExprContext ctx, final @NotNull BinaryExpr.Op op) {
-        final var expressions = ctx.expr();
-        final var lhs = parse(expressions.get(0));
-        final var rhs = parse(expressions.get(1));
-        return List.of(new BinaryExpr(lhs, rhs, op));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var expressions = ctx.expr();
+            final var lhs = parse(expressions.get(0));
+            final var rhs = parse(expressions.get(1));
+            return List.of(new BinaryExpr(lhs, rhs, op));
+        });
     }
 
     private @NotNull List<Expr> parseUnaryExpr(final @NotNull ExprContext ctx, final @NotNull UnaryExpr.Op op) {
-        final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
-        return List.of(new UnaryExpr(expr, op));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
+            return List.of(new UnaryExpr(expr, op));
+        });
     }
 
     private @NotNull List<Expr> parseBinaryExprWithUnaryVariant(final @NotNull ExprContext ctx,
@@ -152,54 +173,56 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitExpr(final @NotNull ExprContext ctx) {
-        final var type = ctx.type();
-        if (ctx.DOT() != null) {
-            // This is a member reference which takes precedence over top level refs
-            final var receiver = parse(ctx.expr().stream().findFirst().orElseThrow());
-            final var call = ctx.macroCall();
-            if (call != null) {
-                return parseMacroCall(call, receiver);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var type = ctx.type();
+            if (ctx.DOT() != null) {
+                // This is a member reference which takes precedence over top level refs
+                final var receiver = parse(ctx.expr().stream().findFirst().orElseThrow());
+                final var call = ctx.macroCall();
+                if (call != null) {
+                    return parseMacroCall(call, receiver);
+                }
+                return parseReference(ctx.reference(), receiver);
             }
-            return parseReference(ctx.reference(), receiver);
-        }
-        else if (ctx.L_SQBRACKET() != null) {
-            // We know this is a subscript operator
-            final var reference = parse(ctx.expr(0));
-            final var index = parse(ctx.expr(1));
-            return List.of(new ArrayAccessExpr(reference, index));
-        }
-        else if (ctx.KW_IS() != null) {
-            return List.of(new IsExpr(parse(ctx.expr(0)), TypeParser.parse(type)));
-        }
-        else if (ctx.KW_AS() != null) {
-            final var value = parse(ctx.expr(0));
-            final var targetType = LiteralExpr.of(TypeParser.parse(ctx.type())); // TODO: allow refs here
-            return List.of(new AsExpr(value, targetType));
-        } // @formatter:off
-        else if (type != null)              return List.of(LiteralExpr.of(TypeParser.parse(type), TokenRange.fromContext(type)));
-        else if (ctx.EQEQ() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
-        else if (ctx.NEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.NE);
-        else if (ctx.L_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.LT);
-        else if (ctx.LEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.LE);
-        else if (ctx.R_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.GT);
-        else if (ctx.GEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.GE);
-        else if (ctx.SPACESHIP() != null)   return parseBinaryExpr(ctx, BinaryExpr.Op.CMP);
-        else if (ctx.PLUS() != null)        return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.ADD, UnaryExpr.Op.PLUS);
-        else if (ctx.MINUS() != null)       return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.SUB, UnaryExpr.Op.MINUS);
-        else if (ctx.ASTERISK() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.MUL);
-        else if (ctx.SLASH() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.DIV);
-        else if (ctx.REM() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.REM);
-        else if (ctx.LSH() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.LSH);
-        else if (ctx.RSH() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.RSH);
-        else if (ctx.CARET() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.XOR);
-        else if (ctx.AMPAMP() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.SC_AND);
-        else if (ctx.AMP() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.AND);
-        else if (ctx.PIPEPIPE() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.SC_OR);
-        else if (ctx.PIPE() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.OR);
-        else if (ctx.TILDE() != null)       return parseUnaryExpr(ctx, UnaryExpr.Op.INVERSE);
-        else if (ctx.EXCL() != null)        return parseUnaryExpr(ctx, UnaryExpr.Op.NOT);
-        // @formatter:on
-        return super.visitExpr(ctx);
+            else if (ctx.L_SQBRACKET() != null) {
+                // We know this is a subscript operator
+                final var reference = parse(ctx.expr(0));
+                final var index = parse(ctx.expr(1));
+                return List.of(new ArrayAccessExpr(reference, index));
+            }
+            else if (ctx.KW_IS() != null) {
+                return List.of(new IsExpr(parse(ctx.expr(0)), TypeParser.parse(type)));
+            }
+            else if (ctx.KW_AS() != null) {
+                final var value = parse(ctx.expr(0));
+                final var targetType = LiteralExpr.of(TypeParser.parse(ctx.type())); // TODO: allow refs here
+                return List.of(new AsExpr(value, targetType));
+            } // @formatter:off
+            else if (type != null)              return List.of(LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(type)), TokenRange.fromContext(type)));
+            else if (ctx.EQEQ() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
+            else if (ctx.NEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.NE);
+            else if (ctx.L_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.LT);
+            else if (ctx.LEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.LE);
+            else if (ctx.R_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.GT);
+            else if (ctx.GEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.GE);
+            else if (ctx.SPACESHIP() != null)   return parseBinaryExpr(ctx, BinaryExpr.Op.CMP);
+            else if (ctx.PLUS() != null)        return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.ADD, UnaryExpr.Op.PLUS);
+            else if (ctx.MINUS() != null)       return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.SUB, UnaryExpr.Op.MINUS);
+            else if (ctx.ASTERISK() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.MUL);
+            else if (ctx.SLASH() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.DIV);
+            else if (ctx.REM() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.REM);
+            else if (ctx.LSH() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.LSH);
+            else if (ctx.RSH() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.RSH);
+            else if (ctx.CARET() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.XOR);
+            else if (ctx.AMPAMP() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.SC_AND);
+            else if (ctx.AMP() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.AND);
+            else if (ctx.PIPEPIPE() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.SC_OR);
+            else if (ctx.PIPE() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.OR);
+            else if (ctx.TILDE() != null)       return parseUnaryExpr(ctx, UnaryExpr.Op.INVERSE);
+            else if (ctx.EXCL() != null)        return parseUnaryExpr(ctx, UnaryExpr.Op.NOT);
+            // @formatter:on
+            return super.visitExpr(ctx);
+        });
     }
 
     private @NotNull List<Expr> parseReference(final @NotNull ReferenceContext ctx, final @NotNull Expr receiver) {
@@ -213,10 +236,12 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     private @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx, final @NotNull Expr receiver) {
-        final var name = ctx.IDENT().getText();
-        final var call = new MacroCallExpr(receiver, name);
-        call.addArguments(ParserUtils.parseArguments(ctx.argument()));
-        return List.of(call);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ctx.IDENT().getText();
+            final var call = new MacroCallExpr(receiver, name);
+            call.addArguments(ParserUtils.parseArguments(ctx.argument()));
+            return List.of(call);
+        });
     }
 
     @Override
@@ -249,7 +274,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         if (text != null) {
             return LiteralExpr.of(text.getText(), TokenRange.fromTerminalNode(text));
         }
-        return parse(ctx.expr());
+        return ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()));
     }
 
     private @NotNull LiteralExpr mergeStringLiterals(final @NotNull ArrayDeque<LiteralExpr> queue) {
@@ -333,32 +358,39 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     private @NotNull Pair<Expr, Expr> parseFunctionSignatureParameter(final @NotNull FunctionSignatureParameterContext ctx) {
-        final var name = Optional.ofNullable(ctx.refOrName()).map(ParserUtils::parseRefOrName).orElse(null);
-        final var type = ParserUtils.parseRefOrType(ctx.refOrType());
-        return new Pair<>(name, type);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = Optional.ofNullable(ctx.refOrName()).map(ExceptionUtils.unsafeFunction(ParserUtils::parseRefOrName)).orElse(
+                null);
+            final var type = ParserUtils.parseRefOrType(ctx.refOrType());
+            return new Pair<>(name, type);
+        });
     }
 
     @Override
     public @NotNull List<Expr> visitFieldSignature(final @NotNull FieldSignatureContext ctx) {
-        final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
-        final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-        final var type = ParserUtils.parseRefOrType(ctx.refOrType());
-        return List.of(new FieldSignatureExpr(owner, name, type));
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
+            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var type = ParserUtils.parseRefOrType(ctx.refOrType());
+            return List.of(new FieldSignatureExpr(owner, name, type));
+        });
     }
 
     @Override
     public @NotNull List<Expr> visitFunctionSignature(final @NotNull FunctionSignatureContext ctx) {
-        final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
-        final var name = ParserUtils.parseFunctionName(ctx.functionName());
-        final var returnType = ParserUtils.parseRefOrType(ctx.refOrType());
-        final var signature = new FunctionSignatureExpr(owner, name, returnType);
-        // @formatter:off
-        signature.addExpressions(ctx.functionSignatureParameter().stream()
-            .map(this::parseFunctionSignatureParameter)
-            .map(Pair::right) // TODO: For these expressions, we discard names for now
-            .toList());
-        // @formatter:on
-        return List.of(signature);
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
+            final var name = ParserUtils.parseFunctionName(ctx.functionName());
+            final var returnType = ParserUtils.parseRefOrType(ctx.refOrType());
+            final var signature = new FunctionSignatureExpr(owner, name, returnType);
+            // @formatter:off
+            signature.addExpressions(ctx.functionSignatureParameter().stream()
+                .map(this::parseFunctionSignatureParameter)
+                .map(Pair::right) // TODO: For these expressions, we discard names for now
+                .toList());
+            // @formatter:on
+            return List.of(signature);
+        });
     }
 
     @Override

@@ -11,13 +11,10 @@ import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public final class MacroDecl extends AbstractElementContainer implements Declaration, ScopeOwner, NamedElement {
-    private final LinkedHashMap<Expr, Expr> parameterTypes = new LinkedHashMap<>();
+    private final ArrayList<Pair<Expr, Expr>> parameters = new ArrayList<>();
     private Expr name;
     private Expr returnType;
 
@@ -52,40 +49,40 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     }
 
     public void clearParameters() {
-        for (final var entry : parameterTypes.entrySet()) {
-            entry.getKey().setParent(null);
-            entry.getValue().setParent(null);
+        for (final var pair : parameters) {
+            pair.left().setParent(null);
+            pair.right().setParent(null);
         }
-        parameterTypes.clear();
+        parameters.clear();
     }
 
     public void addParameter(final @NotNull Expr name, final @NotNull Expr type) {
         name.setParent(this);
         type.setParent(this);
-        parameterTypes.put(name, type);
+        parameters.add(new Pair<>(name, type));
     }
 
-    public void addParameters(final @NotNull Map<Expr, Expr> parameters) {
-        for (final var entry : parameters.entrySet()) {
-            entry.getKey().setParent(this);
-            entry.getValue().setParent(this);
+    public void addParameters(final @NotNull Collection<Pair<Expr, Expr>> parameters) {
+        for (final var entry : parameters) {
+            entry.left().setParent(this);
+            entry.right().setParent(this);
         }
-        parameterTypes.putAll(parameters);
+        this.parameters.addAll(parameters);
     }
 
-    public @NotNull Map<Expr, Expr> getParameters() {
-        return parameterTypes;
+    public @NotNull List<Pair<Expr, Expr>> getParameters() {
+        return parameters;
     }
 
     public @NotNull Map<String, Type> resolveParameters(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var params = getParameters().entrySet();
+        final var params = getParameters();
         if (params.isEmpty()) {
             return Map.of();
         }
-        final var resolvedParams = new LinkedHashMap<String, Type>();
-        for (final var entry : params) {
-            final var name = entry.getKey().evaluateAsConst(context, String.class);
-            final var type = entry.getValue().evaluateAsConst(context, Type.class);
+        final var resolvedParams = new LinkedHashMap<String, Type>(16, 0.75F, true);
+        for (final var pair : params) {
+            final var name = pair.left().evaluateAsConst(context, String.class);
+            final var type = pair.right().evaluateAsConst(context, Type.class);
             resolvedParams.put(name, type);
         }
         return resolvedParams;
@@ -99,7 +96,7 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         // Pop as many args as we have param types from callee frame
-        final var argumentValues = context.popValues(parameterTypes.size());
+        final var argumentValues = context.popValues(parameters.size());
         final var paramNames = resolveParameters(context).keySet();
         final var arguments = new HashMap<String, Expr>();
         var index = 0;
@@ -129,11 +126,7 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     @Override
     public @NotNull MacroDecl copy() {
         final var macro = copyParentAndSourceTo(new MacroDecl(getName().copy(), getReturnType().copy()));
-        // @formatter:off
-        macro.addParameters(getParameters().entrySet().stream()
-            .map(entry -> new Pair<>(entry.getKey().copy(), entry.getValue().copy()))
-            .collect(Collectors.toMap(Pair::left, Pair::right)));
-        // @formatter:on
+        macro.addParameters(getParameters().stream().map(Pair::copy).toList());
         macro.addElements(getElements().stream().map(Element::copy).toList());
         return macro;
     }

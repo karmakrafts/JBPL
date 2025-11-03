@@ -23,13 +23,12 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         this.name = name;
     }
 
-    private @NotNull MacroDecl getMacro(final @NotNull EvaluationContext context) {
+    private @NotNull MacroDecl getMacro(final @NotNull EvaluationContext context) throws EvaluationException {
         final var scope = context.getScope();
         final var macro = context.resolveByName(MacroDecl.class, name);
         if (macro == null) {
-            throw new IllegalStateException(String.format("Could not find macro '%s' in current scope %s",
-                name,
-                scope));
+            throw new EvaluationException(String.format("Could not find macro '%s' in current scope %s", name, scope),
+                SourceDiagnostic.from(this));
         }
         return macro;
     }

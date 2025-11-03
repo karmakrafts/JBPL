@@ -1,6 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.type.*;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ public final class TypeParserTest extends AbstractParserTest {
         Assertions.assertTrue(element.isPresent());
         final var type = element.get().statement().expr().typeOfExpr().type();
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(expectedType, TypeParser.parse(type));
+        Assertions.assertEquals(expectedType, ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(type)));
     }
 
     @Test
