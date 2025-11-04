@@ -20,26 +20,25 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.intellij.util.Annotated;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class DefineNode extends ANTLRPsiNode implements Annotated {
-    public DefineNode(final @NotNull ASTNode node) {
+public final class MacroNode extends ANTLRPsiNode implements Annotated {
+    public MacroNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
     public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        final var children = element.getChildren();
-        if (children[1].getNode().getElementType() instanceof TokenIElementType tokenType && tokenType.getANTLRTokenType() == JBPLLexer.IDENT) { // @formatter:off
+        final var refOrName = element.getChildren()[1]; // refOrName
+        final var firstChild = refOrName.getFirstChild();
+        if(!(firstChild instanceof ExplicitReferenceNode)) { // @formatter:off
             holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                .range(children[1])
-                .textAttributes(TextAttributeKeys.DEFINE_NAME)
+                .range(refOrName)
+                .textAttributes(TextAttributeKeys.MACRO_NAME)
                 .create();
-        }
+        } // @formatter:on
     }
 }

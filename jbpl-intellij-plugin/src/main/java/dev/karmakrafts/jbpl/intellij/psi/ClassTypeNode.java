@@ -20,26 +20,18 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.intellij.util.Annotated;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class DefineNode extends ANTLRPsiNode implements Annotated {
-    public DefineNode(final @NotNull ASTNode node) {
+public final class ClassTypeNode extends ANTLRPsiNode implements Annotated {
+    public ClassTypeNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
     public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        final var children = element.getChildren();
-        if (children[1].getNode().getElementType() instanceof TokenIElementType tokenType && tokenType.getANTLRTokenType() == JBPLLexer.IDENT) { // @formatter:off
-            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                .range(children[1])
-                .textAttributes(TextAttributeKeys.DEFINE_NAME)
-                .create();
-        }
+        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES).range(element).textAttributes(TextAttributeKeys.CLASS_TYPE).create();
     }
 }

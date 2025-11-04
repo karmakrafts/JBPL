@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.util;
 
 import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.Annotator;
 import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
 import org.jetbrains.annotations.NotNull;
 
-public final class JBPLAnnotator implements Annotator {
-    @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        if (element instanceof Annotated annotated) {
-            annotated.annotate(element, holder);
-        }
-    }
+@FunctionalInterface
+public interface Annotated {
+    void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder);
 }

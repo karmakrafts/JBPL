@@ -29,8 +29,7 @@ import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.frontend.JBPLParser;
-import dev.karmakrafts.jbpl.intellij.psi.DefineNode;
-import dev.karmakrafts.jbpl.intellij.psi.ReferenceNode;
+import dev.karmakrafts.jbpl.intellij.psi.*;
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor;
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory;
 import org.antlr.intellij.adaptor.lexer.RuleIElementType;
@@ -110,11 +109,20 @@ public final class JBPLParserDefinition implements ParserDefinition {
         if (!(elementType instanceof RuleIElementType ruleType)) {
             return new ANTLRPsiNode(node);
         }
-        return switch (ruleType.getRuleIndex()) {
+        return switch (ruleType.getRuleIndex()) { // @formatter:off
             case JBPLParser.RULE_define -> new DefineNode(node);
             case JBPLParser.RULE_reference -> new ReferenceNode(node);
+            case JBPLParser.RULE_classType -> new ClassTypeNode(node);
+            case JBPLParser.RULE_macro -> new MacroNode(node);
+            case JBPLParser.RULE_explicitReference -> new ExplicitReferenceNode(node);
+            case JBPLParser.RULE_stringLiteral,
+                 JBPLParser.RULE_simpleStringLiteral -> new StringLiteralNode(node);
+            case JBPLParser.RULE_field -> new FieldNode(node);
+            case JBPLParser.RULE_function -> new FunctionNode(node);
+            case JBPLParser.RULE_refOrName -> new RefOrNameNode(node);
+            case JBPLParser.RULE_refOrType -> new RefOrTypeNode(node);
             default -> new ANTLRPsiNode(node);
-        };
+        }; // @formatter:on
     }
 
     @Override
