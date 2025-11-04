@@ -42,4 +42,9 @@ public final class TypeOfExpr extends AbstractExprContainer implements Expr {
     public @NotNull TypeOfExpr copy() {
         return copyParentAndSourceTo(new TypeOfExpr(getValue().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("typeof(%s)", getValue());
+    }
 }

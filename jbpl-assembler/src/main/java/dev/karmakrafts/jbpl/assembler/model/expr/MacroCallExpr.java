@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     public String name;
@@ -130,4 +131,11 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         call.addArguments(getArguments().stream().map(Pair::copy).toList());
         return call;
     }
+
+    @Override
+    public @NotNull String toString() { // @formatter:off
+        return String.format("%s^(%s)", name, getArguments().stream()
+            .map(pair -> pair.right().toString())
+            .collect(Collectors.joining(", ")));
+    } // @formatter:on
 }

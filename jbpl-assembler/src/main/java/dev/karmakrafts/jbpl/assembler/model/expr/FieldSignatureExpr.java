@@ -56,4 +56,9 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
             getFieldName().copy(),
             getFieldType().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s.%s: %s", getFieldOwner(), getFieldName(), getFieldType());
+    }
 }

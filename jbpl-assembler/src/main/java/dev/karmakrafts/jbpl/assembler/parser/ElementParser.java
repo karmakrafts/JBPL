@@ -3,6 +3,7 @@ package dev.karmakrafts.jbpl.assembler.parser;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.DeclarationContext;
+import dev.karmakrafts.jbpl.frontend.JBPLParser.ExprContext;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.StatementContext;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -30,5 +31,10 @@ public final class ElementParser extends JBPLParserBaseVisitor<List<? extends El
     @Override
     public @NotNull List<? extends Element> visitStatement(final @NotNull StatementContext ctx) {
         return List.of(ExceptionUtils.rethrowUnchecked(() -> StatementParser.parse(ctx)));
+    }
+
+    @Override
+    public @NotNull List<? extends Element> visitExpr(final @NotNull ExprContext ctx) {
+        return List.of(ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx)));
     }
 }

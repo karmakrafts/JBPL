@@ -105,6 +105,11 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         return copyParentAndSourceTo(new UnaryExpr(getValue().copy(), op));
     }
 
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s%s", op, getValue());
+    }
+
     public enum Op {
         PLUS, MINUS, INVERSE, NOT
     }

@@ -15,106 +15,106 @@ public final class TypeParserTest extends AbstractParserTest {
         result.shouldSucceed();
         final var element = Objects.requireNonNull(result.context()).bodyElement().stream().findFirst();
         Assertions.assertTrue(element.isPresent());
-        final var type = element.get().statement().expr().typeOfExpr().type();
+        final var type = element.get().statement().expr().literal().typeLiteral().type();
         Assertions.assertNotNull(type);
         Assertions.assertEquals(expectedType, ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(type)));
     }
 
     @Test
     public void parseI8Type() {
-        runTest(BuiltinType.I8, "typeof(i8)");
+        runTest(BuiltinType.I8, "type(i8)");
     }
 
     @Test
     public void parseI16Type() {
-        runTest(BuiltinType.I16, "typeof(i16)");
+        runTest(BuiltinType.I16, "type(i16)");
     }
 
     @Test
     public void parseI32Type() {
-        runTest(BuiltinType.I32, "typeof(i32)");
+        runTest(BuiltinType.I32, "type(i32)");
     }
 
     @Test
     public void parseI64Type() {
-        runTest(BuiltinType.I64, "typeof(i64)");
+        runTest(BuiltinType.I64, "type(i64)");
     }
 
     @Test
     public void parseF32Type() {
-        runTest(BuiltinType.F32, "typeof(f32)");
+        runTest(BuiltinType.F32, "type(f32)");
     }
 
     @Test
     public void parseF64Type() {
-        runTest(BuiltinType.F64, "typeof(f64)");
+        runTest(BuiltinType.F64, "type(f64)");
     }
 
     @Test
     public void parseBoolType() {
-        runTest(BuiltinType.BOOL, "typeof(bool)");
+        runTest(BuiltinType.BOOL, "type(bool)");
     }
 
     @Test
     public void parseCharType() {
-        runTest(BuiltinType.CHAR, "typeof(char)");
+        runTest(BuiltinType.CHAR, "type(char)");
     }
 
     @Test
     public void parseStringType() {
-        runTest(BuiltinType.STRING, "typeof(string)");
+        runTest(BuiltinType.STRING, "type(string)");
     }
 
     @Test
     public void parseOpcodeType() {
-        runTest(PreproType.OPCODE, "typeof(opcode)");
+        runTest(PreproType.OPCODE, "type(opcode)");
     }
 
     @Test
     public void parseTypeType() {
-        runTest(PreproType.TYPE, "typeof(type)");
+        runTest(PreproType.TYPE, "type(type)");
     }
 
     @Test
     public void parseInstructionType() {
-        runTest(PreproType.INSTRUCTION, "typeof(instruction)");
+        runTest(PreproType.INSTRUCTION, "type(instruction)");
     }
 
     @Test
     public void parseSelectorType() {
-        runTest(PreproType.SELECTOR, "typeof(selector)");
+        runTest(PreproType.SELECTOR, "type(selector)");
     }
 
     @Test
     public void parseFieldSignatureType() {
-        runTest(PreproType.FIELD_SIGNATURE, "typeof(signature(field))");
+        runTest(PreproType.FIELD_SIGNATURE, "type(signature(field))");
     }
 
     @Test
     public void parseFunctionSignatureType() {
-        runTest(PreproType.FUNCTION_SIGNATURE, "typeof(signature(fun))");
+        runTest(PreproType.FUNCTION_SIGNATURE, "type(signature(fun))");
     }
 
     @Test
     public void parseClassType() {
-        runTest(new ClassType("com/example/Foo"), "typeof(<com/example/Foo>)");
+        runTest(new ClassType("com/example/Foo"), "type(<com/example/Foo>)");
     }
 
     @Test
     public void parsePreproClassType() {
-        runTest(new PreproClassType("Testing"), "typeof(Testing)");
+        runTest(new PreproClassType("Testing"), "type(Testing)");
     }
 
     @Test
     public void parseIntersectionType() {
         runTest(new IntersectionType(List.of(BuiltinType.I32, BuiltinType.F32, BuiltinType.F64)),
-            "typeof((i32 | f32 | f64))");
+            "type((i32 | f32 | f64))");
     }
 
     @Test
     public void parseArrayType() {
-        runTest(BuiltinType.I32.array(), "typeof([i32])");
-        runTest(BuiltinType.I32.array().array(), "typeof([[i32]])");
-        runTest(BuiltinType.I32.array().array().array(), "typeof([[[i32]]])");
+        runTest(BuiltinType.I32.array(), "type([i32])");
+        runTest(BuiltinType.I32.array().array(), "type([[i32]])");
+        runTest(BuiltinType.I32.array().array().array(), "type([[[i32]]])");
     }
 }

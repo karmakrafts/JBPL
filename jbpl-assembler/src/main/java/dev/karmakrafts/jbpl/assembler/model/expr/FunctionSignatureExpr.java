@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class FunctionSignatureExpr extends AbstractExprContainer implements SignatureExpr {
     public static final int OWNER_INDEX = 0;
@@ -92,4 +93,12 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
             getFunctionName().copy(),
             getFunctionReturnType().copy()));
     }
+
+    @Override
+    public @NotNull String toString() { // @formatter:off
+        return String.format("%s.%s(%s): %s", getFunctionOwner(),
+            getFunctionName(),
+            getFunctionParameters().stream().map(Expr::toString).collect(Collectors.joining(", ")),
+            getFunctionReturnType());
+    } // @formatter:on
 }

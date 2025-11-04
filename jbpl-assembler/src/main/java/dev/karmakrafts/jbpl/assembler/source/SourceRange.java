@@ -18,6 +18,8 @@ package dev.karmakrafts.jbpl.assembler.source;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public record SourceRange(int startLine, int startColumn, int endLine, int endColumn) {
     public static final int UNDEFINED_INDEX = -1;
     public static final int SYNTHETIC_INDEX = -2;
@@ -32,6 +34,30 @@ public record SourceRange(int startLine, int startColumn, int endLine, int endCo
 
     public static @NotNull SourceRange from(final int line, final int column) {
         return new SourceRange(line, column, line, column);
+    }
+
+    public static @NotNull SourceRange union(final @NotNull List<SourceRange> ranges) {
+        final var startLine = ranges.stream().mapToInt(SourceRange::startLine).min().orElseThrow();
+        // @formatter:off
+        final var startColumn = ranges.stream()
+            .filter(range -> range.startLine == startLine)
+            .mapToInt(SourceRange::startColumn)
+            .findFirst()
+            .orElseThrow();
+        // @formatter:on
+        final var endLine = ranges.stream().mapToInt(SourceRange::endLine).max().orElseThrow();
+        // @formatter:off
+        final var endColumn = ranges.stream()
+            .filter(range -> range.endLine == endLine)
+            .mapToInt(SourceRange::endColumn)
+            .findFirst()
+            .orElseThrow();
+        // @formatter:on
+        return new SourceRange(startLine, startColumn, endLine, endColumn);
+    }
+
+    public static @NotNull SourceRange union(final @NotNull SourceRange... ranges) {
+        return union(List.of(ranges));
     }
 
     public int getLineCount() {

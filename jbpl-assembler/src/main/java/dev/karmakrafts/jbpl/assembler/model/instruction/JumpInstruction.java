@@ -58,4 +58,9 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
     public @NotNull JumpInstruction copy() {
         return copyParentAndSourceTo(new JumpInstruction(opcode, getTarget().copy()));
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", opcode, getTarget());
+    }
 }

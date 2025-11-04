@@ -52,4 +52,33 @@ public final class SourceRangeTest {
         Assertions.assertFalse(range.containsColumn(100, 101));
         Assertions.assertFalse(range.containsColumn(101, 100));
     }
+
+    @Test
+    public void unionSingle() {
+        final var range1 = new SourceRange(0, 0, 10, 10);
+        final var range2 = SourceRange.union(range1);
+        Assertions.assertEquals(range1, range2);
+    }
+
+    @Test
+    public void unionWithoutGap() {
+        final var range1 = new SourceRange(0, 0, 10, 10);
+        final var range2 = new SourceRange(11, 0, 11, 100);
+        final var range3 = SourceRange.union(range1, range2);
+        Assertions.assertEquals(0, range3.startLine());
+        Assertions.assertEquals(0, range3.startColumn());
+        Assertions.assertEquals(11, range3.endLine());
+        Assertions.assertEquals(100, range3.endColumn());
+    }
+
+    @Test
+    public void unionWithGap() {
+        final var range1 = new SourceRange(0, 0, 10, 10);
+        final var range2 = new SourceRange(20, 0, 21, 100);
+        final var range3 = SourceRange.union(range1, range2);
+        Assertions.assertEquals(0, range3.startLine());
+        Assertions.assertEquals(0, range3.startColumn());
+        Assertions.assertEquals(21, range3.endLine());
+        Assertions.assertEquals(100, range3.endColumn());
+    }
 }

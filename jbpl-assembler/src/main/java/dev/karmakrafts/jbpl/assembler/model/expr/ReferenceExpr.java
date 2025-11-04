@@ -8,8 +8,6 @@ import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-
 public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, ExprContainer {
     public String name;
 
@@ -26,8 +24,8 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         final var scope = context.getScope();
         final var define = context.resolveByName(DefineStatement.class, name);
         if (define == null) {
-            throw new EvaluationException(String.format("Could not find define '%s' in scope %s", name, scope),
-                SourceDiagnostic.from(Objects.requireNonNull(getParent()), this));
+            final var message = String.format("Could not find define '%s' in scope %s", name, scope);
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message));
         }
         return define;
     }
@@ -56,5 +54,10 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     @Override
     public @NotNull ReferenceExpr copy() {
         return copyParentAndSourceTo(new ReferenceExpr(getReceiver().copy(), name));
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return name;
     }
 }

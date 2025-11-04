@@ -73,6 +73,11 @@ include:
     simpleStringLiteral
     ;
 
+assertStatement:
+    KW_PREPRO_ASSERT
+    expr
+    ;
+
 infoStatement:
     KW_PREPRO_INFO
     expr
@@ -171,12 +176,12 @@ parameter:
     ;
 
 refOrName:
-    reference
+    explicitReference
     | nameSegment
     ;
 
 refOrType:
-    reference
+    explicitReference
     | type
     ;
 
@@ -264,7 +269,7 @@ expr:
 defaultExpr:
     KW_DEFAULT
     L_PAREN
-    refOrType
+    expr
     R_PAREN
     ;
 
@@ -313,7 +318,11 @@ signatureExpr:
     | fieldSignature
     ;
 
-reference:
+reference: // Impplicit references
+    IDENT
+    ;
+
+explicitReference:
     DOLLAR
     L_BRACE
     IDENT
@@ -323,16 +332,21 @@ reference:
 opcodeOfExpr:
     KW_OPCODEOF
     L_PAREN
-    (opcode
-    | expr)
+    expr
     R_PAREN
     ;
 
 typeOfExpr:
     KW_TYPEOF
     L_PAREN
-    (expr
-    | type
+    expr
+    R_PAREN
+    ;
+
+typeLiteral:
+    KW_TYPE
+    L_PAREN
+    (type
     | diamond)
     R_PAREN
     ;
@@ -485,6 +499,7 @@ statement:
     | versionStatement
     | infoStatement
     | errorStatement
+    | assertStatement
     | label
     | local
     | instruction
@@ -496,6 +511,13 @@ local:
     refOrName
     COLON
     refOrType
+    ;
+
+instructionLiteral:
+    KW_INSTRUCTION
+    L_PAREN
+    instruction
+    R_PAREN
     ;
 
 instruction:
@@ -619,6 +641,9 @@ invoke:
 
 literal:
     stringLiteral
+    | typeLiteral
+    | opcodeLiteral
+    | instructionLiteral
     | boolLiteral
     | LITERAL_CHAR
     | floatLiteral
@@ -701,6 +726,13 @@ logicInstruction:
     | INSN_AND
     | INSN_XOR
     | INSN_OR
+    ;
+
+opcodeLiteral:
+    KW_OPCODE
+    L_PAREN
+    opcode
+    R_PAREN
     ;
 
 opcode:

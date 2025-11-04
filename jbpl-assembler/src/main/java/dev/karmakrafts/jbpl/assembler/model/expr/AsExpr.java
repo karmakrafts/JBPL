@@ -178,4 +178,9 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
     public @NotNull AsExpr copy() {
         return copyParentAndSourceTo(new AsExpr(getValue().copy(), getType().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s as %s", getValue(), getType());
+    }
 }

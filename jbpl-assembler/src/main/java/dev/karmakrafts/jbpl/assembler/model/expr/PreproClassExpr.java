@@ -7,6 +7,8 @@ import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.stream.Collectors;
+
 public final class PreproClassExpr extends AbstractCallExpr implements Expr {
     public final PreproClassType type;
 
@@ -37,4 +39,11 @@ public final class PreproClassExpr extends AbstractCallExpr implements Expr {
     public @NotNull PreproClassExpr copy() {
         return copyParentAndSourceTo(new PreproClassExpr(type));
     }
+
+    @Override
+    public @NotNull String toString() { // @formatter:off
+        return String.format("%s(%s)", type.name(), getArguments().stream()
+            .map(pair -> pair.right().toString())
+            .collect(Collectors.joining(", ")));
+    } // @formatter:on
 }

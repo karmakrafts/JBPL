@@ -50,4 +50,9 @@ public final class DefaultExpr extends AbstractExprContainer implements Expr {
     public @NotNull DefaultExpr copy() {
         return copyParentAndSourceTo(new DefaultExpr(getType().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("default(%s)", getType());
+    }
 }

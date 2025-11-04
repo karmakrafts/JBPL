@@ -61,4 +61,9 @@ public final class InvokeInstruction extends AbstractExprContainer implements In
     public @NotNull InvokeInstruction copy() {
         return copyParentAndSourceTo(new InvokeInstruction(opcode, getSignature().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s %s", opcode, getSignature());
+    }
 }

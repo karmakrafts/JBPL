@@ -64,7 +64,7 @@ public final class ParserUtils {
     }
 
     public static @NotNull Expr parseRefOrName(final @NotNull JBPLParser.RefOrNameContext ctx) throws ParserException {
-        final var ref = ctx.reference();
+        final var ref = ctx.explicitReference();
         // @formatter:off
         return ref != null
             ? ExprParser.parse(ref)
@@ -102,7 +102,7 @@ public final class ParserUtils {
     }
 
     public static @NotNull Expr parseRefOrType(final @NotNull RefOrTypeContext ctx) throws ParserException {
-        final var typeRef = ctx.reference();
+        final var typeRef = ctx.explicitReference();
         // @formatter:off
         return typeRef != null
             ? ExprParser.parse(typeRef)

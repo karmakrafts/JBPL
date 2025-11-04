@@ -18,23 +18,43 @@ package dev.karmakrafts.jbpl.assembler.source;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
-import dev.karmakrafts.jbpl.assembler.util.MathUtils;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.MultiMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-public record SourceDiagnostic( // @formatter:off
-    AssemblyFile file,
-    TokenRange renderedRange,
-    SourceRange highlightedRange
-) { // @formatter:on
-    private static final int LINE_NUMBER_SPACING = 2;
+public final class SourceDiagnostic {
+    private static final int LINE_NUMBER_SPACING = 1;
+    // @formatter:on
+    private static final String V_BORDER_CHAR = "│";
+    private static final String H_BORDER_CHAR = "─";
+    private static final String UNDERLINE_CHAR = "━";
+    private static final String UNDERLINE_CONN_CHAR = "┯";
+    private static final String CORNER_CHAR = "└";
+    public final AssemblyFile file;
+    public final TokenRange renderedRange;
+    public final SourceRange renderedSourceRange;
+    public final List<Highlight> highlights;
+    public final SourceRange highlightBounds;
 
-    public static @NotNull SourceDiagnostic from(final @NotNull AssemblyFile file, final @NotNull Token token) {
+    public SourceDiagnostic(final @NotNull AssemblyFile file,
+                            final @NotNull TokenRange renderedRange,
+                            final @NotNull List<Highlight> highlights) {
+        this.file = file;
+        this.renderedRange = renderedRange;
+        renderedSourceRange = file.getSourceRange(renderedRange);
+        this.highlights = highlights;
+        highlightBounds = SourceRange.union(highlights.stream().map(Highlight::range).toList());
+    }
+
+    public static @NotNull SourceDiagnostic from(final @NotNull AssemblyFile file,
+                                                 final @NotNull Token token,
+                                                 final @Nullable String message) {
         final var tokenRange = TokenRange.fromToken(token);
         final var line = token.getLine();
         // @formatter:off
@@ -49,22 +69,38 @@ public record SourceDiagnostic( // @formatter:off
             : lineTokenIndices.get(lineTokenIndices.size() - 1);
         // @formatter:on
         final var lineTokenRange = TokenRange.fromTokens(lineStartToken, lineEndToken);
-        return new SourceDiagnostic(file, lineTokenRange, file.getSourceRange(tokenRange));
+        final var highlight = new Highlight(file.getSourceRange(tokenRange), message);
+        return new SourceDiagnostic(file, lineTokenRange, List.of(highlight));
+    }
+
+    public static @NotNull SourceDiagnostic from(final @NotNull AssemblyFile file, final @NotNull Token token) {
+        return from(file, token, null);
     }
 
     public static @NotNull SourceDiagnostic from(final @NotNull Element renderedElement,
-                                                 final @NotNull Element highlightedElement) {
+                                                 final @NotNull Element highlightedElement,
+                                                 final @Nullable String message) {
         final var file = renderedElement.getContainingFile();
         if (file != highlightedElement.getContainingFile()) {
             throw new IllegalArgumentException("Rendered and highlighted regions must be within same file");
         }
         final var renderedRange = file.getTokenRange();
         final var highlightedRange = file.getSourceRange(highlightedElement.getTokenRange());
-        return new SourceDiagnostic(file, renderedRange, highlightedRange);
+        final var highlight = new Highlight(highlightedRange, message);
+        return new SourceDiagnostic(file, renderedRange, List.of(highlight));
+    }
+
+    public static @NotNull SourceDiagnostic from(final @NotNull Element renderedElement,
+                                                 final @NotNull Element highlightedElement) {
+        return from(renderedElement, highlightedElement, null);
+    }
+
+    public static @NotNull SourceDiagnostic from(final @NotNull Element element, final @Nullable String message) {
+        return from(Objects.requireNonNullElse(element.getParent(), element), element, message);
     }
 
     public static @NotNull SourceDiagnostic from(final @NotNull Element element) {
-        return from(Objects.requireNonNullElse(element.getParent(), element), element);
+        return from(element, (String) null);
     }
 
     private @NotNull List<SourceLine> getRenderedLines() {
@@ -78,80 +114,107 @@ public record SourceDiagnostic( // @formatter:off
         var sortedLines = mappedTokens.entrySet().stream()
             .map(entry -> new SourceLine(entry.getValue(), entry.getKey()))
             .sorted()
-            .toList();
+            .collect(Collectors.toCollection(ArrayList::new));
         // @formatter:on
-        if (highlightedRange != null) {
-            final var maxAllowedLines = highlightedRange.getLineCount() + 2; // One additional line before and after
-            if (sortedLines.size() > maxAllowedLines) {
-                // We need to shorten the list to only include the maximum allowed number of lines
-                final var maxLineIndex = sortedLines.size();
-                final var start = MathUtils.clamp(0, maxLineIndex, highlightedRange.startLine() - 1);
-                final var end = MathUtils.clamp(0, maxLineIndex, highlightedRange.endLine() + 2);
-                sortedLines = sortedLines.subList(start, end);
+        // We only want to keep lines that contain a highlight
+        // TODO: reimplement additional context lines around the highlighted ones?
+        if (!highlights.isEmpty()) {
+            final var allLines = new ArrayList<>(sortedLines);
+            sortedLines.clear();
+            for (final var line : allLines) {
+                final var lineIndex = line.lineIndex();
+                if (highlights.stream().noneMatch(highlight -> highlight.range.containsLine(lineIndex))) {
+                    continue;
+                }
+                sortedLines.add(line);
             }
         }
         return sortedLines;
     }
 
-    public @NotNull String render(final @Nullable String message) {
+    private void renderLineHighlight(final @NotNull StringBuilder builder,
+                                     final @NotNull SourceLine line,
+                                     final @NotNull Highlight highlight,
+                                     final int spacing) {
+        final var lineIndex = line.lineIndex();
+        final var range = highlight.range;
+        if (!range.containsLine(lineIndex)) {
+            return;
+        }
+        builder.append(" ".repeat(spacing));
+        if (range.getLineCount() == 1) {
+            // If we are rendering a single line highlight, start and end column are on same line
+            final var start = range.startColumn();
+            final var highlightLength = range.endColumn() - start;
+            final var lineLength = line.getLength();
+
+            builder.append(" ".repeat(start));
+            builder.append(UNDERLINE_CHAR.repeat(highlightLength));
+
+            final var message = highlight.message;
+            if (message != null) {
+                builder.append(UNDERLINE_CONN_CHAR);
+                final var connOffset = spacing + start + highlightLength;
+                builder.append('\n');
+                builder.append(" ".repeat(connOffset));
+                builder.append(CORNER_CHAR);
+                builder.append(H_BORDER_CHAR.repeat(lineLength - (start + highlightLength + 1) - 1));
+                builder.append(' ');
+                builder.append(message);
+                return;
+            }
+
+            builder.append(UNDERLINE_CHAR);
+            return;
+        }
+        // For multi-line highlights, we need to handle start-, end- and intermediate lines
+        if (range.isFirstLine(lineIndex)) {
+            // We render from startColumn to end
+            final var start = range.startColumn();
+            final var lineLength = line.getLength();
+            final var highlightLength = lineLength - start;
+
+            builder.append(" ".repeat(start));
+            builder.append(UNDERLINE_CHAR.repeat(highlightLength + 1));
+        }
+        else if (range.isLastLine(lineIndex)) {
+            // We render from 0 to endColumn and the message
+        }
+        else {
+            // We render the entire line
+        }
+    }
+
+    @Override
+    public @NotNull String toString() {
         final var renderedSourceRange = file.getSourceRange(renderedRange);
-        if (highlightedRange != null && !renderedSourceRange.contains(highlightedRange)) {
+        if (!renderedSourceRange.contains(highlightBounds)) {
             throw new IllegalStateException("Highlighted source range is outside of element source range");
         }
         final var lines = getRenderedLines();
         final var maxLineNumberLength = lines.stream().mapToInt(SourceLine::getLineNumberLength).max().orElseThrow();
-        final var highlightSpacing = maxLineNumberLength + LINE_NUMBER_SPACING;
+        final var highlightSpacing = maxLineNumberLength + LINE_NUMBER_SPACING + 2;
         final var builder = new StringBuilder();
-        for (final var line : lines) {
-            // Build line number with uniform spacing and add line content
-            final var lineNumberSpaceCount = (maxLineNumberLength - line.getLineNumberLength()) + LINE_NUMBER_SPACING;
-            builder.append(line.getLineNumber());
-            builder.append(" ".repeat(lineNumberSpaceCount));
-            builder.append(line.renderWithColor());
-            // If this line is within the highlighted region, render the highlight below it accordingly
-            final var lineIndex = line.lineIndex();
-            if (highlightedRange != null && highlightedRange.containsLine(lineIndex)) {
-                final var lineLength = line.getLength();
-                var highlightOffset = 0;
-                var highlightLength = 0;
-                if (highlightedRange.isSingleLine()) {
-                    // If we only highlight a single line, take into account start- and end column
-                    highlightOffset = highlightedRange.startColumn();
-                    highlightLength = (highlightedRange.endColumn() - highlightOffset) + 1;
-                }
-                else {
-                    // Otherwise we are dealing with a multi-line highlight
-                    if (highlightedRange.isFirstLine(lineIndex)) {
-                        // In the first line, we highlight starting at column til the end of the line
-                        highlightOffset = highlightedRange.startColumn();
-                        highlightLength = (lineLength - highlightOffset) + 1;
-                    }
-                    else if (highlightedRange.isLastLine(lineIndex)) {
-                        // In the last line, we highlight from line start to end column
-                        highlightLength = highlightedRange.endColumn();
-                    }
-                    else {
-                        // For any line in between, we highlight the entire line
-                        highlightLength = lineLength;
-                    }
-                }
-                if (highlightLength == 0) {
-                    continue; // If the line length still comes out as 0 chars, we can skip the highlight entirely
-                }
-                if (!line.endsWithNewline()) {
-                    // If the previous source line doesn't end in a \n (last line for example), we need to add one first
-                    builder.append('\n');
-                }
-                builder.append(" ".repeat(highlightSpacing + highlightOffset));
-                builder.append("^".repeat(highlightLength));
-                if (message != null) {
-                    // If a message is specified, render it next to the highlight
-                    builder.append(' ');
-                    builder.append(message);
-                }
-                builder.append('\n'); // Append an additional newline since we're not getting it from the SourceLine here
+        for (var i = 0; i < highlights.size(); i++) {
+            final var highlight = highlights.get(i);
+            for (final var line : lines) {
+                // Build line number with uniform spacing and add line content
+                final var lineNumberSpaceCount = (maxLineNumberLength - line.getLineNumberLength()) + LINE_NUMBER_SPACING;
+                builder.append(line.getLineNumber());
+                builder.append(" ".repeat(lineNumberSpaceCount));
+                builder.append(V_BORDER_CHAR).append(' ');
+                builder.append(line.renderWithColor());
+                // Render all highlights for this line
+                renderLineHighlight(builder, line, highlight, highlightSpacing);
+                builder.append('\n');
             }
         }
         return builder.toString();
     }
+
+    // @formatter:off
+    public record Highlight(
+        @NotNull SourceRange range,
+        @Nullable String message
+    ) {}
 }

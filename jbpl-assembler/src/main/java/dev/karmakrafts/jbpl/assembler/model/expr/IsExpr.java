@@ -12,7 +12,7 @@ public final class IsExpr extends AbstractExprContainer implements Expr {
 
     public IsExpr(final @NotNull Expr value, final @NotNull Type type) {
         addExpression(value);
-        this.type = type;
+        this.type = type; // TODO: allow refs here
     }
 
     public @NotNull Expr getValue() {
@@ -36,5 +36,10 @@ public final class IsExpr extends AbstractExprContainer implements Expr {
     @Override
     public @NotNull IsExpr copy() {
         return copyParentAndSourceTo(new IsExpr(getValue().copy(), type));
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s is %s", getValue(), type);
     }
 }

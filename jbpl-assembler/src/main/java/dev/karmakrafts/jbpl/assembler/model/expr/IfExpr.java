@@ -145,6 +145,26 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
         return true;
     }
 
+    @Override
+    public @NotNull String toString() {
+        final var builder = new StringBuilder();
+        // @formatter:off
+        final var body = elements.size() == 1
+            ? elements.get(0).toString()
+            : "{\n" + elements.stream().map(Element::toString).collect(Collectors.joining("\n")) + "\n}";
+        // @formatter:on
+        builder.append(String.format("if (%s) %s", condition, body));
+        elseIfBranches.forEach(branch -> {
+            builder.append('\n');
+            builder.append(branch);
+        });
+        if (elseBranch != null) {
+            builder.append('\n');
+            builder.append(elseBranch);
+        }
+        return builder.toString();
+    }
+
     public static final class ElseIfBranch extends AbstractElementContainer implements ScopeOwner {
         private Expr condition;
 
@@ -194,6 +214,16 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
         public boolean mergeFrameDataOnFrameExit() {
             return true;
         }
+
+        @Override
+        public @NotNull String toString() {
+            // @formatter:off
+            final var body = elements.size() == 1
+                ? elements.get(0).toString()
+                : "{\n" + elements.stream().map(Element::toString).collect(Collectors.joining("\n")) + "\n}";
+            // @formatter:on
+            return String.format("else if (%s) %s", condition, body);
+        }
     }
 
     public static final class ElseBranch extends AbstractElementContainer implements ScopeOwner {
@@ -222,6 +252,16 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
         @Override
         public boolean mergeFrameDataOnFrameExit() {
             return true;
+        }
+
+        @Override
+        public @NotNull String toString() {
+            // @formatter:off
+            final var body = elements.size() == 1
+                ? elements.get(0).toString()
+                : "{\n" + elements.stream().map(Element::toString).collect(Collectors.joining("\n")) + "\n}";
+            // @formatter:on
+            return String.format("else %s", body);
         }
     }
 }

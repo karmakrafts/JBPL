@@ -8,6 +8,8 @@ import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeCommonizer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.stream.Collectors;
+
 public final class CompoundExpr extends AbstractElementContainer implements Expr {
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
@@ -20,4 +22,11 @@ public final class CompoundExpr extends AbstractElementContainer implements Expr
         result.addElements(getElements().stream().map(Element::copy).toList());
         return result;
     }
+
+    @Override
+    public @NotNull String toString() { // @formatter:off
+        return String.format("{\n%s\n}", elements.stream()
+            .map(Element::toString)
+            .collect(Collectors.joining(", ")));
+    } // @formatter:on
 }

@@ -10,6 +10,7 @@ CONST_STR_START: '"' -> pushMode(M_CONST_STR), type(QUOTE);
 KW_PREPRO_INCLUDE: '^include';
 KW_PREPRO_RETURN: '^return';
 KW_PREPRO_DEFINE: '^define';
+KW_PREPRO_ASSERT: '^assert';
 KW_PREPRO_MACRO: '^macro';
 KW_PREPRO_CLASS: '^class';
 KW_PREPRO_ERROR: '^error';

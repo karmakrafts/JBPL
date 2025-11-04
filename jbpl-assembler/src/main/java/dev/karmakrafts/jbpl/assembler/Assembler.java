@@ -190,11 +190,11 @@ public final class Assembler {
                 throw new SyntaxError(new ParserException(msg, e, null));
             }
             if (e instanceof NoViableAltException noViableAltException) {
-                throw new SyntaxError(new ParserException(msg,
+                throw new SyntaxError(new ParserException("Syntax error",
                     e,
-                    SourceDiagnostic.from(file, noViableAltException.getStartToken())));
+                    SourceDiagnostic.from(file, noViableAltException.getStartToken(), msg)));
             }
-            throw new SyntaxError(new ParserException(msg, e, SourceDiagnostic.from(file, token)));
+            throw new SyntaxError(new ParserException("Syntax error", e, SourceDiagnostic.from(file, token, msg)));
         }
 
         @Override

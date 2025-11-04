@@ -37,4 +37,9 @@ public final class SelectorReferenceExpr extends AbstractElement implements Expr
     public @NotNull SelectorReferenceExpr copy() {
         return copyParentAndSourceTo(new SelectorReferenceExpr(name));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("selector(%s)", name);
+    }
 }

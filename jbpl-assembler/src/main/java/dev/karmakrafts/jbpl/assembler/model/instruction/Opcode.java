@@ -17,9 +17,11 @@
 package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.util.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
 
 public enum Opcode {
@@ -151,5 +153,10 @@ public enum Opcode {
 
     public boolean isJump() {
         return JUMP.contains(this);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return name().toLowerCase(Locale.ROOT);
     }
 }

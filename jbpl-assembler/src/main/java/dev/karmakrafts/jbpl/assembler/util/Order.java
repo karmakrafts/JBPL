@@ -16,6 +16,18 @@
 
 package dev.karmakrafts.jbpl.assembler.util;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
+
 public enum Order {
-    BEFORE, AFTER
+    // @formatter:off
+    BEFORE,
+    AFTER;
+    // @formatter:on
+
+    @Override
+    public @NotNull String toString() {
+        return name().toLowerCase(Locale.ROOT);
+    }
 }

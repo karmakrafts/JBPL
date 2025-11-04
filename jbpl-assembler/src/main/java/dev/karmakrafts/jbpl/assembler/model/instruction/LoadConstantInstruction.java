@@ -119,4 +119,9 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
     public @NotNull LoadConstantInstruction copy() {
         return copyParentAndSourceTo(new LoadConstantInstruction(opcode, getValue().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s %s", opcode, getValue());
+    }
 }

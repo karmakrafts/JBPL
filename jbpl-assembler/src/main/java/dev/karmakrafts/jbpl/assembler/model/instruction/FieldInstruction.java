@@ -61,4 +61,9 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
     public @NotNull FieldInstruction copy() {
         return copyParentAndSourceTo(new FieldInstruction(opcode, getSignature().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s %s", opcode, getSignature());
+    }
 }

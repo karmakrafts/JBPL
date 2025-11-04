@@ -45,12 +45,19 @@ public final class SourceColorizer {
         JBPLLexer.KW_PUBLIC,
         JBPLLexer.KW_PRIVATE,
         JBPLLexer.KW_PROTECTED,
+        JBPLLexer.KW_SELECTOR,
+        JBPLLexer.KW_DEFAULT,
+        JBPLLexer.KW_INJECT,
         JBPLLexer.KW_STATIC,
         JBPLLexer.KW_FINAL,
         JBPLLexer.KW_SYNC,
+        JBPLLexer.KW_FIELD,
+        JBPLLexer.KW_FUN,
+        JBPLLexer.KW_IF,
+        JBPLLexer.KW_ELSE,
         JBPLLexer.KW_IS,
-        JBPLLexer.KW_AS);
-
+        JBPLLexer.KW_AS,
+        JBPLLexer.KW_BY);
     private static final Set<Integer> PREPRO_KEYWORDS = Set.of(JBPLLexer.KW_PREPRO_DEFINE,
         JBPLLexer.KW_PREPRO_INFO,
         JBPLLexer.KW_PREPRO_ERROR,
@@ -58,49 +65,104 @@ public final class SourceColorizer {
         JBPLLexer.KW_PREPRO_INCLUDE,
         JBPLLexer.KW_PREPRO_MACRO,
         JBPLLexer.KW_PREPRO_RETURN);
-
     private static final Set<Integer> STRING_TOKENS = Set.of(JBPLLexer.QUOTE,
         JBPLLexer.M_CONST_STR_TEXT,
         JBPLLexer.SINGLE_QUOTE,
         JBPLLexer.LITERAL_CHAR);
-
     private static final Set<Integer> NUMERIC_TOKENS = Set.of(JBPLLexer.LITERAL_INT, JBPLLexer.LITERAL_FLOAT_LIKE);
+    private static final Set<Integer> INSN_TOKENS = Set.of(JBPLLexer.INSN_INVOKE,
+        JBPLLexer.INSN_F2,
+        JBPLLexer.INSN_D2,
+        JBPLLexer.INSN_I2,
+        JBPLLexer.INSN_L2,
+        JBPLLexer.INSN_STORE,
+        JBPLLexer.INSN_LOAD,
+        JBPLLexer.INSN_ADD,
+        JBPLLexer.INSN_SUB,
+        JBPLLexer.INSN_MUL,
+        JBPLLexer.INSN_DIV,
+        JBPLLexer.INSN_REM,
+        JBPLLexer.INSN_SHL,
+        JBPLLexer.INSN_SHR,
+        JBPLLexer.INSN_USHR,
+        JBPLLexer.INSN_AND,
+        JBPLLexer.INSN_OR,
+        JBPLLexer.INSN_XOR,
+        JBPLLexer.INSN_IF,
+        JBPLLexer.INSN_IF_ACMP,
+        JBPLLexer.INSN_IF_ICMP,
+        JBPLLexer.INSN_IFNONNULL,
+        JBPLLexer.INSN_IFNULL,
+        JBPLLexer.INSN_GOTO,
+        JBPLLexer.INSN_PUT,
+        JBPLLexer.INSN_GET,
+        JBPLLexer.INSN_MONITORENTER,
+        JBPLLexer.INSN_MONITOREXIT);
 
     private SourceColorizer() {
     }
 
-    private static void applyTokenColor(final @NotNull Ansi builder, final @NotNull Token token) {
+    private static void applyTokenColor(final @NotNull Ansi builder,
+                                        final @NotNull Token token,
+                                        final @NotNull State state) {
         final var type = token.getType();
+        if (type == JBPLLexer.ERROR) {
+            builder.fgBrightRed();
+            state.previousType = type;
+            return;
+        }
+        if (INSN_TOKENS.contains(type)) {
+            builder.fgBrightCyan();
+            state.previousType = type;
+            return;
+        }
         if (PREPRO_KEYWORDS.contains(type)) {
             builder.fgMagenta();
+            state.previousType = type;
             return;
         }
         if (KEYWORDS.contains(type)) {
+            // Number suffixes shall have the same color as the number itself
+            if (state.previousType == JBPLLexer.LITERAL_INT || state.previousType == JBPLLexer.LITERAL_FLOAT_LIKE) {
+                builder.fgBrightBlue();
+                state.previousType = type;
+                return;
+            }
             builder.fgBrightMagenta();
+            state.previousType = type;
             return;
         }
         if (STRING_TOKENS.contains(type)) {
             builder.fgBrightGreen();
+            state.previousType = type;
             return;
         }
         if (NUMERIC_TOKENS.contains(type)) {
             builder.fgBrightBlue();
+            state.previousType = type;
             return;
         }
         if (type == JBPLLexer.IDENT) {
             builder.fgBrightYellow();
+            state.previousType = type;
             return;
         }
         builder.fgBright(Color.WHITE);
+        state.previousType = type;
     }
 
     public static @NotNull String colorize(final @NotNull List<Token> tokens) {
         final var builder = Ansi.ansi();
+        final var state = new State();
         for (final var token : tokens) {
-            applyTokenColor(builder, token);
+            applyTokenColor(builder, token, state);
             builder.a(token.getText());
             builder.reset();
         }
         return builder.toString();
+    }
+
+    private static final class State {
+        public int previousType;
     }
 }

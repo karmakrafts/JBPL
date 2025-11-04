@@ -70,4 +70,9 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     public @NotNull ArrayAccessExpr copy() {
         return copyParentAndSourceTo(new ArrayAccessExpr(getReference().copy(), getIndex().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s[%s]", getReference(), getIndex());
+    }
 }

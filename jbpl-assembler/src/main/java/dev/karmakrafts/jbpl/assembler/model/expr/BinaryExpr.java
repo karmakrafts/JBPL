@@ -80,10 +80,10 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                 yield LiteralExpr.of(IntersectionType.unfold(
                     CollectionUtils.intersect(lhsAlternatives, rhsAlternatives, ArrayList::new)), getTokenRange());
             } // @formatter:on
-            default -> throw new EvaluationException(String.format("Unsupported type binary expression: %s %s %s",
-                lhs,
-                op,
-                rhs), SourceDiagnostic.from(this));
+            default -> {
+                final var message = String.format("Unsupported type binary expression: %s %s %s", lhs, op, rhs);
+                throw new EvaluationException(message, SourceDiagnostic.from(this, message));
+            }
         };
     }
 
@@ -347,6 +347,14 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                     final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
                     context.pushValue(LiteralExpr.of(lhsString.compareTo(rhsString)));
                 }
+                case EQ -> {
+                    final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
+                    context.pushValue(LiteralExpr.of(lhsString.equals(rhsString)));
+                }
+                case NE -> {
+                    final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
+                    context.pushValue(LiteralExpr.of(!lhsString.equals(rhsString)));
+                }
             }
             return;
         }
@@ -372,6 +380,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     @Override
     public @NotNull BinaryExpr copy() {
         return copyParentAndSourceTo(new BinaryExpr(getLhs().copy(), getRhs().copy(), op));
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s %s %s", getLhs(), op, getRhs());
     }
 
     public enum Op {

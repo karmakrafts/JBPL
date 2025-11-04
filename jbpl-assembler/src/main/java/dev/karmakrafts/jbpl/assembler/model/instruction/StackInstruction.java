@@ -64,4 +64,9 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
     public @NotNull StackInstruction copy() {
         return copyParentAndSourceTo(new StackInstruction(opcode, getSlot().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s %s", opcode, getSlot());
+    }
 }

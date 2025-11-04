@@ -31,6 +31,11 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     }
 
     @Override
+    public List<Statement> visitAssertStatement(final @NotNull AssertStatementContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new AssertStatement(ExprParser.parse(ctx.expr()))));
+    }
+
+    @Override
     public @NotNull List<Statement> visitExpr(final @NotNull ExprContext ctx) {
         return List.of(ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx)));
     }

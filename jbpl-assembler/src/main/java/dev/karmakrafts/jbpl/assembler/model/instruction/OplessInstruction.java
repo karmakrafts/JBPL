@@ -42,4 +42,9 @@ public final class OplessInstruction extends AbstractElement implements Instruct
     public @NotNull OplessInstruction copy() {
         return copyParentAndSourceTo(new OplessInstruction(opcode));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return opcode.toString();
+    }
 }

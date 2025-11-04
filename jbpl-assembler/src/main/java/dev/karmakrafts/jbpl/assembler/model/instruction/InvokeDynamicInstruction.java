@@ -195,4 +195,6 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             getBSMInstruction().copy(),
             getTargetInstruction().copy()));
     }
+
+    // TODO: Implement custom toString()
 }

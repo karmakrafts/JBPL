@@ -29,6 +29,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class ArrayExpr extends AbstractExprContainer implements Expr {
     public static final int TYPE_INDEX = 0;
@@ -146,4 +147,11 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
         result.addValues(getValues().stream().map(Expr::copy).toList());
         return result;
     }
+
+    @Override
+    public @NotNull String toString() { // @formatter:off
+        return String.format("[%s]{%s}", getType(), getValues().stream()
+            .map(Expr::toString)
+            .collect(Collectors.joining(", ")));
+    } // @formatter:on
 }

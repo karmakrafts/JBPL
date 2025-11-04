@@ -36,4 +36,9 @@ public final class OpcodeOfExpr extends AbstractExprContainer implements Expr {
     public @NotNull OpcodeOfExpr copy() {
         return copyParentAndSourceTo(new OpcodeOfExpr(getValue().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("opcodeof(%s)", getValue());
+    }
 }

@@ -4,6 +4,7 @@ import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -18,6 +19,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public static final ExprParser INSTANCE = new ExprParser();
@@ -41,6 +43,21 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             .toList();
     } // @formatter:on
 
+    private static @NotNull List<Expr> parseIntWithPrefix(final @NotNull IntLiteralContext ctx,
+                                                          final @NotNull BiFunction<String, Integer, Object> parseFunction) {
+        final var value = ctx.LITERAL_INT().getText();
+        if (value.startsWith("0x") || value.startsWith("0X")) {
+            return List.of(LiteralExpr.of(parseFunction.apply(value.substring(2), 16), TokenRange.fromContext(ctx)));
+        }
+        else if (value.startsWith("0b") || value.startsWith("0B")) {
+            return List.of(LiteralExpr.of(parseFunction.apply(value.substring(2), 2), TokenRange.fromContext(ctx)));
+        }
+        else if (value.startsWith("0o") || value.startsWith("0O")) {
+            return List.of(LiteralExpr.of(parseFunction.apply(value.substring(2), 8), TokenRange.fromContext(ctx)));
+        }
+        return List.of(LiteralExpr.of(parseFunction.apply(value, 10), TokenRange.fromContext(ctx)));
+    }
+
     @Override
     protected @NotNull List<Expr> defaultResult() {
         return new ArrayList<>();
@@ -55,10 +72,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitDefaultExpr(final @NotNull DefaultExprContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var type = ParserUtils.parseRefOrType(ctx.refOrType());
-            return List.of(new DefaultExpr(type));
-        });
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new DefaultExpr(ExprParser.parse(ctx.expr()))));
     }
 
     @Override
@@ -76,26 +90,25 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitTypeOfExpr(final @NotNull TypeOfExprContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            // @formatter:off
-            final var type = ctx.type() != null
-                ? LiteralExpr.of(TypeParser.parse(ctx.type()))
-                : ExprParser.parse(ctx.expr());
-            // @formatter:on
-            return List.of(new TypeOfExpr(type));
-        });
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new TypeOfExpr(ExprParser.parse(ctx.expr()))));
+    }
+
+    @Override
+    public @NotNull List<Expr> visitTypeLiteral(final @NotNull TypeLiteralContext ctx) {
+        if (ctx.diamond() != null) {
+            return List.of(LiteralExpr.of(BuiltinType.OBJECT));
+        }
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(TypeParser.parse(ctx.type()))));
     }
 
     @Override
     public @NotNull List<Expr> visitOpcodeOfExpr(final @NotNull OpcodeOfExprContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var opcodeNode = ctx.opcode();
-            if (opcodeNode != null) {
-                final var opcode = ParserUtils.parseOpcode(opcodeNode);
-                return List.of(new OpcodeOfExpr(LiteralExpr.of(opcode, TokenRange.fromContext(opcodeNode))));
-            }
-            return List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr())));
-        });
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr()))));
+    }
+
+    @Override
+    public @NotNull List<Expr> visitOpcodeLiteral(final @NotNull OpcodeLiteralContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(ParserUtils.parseOpcode(ctx.opcode()))));
     }
 
     @Override
@@ -230,6 +243,17 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return List.of(new ReferenceExpr(receiver, name));
     }
 
+    private @NotNull List<Expr> parseExplicitReference(final @NotNull ExplicitReferenceContext ctx,
+                                                       final @NotNull Expr receiver) {
+        final var name = ctx.IDENT().getText();
+        return List.of(new ReferenceExpr(receiver, name));
+    }
+
+    @Override
+    public List<Expr> visitExplicitReference(final @NotNull ExplicitReferenceContext ctx) {
+        return parseExplicitReference(ctx, LiteralExpr.unit());
+    }
+
     @Override
     public @NotNull List<Expr> visitReference(final @NotNull ReferenceContext ctx) {
         return parseReference(ctx, LiteralExpr.unit());
@@ -327,21 +351,24 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
+    public @NotNull List<Expr> visitInstructionLiteral(final @NotNull InstructionLiteralContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(InstructionParser.parse(ctx.instruction()))));
+    }
+
+    @Override
     public @NotNull List<Expr> visitBoolLiteral(final @NotNull BoolLiteralContext ctx) {
         return List.of(LiteralExpr.of(ctx.KW_TRUE() != null, TokenRange.fromContext(ctx)));
     }
 
     @Override
     public @NotNull List<Expr> visitIntLiteral(final @NotNull IntLiteralContext ctx) {
-        final var value = ctx.LITERAL_INT().getText();
-        final var tokenRange = TokenRange.fromContext(ctx);
         // @formatter:off
-        if (ctx.KW_I64() != null)       return List.of(LiteralExpr.of(Long.parseLong(value), tokenRange));
-        else if (ctx.KW_I16() != null)  return List.of(LiteralExpr.of(Short.parseShort(value), tokenRange));
-        else if (ctx.KW_I8() != null)   return List.of(LiteralExpr.of(Byte.parseByte(value), tokenRange));
+        if (ctx.KW_I64() != null)       return parseIntWithPrefix(ctx, Long::parseLong);
+        else if (ctx.KW_I16() != null)  return parseIntWithPrefix(ctx, Short::parseShort);
+        else if (ctx.KW_I8() != null)   return parseIntWithPrefix(ctx, Byte::parseByte);
         // @formatter:on
         // Without suffix or with i32, we assume int as the default case
-        return List.of(LiteralExpr.of(Integer.parseInt(value), tokenRange));
+        return parseIntWithPrefix(ctx, Integer::parseInt);
     }
 
     @Override
