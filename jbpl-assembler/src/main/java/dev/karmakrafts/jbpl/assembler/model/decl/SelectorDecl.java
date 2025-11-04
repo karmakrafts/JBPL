@@ -5,12 +5,8 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
-import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
-import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
-import dev.karmakrafts.jbpl.assembler.util.Copyable;
 import dev.karmakrafts.jbpl.assembler.util.Order;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,18 +59,25 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
         return selector;
     }
 
-    public interface Condition extends SourceOwner, Copyable<Condition> {
-        @NotNull Order order();
-    }
+    public static final class Condition extends AbstractExprContainer {
+        public static final int VALUE_INDEX = 0;
 
-    public static final class OpcodeCondition implements Condition {
         public Order order;
-        public Opcode opcode;
         private TokenRange tokenRange = TokenRange.UNDEFINED;
 
-        public OpcodeCondition(final @NotNull Order order, final @NotNull Opcode opcode) {
+        public Condition(final @NotNull Order order, final @NotNull Expr value) {
             this.order = order;
-            this.opcode = opcode;
+            addExpression(value);
+        }
+
+        public @NotNull Expr getValue() {
+            return getExpressions().get(VALUE_INDEX);
+        }
+
+        public void setValue(final @NotNull Expr value) {
+            getValue().setParent(null);
+            value.setParent(this);
+            getExpressions().set(VALUE_INDEX, value);
         }
 
         @Override
@@ -87,45 +90,13 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
             this.tokenRange = tokenRange;
         }
 
-        @Override
-        public @NotNull Order order() {
+        public @NotNull Order getOrder() {
             return order;
         }
 
         @Override
-        public @NotNull OpcodeCondition copy() {
-            return copySourcesTo(new OpcodeCondition(order, opcode));
-        }
-    }
-
-    public static final class InstructionCondition implements Condition {
-        public Order order;
-        public Instruction instruction;
-        private TokenRange tokenRange = TokenRange.UNDEFINED;
-
-        public InstructionCondition(final @NotNull Order order, final @NotNull Instruction instruction) {
-            this.order = order;
-            this.instruction = instruction;
-        }
-
-        @Override
-        public @NotNull TokenRange getTokenRange() {
-            return tokenRange;
-        }
-
-        @Override
-        public void setTokenRange(final @NotNull TokenRange tokenRange) {
-            this.tokenRange = tokenRange;
-        }
-
-        @Override
-        public @NotNull Order order() {
-            return order;
-        }
-
-        @Override
-        public @NotNull InstructionCondition copy() {
-            return copySourcesTo(new InstructionCondition(order, instruction));
+        public @NotNull Condition copy() {
+            return copySourcesTo(new Condition(order, getValue().copy()));
         }
     }
 }

@@ -432,8 +432,7 @@ selectionOffset:
 selectionStatement:
     (KW_AFTER
     | KW_BEFORE)
-    (instruction
-    | opcode)
+    expr
     ;
 
 injector:

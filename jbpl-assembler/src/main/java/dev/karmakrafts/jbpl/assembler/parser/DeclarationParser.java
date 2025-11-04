@@ -4,7 +4,6 @@ import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
-import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -65,18 +64,8 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     private @NotNull SelectorDecl.Condition parseSelectorCondition(final @NotNull SelectionStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var order = ctx.KW_BEFORE() != null ? Order.BEFORE : Order.AFTER;
-            final var instructionCtx = ctx.instruction();
-            if (instructionCtx != null) {
-                final var statement = StatementParser.parse(instructionCtx);
-                if (!(statement instanceof Instruction instruction)) {
-                    throw new IllegalStateException("Selector condition is not an instruction");
-                }
-                final var condition = new SelectorDecl.InstructionCondition(order, instruction);
-                condition.setTokenRange(TokenRange.fromContext(ctx));
-                return condition;
-            }
-            final var opcode = ParserUtils.parseOpcode(ctx.opcode());
-            final var condition = new SelectorDecl.OpcodeCondition(order, opcode);
+            final var opcode = ExprParser.parse(ctx.expr());
+            final var condition = new SelectorDecl.Condition(order, opcode);
             condition.setTokenRange(TokenRange.fromContext(ctx));
             return condition;
         });

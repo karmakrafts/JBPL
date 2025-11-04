@@ -2,8 +2,6 @@ package dev.karmakrafts.jbpl.assembler.model.element;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
-import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl.InstructionCondition;
-import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl.OpcodeCondition;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
@@ -97,22 +95,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull SelectorDecl.Condition visitSelectorCondition(final @NotNull SelectorDecl.Condition condition) {
-        if (condition instanceof InstructionCondition instructionCondition) {
-            return visitInstructionSelectorCondition(instructionCondition);
-        }
-        else if (condition instanceof OpcodeCondition opcodeCondition) {
-            return visitOpcodeSelectorCondition(opcodeCondition);
-        }
-        throw new IllegalStateException("Unsupported selector condition type");
-    }
-
-    default @NotNull SelectorDecl.InstructionCondition visitInstructionSelectorCondition(final @NotNull SelectorDecl.InstructionCondition instructionCondition) {
-        instructionCondition.instruction = visitInstruction(instructionCondition.instruction);
-        return instructionCondition;
-    }
-
-    default @NotNull SelectorDecl.OpcodeCondition visitOpcodeSelectorCondition(final @NotNull SelectorDecl.OpcodeCondition opcodeCondition) {
-        return opcodeCondition;
+        return visitExprContainer(condition);
     }
 
     default @NotNull Declaration visitFunction(final @NotNull FunctionDecl functionDecl) {
@@ -305,6 +288,9 @@ public interface ElementVisitor {
         else if (statement instanceof ReturnStatement returnStatement) {
             return visitReturnStatement(returnStatement);
         }
+        else if (statement instanceof AssertStatement assertStatement) {
+            return visitAssertStatement(assertStatement);
+        }
         else if (statement instanceof Instruction instruction) {
             return visitInstruction(instruction);
         }
@@ -336,6 +322,10 @@ public interface ElementVisitor {
             return visitExpr(expr);
         }
         throw new IllegalStateException(String.format("Unsupported statement type %s", statement.getClass()));
+    }
+
+    default @NotNull Statement visitAssertStatement(final @NotNull AssertStatement assertStatement) {
+        return visitExprContainer(assertStatement);
     }
 
     default @NotNull Statement visitInfoStatement(final @NotNull InfoStatement infoStatement) {
