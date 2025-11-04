@@ -133,6 +133,6 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
 
     @Override
     public String toString() {
-        return String.format("^macro %s(...)", name);
+        return name.toString();
     }
 }

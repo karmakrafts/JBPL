@@ -49,6 +49,6 @@ public final class AssertStatement extends AbstractExprContainer implements Stat
             return;
         }
         // TODO: use colored rendering for this?
-        throw new EvaluationException(String.format("Assertion %s failed", getValue()), null);
+        throw new EvaluationException(String.format("Assertion %s failed", getValue()), null, null);
     }
 }

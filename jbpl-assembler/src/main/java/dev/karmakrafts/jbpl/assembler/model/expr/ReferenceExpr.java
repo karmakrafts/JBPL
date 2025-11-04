@@ -25,7 +25,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         final var define = context.resolveByName(DefineStatement.class, name);
         if (define == null) {
             final var message = String.format("Could not find define '%s' in scope %s", name, scope);
-            throw new EvaluationException(message, SourceDiagnostic.from(this, message));
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
         return define;
     }

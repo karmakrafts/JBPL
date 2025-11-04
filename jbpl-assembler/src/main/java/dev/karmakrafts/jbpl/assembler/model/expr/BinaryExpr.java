@@ -52,7 +52,8 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     }
 
     private @NotNull LiteralExpr evaluateForType(final @NotNull Type lhs,
-                                                 final @NotNull Type rhs) throws EvaluationException {
+                                                 final @NotNull Type rhs,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             case ADD -> LiteralExpr.of(IntersectionType.unfold(List.of(lhs, rhs)), getTokenRange());
             case SUB -> {
@@ -68,7 +69,8 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                 }
                 throw new EvaluationException(
                     "Left hand side type must be an intersection type for subtraction operation!",
-                    SourceDiagnostic.from(this));
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace());
             }
             case AND -> { // @formatter:off
                 final var lhsAlternatives = lhs instanceof IntersectionType lhsIntersectionType
@@ -82,7 +84,9 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             } // @formatter:on
             default -> {
                 final var message = String.format("Unsupported type binary expression: %s %s %s", lhs, op, rhs);
-                throw new EvaluationException(message, SourceDiagnostic.from(this, message));
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
             }
         };
     }
@@ -127,12 +131,15 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             default -> throw new EvaluationException(String.format("Unsupported boolean binary expression: %s %s %s",
                 lhsBool,
                 op,
-                getRhs().evaluateAsConst(context, Object.class)), SourceDiagnostic.from(this));
+                getRhs().evaluateAsConst(context, Object.class)),
+                SourceDiagnostic.from(this),
+                context.createStackTrace());
         };
     }
 
     private @NotNull LiteralExpr evaluateForByte(final @NotNull Byte lhsByte,
-                                                 final @NotNull Number rhsNumber) throws EvaluationException {
+                                                 final @NotNull Number rhsNumber,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
             case EQ -> LiteralExpr.of(lhsByte == rhsNumber.byteValue(), getTokenRange());
@@ -158,12 +165,13 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
                 lhsByte,
                 op,
-                rhsNumber), SourceDiagnostic.from(this));
+                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
         };
     }
 
     private @NotNull LiteralExpr evaluateForShort(final @NotNull Short lhsShort,
-                                                  final @NotNull Number rhsNumber) throws EvaluationException {
+                                                  final @NotNull Number rhsNumber,
+                                                  final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
             case EQ -> LiteralExpr.of(lhsShort == rhsNumber.shortValue(), getTokenRange());
@@ -189,12 +197,13 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
                 lhsShort,
                 op,
-                rhsNumber), SourceDiagnostic.from(this));
+                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
         };
     }
 
     private @NotNull LiteralExpr evaluateForInteger(final @NotNull Integer lhsInteger,
-                                                    final @NotNull Number rhsNumber) throws EvaluationException {
+                                                    final @NotNull Number rhsNumber,
+                                                    final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
             case EQ -> LiteralExpr.of(lhsInteger == rhsNumber.intValue(), getTokenRange());
@@ -220,12 +229,13 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
                 lhsInteger,
                 op,
-                rhsNumber), SourceDiagnostic.from(this));
+                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
         };
     }
 
     private @NotNull LiteralExpr evaluateForLong(final @NotNull Long lhsLong,
-                                                 final @NotNull Number rhsNumber) throws EvaluationException {
+                                                 final @NotNull Number rhsNumber,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
             case EQ -> LiteralExpr.of(lhsLong == rhsNumber.longValue(), getTokenRange());
@@ -251,12 +261,13 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
                 lhsLong,
                 op,
-                rhsNumber), SourceDiagnostic.from(this));
+                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
         };
     }
 
     private @NotNull LiteralExpr evaluateForFloat(final @NotNull Float lhsFloat,
-                                                  final @NotNull Number rhsNumber) throws EvaluationException {
+                                                  final @NotNull Number rhsNumber,
+                                                  final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
             case EQ -> LiteralExpr.of(lhsFloat == rhsNumber.floatValue(), getTokenRange());
@@ -275,12 +286,13 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
                 lhsFloat,
                 op,
-                rhsNumber), SourceDiagnostic.from(this));
+                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
         };
     }
 
     private @NotNull LiteralExpr evaluateForDouble(final @NotNull Double lhsDouble,
-                                                   final @NotNull Number rhsNumber) throws EvaluationException {
+                                                   final @NotNull Number rhsNumber,
+                                                   final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
             case EQ -> LiteralExpr.of(lhsDouble == rhsNumber.doubleValue(), getTokenRange());
@@ -299,7 +311,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
                 lhsDouble,
                 op,
-                rhsNumber), SourceDiagnostic.from(this));
+                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
         };
     }
 
@@ -308,30 +320,31 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
         if (!(rhsValue instanceof Number rhsNumber)) {
             throw new EvaluationException("Numeric binary expression must have a number on the right hand side!",
-                SourceDiagnostic.from(this));
+                SourceDiagnostic.from(this),
+                context.createStackTrace());
         }
         if (lhsNumber instanceof Byte lhsByte) {
-            return evaluateForByte(lhsByte, rhsNumber);
+            return evaluateForByte(lhsByte, rhsNumber, context);
         }
         else if (lhsNumber instanceof Short lhsShort) {
-            return evaluateForShort(lhsShort, rhsNumber);
+            return evaluateForShort(lhsShort, rhsNumber, context);
         }
         else if (lhsNumber instanceof Integer lhsInteger) {
-            return evaluateForInteger(lhsInteger, rhsNumber);
+            return evaluateForInteger(lhsInteger, rhsNumber, context);
         }
         else if (lhsNumber instanceof Long lhsLong) {
-            return evaluateForLong(lhsLong, rhsNumber);
+            return evaluateForLong(lhsLong, rhsNumber, context);
         }
         else if (lhsNumber instanceof Float lhsFloat) {
-            return evaluateForFloat(lhsFloat, rhsNumber);
+            return evaluateForFloat(lhsFloat, rhsNumber, context);
         }
         else if (lhsNumber instanceof Double lhsDouble) {
-            return evaluateForDouble(lhsDouble, rhsNumber);
+            return evaluateForDouble(lhsDouble, rhsNumber, context);
         }
         throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
             lhsNumber,
             op,
-            rhsNumber), SourceDiagnostic.from(this));
+            rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
     }
 
     @Override
@@ -360,7 +373,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         }
         else if (lhsValue instanceof Type lhsType) { // Type addition/subtraction creates intersection types
             final var rhsType = getRhs().evaluateAsConst(context, Type.class);
-            context.pushValue(evaluateForType(lhsType, rhsType));
+            context.pushValue(evaluateForType(lhsType, rhsType, context));
             return;
         }
         else if (lhsValue instanceof Boolean lhsBool) { // Boolean binary expressions
@@ -374,7 +387,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         throw new EvaluationException(String.format("Unsupported binary expression operands: %s %s %s",
             lhsValue,
             op,
-            getRhs().evaluateAsConst(context, Object.class)), SourceDiagnostic.from(this));
+            getRhs().evaluateAsConst(context, Object.class)), SourceDiagnostic.from(this), context.createStackTrace());
     }
 
     @Override

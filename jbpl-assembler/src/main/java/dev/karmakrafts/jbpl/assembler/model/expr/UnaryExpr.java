@@ -29,7 +29,8 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         return getValue().getType(context);
     }
 
-    private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number value) throws EvaluationException {
+    private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number value,
+                                                   final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             case MINUS, PLUS -> {
                 if (value instanceof Byte byteValue) {
@@ -70,16 +71,19 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
                 throw new IllegalStateException(String.format("Unsupported inverse expression operand %s", value));
             }
             default -> throw new EvaluationException(String.format("Unary operator %s cannot be applied to number", op),
-                SourceDiagnostic.from(this));
+                SourceDiagnostic.from(this),
+                context.createStackTrace());
         };
     }
 
-    private @NotNull LiteralExpr evaluateForBool(final boolean value) throws EvaluationException {
+    private @NotNull LiteralExpr evaluateForBool(final boolean value,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             case NOT -> LiteralExpr.of(!value);
             default ->
                 throw new EvaluationException(String.format("Unary operator %s cannot be applied to boolean", op),
-                    SourceDiagnostic.from(this));
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace());
         };
     }
 
@@ -89,15 +93,16 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         final var constValue = value.evaluateAsConst(context, Object.class);
         final var type = value.getType(context);
         if (type == BuiltinType.BOOL) {
-            context.pushValue(evaluateForBool((boolean) constValue));
+            context.pushValue(evaluateForBool((boolean) constValue, context));
             return;
         }
         else if (constValue instanceof Number numberValue) {
-            context.pushValue(evaluateForNumber(numberValue));
+            context.pushValue(evaluateForNumber(numberValue, context));
             return;
         }
         throw new EvaluationException(String.format("Unary operator %s cannot be applied to %s", op, value),
-            SourceDiagnostic.from(this));
+            SourceDiagnostic.from(this),
+            context.createStackTrace());
     }
 
     @Override

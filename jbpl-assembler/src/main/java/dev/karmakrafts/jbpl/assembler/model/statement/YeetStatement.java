@@ -42,7 +42,8 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
         }
         else {
             throw new EvaluationException(String.format("Unsupported target type for yeet: %s", target),
-                SourceDiagnostic.from(this));
+                SourceDiagnostic.from(this),
+                context.createStackTrace());
         }
     }
 

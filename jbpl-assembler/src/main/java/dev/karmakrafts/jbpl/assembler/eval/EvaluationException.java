@@ -22,17 +22,22 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class EvaluationException extends AssemblerException {
-    public EvaluationException(@NotNull String message, @Nullable SourceDiagnostic diagnostic) {
-        super(message, diagnostic);
+    public EvaluationException(final @NotNull String message,
+                               final @Nullable SourceDiagnostic diagnostic,
+                               final @Nullable StackTrace stackTrace) {
+        super(message, diagnostic, stackTrace);
     }
 
-    public EvaluationException(@NotNull String message,
-                               @NotNull Throwable cause,
-                               @Nullable SourceDiagnostic diagnostic) {
-        super(message, cause, diagnostic);
+    public EvaluationException(final @NotNull String message,
+                               final @NotNull Throwable cause,
+                               final @Nullable SourceDiagnostic diagnostic,
+                               final @Nullable StackTrace stackTrace) {
+        super(message, cause, diagnostic, stackTrace);
     }
 
-    public EvaluationException(@NotNull Throwable cause, @Nullable SourceDiagnostic diagnostic) {
-        super(cause, diagnostic);
+    public EvaluationException(final @NotNull Throwable cause,
+                               final @Nullable SourceDiagnostic diagnostic,
+                               final @Nullable StackTrace stackTrace) {
+        super(cause, diagnostic, stackTrace);
     }
 }

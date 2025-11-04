@@ -13,7 +13,8 @@ public final class VersionValidationVisitor implements ElementVisitor {
     public @NotNull Statement visitVersionStatement(final @NotNull VersionStatement versionStatement) {
         if (isVersionSet) {
             throw new RuntimeException(new ValidationException("Cannot set bytecode version more than once per file",
-                SourceDiagnostic.from(versionStatement)));
+                SourceDiagnostic.from(versionStatement),
+                null));
         }
         isVersionSet = true;
         return versionStatement;

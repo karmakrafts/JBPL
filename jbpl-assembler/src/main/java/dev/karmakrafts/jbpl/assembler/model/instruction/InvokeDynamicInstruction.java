@@ -58,14 +58,16 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         return org.objectweb.asm.Type.getMethodDescriptor(type.materialize(context));
     }
 
-    private int getInvokeTag(final @NotNull Opcode opcode) throws EvaluationException {
+    private int getInvokeTag(final @NotNull Opcode opcode,
+                             final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (opcode) {
             case INVOKEVIRTUAL -> Opcodes.H_INVOKEVIRTUAL;
             case INVOKESTATIC -> Opcodes.H_INVOKESTATIC;
             case INVOKESPECIAL -> Opcodes.H_INVOKESPECIAL;
             case INVOKEINTERFACE -> Opcodes.H_INVOKEINTERFACE;
             default -> throw new EvaluationException(String.format("Unsupported invoke tag for opcode %s", opcode),
-                SourceDiagnostic.from(this));
+                SourceDiagnostic.from(this),
+                context.createStackTrace());
         };
     }
 
@@ -133,10 +135,11 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         if (!(instruction instanceof InvokeInstruction invokeInstruction)) {
             throw new EvaluationException(
                 "Invoke handle requires INVOKESTATIC, INVOKEVIRTUAL, INVOKESPECIAL or INVOKEINTERFACE target",
-                SourceDiagnostic.from(this));
+                SourceDiagnostic.from(this),
+                context.createStackTrace());
         }
         final var opcode = invokeInstruction.getOpcode(context);
-        final var tag = getInvokeTag(opcode);
+        final var tag = getInvokeTag(opcode, context);
         final var signature = invokeInstruction.getSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
         final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class).materialize(context);
         final var name = signature.getFunctionName().evaluateAsConst(context, String.class);

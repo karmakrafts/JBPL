@@ -54,7 +54,8 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
     }
 
     private @NotNull LiteralExpr castFromNumber(final @NotNull Type type,
-                                                final @NotNull Number number) throws EvaluationException {
+                                                final @NotNull Number number,
+                                                final @NotNull EvaluationContext context) throws EvaluationException {
         // If we have a number, we may cast into other numbers and chars/bools with special rules
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -67,15 +68,18 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case CHAR -> LiteralExpr.of((char) number.intValue(), getTokenRange());
                 case BOOL -> LiteralExpr.of(number.longValue() != 0, getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast numeric type into %s", type),
-                    SourceDiagnostic.from(this));
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace());
             };
         }
         throw new EvaluationException(String.format("Cannot cast numeric type into %s", type),
-            SourceDiagnostic.from(this));
+            SourceDiagnostic.from(this),
+            context.createStackTrace());
     }
 
     private @NotNull LiteralExpr castFromBoolean(final @NotNull Type type,
-                                                 final @NotNull Boolean bool) throws EvaluationException {
+                                                 final @NotNull Boolean bool,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         // Booleans can be cast into any integer and floating point type
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -86,14 +90,18 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case F32 -> LiteralExpr.of(bool ? 1F : 0F, getTokenRange());
                 case F64 -> LiteralExpr.of(bool ? 1.0 : 0.0, getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast boolean into %s", type),
-                    SourceDiagnostic.from(this));
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace());
             };
         }
-        throw new EvaluationException(String.format("Cannot cast boolean into %s", type), SourceDiagnostic.from(this));
+        throw new EvaluationException(String.format("Cannot cast boolean into %s", type),
+            SourceDiagnostic.from(this),
+            context.createStackTrace());
     }
 
     private @NotNull LiteralExpr castFromString(final @NotNull Type type,
-                                                final @NotNull String string) throws EvaluationException {
+                                                final @NotNull String string,
+                                                final @NotNull EvaluationContext context) throws EvaluationException {
         // Strings can be cast into any builtin type for parsing numerics and converting into chars/bools
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -106,14 +114,18 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case BOOL -> LiteralExpr.of(Boolean.parseBoolean(string), getTokenRange());
                 case CHAR -> LiteralExpr.of(string.charAt(0), getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast string into %s", type),
-                    SourceDiagnostic.from(this));
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace());
             };
         }
-        throw new EvaluationException(String.format("Cannot cast string into %s", type), SourceDiagnostic.from(this));
+        throw new EvaluationException(String.format("Cannot cast string into %s", type),
+            SourceDiagnostic.from(this),
+            context.createStackTrace());
     }
 
     private @NotNull LiteralExpr castFromChar(final @NotNull Type type,
-                                              final @NotNull Character value) throws EvaluationException {
+                                              final @NotNull Character value,
+                                              final @NotNull EvaluationContext context) throws EvaluationException {
         // Strings can be cast into any builtin type for parsing numerics and converting into chars/bools
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
@@ -126,10 +138,13 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case BOOL -> LiteralExpr.of(Boolean.parseBoolean(value.toString()), getTokenRange());
                 case CHAR -> LiteralExpr.of(value.toString(), getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast string into %s", type),
-                    SourceDiagnostic.from(this));
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace());
             };
         }
-        throw new EvaluationException(String.format("Cannot cast string into %s", type), SourceDiagnostic.from(this));
+        throw new EvaluationException(String.format("Cannot cast string into %s", type),
+            SourceDiagnostic.from(this),
+            context.createStackTrace());
     }
 
     @Override
@@ -155,23 +170,24 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         }
         // We decide which conversions are possible based on the incoming type
         if (constValue instanceof Number number) {
-            context.pushValue(castFromNumber(type, number));
+            context.pushValue(castFromNumber(type, number, context));
             return;
         }
         else if (constValue instanceof Boolean bool) {
-            context.pushValue(castFromBoolean(type, bool));
+            context.pushValue(castFromBoolean(type, bool, context));
             return;
         }
         else if (constValue instanceof String string) {
-            context.pushValue(castFromString(type, string));
+            context.pushValue(castFromString(type, string, context));
             return;
         }
         else if (constValue instanceof Character character) {
-            context.pushValue(castFromChar(type, character));
+            context.pushValue(castFromChar(type, character, context));
             return;
         }
         throw new EvaluationException(String.format("Cannot cast %s into %s", valueType, type),
-            SourceDiagnostic.from(this));
+            SourceDiagnostic.from(this),
+            context.createStackTrace());
     }
 
     @Override

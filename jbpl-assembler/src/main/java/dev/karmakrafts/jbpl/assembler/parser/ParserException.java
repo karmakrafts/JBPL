@@ -23,16 +23,16 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ParserException extends AssemblerException {
     public ParserException(final @NotNull String message, final @Nullable SourceDiagnostic diagnostic) {
-        super(message, diagnostic);
+        super(message, diagnostic, null);
     }
 
     public ParserException(final @NotNull String message,
                            final @NotNull Throwable cause,
                            final @Nullable SourceDiagnostic diagnostic) {
-        super(message, cause, diagnostic);
+        super(message, cause, diagnostic, null);
     }
 
     public ParserException(final @NotNull Throwable cause, final @Nullable SourceDiagnostic diagnostic) {
-        super(cause, diagnostic);
+        super(cause, diagnostic, null);
     }
 }

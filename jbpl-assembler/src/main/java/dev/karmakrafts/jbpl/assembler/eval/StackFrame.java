@@ -20,14 +20,17 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.scope.Scope;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
+import dev.karmakrafts.jbpl.assembler.util.Copyable;
+import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
-public final class StackFrame {
+public final class StackFrame implements Copyable<StackFrame> {
     public final Scope scope;
     public final ScopeResolver scopeResolver;
     public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
@@ -43,5 +46,24 @@ public final class StackFrame {
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
         return labelNodes.computeIfAbsent(name, n -> new LabelNode());
+    }
+
+    @Override
+    public StackFrame copy() {
+        final var frame = new StackFrame(scope);
+        frame.valueStack.addAll(valueStack.stream().map(Expr::copy).toList());
+        // @formatter:off
+        frame.arguments.putAll(arguments.entrySet().stream()
+            .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
+            .collect(Collectors.toMap(Pair::left, Pair::right)));
+        // @formatter:on
+        frame.instructionBuffer.add(instructionBuffer);
+        // @formatter:off
+        frame.locals.putAll(locals.entrySet().stream()
+            .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
+            .collect(Collectors.toMap(Pair::left, Pair::right)));
+        // @formatter:on
+        frame.labelNodes.putAll(labelNodes);
+        return frame;
     }
 }

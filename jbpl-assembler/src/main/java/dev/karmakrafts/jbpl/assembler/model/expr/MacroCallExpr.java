@@ -29,7 +29,8 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         final var macro = context.resolveByName(MacroDecl.class, name);
         if (macro == null) {
             throw new EvaluationException(String.format("Could not find macro '%s' in current scope %s", name, scope),
-                SourceDiagnostic.from(this));
+                SourceDiagnostic.from(this),
+                context.createStackTrace());
         }
         return macro;
     }
@@ -72,7 +73,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     .findFirst()
                     .orElseThrow(() -> new EvaluationException(
                         String.format("No parameter named '%s' in macro %s", name, ExceptionUtils.rethrowUnchecked(() -> macro.getName(context))),
-                        SourceDiagnostic.from(this) // TODO: Improve this to highlight the actual parameter
+                        SourceDiagnostic.from(this), context.createStackTrace() // TODO: Improve this to highlight the actual parameter
                     ));
                 // @formatter:on
                 final var paramType = parameter.getValue();
@@ -82,7 +83,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                         valueType,
                         name,
                         paramType,
-                        macro.getName(context)), SourceDiagnostic.from(this, value));
+                        macro.getName(context)), SourceDiagnostic.from(this, value), context.createStackTrace());
                 }
                 arguments.put(name, value);
                 currentArgIndex = parameters.indexOf(parameter) + 1;
@@ -96,7 +97,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     valueType,
                     parameter.getKey(),
                     paramType,
-                    macro.getName(context)), SourceDiagnostic.from(this, value));
+                    macro.getName(context)), SourceDiagnostic.from(this, value), context.createStackTrace());
             }
             arguments.put(parameter.getKey(), value);
             currentArgIndex++;

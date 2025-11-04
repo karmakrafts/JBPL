@@ -53,6 +53,10 @@ public final class EvaluationContext {
         this.errorConsumer = errorConsumer;
     }
 
+    public @NotNull StackTrace createStackTrace() {
+        return new StackTrace(frameStack.stream().map(StackFrame::copy).toList());
+    }
+
     // TODO: move this someplace else, but ScopeResolver is not a good one..
     public <E extends NamedElement> @Nullable E resolveByName(final @NotNull Class<E> type,
                                                               final @NotNull String name) {

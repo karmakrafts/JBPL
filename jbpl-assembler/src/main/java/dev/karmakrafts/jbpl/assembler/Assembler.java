@@ -144,7 +144,7 @@ public final class Assembler {
         final var version = context.bytecodeVersion;
         if (!BYTECODE_VERSIONS.contains(version)) {
             final var message = String.format("%d is not a valid class file version", version);
-            throw new ValidationException(message, null);
+            throw new ValidationException(message, null, context.createStackTrace());
         }
     }
 
