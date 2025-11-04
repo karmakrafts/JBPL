@@ -46,7 +46,7 @@ public class AssemblerException extends Exception {
             builder.append('\n');
             builder.append("────────────────────↯ STACKTRACE ↯────────────────────\n");
             builder.append(stackTrace);
-            builder.append('\n');
+            builder.append("\n\n");
         }
         return builder.toString();
     }

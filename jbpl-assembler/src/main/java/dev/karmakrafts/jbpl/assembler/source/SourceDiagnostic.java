@@ -30,16 +30,16 @@ import java.util.stream.Collectors;
 
 public final class SourceDiagnostic {
     private static final int LINE_NUMBER_SPACING = 1;
-    // @formatter:on
     private static final String V_BORDER_CHAR = "│";
     private static final String H_BORDER_CHAR = "─";
     private static final String UNDERLINE_CHAR = "━";
     private static final String UNDERLINE_CONN_CHAR = "┯";
     private static final String CORNER_CHAR = "└";
+
     public final AssemblyFile file;
     public final TokenRange renderedRange;
     public final SourceRange renderedSourceRange;
-    public final List<Highlight> highlights;
+    public final ArrayList<Highlight> highlights;
     public final SourceRange highlightBounds;
 
     public SourceDiagnostic(final @NotNull AssemblyFile file,
@@ -48,7 +48,7 @@ public final class SourceDiagnostic {
         this.file = file;
         this.renderedRange = renderedRange;
         renderedSourceRange = file.getSourceRange(renderedRange);
-        this.highlights = highlights;
+        this.highlights = new ArrayList<>(highlights);
         highlightBounds = SourceRange.union(highlights.stream().map(Highlight::range).toList());
     }
 
@@ -101,6 +101,14 @@ public final class SourceDiagnostic {
 
     public static @NotNull SourceDiagnostic from(final @NotNull Element element) {
         return from(element, (String) null);
+    }
+
+    public void addHighlight(final @NotNull Highlight highlight) {
+        highlights.add(highlight);
+    }
+
+    public void removeHighlight(final @NotNull Highlight highlight) {
+        highlights.remove(highlight);
     }
 
     private @NotNull List<SourceLine> getRenderedLines() {

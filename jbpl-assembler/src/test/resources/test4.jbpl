@@ -66,6 +66,7 @@ public static fun <com/example/Example>.testing(): void {
 ^info "Call to testing returned ${testing^(y)}"
 
 ^info "xxx is i32: ${xxx is i32}"
+^info "xxx: ${xxx}"
 
 ^define arr: [i32] = []{0, 1, 2, 4, 8, 16}
 ^define arr_idx: i32 = 2
