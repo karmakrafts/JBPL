@@ -27,7 +27,7 @@ public final class TextAttributeKeys {
     public static final TextAttributesKey CLASS_TYPE = TextAttributesKey.createTextAttributesKey("JBPL_CLASS_TYPE",
         DefaultLanguageHighlighterColors.INTERFACE_NAME);
     public static final TextAttributesKey INTERPOLATION = TextAttributesKey.createTextAttributesKey("JBPL_INTERPOLATION",
-        DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE);
+        DefaultLanguageHighlighterColors.KEYWORD);
 
     private TextAttributeKeys() {
     }

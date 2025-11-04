@@ -121,6 +121,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_function -> new FunctionNode(node);
             case JBPLParser.RULE_refOrName -> new RefOrNameNode(node);
             case JBPLParser.RULE_refOrType -> new RefOrTypeNode(node);
+            case JBPLParser.RULE_macroCall -> new MacroCallNode(node);
             default -> new ANTLRPsiNode(node);
         }; // @formatter:on
     }
