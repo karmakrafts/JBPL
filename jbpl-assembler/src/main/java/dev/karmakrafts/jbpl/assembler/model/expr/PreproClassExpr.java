@@ -13,7 +13,7 @@ public final class PreproClassExpr extends AbstractCallExpr implements Expr {
     public final PreproClassType type;
 
     public PreproClassExpr(final @NotNull PreproClassType type) {
-        super(LiteralExpr.unit()); // Class instantiations don't have a receiver
+        super();
         this.type = type;
     }
 
@@ -37,6 +37,7 @@ public final class PreproClassExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull PreproClassExpr copy() {
+        // We can ignore receiver for class instantiations here
         return copyParentAndSourceTo(new PreproClassExpr(type));
     }
 

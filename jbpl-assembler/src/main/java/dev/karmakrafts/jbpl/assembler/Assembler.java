@@ -120,6 +120,7 @@ public final class Assembler {
                         .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
                         .toList());
                     // @formatter:on
+                    file.updateChildParents(); // Update all parent references recursively
                     return file;
                 }
                 catch (IOException error) {

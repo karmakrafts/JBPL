@@ -61,8 +61,9 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public List<Statement> visitInfoStatement(final @NotNull InfoStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var value = ExprParser.parse(ctx.expr());
-            return List.of(new InfoStatement(value));
+            final var statement = new InfoStatement();
+            statement.setValue(ExprParser.parse(ctx.expr()));
+            return List.of(statement);
         });
     }
 

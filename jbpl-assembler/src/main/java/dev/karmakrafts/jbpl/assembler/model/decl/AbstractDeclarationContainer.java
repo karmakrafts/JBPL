@@ -17,8 +17,8 @@ public abstract class AbstractDeclarationContainer extends AbstractElementContai
 
     @Override
     public void removeDeclaration(final @NotNull Declaration declaration) {
-        declarations.remove(declaration);
         declaration.setParent(null);
+        declarations.remove(declaration);
     }
 
     @Override

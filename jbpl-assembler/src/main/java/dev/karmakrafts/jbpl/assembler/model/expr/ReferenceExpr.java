@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Nullable;
 public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, ExprContainer {
     public String name;
 
-    public ReferenceExpr(final @NotNull Expr receiver, final @NotNull String name) {
-        super(receiver);
+    public ReferenceExpr(final @NotNull String name) {
+        super();
         this.name = name;
     }
 
@@ -53,7 +53,9 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
 
     @Override
     public @NotNull ReferenceExpr copy() {
-        return copyParentAndSourceTo(new ReferenceExpr(getReceiver().copy(), name));
+        final var reference = copyParentAndSourceTo(new ReferenceExpr(name));
+        reference.setReceiver(getReceiver().copy());
+        return reference;
     }
 
     @Override

@@ -3,6 +3,7 @@ package dev.karmakrafts.jbpl.assembler.model.decl;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
@@ -12,21 +13,17 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.util.EnumSet;
+import java.util.stream.Collectors;
 
 public final class FunctionDecl extends AbstractStatementContainer implements Declaration, ScopeOwner {
     public final EnumSet<AccessModifier> accessModifiers = EnumSet.noneOf(AccessModifier.class);
-    private FunctionSignatureExpr signature;
+    private Expr signature;
 
-    public FunctionDecl(final @NotNull FunctionSignatureExpr signature) {
-        signature.setParent(this);
-        this.signature = signature;
-    }
-
-    public @NotNull FunctionSignatureExpr getSignature() {
+    public @NotNull Expr getSignature() {
         return signature;
     }
 
-    public void setSignature(final @NotNull FunctionSignatureExpr signature) {
+    public void setSignature(final @NotNull Expr signature) {
         if (this.signature != null) {
             this.signature.setParent(null);
         }
@@ -49,9 +46,20 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
 
     @Override
     public @NotNull FunctionDecl copy() {
-        final var function = copyParentAndSourceTo(new FunctionDecl(getSignature().copy()));
+        final var function = copyParentAndSourceTo(new FunctionDecl());
+        function.setSignature(getSignature().copy());
         function.accessModifiers.addAll(accessModifiers);
         function.addStatements(getStatements().stream().map(Statement::copy).toList());
         return copyParentAndSourceTo(function);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        // @formatter:off
+        final var mods = accessModifiers.stream()
+            .map(AccessModifier::toString)
+            .collect(Collectors.joining(" ", "", " "));
+        // @formatter:on
+        return String.format("%s fun %s", mods, getSignature());
     }
 }

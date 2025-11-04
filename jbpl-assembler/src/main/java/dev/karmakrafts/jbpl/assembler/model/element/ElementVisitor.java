@@ -84,7 +84,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull Declaration visitInjector(final @NotNull InjectorDecl injectorDecl) {
-        injectorDecl.setTarget(visitFunctionSignatureExpr(injectorDecl.getTarget()));
+        injectorDecl.setTarget(visitExpr(injectorDecl.getTarget()));
         injectorDecl.setSelector(visitExpr(injectorDecl.getSelector()));
         return visitStatementContainer(injectorDecl);
     }
@@ -99,7 +99,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull Declaration visitFunction(final @NotNull FunctionDecl functionDecl) {
-        functionDecl.setSignature(visitFunctionSignatureExpr(functionDecl.getSignature()));
+        functionDecl.setSignature(visitExpr(functionDecl.getSignature()));
         return visitStatementContainer(functionDecl);
     }
 
@@ -232,7 +232,7 @@ public interface ElementVisitor {
         return visitExprContainer(opcodeOfExpr);
     }
 
-    default @NotNull SignatureExpr visitSignatureExpr(final @NotNull SignatureExpr signatureExpr) {
+    default @NotNull Expr visitSignatureExpr(final @NotNull SignatureExpr signatureExpr) {
         if (signatureExpr instanceof FunctionSignatureExpr functionSignatureExpr) {
             return visitFunctionSignatureExpr(functionSignatureExpr);
         }
@@ -242,11 +242,11 @@ public interface ElementVisitor {
         throw new IllegalStateException("Unsupported signature expression type");
     }
 
-    default @NotNull FunctionSignatureExpr visitFunctionSignatureExpr(final @NotNull FunctionSignatureExpr functionSignatureExpr) {
+    default @NotNull Expr visitFunctionSignatureExpr(final @NotNull FunctionSignatureExpr functionSignatureExpr) {
         return functionSignatureExpr;
     }
 
-    default @NotNull FieldSignatureExpr visitFieldSignatureExpr(final @NotNull FieldSignatureExpr fieldSignatureExpr) {
+    default @NotNull Expr visitFieldSignatureExpr(final @NotNull FieldSignatureExpr fieldSignatureExpr) {
         return fieldSignatureExpr;
     }
 

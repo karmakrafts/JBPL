@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 
 import java.util.Collection;
+import java.util.Locale;
 
 public enum AccessModifier {
     // @formatter:off
@@ -27,5 +28,10 @@ public enum AccessModifier {
             result |= modifier.encodedValue;
         }
         return result;
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return name().toLowerCase(Locale.ROOT);
     }
 }

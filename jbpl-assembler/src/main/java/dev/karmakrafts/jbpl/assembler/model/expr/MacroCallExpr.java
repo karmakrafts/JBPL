@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     public String name;
 
-    public MacroCallExpr(final @NotNull Expr receiver, final @NotNull String name) {
-        super(receiver);
+    public MacroCallExpr(final @NotNull String name) {
+        super();
         this.name = name;
     }
 
@@ -128,7 +128,8 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull MacroCallExpr copy() {
-        final var call = copyParentAndSourceTo(new MacroCallExpr(getReceiver().copy(), name));
+        final var call = copyParentAndSourceTo(new MacroCallExpr(name));
+        call.setReceiver(getReceiver().copy());
         call.addArguments(getArguments().stream().map(Pair::copy).toList());
         return call;
     }

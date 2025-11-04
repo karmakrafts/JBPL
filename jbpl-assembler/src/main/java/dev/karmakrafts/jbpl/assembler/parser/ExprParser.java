@@ -240,13 +240,17 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     private @NotNull List<Expr> parseReference(final @NotNull ReferenceContext ctx, final @NotNull Expr receiver) {
         final var name = ctx.IDENT().getText();
-        return List.of(new ReferenceExpr(receiver, name));
+        final var ref = new ReferenceExpr(name);
+        ref.setReceiver(receiver);
+        return List.of(ref);
     }
 
     private @NotNull List<Expr> parseExplicitReference(final @NotNull ExplicitReferenceContext ctx,
                                                        final @NotNull Expr receiver) {
         final var name = ctx.IDENT().getText();
-        return List.of(new ReferenceExpr(receiver, name));
+        final var ref = new ReferenceExpr(name);
+        ref.setReceiver(receiver);
+        return List.of(ref);
     }
 
     @Override
@@ -262,7 +266,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     private @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx, final @NotNull Expr receiver) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var name = ctx.IDENT().getText();
-            final var call = new MacroCallExpr(receiver, name);
+            final var call = new MacroCallExpr(name);
+            call.setReceiver(receiver);
             call.addArguments(ParserUtils.parseArguments(ctx.argument()));
             return List.of(call);
         });

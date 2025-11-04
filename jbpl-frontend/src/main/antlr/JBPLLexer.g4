@@ -216,7 +216,7 @@ LITERAL_CHAR: SINGLE_QUOTE (ESCAPED_CHAR | ~[']) SINGLE_QUOTE;
 
 IDENT: [a-zA-Z_]+[a-zA-Z0-9_]*;
 
-ERROR: .;
+ERROR: . -> channel(HIDDEN);
 
 mode M_CONST_STR;
 

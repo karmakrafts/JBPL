@@ -10,8 +10,8 @@ import java.util.List;
 public abstract class AbstractCallExpr extends AbstractReceiverExpr implements Expr {
     private final ArrayList<Pair<@Nullable Expr, Expr>> arguments = new ArrayList<>();
 
-    public AbstractCallExpr(final @NotNull Expr receiver) {
-        super(receiver);
+    public AbstractCallExpr() {
+        super();
     }
 
     public void clearArguments() {

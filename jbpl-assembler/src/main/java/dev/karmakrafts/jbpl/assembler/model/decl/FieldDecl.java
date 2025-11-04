@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.FieldNode;
 
 import java.util.EnumSet;
+import java.util.stream.Collectors;
 
 public final class FieldDecl extends AbstractExprContainer implements Declaration {
     public static final int SIGNATURE_INDEX = 0;
@@ -21,9 +22,9 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     public final EnumSet<AccessModifier> accessModifiers = EnumSet.noneOf(AccessModifier.class);
 
-    public FieldDecl(final @NotNull Expr signature) {
-        addExpression(signature);
-        addExpression(LiteralExpr.unit());
+    public FieldDecl() {
+        addExpression(LiteralExpr.unit()); // Signature
+        addExpression(LiteralExpr.unit()); // Initializer
     }
 
     public @NotNull Expr getInitializer() {
@@ -36,11 +37,11 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
         getExpressions().set(INITIALIZER_INDEX, initializer);
     }
 
-    public @NotNull FieldSignatureExpr getSignature() {
-        return (FieldSignatureExpr) getExpressions().get(SIGNATURE_INDEX);
+    public @NotNull Expr getSignature() {
+        return getExpressions().get(SIGNATURE_INDEX);
     }
 
-    public void setSignature(final @NotNull FieldSignatureExpr signature) {
+    public void setSignature(final @NotNull Expr signature) {
         getSignature().setParent(null);
         signature.setParent(this);
         getExpressions().set(SIGNATURE_INDEX, signature);
@@ -68,9 +69,21 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     @Override
     public @NotNull FieldDecl copy() {
-        final var field = copyParentAndSourceTo(new FieldDecl(getSignature().copy()));
+        final var field = copyParentAndSourceTo(new FieldDecl());
+        field.setInitializer(getInitializer().copy());
+        field.setSignature(getSignature().copy());
         field.accessModifiers.addAll(accessModifiers);
         field.addExpressions(getExpressions().stream().map(Expr::copy).toList());
         return copyParentAndSourceTo(field);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        // @formatter:off
+        final var mods = accessModifiers.stream()
+            .map(AccessModifier::toString)
+            .collect(Collectors.joining(" ", "", " "));
+        // @formatter:on
+        return String.format("%sfield %s = %s", mods, getSignature(), getInitializer());
     }
 }

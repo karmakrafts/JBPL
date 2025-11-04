@@ -49,9 +49,9 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitInjector(final @NotNull InjectorContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var signature = (FunctionSignatureExpr) ExprParser.parse(ctx.functionSignature());
-            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-            final var injector = new InjectorDecl(signature, name);
+            final var injector = new InjectorDecl();
+            injector.setTarget(ExprParser.parse(ctx.functionSignature()));
+            injector.setSelector(ParserUtils.parseRefOrName(ctx.refOrName()));
             // @formatter:off
             injector.addStatements(ctx.statement().stream()
                 .map(ExceptionUtils.unsafeFunction(StatementParser::parse))
@@ -124,8 +124,8 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitFunction(final @NotNull FunctionContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var signature = (FunctionSignatureExpr) ExprParser.parse(ctx.functionSignature());
-            final var function = new FunctionDecl(signature);
+            final var function = new FunctionDecl();
+            function.setSignature(ExprParser.parse(ctx.functionSignature()));
             // @formatter:off
             function.accessModifiers.addAll(ctx.accessModifier().stream()
                 .map(ParserUtils::parseAccessModifier)
@@ -142,8 +142,8 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitField(final @NotNull FieldContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var signature = (FieldSignatureExpr) ExprParser.parse(ctx.fieldSignature());
-            final var field = new FieldDecl(signature);
+            final var field = new FieldDecl();
+            field.setSignature((FieldSignatureExpr) ExprParser.parse(ctx.fieldSignature()));
             final var initializer = ctx.expr();
             if (initializer != null) {
                 field.setInitializer(ExprParser.parse(initializer));

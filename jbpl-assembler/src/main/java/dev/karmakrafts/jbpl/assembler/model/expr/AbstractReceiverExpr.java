@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 public abstract class AbstractReceiverExpr extends AbstractExprContainer {
     public static final int RECEIVER_INDEX = 0;
 
-    public AbstractReceiverExpr(final @NotNull Expr receiver) {
-        addExpression(receiver);
+    public AbstractReceiverExpr() {
+        addExpression(LiteralExpr.unit()); // Receiver
     }
 
     public @NotNull Expr getReceiver() {
@@ -14,6 +14,7 @@ public abstract class AbstractReceiverExpr extends AbstractExprContainer {
     }
 
     public void setReceiver(final @NotNull Expr receiver) {
+        getReceiver().setParent(null);
         receiver.setParent(this);
         if (elements.isEmpty()) {
             elements.add(receiver);

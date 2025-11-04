@@ -12,6 +12,19 @@ import java.util.function.Predicate;
 
 public interface ElementContainer extends Element {
     /**
+     * Recursively update all child parent references in the subtree,
+     * starting with this element.
+     */
+    default void updateChildParents() {
+        for (final var child : getElements()) {
+            if (child instanceof ElementContainer container) {
+                container.updateChildParents();
+            }
+            child.setParent(this);
+        }
+    }
+
+    /**
      * Add the element to this container as is.
      *
      * @param element The element to add to this container.

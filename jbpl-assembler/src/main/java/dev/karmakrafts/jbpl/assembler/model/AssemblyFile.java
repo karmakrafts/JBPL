@@ -19,6 +19,7 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
 
     public AssemblyFile(final @NotNull String path) {
         this.path = path;
+        tokenRange = null; // We lazily assign the token range for the file
     }
 
     public @NotNull List<Token> getTokens(final @NotNull TokenRange range) {
@@ -52,13 +53,17 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     }
 
     @Override
-    public @NotNull TokenRange getTokenRange() {
-        return new TokenRange(0, source.size() - 1);
+    public void setTokenRange(final @NotNull TokenRange tokenRange) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setTokenRange(final @NotNull TokenRange tokenRange) {
-        throw new UnsupportedOperationException();
+    public @NotNull TokenRange getTokenRange() {
+        // Lazily create file token range when needed
+        if (tokenRange == null) {
+            tokenRange = new TokenRange(0, source.size() - 1);
+        }
+        return tokenRange;
     }
 
     @Override

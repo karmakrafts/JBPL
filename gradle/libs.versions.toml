@@ -12,6 +12,8 @@ junit = "5.13.4" # https://github.com/junit-team/junit-framework/releases
 junitPlatform = "1.13.4" # https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
 jansi = "3.30.6"
 shadow = "9.2.2"
+intelliJPlatform = "2.9.0"
+intelliJAdaptor = "0.1"
 
 [libraries]
 
@@ -24,9 +26,11 @@ junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jun
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
 jansi = { module = "org.jline:jline-terminal-jansi", version.ref = "jansi" }
+intelliJAdaptor = { module = "org.antlr:antlr4-intellij-adaptor", version.ref = "intelliJAdaptor" }
 
 [plugins]
 
 karmaConventions = { id = "dev.karmakrafts.conventions.karma-conventions", version.ref = "karmaConventions" }
 gradleNexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexus" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }

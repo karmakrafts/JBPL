@@ -58,4 +58,9 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     public boolean isEvaluatedDirectly() {
         return false;
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("^define %s: %s = %s", name, type, getValue());
+    }
 }

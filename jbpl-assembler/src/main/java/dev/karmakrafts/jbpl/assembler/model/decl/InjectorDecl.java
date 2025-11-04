@@ -2,22 +2,14 @@ package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import org.jetbrains.annotations.NotNull;
 
 public final class InjectorDecl extends AbstractStatementContainer implements Declaration, ScopeOwner {
-    private FunctionSignatureExpr target;
+    private Expr target;
     private Expr selector;
-
-    public InjectorDecl(final @NotNull FunctionSignatureExpr target, final @NotNull Expr selector) {
-        target.setParent(this);
-        this.target = target;
-        selector.setParent(this);
-        this.selector = selector;
-    }
 
     public @NotNull Expr getSelector() {
         return selector;
@@ -31,11 +23,11 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
         this.selector = selector;
     }
 
-    public @NotNull FunctionSignatureExpr getTarget() {
+    public @NotNull Expr getTarget() {
         return target;
     }
 
-    public void setTarget(final @NotNull FunctionSignatureExpr target) {
+    public void setTarget(final @NotNull Expr target) {
         if (this.target != null) {
             this.target.setParent(null);
         }
@@ -50,7 +42,9 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
 
     @Override
     public @NotNull InjectorDecl copy() {
-        final var injector = copyParentAndSourceTo(new InjectorDecl(target.copy(), selector.copy()));
+        final var injector = copyParentAndSourceTo(new InjectorDecl());
+        injector.setTarget(getTarget().copy());
+        injector.setSelector(getSelector().copy());
         injector.addStatements(getStatements().stream().map(Statement::copy).toList());
         return injector;
     }
