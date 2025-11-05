@@ -5,6 +5,7 @@
 .gradle/
 .kotlin/
 .DS_Store
+.intellijPlatform/
 build/
 captures
 .externalNativeBuild
