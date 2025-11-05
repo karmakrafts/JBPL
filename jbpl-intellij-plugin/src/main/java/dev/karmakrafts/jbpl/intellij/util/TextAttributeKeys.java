@@ -28,6 +28,10 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.INTERFACE_NAME);
     public static final TextAttributesKey INTERPOLATION = TextAttributesKey.createTextAttributesKey("JBPL_INTERPOLATION",
         DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey FIELD = TextAttributesKey.createTextAttributesKey("JBPL_FIELD",
+        DefaultLanguageHighlighterColors.INSTANCE_FIELD);
+    public static final TextAttributesKey FUNCTION = TextAttributesKey.createTextAttributesKey("JBPL_FUNCTION",
+        DefaultLanguageHighlighterColors.INSTANCE_METHOD);
 
     private TextAttributeKeys() {
     }
