@@ -39,6 +39,18 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
         DefaultLanguageHighlighterColors.NUMBER);
     public static final TextAttributesKey STRING = TextAttributesKey.createTextAttributesKey("JBPL_STRING",
         DefaultLanguageHighlighterColors.STRING);
+    public static final TextAttributesKey CHAR = TextAttributesKey.createTextAttributesKey("JBPL_CHAR",
+        DefaultLanguageHighlighterColors.STRING);
+    public static final TextAttributesKey BRACE = TextAttributesKey.createTextAttributesKey("JBPL_BRACE",
+        DefaultLanguageHighlighterColors.BRACES);
+    public static final TextAttributesKey PAREN = TextAttributesKey.createTextAttributesKey("JBPL_PAREN",
+        DefaultLanguageHighlighterColors.PARENTHESES);
+    public static final TextAttributesKey BRACKET = TextAttributesKey.createTextAttributesKey("JBPL_BRACKET",
+        DefaultLanguageHighlighterColors.BRACKETS);
+    public static final TextAttributesKey ANGLE_BRACKET = TextAttributesKey.createTextAttributesKey("JBPL_ANGLE_BRACKET",
+        DefaultLanguageHighlighterColors.BRACKETS);
+    public static final TextAttributesKey INSTRUCTION = TextAttributesKey.createTextAttributesKey("JBPL_INSTRUCTION",
+        DefaultLanguageHighlighterColors.KEYWORD);
 
     static {
         JBPLParserDefinition.ensureTokenTypesRegistered();
@@ -88,6 +100,8 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_DEFAULT,
                  JBPLLexer.KW_AS,
                  JBPLLexer.KW_IS,
+                 JBPLLexer.KW_BY,
+                 JBPLLexer.KW_SIGNATURE,
                  JBPLLexer.KW_PREPRO_ASSERT,
                  JBPLLexer.KW_PREPRO_CLASS,
                  JBPLLexer.KW_PREPRO_DEFINE,
@@ -96,8 +110,51 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_PREPRO_RETURN,
                  JBPLLexer.KW_PREPRO_INCLUDE,
                  JBPLLexer.KW_PREPRO_MACRO -> keys.add(KEYWORD);
-            case JBPLLexer.LITERAL_INT, JBPLLexer.LITERAL_FLOAT_LIKE -> keys.add(NUMBER);
-            case JBPLLexer.QUOTE, JBPLLexer.M_CONST_STR_TEXT -> keys.add(STRING);
+            case JBPLLexer.LITERAL_INT,
+                 JBPLLexer.LITERAL_FLOAT_LIKE -> keys.add(NUMBER);
+            case JBPLLexer.QUOTE,
+                 JBPLLexer.M_CONST_STR_TEXT -> keys.add(STRING);
+            case JBPLLexer.SINGLE_QUOTE,
+                 JBPLLexer.LITERAL_CHAR -> keys.add(CHAR);
+            case JBPLLexer.L_PAREN,
+                 JBPLLexer.R_PAREN -> keys.add(PAREN);
+            case JBPLLexer.L_BRACE,
+                 JBPLLexer.R_BRACE -> keys.add(BRACE);
+            case JBPLLexer.L_SQBRACKET,
+                 JBPLLexer.R_SQBRACKET -> keys.add(BRACKET);
+            case JBPLLexer.L_ABRACKET,
+                 JBPLLexer.R_ABRACKET -> keys.add(ANGLE_BRACKET);
+            case JBPLLexer.INSN_D2,
+                 JBPLLexer.INSN_F2,
+                 JBPLLexer.INSN_I2,
+                 JBPLLexer.INSN_L2,
+                 JBPLLexer.INSN_INVOKE,
+                 JBPLLexer.INSN_INVOKEDYNAMIC,
+                 JBPLLexer.INSN_GOTO,
+                 JBPLLexer.INSN_LOAD,
+                 JBPLLexer.INSN_STORE,
+                 JBPLLexer.INSN_ARRAY_LOAD,
+                 JBPLLexer.INSN_ARRAY_STORE,
+                 JBPLLexer.INSN_LDC,
+                 JBPLLexer.INSN_GET,
+                 JBPLLexer.INSN_PUT,
+                 JBPLLexer.INSN_ADD,
+                 JBPLLexer.INSN_SUB,
+                 JBPLLexer.INSN_MUL,
+                 JBPLLexer.INSN_DIV,
+                 JBPLLexer.INSN_REM,
+                 JBPLLexer.INSN_SHL,
+                 JBPLLexer.INSN_SHR,
+                 JBPLLexer.INSN_USHR,
+                 JBPLLexer.INSN_AND,
+                 JBPLLexer.INSN_OR,
+                 JBPLLexer.INSN_XOR,
+                 JBPLLexer.INSN_RETURN,
+                 JBPLLexer.INSN_MONITORENTER,
+                 JBPLLexer.INSN_MONITOREXIT,
+                 JBPLLexer.INSN_IPUSH,
+                 JBPLLexer.INSN_JSR,
+                 JBPLLexer.INSN_RET -> keys.add(INSTRUCTION);
             case JBPLLexer.IDENT -> keys.add(IDENT);
         } // @formatter:on
         return keys.toArray(TextAttributesKey[]::new);

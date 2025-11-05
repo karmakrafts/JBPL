@@ -21,7 +21,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 
 public final class TextAttributeKeys {
     public static final TextAttributesKey DEFINE_NAME = TextAttributesKey.createTextAttributesKey("JBPL_DEFINE_NAME",
-        DefaultLanguageHighlighterColors.CONSTANT);
+        DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey MACRO_NAME = TextAttributesKey.createTextAttributesKey("JBPL_MACRO_NAME",
         DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
     public static final TextAttributesKey CLASS_TYPE = TextAttributesKey.createTextAttributesKey("JBPL_CLASS_TYPE",
