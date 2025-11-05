@@ -20,6 +20,27 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 
 public final class TextAttributeKeys {
+    public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("JBPL_KEYWORD",
+        DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey IDENT = TextAttributesKey.createTextAttributesKey("JBPL_IDENT",
+        DefaultLanguageHighlighterColors.IDENTIFIER);
+    public static final TextAttributesKey NUMBER = TextAttributesKey.createTextAttributesKey("JBPL_NUMBER",
+        DefaultLanguageHighlighterColors.NUMBER);
+    public static final TextAttributesKey STRING = TextAttributesKey.createTextAttributesKey("JBPL_STRING",
+        DefaultLanguageHighlighterColors.STRING);
+    public static final TextAttributesKey CHAR = TextAttributesKey.createTextAttributesKey("JBPL_CHAR",
+        DefaultLanguageHighlighterColors.STRING);
+    public static final TextAttributesKey BRACE = TextAttributesKey.createTextAttributesKey("JBPL_BRACE",
+        DefaultLanguageHighlighterColors.BRACES);
+    public static final TextAttributesKey PAREN = TextAttributesKey.createTextAttributesKey("JBPL_PAREN",
+        DefaultLanguageHighlighterColors.PARENTHESES);
+    public static final TextAttributesKey BRACKET = TextAttributesKey.createTextAttributesKey("JBPL_BRACKET",
+        DefaultLanguageHighlighterColors.BRACKETS);
+    public static final TextAttributesKey ANGLE_BRACKET = TextAttributesKey.createTextAttributesKey("JBPL_ANGLE_BRACKET",
+        DefaultLanguageHighlighterColors.BRACKETS);
+    public static final TextAttributesKey INSTRUCTION = TextAttributesKey.createTextAttributesKey("JBPL_INSTRUCTION",
+        DefaultLanguageHighlighterColors.KEYWORD);
+
     public static final TextAttributesKey DEFINE_NAME = TextAttributesKey.createTextAttributesKey("JBPL_DEFINE_NAME",
         DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey MACRO_NAME = TextAttributesKey.createTextAttributesKey("JBPL_MACRO_NAME",
@@ -28,10 +49,12 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.INTERFACE_NAME);
     public static final TextAttributesKey INTERPOLATION = TextAttributesKey.createTextAttributesKey("JBPL_INTERPOLATION",
         DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey FIELD = TextAttributesKey.createTextAttributesKey("JBPL_FIELD",
+    public static final TextAttributesKey FIELD_NAME = TextAttributesKey.createTextAttributesKey("JBPL_FIELD",
         DefaultLanguageHighlighterColors.INSTANCE_FIELD);
-    public static final TextAttributesKey FUNCTION = TextAttributesKey.createTextAttributesKey("JBPL_FUNCTION",
+    public static final TextAttributesKey FUNCTION_NAME = TextAttributesKey.createTextAttributesKey("JBPL_FUNCTION",
         DefaultLanguageHighlighterColors.INSTANCE_METHOD);
+    public static final TextAttributesKey PARAMETER_NAME = TextAttributesKey.createTextAttributesKey("JBPL_PARAMETER",
+        DefaultLanguageHighlighterColors.PARAMETER);
 
     private TextAttributeKeys() {
     }

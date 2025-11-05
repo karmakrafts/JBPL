@@ -17,11 +17,11 @@
 package dev.karmakrafts.jbpl.intellij;
 
 import com.intellij.lexer.Lexer;
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
+import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor;
 import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.jetbrains.annotations.NotNull;
@@ -30,27 +30,6 @@ import java.util.ArrayList;
 
 public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
-
-    public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("JBPL_KEYWORD",
-        DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey IDENT = TextAttributesKey.createTextAttributesKey("JBPL_IDENT",
-        DefaultLanguageHighlighterColors.IDENTIFIER);
-    public static final TextAttributesKey NUMBER = TextAttributesKey.createTextAttributesKey("JBPL_NUMBER",
-        DefaultLanguageHighlighterColors.NUMBER);
-    public static final TextAttributesKey STRING = TextAttributesKey.createTextAttributesKey("JBPL_STRING",
-        DefaultLanguageHighlighterColors.STRING);
-    public static final TextAttributesKey CHAR = TextAttributesKey.createTextAttributesKey("JBPL_CHAR",
-        DefaultLanguageHighlighterColors.STRING);
-    public static final TextAttributesKey BRACE = TextAttributesKey.createTextAttributesKey("JBPL_BRACE",
-        DefaultLanguageHighlighterColors.BRACES);
-    public static final TextAttributesKey PAREN = TextAttributesKey.createTextAttributesKey("JBPL_PAREN",
-        DefaultLanguageHighlighterColors.PARENTHESES);
-    public static final TextAttributesKey BRACKET = TextAttributesKey.createTextAttributesKey("JBPL_BRACKET",
-        DefaultLanguageHighlighterColors.BRACKETS);
-    public static final TextAttributesKey ANGLE_BRACKET = TextAttributesKey.createTextAttributesKey("JBPL_ANGLE_BRACKET",
-        DefaultLanguageHighlighterColors.BRACKETS);
-    public static final TextAttributesKey INSTRUCTION = TextAttributesKey.createTextAttributesKey("JBPL_INSTRUCTION",
-        DefaultLanguageHighlighterColors.KEYWORD);
 
     static {
         JBPLParserDefinition.ensureTokenTypesRegistered();
@@ -109,21 +88,21 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_PREPRO_ERROR,
                  JBPLLexer.KW_PREPRO_RETURN,
                  JBPLLexer.KW_PREPRO_INCLUDE,
-                 JBPLLexer.KW_PREPRO_MACRO -> keys.add(KEYWORD);
+                 JBPLLexer.KW_PREPRO_MACRO -> keys.add(TextAttributeKeys.KEYWORD);
             case JBPLLexer.LITERAL_INT,
-                 JBPLLexer.LITERAL_FLOAT_LIKE -> keys.add(NUMBER);
+                 JBPLLexer.LITERAL_FLOAT_LIKE -> keys.add(TextAttributeKeys.NUMBER);
             case JBPLLexer.QUOTE,
-                 JBPLLexer.M_CONST_STR_TEXT -> keys.add(STRING);
+                 JBPLLexer.M_CONST_STR_TEXT -> keys.add(TextAttributeKeys.STRING);
             case JBPLLexer.SINGLE_QUOTE,
-                 JBPLLexer.LITERAL_CHAR -> keys.add(CHAR);
+                 JBPLLexer.LITERAL_CHAR -> keys.add(TextAttributeKeys.CHAR);
             case JBPLLexer.L_PAREN,
-                 JBPLLexer.R_PAREN -> keys.add(PAREN);
+                 JBPLLexer.R_PAREN -> keys.add(TextAttributeKeys.PAREN);
             case JBPLLexer.L_BRACE,
-                 JBPLLexer.R_BRACE -> keys.add(BRACE);
+                 JBPLLexer.R_BRACE -> keys.add(TextAttributeKeys.BRACE);
             case JBPLLexer.L_SQBRACKET,
-                 JBPLLexer.R_SQBRACKET -> keys.add(BRACKET);
+                 JBPLLexer.R_SQBRACKET -> keys.add(TextAttributeKeys.BRACKET);
             case JBPLLexer.L_ABRACKET,
-                 JBPLLexer.R_ABRACKET -> keys.add(ANGLE_BRACKET);
+                 JBPLLexer.R_ABRACKET -> keys.add(TextAttributeKeys.ANGLE_BRACKET);
             case JBPLLexer.INSN_D2,
                  JBPLLexer.INSN_F2,
                  JBPLLexer.INSN_I2,
@@ -154,8 +133,12 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_MONITOREXIT,
                  JBPLLexer.INSN_IPUSH,
                  JBPLLexer.INSN_JSR,
-                 JBPLLexer.INSN_RET -> keys.add(INSTRUCTION);
-            case JBPLLexer.IDENT -> keys.add(IDENT);
+                 JBPLLexer.INSN_RET,
+                 JBPLLexer.INSN_NEG,
+                 JBPLLexer.INSN_NOP,
+                 JBPLLexer.INSN_POP,
+                 JBPLLexer.INSN_DUP -> keys.add(TextAttributeKeys.INSTRUCTION);
+            case JBPLLexer.IDENT -> keys.add(TextAttributeKeys.IDENT);
         } // @formatter:on
         return keys.toArray(TextAttributesKey[]::new);
     }

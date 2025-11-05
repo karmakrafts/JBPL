@@ -41,7 +41,7 @@ public final class FieldSignatureNode extends ANTLRPsiNode implements Annotated 
         // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(nameSegment)
-            .textAttributes(TextAttributeKeys.FIELD)
+            .textAttributes(TextAttributeKeys.FIELD_NAME)
             .create();
         // @formatter:on
     }

@@ -78,7 +78,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
                 if (root instanceof IFileElementType) {
                     return ((JBPLParser) parser).file();
                 }
-                return ((JBPLParser) parser).bodyElement(); // Assume everything else is an element
+                return ((JBPLParser) parser).statement(); // Assume everything else is a statement
             }
         };
     }
@@ -95,12 +95,18 @@ public final class JBPLParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull TokenSet getStringLiteralElements() {
-        return STRING_LITERALS;
+        return TokenSet.EMPTY;
     }
 
     @Override
     public @NotNull TokenSet getWhitespaceTokens() {
         return WHITESPACE;
+    }
+
+    @Override
+    public @NotNull SpaceRequirements spaceExistenceTypeBetweenTokens(final @NotNull ASTNode left,
+                                                                      final @NotNull ASTNode right) {
+        return SpaceRequirements.MAY;
     }
 
     @Override
@@ -114,15 +120,12 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_reference -> new ReferenceNode(node);
             case JBPLParser.RULE_classType -> new ClassTypeNode(node);
             case JBPLParser.RULE_macro -> new MacroNode(node);
+            case JBPLParser.RULE_parameter -> new ParameterNode(node);
+            case JBPLParser.RULE_macroCall -> new MacroCallNode(node);
             case JBPLParser.RULE_explicitReference -> new ExplicitReferenceNode(node);
-            case JBPLParser.RULE_stringLiteral,
-                 JBPLParser.RULE_simpleStringLiteral -> new StringLiteralNode(node);
-            case JBPLParser.RULE_field -> new FieldNode(node);
-            case JBPLParser.RULE_function -> new FunctionNode(node);
+            case JBPLParser.RULE_stringSegment -> new StringSegmentNode(node);
             case JBPLParser.RULE_refOrName -> new RefOrNameNode(node);
             case JBPLParser.RULE_refOrType -> new RefOrTypeNode(node);
-            case JBPLParser.RULE_macroCall -> new MacroCallNode(node);
-            case JBPLParser.RULE_functionSignature -> new FunctionSignatureNode(node);
             case JBPLParser.RULE_fieldSignature -> new FieldSignatureNode(node);
             case JBPLParser.RULE_nameSegment -> new NameSegmentNode(node);
             case JBPLParser.RULE_functionName -> new FunctionNameNode(node);

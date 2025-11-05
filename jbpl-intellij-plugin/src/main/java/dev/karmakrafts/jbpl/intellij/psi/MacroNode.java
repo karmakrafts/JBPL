@@ -34,11 +34,14 @@ public final class MacroNode extends ANTLRPsiNode implements Annotated {
     public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
         final var refOrName = element.getChildren()[1]; // refOrName
         final var firstChild = refOrName.getFirstChild();
-        if(!(firstChild instanceof ExplicitReferenceNode)) { // @formatter:off
-            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                .range(refOrName)
-                .textAttributes(TextAttributeKeys.MACRO_NAME)
-                .create();
-        } // @formatter:on
+        if (!(firstChild instanceof NameSegmentNode nameSegment)) {
+            return;
+        }
+        // @formatter:off
+        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+            .range(nameSegment)
+            .textAttributes(TextAttributeKeys.MACRO_NAME)
+            .create();
+        // @formatter:on
     }
 }

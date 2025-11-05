@@ -43,7 +43,7 @@ public final class FunctionNameNode extends ANTLRPsiNode implements Annotated {
         // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(nameSegment)
-            .textAttributes(TextAttributeKeys.FUNCTION)
+            .textAttributes(TextAttributeKeys.FUNCTION_NAME)
             .create();
         // @formatter:on
     }

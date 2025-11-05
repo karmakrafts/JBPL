@@ -25,21 +25,26 @@ import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class MacroCallNode extends ANTLRPsiNode implements Annotated {
-    public MacroCallNode(final @NotNull ASTNode node) {
+public final class StringSegmentNode extends ANTLRPsiNode implements Annotated {
+    public StringSegmentNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) { // @formatter:off
+    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
         final var children = element.getChildren();
+        if (children.length < 3) {
+            return; // This is verbatim text
+        }
+        // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[0])
-            .textAttributes(TextAttributeKeys.MACRO_NAME)
+            .textAttributes(TextAttributeKeys.INTERPOLATION)
             .create();
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(children[1])
-            .textAttributes(TextAttributeKeys.KEYWORD)
+            .range(children[2])
+            .textAttributes(TextAttributeKeys.INTERPOLATION)
             .create();
-    } // @formatter:on
+        // @formatter:on
+    }
 }

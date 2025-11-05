@@ -223,3 +223,4 @@ mode M_CONST_STR;
 M_CONST_STR_END: QUOTE -> popMode, type(QUOTE);
 M_CONST_STR_LERP_BEGIN: '${' -> pushMode(DEFAULT_MODE);
 M_CONST_STR_TEXT: ~('"' | '$')+;
+M_CONST_STR_ERROR: ERROR -> channel(HIDDEN), type(ERROR);

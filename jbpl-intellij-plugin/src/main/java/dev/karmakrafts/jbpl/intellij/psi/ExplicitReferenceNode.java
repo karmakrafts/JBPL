@@ -33,6 +33,9 @@ public final class ExplicitReferenceNode extends ANTLRPsiNode implements Annotat
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) { // @formatter:off
         final var children = element.getChildren();
+        if(children.length < 4) {
+            return;
+        }
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[0])
             .textAttributes(TextAttributeKeys.INTERPOLATION)
