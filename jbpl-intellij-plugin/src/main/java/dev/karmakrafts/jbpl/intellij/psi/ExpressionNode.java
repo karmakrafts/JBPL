@@ -29,11 +29,12 @@ import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
 public final class ExpressionNode extends ANTLRPsiNode implements Annotated {
-    private static final IntSet TOKENS = IntSet.of(JBPLLexer.AMP,
+    private static final IntSet BINARY_OPS = IntSet.of(JBPLLexer.AMP,
         JBPLLexer.AMPAMP,
         JBPLLexer.PIPE,
         JBPLLexer.PIPEPIPE,
         JBPLLexer.EQEQ,
+        JBPLLexer.CARET,
         JBPLLexer.NEQ,
         JBPLLexer.L_ABRACKET,
         JBPLLexer.R_ABRACKET,
@@ -47,6 +48,7 @@ public final class ExpressionNode extends ANTLRPsiNode implements Annotated {
         JBPLLexer.SPACESHIP,
         JBPLLexer.GEQ,
         JBPLLexer.LEQ);
+    private static final IntSet UNARY_OPS = IntSet.of(JBPLLexer.PLUS, JBPLLexer.MINUS, JBPLLexer.TILDE);
 
     public ExpressionNode(final @NotNull ASTNode node) {
         super(node);
@@ -58,7 +60,17 @@ public final class ExpressionNode extends ANTLRPsiNode implements Annotated {
         if (children.length == 3) {
             // Handle semantic highlighting for operators
             final var opNode = children[1];
-            if (opNode.getNode().getElementType() instanceof TokenIElementType tokenType && TOKENS.contains(tokenType.getANTLRTokenType())) { // @formatter:off
+            if (opNode.getNode().getElementType() instanceof TokenIElementType tokenType && BINARY_OPS.contains(tokenType.getANTLRTokenType())) { // @formatter:off
+                holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+                    .range(opNode)
+                    .textAttributes(TextAttributeKeys.OPERATOR)
+                    .create();
+            } // @formatter:on
+        }
+        else if (children.length == 2) {
+            // Handle semantic highlighting for unary operators
+            final var opNode = children[0];
+            if(opNode.getNode().getElementType() instanceof TokenIElementType tokenType && UNARY_OPS.contains(tokenType.getANTLRTokenType())) { // @formatter:off
                 holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                     .range(opNode)
                     .textAttributes(TextAttributeKeys.OPERATOR)
