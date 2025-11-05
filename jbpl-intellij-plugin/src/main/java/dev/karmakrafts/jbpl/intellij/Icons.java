@@ -21,10 +21,10 @@ import com.intellij.openapi.util.IconLoader;
 import javax.swing.*;
 
 public final class Icons {
-    public static final Icon FILE = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/file.png", Icons.class);
-    public static final Icon INJECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/injector.png",
+    public static final Icon FILE = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/file.svg", Icons.class);
+    public static final Icon INJECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/injector.svg",
         Icons.class);
-    public static final Icon SELECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/selector.png",
+    public static final Icon SELECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/selector.svg",
         Icons.class);
 
     private Icons() {
