@@ -19,15 +19,29 @@ package dev.karmakrafts.jbpl.intellij;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
+import org.antlr.intellij.adaptor.psi.ScopeNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class JBPLFileRoot extends PsiFileBase {
-    public JBPLFileRoot(final @NotNull FileViewProvider viewProvider) {
+public final class JBPLFile extends PsiFileBase implements ScopeNode {
+    public JBPLFile(final @NotNull FileViewProvider viewProvider) {
         super(viewProvider, JBPLanguage.INSTANCE);
+    }
+
+    @Override
+    public @Nullable ScopeNode getContext() {
+        return null;
     }
 
     @Override
     public @NotNull FileType getFileType() {
         return JBPLFileType.INSTANCE;
+    }
+
+    @Override
+    public @Nullable PsiElement resolve(final @NotNull PsiNamedElement element) {
+        return null;
     }
 }

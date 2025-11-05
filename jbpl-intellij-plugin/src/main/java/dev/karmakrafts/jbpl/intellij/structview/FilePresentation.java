@@ -14,21 +14,35 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.structview;
 
-import com.intellij.ide.IconProvider;
+import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
+import dev.karmakrafts.jbpl.intellij.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public final class JBPLIconProvider extends IconProvider {
+public class FilePresentation implements ItemPresentation {
+    protected final PsiElement element;
+
+    public FilePresentation(final @NotNull PsiElement element) {
+        this.element = element;
+    }
+
     @Override
-    public @Nullable Icon getIcon(final @NotNull PsiElement element, final int flags) {
-        if (element instanceof JBPLFile) {
-            return Icons.FILE;
-        }
+    public @Nullable String getPresentableText() {
+        return element.getContainingFile().getVirtualFile().getNameWithoutExtension();
+    }
+
+    @Override
+    public @NotNull Icon getIcon(final boolean unused) {
+        return Icons.FILE;
+    }
+
+    @Override
+    public @Nullable String getLocationString() {
         return null;
     }
 }

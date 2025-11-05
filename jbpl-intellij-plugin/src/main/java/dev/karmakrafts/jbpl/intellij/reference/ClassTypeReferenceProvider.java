@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.reference;
 
-import com.intellij.ide.IconProvider;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiReferenceProvider;
+import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-
-public final class JBPLIconProvider extends IconProvider {
+public final class ClassTypeReferenceProvider extends PsiReferenceProvider {
     @Override
-    public @Nullable Icon getIcon(final @NotNull PsiElement element, final int flags) {
-        if (element instanceof JBPLFile) {
-            return Icons.FILE;
-        }
-        return null;
+    public PsiReference @NotNull [] getReferencesByElement(final @NotNull PsiElement element,
+                                                           final @NotNull ProcessingContext context) {
+        return new PsiReference[]{new ClassTypeReference(element, element.getTextRange())};
     }
 }

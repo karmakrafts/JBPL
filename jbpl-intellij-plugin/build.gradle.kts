@@ -23,7 +23,7 @@ dependencies {
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
         bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
-        testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Plugin.Java)
     }
     implementation(projects.jbplFrontend)
     implementation(libs.intelliJAdaptor)
@@ -32,4 +32,13 @@ dependencies {
 java {
     withSourcesJar()
     withJavadocJar()
+}
+
+tasks {
+    runIde {
+        // Automatically enable native wayland support when the host is using Wayland
+        if (System.getenv("XDG_SESSION_TYPE") == "wayland") {
+            jvmArgs("-Dawt.toolkit.name=WLToolkit", "-Dsun.java2d.vulkan=true")
+        }
+    }
 }

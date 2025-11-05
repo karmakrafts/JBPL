@@ -20,24 +20,24 @@
     <vendor>Karma Krafts</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
 
+    <!-- @formatter:off -->
     <extensions defaultExtensionNs="com.intellij">
-        <fileType
-                name="JBPL"
+        <fileType name="JBPL"
                 language="JBPL"
                 implementationClass="dev.karmakrafts.jbpl.intellij.JBPLFileType"
                 fieldName="INSTANCE"
                 extensions="jbpl"/>
+        <lang.parserDefinition language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLSyntaxHighlighterFactory"/>
+        <lang.braceMatcher language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLBraceMatcher"/>
+        <lang.psiStructureViewFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.structview.JBPLStructureViewFactory"/>
+        <psi.referenceContributor language="JAVA" implementation="dev.karmakrafts.jbpl.intellij.reference.JBPLReferenceContributor"/>
+        <completion.contributor language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
+        <codeInsight.lineMarkerProvider language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLLineMarkerProvider"/>
+        <annotator language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLAnnotator"/>
         <iconProvider implementation="dev.karmakrafts.jbpl.intellij.JBPLIconProvider"/>
-        <lang.parserDefinition language="JBPL"
-                               implementationClass="dev.karmakrafts.jbpl.intellij.JBPLParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="JBPL"
-                                       implementationClass="dev.karmakrafts.jbpl.intellij.JBPLSyntaxHighlighterFactory"/>
-        <annotator language="JBPL"
-                   implementationClass="dev.karmakrafts.jbpl.intellij.JBPLAnnotator"/>
-        <completion.contributor language="JBPL"
-                                implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
-        <codeInsight.lineMarkerProvider language="JBPL"
-                                        implementationClass="dev.karmakrafts.jbpl.intellij.JBPLLineMarkerProvider"/>
     </extensions>
+    <!-- @formatter:on -->
 </idea-plugin>

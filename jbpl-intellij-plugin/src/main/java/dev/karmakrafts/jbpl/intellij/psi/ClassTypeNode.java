@@ -34,4 +34,10 @@ public final class ClassTypeNode extends ANTLRPsiNode implements Annotated {
     public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES).range(element).textAttributes(TextAttributeKeys.CLASS_TYPE).create();
     }
+
+    @Override
+    public @NotNull String getName() {
+        final var text = getText();
+        return text.substring(1, text.length() - 2).replace('/', '.');
+    }
 }

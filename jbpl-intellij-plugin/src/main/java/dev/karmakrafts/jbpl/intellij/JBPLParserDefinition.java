@@ -43,8 +43,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public final class JBPLParserDefinition implements ParserDefinition {
-    public static final IFileElementType FILE = new IFileElementType(JBPLanguage.INSTANCE);
-    public static final List<TokenIElementType> TOKEN_TYPES;
+    public static final IFileElementType FILE_TYPE = new IFileElementType(JBPLanguage.INSTANCE);
+    private static final List<TokenIElementType> TOKEN_TYPES;
     private static final TokenSet COMMENTS;
     private static final TokenSet STRING_LITERALS;
     private static final TokenSet WHITESPACE;
@@ -57,6 +57,10 @@ public final class JBPLParserDefinition implements ParserDefinition {
             JBPLLexer.BLOCK_COMMENT);
         STRING_LITERALS = PSIElementTypeFactory.createTokenSet(JBPLanguage.INSTANCE, JBPLLexer.M_CONST_STR_TEXT);
         WHITESPACE = PSIElementTypeFactory.createTokenSet(JBPLanguage.INSTANCE, JBPLLexer.WS, JBPLLexer.NL);
+    }
+
+    public static @NotNull TokenIElementType getTokenType(final int index) {
+        return TOKEN_TYPES.get(index);
     }
 
     public static void ensureTokenTypesRegistered() {
@@ -85,7 +89,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull IFileElementType getFileNodeType() {
-        return FILE;
+        return FILE_TYPE;
     }
 
     @Override
@@ -141,6 +145,6 @@ public final class JBPLParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull PsiFile createFile(final @NotNull FileViewProvider fileViewProvider) {
-        return new JBPLFileRoot(fileViewProvider);
+        return new JBPLFile(fileViewProvider);
     }
 }
