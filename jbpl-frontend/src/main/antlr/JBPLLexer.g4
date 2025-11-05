@@ -1,4 +1,30 @@
+/*
+ * Copyright 2025 Karma Krafts & associates
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 lexer grammar JBPLLexer;
+
+// To workaround https://github.com/antlr/antlr4/issues/2006
+@members {
+    private void popModeIfPresent() {
+        if(_modeStack.size() == 0) {
+            return;
+        }
+        popMode();
+    }
+}
 
 LINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN);
 BLOCK_COMMENT: '/*' (BLOCK_COMMENT | .)*? '*/' -> channel(HIDDEN);
@@ -82,12 +108,12 @@ LSH: '<<';
 L_ABRACKET: '<';
 RSH: '>>';
 R_ABRACKET: '>';
-L_PAREN: '(';
-R_PAREN: ')';
-L_SQBRACKET: '[';
-R_SQBRACKET: ']';
+L_PAREN: '(' -> pushMode(DEFAULT_MODE);
+R_PAREN: ')' { popModeIfPresent(); };
+L_SQBRACKET: '[' -> pushMode(DEFAULT_MODE);
+R_SQBRACKET: ']' { popModeIfPresent(); };
 L_BRACE: '{' -> pushMode(DEFAULT_MODE);
-R_BRACE: '}' -> popMode;
+R_BRACE: '}' { popModeIfPresent(); };
 SINGLE_QUOTE: '\'';
 QUOTE: '"';
 SEMICOLON: ';';
@@ -216,11 +242,11 @@ LITERAL_CHAR: SINGLE_QUOTE (ESCAPED_CHAR | ~[']) SINGLE_QUOTE;
 
 IDENT: [a-zA-Z_]+[a-zA-Z0-9_]*;
 
-ERROR: . -> channel(HIDDEN);
+ERROR: .;
 
 mode M_CONST_STR;
 
 M_CONST_STR_END: QUOTE -> popMode, type(QUOTE);
 M_CONST_STR_LERP_BEGIN: '${' -> pushMode(DEFAULT_MODE);
 M_CONST_STR_TEXT: ~('"' | '$')+;
-M_CONST_STR_ERROR: ERROR -> channel(HIDDEN), type(ERROR);
+M_CONST_STR_ERROR: ERROR -> type(ERROR);

@@ -35,6 +35,9 @@ public final class DefineNode extends ANTLRPsiNode implements Annotated {
     @Override
     public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
         final var children = element.getChildren();
+        if (children.length < 2) {
+            return;
+        }
         if (children[1].getNode().getElementType() instanceof TokenIElementType tokenType && tokenType.getANTLRTokenType() == JBPLLexer.IDENT) { // @formatter:off
             holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                 .range(children[1])

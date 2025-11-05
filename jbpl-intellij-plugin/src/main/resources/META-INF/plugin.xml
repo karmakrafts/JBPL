@@ -35,5 +35,7 @@
                                        implementationClass="dev.karmakrafts.jbpl.intellij.JBPLSyntaxHighlighterFactory"/>
         <annotator language="JBPL"
                    implementationClass="dev.karmakrafts.jbpl.intellij.JBPLAnnotator"/>
+        <completion.contributor language="JBPL"
+                                implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
     </extensions>
 </idea-plugin>
