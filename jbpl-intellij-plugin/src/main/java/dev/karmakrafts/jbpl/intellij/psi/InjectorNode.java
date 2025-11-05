@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.openapi.util.IconLoader;
+import com.intellij.lang.ASTNode;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-
-public final class Icons {
-    public static final Icon FILE = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/file.png", Icons.class);
-    public static final Icon INJECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/injector.png",
-        Icons.class);
-    public static final Icon SELECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/selector.png",
-        Icons.class);
-
-    private Icons() {
+public final class InjectorNode extends ANTLRPsiNode {
+    public InjectorNode(final @NotNull ASTNode node) {
+        super(node);
     }
 }

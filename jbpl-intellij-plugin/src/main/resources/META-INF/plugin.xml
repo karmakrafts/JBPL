@@ -37,5 +37,7 @@
                    implementationClass="dev.karmakrafts.jbpl.intellij.JBPLAnnotator"/>
         <completion.contributor language="JBPL"
                                 implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
+        <codeInsight.lineMarkerProvider language="JBPL"
+                                        implementationClass="dev.karmakrafts.jbpl.intellij.JBPLLineMarkerProvider"/>
     </extensions>
 </idea-plugin>
