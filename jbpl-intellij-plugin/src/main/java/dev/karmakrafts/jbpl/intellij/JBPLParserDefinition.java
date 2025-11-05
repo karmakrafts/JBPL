@@ -95,7 +95,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull TokenSet getStringLiteralElements() {
-        return TokenSet.EMPTY;
+        return STRING_LITERALS;
     }
 
     @Override
@@ -129,6 +129,8 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_fieldSignature -> new FieldSignatureNode(node);
             case JBPLParser.RULE_nameSegment -> new NameSegmentNode(node);
             case JBPLParser.RULE_functionName -> new FunctionNameNode(node);
+            case JBPLParser.RULE_intLiteral, JBPLParser.RULE_floatLiteral -> new NumberNode(node);
+            case JBPLParser.RULE_expr -> new ExpressionNode(node);
             default -> new ANTLRPsiNode(node);
         }; // @formatter:on
     }

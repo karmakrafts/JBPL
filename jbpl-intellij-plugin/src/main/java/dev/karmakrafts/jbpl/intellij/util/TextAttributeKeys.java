@@ -40,6 +40,8 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.BRACKETS);
     public static final TextAttributesKey INSTRUCTION = TextAttributesKey.createTextAttributesKey("JBPL_INSTRUCTION",
         DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey DOT = TextAttributesKey.createTextAttributesKey("JBPL_DOT",
+        DefaultLanguageHighlighterColors.DOT);
 
     public static final TextAttributesKey DEFINE_NAME = TextAttributesKey.createTextAttributesKey("JBPL_DEFINE_NAME",
         DefaultLanguageHighlighterColors.STATIC_FIELD);
@@ -55,6 +57,8 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.INSTANCE_METHOD);
     public static final TextAttributesKey PARAMETER_NAME = TextAttributesKey.createTextAttributesKey("JBPL_PARAMETER",
         DefaultLanguageHighlighterColors.PARAMETER);
+    public static final TextAttributesKey OPERATOR = TextAttributesKey.createTextAttributesKey("JBPL_OPERATOR",
+        DefaultLanguageHighlighterColors.OPERATION_SIGN);
 
     private TextAttributeKeys() {
     }

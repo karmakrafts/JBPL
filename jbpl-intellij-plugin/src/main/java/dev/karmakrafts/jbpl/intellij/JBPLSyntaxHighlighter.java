@@ -80,6 +80,9 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_AS,
                  JBPLLexer.KW_IS,
                  JBPLLexer.KW_BY,
+                 JBPLLexer.KW_IF,
+                 JBPLLexer.KW_ELSE,
+                 JBPLLexer.KW_OFFSET,
                  JBPLLexer.KW_SIGNATURE,
                  JBPLLexer.KW_VERSION,
                  JBPLLexer.KW_PREPRO_ASSERT,
@@ -139,6 +142,7 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_NOP,
                  JBPLLexer.INSN_POP,
                  JBPLLexer.INSN_DUP -> keys.add(TextAttributeKeys.INSTRUCTION);
+            case JBPLLexer.DOT -> keys.add(TextAttributeKeys.DOT);
             case JBPLLexer.IDENT -> keys.add(TextAttributeKeys.IDENT);
         } // @formatter:on
         return keys.toArray(TextAttributesKey[]::new);
