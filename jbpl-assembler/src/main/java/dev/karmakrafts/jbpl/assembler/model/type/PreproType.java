@@ -37,6 +37,10 @@ public enum PreproType implements Type {
         return Arrays.stream(values()).filter(t -> t.type.isAssignableFrom(type)).findFirst();
     }
 
+    public static @NotNull Optional<PreproType> findByName(final @NotNull String name) {
+        return Arrays.stream(values()).filter(t -> t.name().equalsIgnoreCase(name)).findFirst();
+    }
+
     @Override
     public @NotNull TypeCategory getCategory() {
         return TypeCategory.PREPROCESSOR;

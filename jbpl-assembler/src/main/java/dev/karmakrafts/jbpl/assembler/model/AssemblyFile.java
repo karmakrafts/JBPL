@@ -53,17 +53,17 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     }
 
     @Override
-    public void setTokenRange(final @NotNull TokenRange tokenRange) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public @NotNull TokenRange getTokenRange() {
         // Lazily create file token range when needed
         if (tokenRange == null) {
             tokenRange = new TokenRange(0, source.size() - 1);
         }
         return tokenRange;
+    }
+
+    @Override
+    public void setTokenRange(final @NotNull TokenRange tokenRange) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -53,6 +53,10 @@ public enum BuiltinType implements Type {
         return Arrays.stream(values()).filter(t -> t.boxedType == boxedType).findFirst();
     }
 
+    public static @NotNull Optional<BuiltinType> findByName(final @NotNull String name) {
+        return Arrays.stream(values()).filter(t -> t.name().equalsIgnoreCase(name)).findFirst();
+    }
+
     @Override
     public @NotNull TypeCategory getCategory() {
         return category;

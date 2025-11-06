@@ -18,7 +18,9 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
+import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
@@ -113,6 +115,21 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
                 case F64 -> LiteralExpr.of(Double.parseDouble(string), getTokenRange());
                 case BOOL -> LiteralExpr.of(Boolean.parseBoolean(string), getTokenRange());
                 case CHAR -> LiteralExpr.of(string.charAt(0), getTokenRange());
+                default -> throw new EvaluationException(String.format("Cannot cast string into %s", type),
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace());
+            };
+        }
+        else if (type instanceof PreproType preproType) {
+            return switch (preproType) {
+                case TYPE -> LiteralExpr.of(Type.tryParse(string).orElseThrow(() -> new EvaluationException(
+                    "Could not parse type from string",
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace())), getTokenRange());
+                case OPCODE -> LiteralExpr.of(Opcode.findByName(string).orElseThrow(() -> new EvaluationException(
+                    "Could not parse opcode from string",
+                    SourceDiagnostic.from(this),
+                    context.createStackTrace())), getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast string into %s", type),
                     SourceDiagnostic.from(this),
                     context.createStackTrace());

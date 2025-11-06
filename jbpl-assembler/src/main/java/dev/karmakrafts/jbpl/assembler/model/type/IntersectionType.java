@@ -3,10 +3,9 @@ package dev.karmakrafts.jbpl.assembler.model.type;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public record IntersectionType(@NotNull List<Type> alternatives) implements Type {
@@ -21,6 +20,22 @@ public record IntersectionType(@NotNull List<Type> alternatives) implements Type
             unfoldedTypes.add(type);
         }
         return new IntersectionType(unfoldedTypes);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public static @NotNull Optional<IntersectionType> tryParse(final @Nullable String value) {
+        if (value == null || !value.startsWith("(") || !value.endsWith(")")) {
+            return Optional.empty();
+        }
+        // @formatter:off
+        final var alternatives = Arrays.stream(value.substring(1, value.length() - 1).replace(" ", "").split("\\|"))
+            .map(Type::tryParse)
+            .toList();
+        // @formatter:on
+        if (alternatives.stream().anyMatch(Optional::isEmpty)) {
+            return Optional.empty();
+        }
+        return Optional.of(new IntersectionType(alternatives.stream().map(Optional::get).toList()));
     }
 
     public @NotNull IntersectionType unfold() {

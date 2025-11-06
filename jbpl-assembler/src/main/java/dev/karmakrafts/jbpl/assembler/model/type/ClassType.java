@@ -3,10 +3,21 @@ package dev.karmakrafts.jbpl.assembler.model.type;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public record ClassType(String name) implements Type {
     public ClassType(final @NotNull Class<?> type) {
         this(org.objectweb.asm.Type.getInternalName(type));
+    }
+
+    public static @NotNull Optional<ClassType> tryParse(final @Nullable String value) {
+        if (value == null || !value.startsWith("<") || !value.endsWith(">")) {
+            return Optional.empty();
+        }
+        final var name = value.substring(1, value.length() - 1);
+        return Optional.of(new ClassType(name));
     }
 
     public @NotNull Class<?> loadClass() throws ClassNotFoundException {

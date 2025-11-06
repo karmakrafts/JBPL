@@ -522,6 +522,8 @@ local:
     refOrName
     COLON
     refOrType
+    (EQ
+    expr)?
     ;
 
 instructionLiteral:

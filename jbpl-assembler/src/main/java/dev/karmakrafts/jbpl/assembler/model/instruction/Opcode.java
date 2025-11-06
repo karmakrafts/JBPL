@@ -20,9 +20,7 @@ import dev.karmakrafts.jbpl.assembler.util.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 
-import java.util.EnumSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 public enum Opcode {
     // @formatter:off
@@ -121,6 +119,10 @@ public enum Opcode {
 
     Opcode(final int encodedValue) {
         this.encodedValue = encodedValue;
+    }
+
+    public static @NotNull Optional<Opcode> findByName(final @NotNull String name) {
+        return Arrays.stream(values()).filter(op -> op.name().equalsIgnoreCase(name)).findFirst();
     }
 
     public boolean isConstant() {

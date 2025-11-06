@@ -2,7 +2,6 @@ package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
-import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
@@ -144,7 +143,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     public @NotNull List<Declaration> visitField(final @NotNull FieldContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var field = new FieldDecl();
-            field.setSignature((FieldSignatureExpr) ExprParser.parse(ctx.fieldSignature()));
+            field.setSignature(ExprParser.parse(ctx.fieldSignature()));
             final var initializer = ctx.expr();
             if (initializer != null) {
                 field.setInitializer(ExprParser.parse(initializer));
