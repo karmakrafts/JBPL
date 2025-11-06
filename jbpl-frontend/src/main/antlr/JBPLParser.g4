@@ -803,10 +803,18 @@ classType:
     R_ABRACKET
     ;
 
+softKeyword:
+    KW_TYPE
+    | KW_OPCODE
+    | KW_VERSION
+    ;
+
 nameSegment:
-    IDENT
+    (IDENT
+    | softKeyword)
     (DOT
     | DOLLAR
     | IDENT
+    | softKeyword
     | LITERAL_INT)*
     ;

@@ -35,6 +35,7 @@ import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory;
 import org.antlr.intellij.adaptor.lexer.RuleIElementType;
 import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.parser.ANTLRParserAdaptor;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiLeafNode;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -116,6 +117,9 @@ public final class JBPLParserDefinition implements ParserDefinition {
     @Override
     public @NotNull PsiElement createElement(final @NotNull ASTNode node) {
         final var elementType = node.getElementType();
+        if (elementType instanceof TokenIElementType tokenType) {
+            return new ANTLRPsiLeafNode(tokenType, node.getText());
+        }
         if (!(elementType instanceof RuleIElementType ruleType)) {
             return new ANTLRPsiNode(node);
         }
@@ -144,6 +148,10 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_preproClass -> new PreproClassNode(node);
             case JBPLParser.RULE_yeetStatement -> new YeetStatementNode(node);
             case JBPLParser.RULE_signatureOwner -> new SignatureOwnerNode(node);
+            case JBPLParser.RULE_type -> new TypeNode(node);
+            case JBPLParser.RULE_typeLiteral -> new TypeLiteralNode(node);
+            case JBPLParser.RULE_opcodeLiteral -> new OpcodeLiteralNode(node);
+            case JBPLParser.RULE_versionStatement -> new VersionStatementNode(node);
             default -> new ANTLRPsiNode(node);
         }; // @formatter:on
     }
