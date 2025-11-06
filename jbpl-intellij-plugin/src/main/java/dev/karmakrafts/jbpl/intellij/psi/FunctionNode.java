@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.lang.ASTNode;
+import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public final class FunctionNode extends ANTLRPsiNode implements StructuralPsiEle
 
     @Override
     public @NotNull Icon getStructureIcon() {
-        return Nodes.Method;
+        return Icons.getIconWithModifier(Nodes.Method, PsiUtils.findAll(this, "/function/accessModifier").toList());
     }
 
     @Override

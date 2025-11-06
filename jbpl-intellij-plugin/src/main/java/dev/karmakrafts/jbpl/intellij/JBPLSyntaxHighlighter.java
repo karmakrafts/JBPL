@@ -77,6 +77,7 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_AFTER,
                  JBPLLexer.KW_BEFORE,
                  JBPLLexer.KW_DEFAULT,
+                 JBPLLexer.KW_FINAL,
                  JBPLLexer.KW_AS,
                  JBPLLexer.KW_IS,
                  JBPLLexer.KW_BY,

@@ -16,9 +16,16 @@
 
 package dev.karmakrafts.jbpl.intellij.util;
 
+import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.psi.PsiElement;
+import com.intellij.ui.LayeredIcon;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Icons {
     public static final Icon FILE = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/file.svg", Icons.class);
@@ -33,6 +40,25 @@ public final class Icons {
     public static final Icon PREPRO_CLASS = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/prepro_class.svg",
         Icons.class);
 
+    public static final Map<String, Icon> MODIFIERS = Map.of( // @formatter:off
+        "final",     Nodes.FinalMark,
+        "static",    Nodes.StaticMark,
+        "private",   Nodes.Private,
+        "protected", Nodes.Protected
+    ); // @formatter:on
+
     private Icons() {
+    }
+
+    public static @NotNull Icon getIconWithModifier(final @NotNull Icon icon,
+                                                    final @NotNull List<? extends PsiElement> modifiers) {
+        // @formatter:off
+        final var icons = modifiers.stream()
+            .map(mod -> MODIFIERS.get(mod.getText()))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(ArrayList::new));
+        // @formatter:on
+        icons.add(0, icon);
+        return LayeredIcon.layeredIcon(icons.toArray(Icon[]::new));
     }
 }
