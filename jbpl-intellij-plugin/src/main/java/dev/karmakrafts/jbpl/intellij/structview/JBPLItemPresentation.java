@@ -34,7 +34,7 @@ public final class JBPLItemPresentation implements ItemPresentation {
     @Override
     public @Nullable String getPresentableText() {
         if (element instanceof StructuralPsiElement structural) {
-            return structural.getName();
+            return structural.getDetailedStructureText();
         }
         return null;
     }

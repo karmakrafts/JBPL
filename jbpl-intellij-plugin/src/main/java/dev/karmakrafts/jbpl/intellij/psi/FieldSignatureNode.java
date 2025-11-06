@@ -28,11 +28,26 @@ public final class FieldSignatureNode extends ANTLRPsiNode implements Annotated 
         super(node);
     }
 
+    public @NotNull String getOwnerName() { // @formatter:off
+        return PsiUtils.find(this, "/fieldSignature/signatureOwner", SignatureOwnerNode.class)
+            .map(SignatureOwnerNode::getName)
+            .orElse("Unknown");
+    } // @formatter:on
+
     @Override
-    public void annotate(final @NotNull AnnotationHolder holder) {
-        // @formatter:off
+    public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
         PsiUtils.find(this, "/fieldSignature/refOrName", RefOrNameNode.class)
             .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.FIELD_NAME, holder));
-        // @formatter:On
+    } // @formatter:on
+
+    @Override
+    public @NotNull String getName() { // @formatter:off
+        return PsiUtils.find(this, "/fieldSignature/refOrName", RefOrNameNode.class)
+            .map(RefOrNameNode::getName)
+            .orElse("Unknown");
+    } // @formatter:on
+
+    public @NotNull String getOwnerAndName() {
+        return String.format("%s.%s", getOwnerName(), getName());
     }
 }

@@ -94,10 +94,11 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitMacro(final @NotNull MacroContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var signature = ctx.macroSignature();
+            final var name = ParserUtils.parseRefOrName(signature.refOrName());
             // @formatter:off
-            final var returnType = ctx.refOrType() != null
-                ? ParserUtils.parseRefOrType(ctx.refOrType())
+            final var returnType = signature.refOrType() != null
+                ? ParserUtils.parseRefOrType(signature.refOrType())
                 : LiteralExpr.of(BuiltinType.VOID);
             // @formatter:on
             final var macro = new MacroDecl(name, returnType);
@@ -106,7 +107,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
                 .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
                 .toList());
             // @formatter:on
-            macro.addParameters(ParserUtils.parseParameters(ctx.parameter()));
+            macro.addParameters(ParserUtils.parseParameters(signature.parameter()));
             return List.of(macro);
         });
     }

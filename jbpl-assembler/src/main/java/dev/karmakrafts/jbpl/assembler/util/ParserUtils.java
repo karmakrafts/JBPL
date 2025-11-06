@@ -55,7 +55,7 @@ public final class ParserUtils {
     }
 
     public static @NotNull Expr parseSignatureOwner(final @NotNull SignatureOwnerContext ctx) throws ParserException {
-        final var ref = ctx.reference();
+        final var ref = ctx.explicitReference();
         // @formatter:off
         return ref != null
             ? ExprParser.parse(ref)

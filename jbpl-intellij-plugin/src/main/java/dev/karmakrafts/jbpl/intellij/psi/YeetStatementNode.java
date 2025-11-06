@@ -17,12 +17,10 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
@@ -37,11 +35,22 @@ public final class YeetStatementNode extends ANTLRPsiNode implements StructuralP
     }
 
     @Override
-    public @Nullable String getName() { // @formatter:off
+    public @NotNull String getName() { // @formatter:off
+        return PsiUtils.find(this, "/yeetStatement/functionSignature", FunctionSignatureNode.class)
+            .map(FunctionSignatureNode::getName)
+            .or(() -> PsiUtils.find(this, "/yeetStatement/fieldSignature", FieldSignatureNode.class)
+                .map(FieldSignatureNode::getName))
+            .or(() -> PsiUtils.find(this, "/yeetStatement/classType", ClassTypeNode.class)
+                .map(ClassTypeNode::getName))
+            .orElse("Unknown");
+    } // @formatter:on
+
+    @Override
+    public @NotNull String getDetailedStructureText() { // @formatter:off
         return PsiUtils.find(this, "/yeetStatement/functionSignature")
-            .map(PsiElement::getText)
-            .or(() -> PsiUtils.find(this, "/yeetStatement/fieldSignature").map(PsiElement::getText))
-            .or(() -> PsiUtils.find(this, "/yeetStatement/classType").map(PsiElement::getText))
-            .orElseGet(super::getName);
+            .or(() -> PsiUtils.find(this, "/yeetStatement/fieldSignature"))
+            .or(() -> PsiUtils.find(this, "/yeetStatement/classType"))
+            .map(PsiUtils::toSingleLine)
+            .orElse("Unknown");
     } // @formatter:on
 }

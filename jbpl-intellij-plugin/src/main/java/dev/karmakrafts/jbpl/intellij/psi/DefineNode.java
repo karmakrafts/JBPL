@@ -20,6 +20,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +53,22 @@ public final class DefineNode extends ANTLRPsiNode implements StructuralPsiEleme
         if (children.length < 2) {
             return null;
         }
-        return children[1].getText(); // TODO: Use PsiUtils.getRefOrName
+        return PsiUtils.toSingleLine(children[1]); // TODO: Use PsiUtils.getRefOrName
+    }
+
+    // Defines should be rendered as <name>: <type> = <value>
+    @Override
+    public @NotNull String getDetailedStructureText() {
+        // @formatter:off
+        final var name = getName();
+        final var type = PsiUtils.find(this, "/define/type")
+            .map(PsiUtils::toSingleLine)
+            .orElse("Unknown");
+        final var value = PsiUtils.find(this, "/define/expr", ExpressionNode.class)
+            .map(PsiUtils::toSingleLine)
+            .orElse("<uninitialized>");
+        // @formatter:on
+        return String.format("%s: %s = %s", name, type, value);
     }
 
     @Override

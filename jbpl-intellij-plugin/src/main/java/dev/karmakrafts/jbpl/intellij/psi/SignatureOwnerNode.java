@@ -17,34 +17,26 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
-import dev.karmakrafts.jbpl.intellij.util.Icons;
+import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
+import java.util.stream.Collectors;
 
-public final class InjectorNode extends ANTLRPsiNode implements StructuralPsiElement {
-    public InjectorNode(final @NotNull ASTNode node) {
+public final class SignatureOwnerNode extends ANTLRPsiNode {
+    public SignatureOwnerNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
-    public @NotNull Icon getStructureIcon() {
-        return Icons.INJECTOR;
-    }
-
-    @Override
     public @NotNull String getName() { // @formatter:off
-        return PsiUtils.find(this, "/injector/functionSignature", FunctionSignatureNode.class)
-            .map(FunctionSignatureNode::getName)
-            .orElse("Unknown");
-    } // @formatter:on
-
-    @Override
-    public @NotNull String getDetailedStructureText() { // @formatter:off
-        return PsiUtils.find(this, "/injector/functionSignature")
-            .map(PsiUtils::toSingleLine)
+        return PsiUtils.find(this, "/signatureOwner/classType")
+            .map(type -> PsiUtils.findAll(type, "/classType/nameSegment")
+                .map(PsiElement::getText)
+                .collect(Collectors.joining(".")))
+            .or(() -> PsiUtils.find(this, "/signatureOwner/explicitReference", ExplicitReferenceNode.class)
+                .map(ExplicitReferenceNode::getName))
             .orElse("Unknown");
     } // @formatter:on
 }

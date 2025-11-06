@@ -36,7 +36,7 @@ public final class JBPLStructureAwareNavBarModelExtension extends StructureAware
             return null;
         }
         if (object instanceof StructuralPsiElement structural) {
-            return structural.getName();
+            return structural.getStructureText();
         }
         return null;
     }

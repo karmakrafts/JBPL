@@ -21,7 +21,6 @@ import com.intellij.lang.ASTNode;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
@@ -36,9 +35,24 @@ public final class FieldNode extends ANTLRPsiNode implements StructuralPsiElemen
     }
 
     @Override
-    public @Nullable String getName() { // @formatter:off
+    public @NotNull String getName() { // @formatter:off
         return PsiUtils.find(this, "/field/fieldSignature", FieldSignatureNode.class)
-            .map(FieldSignatureNode::getText)
-            .orElseGet(super::getName);
+            .map(FieldSignatureNode::getName)
+            .orElse("Unknown");
     } // @formatter:on
+
+    @Override
+    public @NotNull String getDetailedStructureText() {
+        // @formatter:off
+        final var signature = PsiUtils.find(this, "/field/fieldSignature")
+            .map(PsiUtils::toSingleLine)
+            .or(() -> PsiUtils.find(this, "/field/explicitReference", ExplicitReferenceNode.class)
+                .map(ExplicitReferenceNode::getName))
+            .orElse("Unknown");
+        final var value = PsiUtils.find(this, "/field/expr")
+            .map(PsiUtils::toSingleLine)
+            .orElse("<uninitialized>");
+        // @formatter:on
+        return String.format("%s = %s", signature, value);
+    }
 }

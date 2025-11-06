@@ -22,9 +22,20 @@ import org.antlr.intellij.adaptor.xpath.XPath;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class PsiUtils {
     private PsiUtils() {
+    }
+
+    public static @NotNull String toSingleLine(final @NotNull PsiElement element) {
+        // TODO: get rid of this RegEx, i'm just really lazy right now
+        return element.getText().replaceAll("[\\n\\s]+", " ").trim();
+    }
+
+    public static @NotNull Stream<? extends PsiElement> findAll(final @NotNull PsiElement element,
+                                                                final @NotNull String path) {
+        return XPath.findAll(JBPLanguage.INSTANCE, element, path).stream();
     }
 
     @SuppressWarnings("unchecked")

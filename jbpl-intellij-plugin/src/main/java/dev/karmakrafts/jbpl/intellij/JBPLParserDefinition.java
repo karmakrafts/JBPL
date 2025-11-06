@@ -143,6 +143,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_functionSignature -> new FunctionSignatureNode(node);
             case JBPLParser.RULE_preproClass -> new PreproClassNode(node);
             case JBPLParser.RULE_yeetStatement -> new YeetStatementNode(node);
+            case JBPLParser.RULE_signatureOwner -> new SignatureOwnerNode(node);
             default -> new ANTLRPsiNode(node);
         }; // @formatter:on
     }

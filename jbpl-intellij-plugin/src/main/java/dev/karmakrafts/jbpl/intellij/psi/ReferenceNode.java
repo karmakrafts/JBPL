@@ -35,4 +35,9 @@ public final class ReferenceNode extends ANTLRPsiNode implements Annotated {
             .textAttributes(TextAttributeKeys.DEFINE_NAME)
             .create();
     } // @formatter:on
+
+    @Override
+    public @NotNull String getName() {
+        return getText();
+    }
 }

@@ -24,4 +24,12 @@ import javax.swing.*;
 
 public interface StructuralPsiElement extends PsiElement, NavigationItem {
     @Nullable Icon getStructureIcon();
+
+    default @Nullable String getStructureText() {
+        return getName();
+    }
+
+    default @Nullable String getDetailedStructureText() {
+        return getName();
+    }
 }

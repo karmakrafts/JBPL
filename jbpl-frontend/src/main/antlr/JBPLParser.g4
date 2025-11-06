@@ -121,8 +121,7 @@ returnStatement:
     expr?
     ;
 
-macro:
-    KW_PREPRO_MACRO
+macroSignature:
     refOrName
     L_PAREN
     (parameter
@@ -132,6 +131,11 @@ macro:
     R_PAREN
     (COLON
     refOrType)?
+    ;
+
+macro:
+    KW_PREPRO_MACRO
+    macroSignature
     L_BRACE
     (bodyElement
     | NL)*?
@@ -386,7 +390,7 @@ declaration:
 field:
     accessModifier*?
     KW_FIELD
-    (reference
+    (explicitReference
     | fieldSignature)
     (EQ
     expr)?
@@ -405,7 +409,7 @@ fieldSignature:
     ;
 
 signatureOwner:
-    reference
+    explicitReference
     | classType
     ;
 

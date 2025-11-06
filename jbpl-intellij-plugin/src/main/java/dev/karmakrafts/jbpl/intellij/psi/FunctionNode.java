@@ -31,13 +31,20 @@ public final class FunctionNode extends ANTLRPsiNode implements StructuralPsiEle
 
     @Override
     public @NotNull Icon getStructureIcon() {
-        return Nodes.Function;
+        return Nodes.Method;
     }
 
     @Override
     public String getName() { // @formatter:off
         return PsiUtils.find(this, "/function/functionSignature", FunctionSignatureNode.class)
-            .map(FunctionSignatureNode::getText)
-            .orElseGet(super::getName);
+            .map(FunctionSignatureNode::getName)
+            .orElse("Unknown");
+    } // @formatter:on
+
+    @Override
+    public @NotNull String getDetailedStructureText() { // @formatter:off
+        return PsiUtils.find(this, "/function/functionSignature")
+            .map(PsiUtils::toSingleLine)
+            .orElse("Unknown");
     } // @formatter:on
 }

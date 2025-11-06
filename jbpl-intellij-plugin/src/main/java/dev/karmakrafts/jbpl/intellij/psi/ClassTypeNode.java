@@ -41,6 +41,6 @@ public final class ClassTypeNode extends ANTLRPsiNode implements Annotated {
     @Override
     public @NotNull String getName() {
         final var text = getText();
-        return text.substring(1, text.length() - 2).replace('/', '.');
+        return text.substring(1, text.length() - 1).replace('/', '.');
     }
 }

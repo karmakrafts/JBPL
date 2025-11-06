@@ -24,4 +24,9 @@ public final class RefOrTypeNode extends ANTLRPsiNode {
     public RefOrTypeNode(final @NotNull ASTNode node) {
         super(node);
     }
+
+    @Override
+    public String getName() {
+        return super.getName();
+    }
 }
