@@ -19,8 +19,6 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
@@ -31,8 +29,8 @@ public final class ExplicitReferenceNode extends ANTLRPsiNode implements Annotat
     }
 
     @Override
-    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) { // @formatter:off
-        final var children = element.getChildren();
+    public void annotate(@NotNull AnnotationHolder holder) { // @formatter:off
+        final var children = getChildren();
         if(children.length < 4) {
             return;
         }

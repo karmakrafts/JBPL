@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
@@ -25,20 +26,22 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public final class SelectorNode extends ANTLRPsiNode implements StructuralPsiElement {
-    public SelectorNode(final @NotNull ASTNode node) {
+public final class YeetStatementNode extends ANTLRPsiNode implements StructuralPsiElement {
+    public YeetStatementNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
     public @NotNull Icon getStructureIcon() {
-        return Icons.SELECTOR;
+        return Icons.YEET;
     }
 
     @Override
     public @Nullable String getName() { // @formatter:off
-        return PsiUtils.find(this, "/selector/refOrName", RefOrNameNode.class)
-            .map(RefOrNameNode::getName)
+        return PsiUtils.find(this, "/yeetStatement/functionSignature")
+            .map(PsiElement::getText)
+            .or(() -> PsiUtils.find(this, "/yeetStatement/fieldSignature").map(PsiElement::getText))
+            .or(() -> PsiUtils.find(this, "/yeetStatement/classType").map(PsiElement::getText))
             .orElseGet(super::getName);
     } // @formatter:on
 }

@@ -18,55 +18,13 @@ package dev.karmakrafts.jbpl.intellij;
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
-import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment;
 import com.intellij.psi.PsiElement;
-import com.intellij.util.PlatformIcons;
-import dev.karmakrafts.jbpl.intellij.psi.FieldNode;
-import dev.karmakrafts.jbpl.intellij.psi.FunctionNode;
-import dev.karmakrafts.jbpl.intellij.psi.InjectorNode;
-import dev.karmakrafts.jbpl.intellij.psi.SelectorNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class JBPLLineMarkerProvider implements LineMarkerProvider {
     @Override
     public @Nullable LineMarkerInfo<?> getLineMarkerInfo(final @NotNull PsiElement element) {
-        if (element instanceof InjectorNode injector) {
-            return new LineMarkerInfo<>(injector,
-                injector.getTextRange(),
-                Icons.INJECTOR,
-                null,
-                null,
-                Alignment.RIGHT,
-                () -> "Injector");
-        }
-        else if (element instanceof SelectorNode selector) {
-            return new LineMarkerInfo<PsiElement>(selector,
-                selector.getTextRange(),
-                Icons.SELECTOR,
-                null,
-                null,
-                Alignment.RIGHT,
-                () -> "Selector");
-        }
-        else if (element instanceof FunctionNode function) {
-            return new LineMarkerInfo<PsiElement>(function,
-                function.getTextRange(),
-                PlatformIcons.FUNCTION_ICON,
-                null,
-                null,
-                Alignment.RIGHT,
-                () -> "Function");
-        }
-        else if (element instanceof FieldNode field) {
-            return new LineMarkerInfo<PsiElement>(field,
-                field.getTextRange(),
-                PlatformIcons.FIELD_ICON,
-                null,
-                null,
-                Alignment.RIGHT,
-                () -> "Field");
-        }
         return null;
     }
 }

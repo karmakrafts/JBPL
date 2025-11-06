@@ -32,7 +32,7 @@ public final class JBPLStructureViewFactory implements PsiStructureViewFactory {
         return new TreeBasedStructureViewBuilder() {
             @Override
             public @NotNull StructureViewModel createStructureViewModel(final @Nullable Editor editor) {
-                return new JBPLStructureViewModel((JBPLFile) file);
+                return new JBPLStructureViewModel(editor, (JBPLFile) file);
             }
         };
     }

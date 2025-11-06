@@ -20,7 +20,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
@@ -31,20 +31,20 @@ public final class FunctionNameNode extends ANTLRPsiNode implements Annotated {
     }
 
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        final var firstChild = element.getFirstChild();
-        if (!(firstChild instanceof RefOrNameNode refOrName)) {
-            return;
-        }
-        final var firstNameChild = refOrName.getFirstChild();
-        if (!(firstNameChild instanceof NameSegmentNode nameSegment)) {
-            return;
-        }
-        // @formatter:off
-        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(nameSegment)
-            .textAttributes(TextAttributeKeys.FUNCTION_NAME)
-            .create();
-        // @formatter:on
-    }
+    public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
+        PsiUtils.find(this, "/functionName/refOrName/nameSegment")
+            .or(() -> PsiUtils.find(this, "/functionName/specialFunctionName"))
+            .ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+                .range(name)
+                .textAttributes(TextAttributeKeys.FUNCTION_NAME)
+                .create());
+    } // @formatter:on
+
+    @Override
+    public @NotNull String getName() { // @formatter:off
+        return PsiUtils.find(this, "/functionName/refOrName", RefOrNameNode.class)
+            .map(RefOrNameNode::getName)
+            .or(() -> PsiUtils.find(this, "/functionName/specialFunctionName").map(PsiElement::getText))
+            .orElseGet(this::getText);
+    } // @formatter:on
 }

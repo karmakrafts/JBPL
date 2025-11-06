@@ -16,12 +16,28 @@
 
 package dev.karmakrafts.jbpl.intellij.psi;
 
+import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.lang.ASTNode;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class FunctionNode extends ANTLRPsiNode {
+import javax.swing.*;
+
+public final class FunctionNode extends ANTLRPsiNode implements StructuralPsiElement {
     public FunctionNode(final @NotNull ASTNode node) {
         super(node);
     }
+
+    @Override
+    public @NotNull Icon getStructureIcon() {
+        return Nodes.Function;
+    }
+
+    @Override
+    public String getName() { // @formatter:off
+        return PsiUtils.find(this, "/function/functionSignature", FunctionSignatureNode.class)
+            .map(FunctionSignatureNode::getText)
+            .orElseGet(super::getName);
+    } // @formatter:on
 }

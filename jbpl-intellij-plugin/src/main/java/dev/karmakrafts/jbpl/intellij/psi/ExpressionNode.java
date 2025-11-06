@@ -19,9 +19,7 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.antlr.intellij.adaptor.lexer.TokenIElementType;
@@ -55,8 +53,8 @@ public final class ExpressionNode extends ANTLRPsiNode implements Annotated {
     }
 
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        final var children = element.getChildren();
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        final var children = getChildren();
         if (children.length == 3) {
             // Handle semantic highlighting for operators
             final var opNode = children[1];

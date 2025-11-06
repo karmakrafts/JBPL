@@ -19,8 +19,6 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
@@ -31,8 +29,8 @@ public final class ParameterNode extends ANTLRPsiNode implements Annotated {
     }
 
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        final var refOrName = element.getFirstChild();
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        final var refOrName = getFirstChild();
         if (!(refOrName instanceof NameSegmentNode nameSegment)) {
             return;
         }

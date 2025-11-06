@@ -14,35 +14,31 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij.structview;
+package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.navigation.ItemPresentation;
-import com.intellij.psi.PsiElement;
-import com.intellij.util.PlatformIcons;
+import com.intellij.lang.ASTNode;
+import dev.karmakrafts.jbpl.intellij.util.Icons;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class ElementPresentation implements ItemPresentation {
-    protected final PsiElement element;
-
-    public ElementPresentation(final @NotNull PsiElement element) {
-        this.element = element;
+public final class PreproClassNode extends ANTLRPsiNode implements StructuralPsiElement {
+    public PreproClassNode(final @NotNull ASTNode node) {
+        super(node);
     }
 
     @Override
-    public @Nullable String getPresentableText() {
-        return element.getText();
+    public @NotNull Icon getStructureIcon() {
+        return Icons.PREPRO_CLASS;
     }
 
     @Override
-    public @Nullable Icon getIcon(final boolean unused) {
-        return PlatformIcons.FUNCTION_ICON;
-    }
-
-    @Override
-    public @Nullable String getLocationString() {
-        return null;
-    }
+    public @Nullable String getName() { // @formatter:off
+        return PsiUtils.find(this, "/preproClass/refOrName", RefOrNameNode.class)
+            .map(RefOrNameNode::getName)
+            .orElseGet(super::getName);
+    } // @formatter:on
 }

@@ -18,27 +18,33 @@ package dev.karmakrafts.jbpl.intellij.structview;
 
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.Icons;
+import dev.karmakrafts.jbpl.intellij.psi.StructuralPsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class FilePresentation implements ItemPresentation {
-    protected final PsiElement element;
+public final class JBPLItemPresentation implements ItemPresentation {
+    private final PsiElement element;
 
-    public FilePresentation(final @NotNull PsiElement element) {
+    public JBPLItemPresentation(final @NotNull PsiElement element) {
         this.element = element;
     }
 
     @Override
     public @Nullable String getPresentableText() {
-        return element.getContainingFile().getVirtualFile().getNameWithoutExtension();
+        if (element instanceof StructuralPsiElement structural) {
+            return structural.getName();
+        }
+        return null;
     }
 
     @Override
-    public @NotNull Icon getIcon(final boolean unused) {
-        return Icons.FILE;
+    public @Nullable Icon getIcon(final boolean unused) {
+        if (element instanceof StructuralPsiElement structural) {
+            return structural.getStructureIcon();
+        }
+        return null;
     }
 
     @Override

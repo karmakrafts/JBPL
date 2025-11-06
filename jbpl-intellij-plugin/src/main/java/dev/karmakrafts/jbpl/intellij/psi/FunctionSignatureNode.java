@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij.structview;
+package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.psi.PsiFile;
+import com.intellij.lang.ASTNode;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class JBPLStructureViewRootElement extends JBPLStructureViewElement {
-    public JBPLStructureViewRootElement(final @NotNull PsiFile element) {
-        super(element);
-        presentation = new FilePresentation(element);
+public final class FunctionSignatureNode extends ANTLRPsiNode {
+    public FunctionSignatureNode(final @NotNull ASTNode node) {
+        super(node);
     }
+
+    @Override
+    public String getName() { // @formatter:off
+        return PsiUtils.find(this, "/functionSignature/functionName", FunctionNameNode.class)
+            .map(FunctionNameNode::getName)
+            .orElseGet(super::getName);
+    } // @formatter:on
 }

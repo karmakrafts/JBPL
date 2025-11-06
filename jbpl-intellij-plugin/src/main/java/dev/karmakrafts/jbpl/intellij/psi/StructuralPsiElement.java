@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.openapi.util.IconLoader;
+import com.intellij.navigation.NavigationItem;
+import com.intellij.psi.PsiElement;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public final class Icons {
-    public static final Icon FILE = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/file.svg", Icons.class);
-    public static final Icon INJECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/injector.svg",
-        Icons.class);
-    public static final Icon SELECTOR = IconLoader.getIcon("/icons/dev/karmakrafts/jbpl/intellij/selector.svg",
-        Icons.class);
-
-    private Icons() {
-    }
+public interface StructuralPsiElement extends PsiElement, NavigationItem {
+    @Nullable Icon getStructureIcon();
 }

@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.intellij;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.NlsContexts.Label;
+import dev.karmakrafts.jbpl.intellij.util.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

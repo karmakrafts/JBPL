@@ -136,6 +136,7 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_MONITORENTER,
                  JBPLLexer.INSN_MONITOREXIT,
                  JBPLLexer.INSN_IPUSH,
+                 JBPLLexer.INSN_SWAP,
                  JBPLLexer.INSN_JSR,
                  JBPLLexer.INSN_RET,
                  JBPLLexer.INSN_NEG,

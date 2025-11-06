@@ -19,14 +19,14 @@ package dev.karmakrafts.jbpl.intellij;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
+import dev.karmakrafts.jbpl.intellij.psi.Annotated;
 import org.jetbrains.annotations.NotNull;
 
 public final class JBPLAnnotator implements Annotator {
     @Override
     public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
         if (element instanceof Annotated annotated) {
-            annotated.annotate(element, holder);
+            annotated.annotate(holder);
         }
     }
 }

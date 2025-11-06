@@ -19,30 +19,44 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.frontend.JBPLLexer;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
+import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class DefineNode extends ANTLRPsiNode implements Annotated {
+import javax.swing.*;
+
+public final class DefineNode extends ANTLRPsiNode implements StructuralPsiElement, Annotated {
     public DefineNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        final var children = element.getChildren();
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        final var children = getChildren();
         if (children.length < 2) {
             return;
         }
-        if (children[1].getNode().getElementType() instanceof TokenIElementType tokenType && tokenType.getANTLRTokenType() == JBPLLexer.IDENT) { // @formatter:off
-            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                .range(children[1])
-                .textAttributes(TextAttributeKeys.DEFINE_NAME)
-                .create();
+        // @formatter:off
+        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+            .range(children[1])
+            .textAttributes(TextAttributeKeys.DEFINE_NAME)
+            .create();
+        // @formatter:on
+    }
+
+    @Override
+    public @Nullable String getName() {
+        final var children = getChildren();
+        if (children.length < 2) {
+            return null;
         }
+        return children[1].getText(); // TODO: Use PsiUtils.getRefOrName
+    }
+
+    @Override
+    public @NotNull Icon getStructureIcon() {
+        return Icons.DEFINE;
     }
 }

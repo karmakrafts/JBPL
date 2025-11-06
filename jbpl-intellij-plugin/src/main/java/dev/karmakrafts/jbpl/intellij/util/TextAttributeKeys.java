@@ -39,7 +39,7 @@ public final class TextAttributeKeys {
     public static final TextAttributesKey ANGLE_BRACKET = TextAttributesKey.createTextAttributesKey("JBPL_ANGLE_BRACKET",
         DefaultLanguageHighlighterColors.BRACKETS);
     public static final TextAttributesKey INSTRUCTION = TextAttributesKey.createTextAttributesKey("JBPL_INSTRUCTION",
-        DefaultLanguageHighlighterColors.KEYWORD);
+        DefaultLanguageHighlighterColors.METADATA);
     public static final TextAttributesKey DOT = TextAttributesKey.createTextAttributesKey("JBPL_DOT",
         DefaultLanguageHighlighterColors.DOT);
 

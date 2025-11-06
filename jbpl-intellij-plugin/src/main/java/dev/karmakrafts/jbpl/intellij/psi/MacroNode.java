@@ -18,30 +18,37 @@ package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
+import dev.karmakrafts.jbpl.intellij.util.Icons;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class MacroNode extends ANTLRPsiNode implements Annotated {
+import javax.swing.*;
+
+public final class MacroNode extends ANTLRPsiNode implements Annotated, StructuralPsiElement {
     public MacroNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        final var refOrName = element.getChildren()[1]; // refOrName
-        final var firstChild = refOrName.getFirstChild();
-        if (!(firstChild instanceof NameSegmentNode nameSegment)) {
-            return;
-        }
+    public void annotate(final @NotNull AnnotationHolder holder) {
         // @formatter:off
-        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(nameSegment)
-            .textAttributes(TextAttributeKeys.MACRO_NAME)
-            .create();
+        PsiUtils.find(this, "/macro/refOrName", RefOrNameNode.class)
+            .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.MACRO_NAME, holder));
         // @formatter:on
+    }
+
+    @Override
+    public @Nullable String getName() { // @formatter:off
+        return PsiUtils.find(this, "/macro/refOrName", RefOrNameNode.class)
+            .map(RefOrNameNode::getName)
+            .orElseGet(super::getName);
+    } // @formatter:on
+
+    @Override
+    public @NotNull Icon getStructureIcon() {
+        return Icons.MACRO;
     }
 }

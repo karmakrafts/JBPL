@@ -19,8 +19,6 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Annotated;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
@@ -31,8 +29,9 @@ public final class MacroCallNode extends ANTLRPsiNode implements Annotated {
     }
 
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) { // @formatter:off
-        final var children = element.getChildren();
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        final var children = getChildren();
+        // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[0])
             .textAttributes(TextAttributeKeys.MACRO_NAME)
@@ -41,5 +40,6 @@ public final class MacroCallNode extends ANTLRPsiNode implements Annotated {
             .range(children[1])
             .textAttributes(TextAttributeKeys.KEYWORD)
             .create();
-    } // @formatter:on
+        // @formatter:on
+    }
 }

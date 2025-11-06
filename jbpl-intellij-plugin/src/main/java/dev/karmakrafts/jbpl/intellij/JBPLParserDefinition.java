@@ -135,10 +135,14 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_functionName -> new FunctionNameNode(node);
             case JBPLParser.RULE_intLiteral, JBPLParser.RULE_floatLiteral -> new NumberNode(node);
             case JBPLParser.RULE_expr -> new ExpressionNode(node);
+            case JBPLParser.RULE_statement -> new StatementNode(node);
             case JBPLParser.RULE_function -> new FunctionNode(node);
             case JBPLParser.RULE_field -> new FieldNode(node);
             case JBPLParser.RULE_injector -> new InjectorNode(node);
             case JBPLParser.RULE_selector -> new SelectorNode(node);
+            case JBPLParser.RULE_functionSignature -> new FunctionSignatureNode(node);
+            case JBPLParser.RULE_preproClass -> new PreproClassNode(node);
+            case JBPLParser.RULE_yeetStatement -> new YeetStatementNode(node);
             default -> new ANTLRPsiNode(node);
         }; // @formatter:on
     }

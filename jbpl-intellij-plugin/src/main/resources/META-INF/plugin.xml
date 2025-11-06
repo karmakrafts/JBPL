@@ -38,6 +38,7 @@
         <codeInsight.lineMarkerProvider language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLLineMarkerProvider"/>
         <annotator language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLAnnotator"/>
         <iconProvider implementation="dev.karmakrafts.jbpl.intellij.JBPLIconProvider"/>
+        <navbar implementation="dev.karmakrafts.jbpl.intellij.JBPLStructureAwareNavBarModelExtension"/>
     </extensions>
     <!-- @formatter:on -->
 </idea-plugin>

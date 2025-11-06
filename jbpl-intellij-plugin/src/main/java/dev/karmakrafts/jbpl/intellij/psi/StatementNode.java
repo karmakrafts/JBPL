@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij.util;
+package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.psi.PsiElement;
+import com.intellij.lang.ASTNode;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-@FunctionalInterface
-public interface Annotated {
-    void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder);
+public final class StatementNode extends ANTLRPsiNode {
+    public StatementNode(final @NotNull ASTNode node) {
+        super(node);
+    }
 }

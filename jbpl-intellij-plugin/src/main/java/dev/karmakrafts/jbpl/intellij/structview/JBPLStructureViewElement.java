@@ -21,16 +21,19 @@ import com.intellij.ide.util.treeView.smartTree.SortableTreeElement;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.PsiRecursiveElementVisitor;
+import dev.karmakrafts.jbpl.intellij.psi.StructuralPsiElement;
 import org.jetbrains.annotations.NotNull;
 
-public class JBPLStructureViewElement implements StructureViewTreeElement, SortableTreeElement {
-    protected final PsiElement element;
-    protected ItemPresentation presentation;
+import java.util.ArrayList;
+
+public final class JBPLStructureViewElement implements StructureViewTreeElement, SortableTreeElement {
+    private final PsiElement element;
+    private final ItemPresentation presentation;
 
     public JBPLStructureViewElement(final @NotNull PsiElement element) {
         this.element = element;
-        presentation = new ElementPresentation(element);
+        presentation = new JBPLItemPresentation(element);
     }
 
     @Override
@@ -40,7 +43,7 @@ public class JBPLStructureViewElement implements StructureViewTreeElement, Sorta
 
     @Override
     public @NotNull String getAlphaSortKey() {
-        final var s = element instanceof PsiNamedElement ? ((PsiNamedElement) element).getName() : null;
+        final var s = element instanceof StructuralPsiElement structural ? structural.getName() : null;
         if (s == null) {
             return "unknown";
         }
@@ -54,6 +57,21 @@ public class JBPLStructureViewElement implements StructureViewTreeElement, Sorta
 
     @Override
     public TreeElement @NotNull [] getChildren() {
-        return new TreeElement[0]; // TODO: ...
+        final var treeElements = new ArrayList<TreeElement>();
+        new PsiRecursiveElementVisitor() {
+            @Override
+            public void visitElement(final @NotNull PsiElement element) {
+                if (element == JBPLStructureViewElement.this.element) {
+                    super.visitElement(element);
+                    return;
+                }
+                if (element instanceof StructuralPsiElement) {
+                    treeElements.add(new JBPLStructureViewElement(element));
+                    return;
+                }
+                super.visitElement(element);
+            }
+        }.visitElement(element);
+        return treeElements.toArray(TreeElement[]::new);
     }
 }

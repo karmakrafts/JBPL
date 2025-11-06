@@ -17,17 +17,27 @@
 package dev.karmakrafts.jbpl.intellij.structview;
 
 import com.intellij.ide.structureView.StructureViewModel.ElementInfoProvider;
-import com.intellij.ide.structureView.StructureViewModelBase;
 import com.intellij.ide.structureView.StructureViewTreeElement;
+import com.intellij.ide.structureView.TextEditorBasedStructureViewModel;
 import com.intellij.ide.util.treeView.smartTree.Sorter;
+import com.intellij.openapi.editor.Editor;
 import dev.karmakrafts.jbpl.intellij.JBPLFile;
+import dev.karmakrafts.jbpl.intellij.psi.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class JBPLStructureViewModel extends StructureViewModelBase implements ElementInfoProvider {
+public final class JBPLStructureViewModel extends TextEditorBasedStructureViewModel implements ElementInfoProvider {
     private static final Sorter[] SORTERS = new Sorter[]{Sorter.ALPHA_SORTER};
+    private final JBPLStructureViewElement rootView;
 
-    public JBPLStructureViewModel(final @NotNull JBPLFile root) {
-        super(root, new JBPLStructureViewRootElement(root));
+    public JBPLStructureViewModel(final @Nullable Editor editor, final @NotNull JBPLFile root) {
+        super(editor, root);
+        rootView = new JBPLStructureViewElement(root);
+    }
+
+    @Override
+    public @NotNull StructureViewTreeElement getRoot() {
+        return rootView;
     }
 
     @Override
@@ -37,11 +47,25 @@ public final class JBPLStructureViewModel extends StructureViewModelBase impleme
 
     @Override
     public boolean isAlwaysShowsPlus(final @NotNull StructureViewTreeElement element) {
-        return element.getValue() instanceof JBPLFile;
+        return false;
     }
 
     @Override
     public boolean isAlwaysLeaf(final @NotNull StructureViewTreeElement element) {
-        return !isAlwaysShowsPlus(element);
+        return false;
+    }
+
+    @Override
+    protected Class<?> @NotNull [] getSuitableClasses() {
+        return new Class<?>[]{ // @formatter:off
+            DefineNode.class,
+            MacroNode.class,
+            FieldNode.class,
+            FunctionNode.class,
+            SelectorNode.class,
+            InjectorNode.class,
+            PreproClassNode.class,
+            YeetStatementNode.class
+        }; // @formatter:on
     }
 }

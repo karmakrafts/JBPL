@@ -17,11 +17,29 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import dev.karmakrafts.jbpl.intellij.util.Icons;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class InjectorNode extends ANTLRPsiNode {
+import javax.swing.*;
+
+public final class InjectorNode extends ANTLRPsiNode implements StructuralPsiElement {
     public InjectorNode(final @NotNull ASTNode node) {
         super(node);
     }
+
+    @Override
+    public @NotNull Icon getStructureIcon() {
+        return Icons.INJECTOR;
+    }
+
+    @Override
+    public @Nullable String getName() { // @formatter:off
+        return PsiUtils.find(this, "/injector/functionSignature")
+            .map(PsiElement::getText)
+            .orElseGet(super::getName);
+    } // @formatter:on
 }

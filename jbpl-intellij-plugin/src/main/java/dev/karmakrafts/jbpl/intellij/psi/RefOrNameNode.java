@@ -17,6 +17,11 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.annotation.AnnotationHolder;
+import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.psi.PsiElement;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,4 +29,20 @@ public final class RefOrNameNode extends ANTLRPsiNode {
     public RefOrNameNode(final @NotNull ASTNode node) {
         super(node);
     }
+
+    public void annotateNameWith(final @NotNull TextAttributesKey key, final @NotNull AnnotationHolder holder) {
+        PsiUtils.find(this, "/refOrName/nameSegment").ifPresent(name -> { // @formatter:off
+            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+                .range(name)
+                .textAttributes(key)
+                .create();
+        }); // @formatter:on
+    }
+
+    @Override
+    public @NotNull String getName() { // @formatter:off
+        return PsiUtils.find(this, "/refOrName/nameSegment")
+            .map(PsiElement::getText)
+            .orElseGet(this::getText);
+    } // @formatter:on
 }

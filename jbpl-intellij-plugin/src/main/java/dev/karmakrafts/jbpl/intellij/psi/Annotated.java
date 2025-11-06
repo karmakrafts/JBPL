@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.ide.IconProvider;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.util.Icons;
+import com.intellij.lang.annotation.AnnotationHolder;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-
-public final class JBPLIconProvider extends IconProvider {
-    @Override
-    public @Nullable Icon getIcon(final @NotNull PsiElement element, final int flags) {
-        if (element instanceof JBPLFile) {
-            return Icons.FILE;
-        }
-        return null;
-    }
+@FunctionalInterface
+public interface Annotated {
+    void annotate(final @NotNull AnnotationHolder holder);
 }
