@@ -31,14 +31,6 @@ bodyElement:
     | statement
     ;
 
-reportStatement:
-    (KW_PREPRO_ERROR
-    | KW_PREPRO_INFO)
-    L_PAREN
-    stringLiteral
-    R_PAREN
-    ;
-
 ifExpr:
     KW_IF
     L_PAREN
@@ -345,7 +337,8 @@ reference: // Impplicit references
 explicitReference:
     DOLLAR
     L_BRACE
-    IDENT
+    (IDENT
+    | softKeyword)
     R_BRACE
     ;
 
@@ -512,7 +505,6 @@ functionName:
 statement:
     include
     | define
-    | reportStatement
     | returnStatement
     | yeetStatement
     | versionStatement
