@@ -73,7 +73,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     .findFirst()
                     .orElseThrow(() -> new EvaluationException(
                         String.format("No parameter named '%s' in macro %s", name, ExceptionUtils.rethrowUnchecked(() -> macro.getName(context))),
-                        SourceDiagnostic.from(this), context.createStackTrace() // TODO: Improve this to highlight the actual parameter
+                        SourceDiagnostic.from(this), context.createStackTrace()
                     ));
                 // @formatter:on
                 final var paramType = parameter.getValue();
