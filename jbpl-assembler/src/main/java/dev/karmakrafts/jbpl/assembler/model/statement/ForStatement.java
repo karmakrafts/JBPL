@@ -69,7 +69,6 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         if (valueType instanceof ArrayType) {
             final var array = value.evaluateAsConst(context, Object.class);
             final var arrayLength = Array.getLength(array);
-            // TODO: implement continue flag
             arrayLoop:
             for (var i = 0; i < arrayLength; i++) {
                 final var value = Array.get(array, i);
