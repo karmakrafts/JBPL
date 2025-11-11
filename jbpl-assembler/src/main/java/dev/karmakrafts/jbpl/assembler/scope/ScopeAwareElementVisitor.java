@@ -16,8 +16,7 @@
 
 package dev.karmakrafts.jbpl.assembler.scope;
 
-import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
-import dev.karmakrafts.jbpl.assembler.model.decl.*;
+import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +29,10 @@ public abstract class ScopeAwareElementVisitor implements ElementVisitor {
     protected final Stack<Scope> scopeStack = new Stack<>();
     protected Consumer<Scope> scopeEnter = IDENTITY_CALLBACK;
     protected Consumer<Scope> scopeLeave = IDENTITY_CALLBACK;
+
+    public void restoreFrom(final @NotNull Stack<Scope> scopeStack) {
+        this.scopeStack.addAll(scopeStack);
+    }
 
     protected @NotNull Scope getScope() {
         return scopeStack.peek();
@@ -70,75 +73,17 @@ public abstract class ScopeAwareElementVisitor implements ElementVisitor {
         scopeLeave.accept(scopeStack.pop());
     }
 
-    public @NotNull AssemblyFile visitFileInScope(final @NotNull AssemblyFile file) {
-        return file;
-    }
-
     @Override
-    public @NotNull AssemblyFile visitFile(final @NotNull AssemblyFile file) {
-        pushScope(file);
-        final var transformedFile = visitFileInScope(ElementVisitor.super.visitFile(file));
-        popScope();
-        return transformedFile;
-    }
-
-    public @NotNull Declaration visitFunctionInScope(final @NotNull FunctionDecl functionDecl) {
-        return functionDecl;
-    }
-
-    @Override
-    public @NotNull Declaration visitFunction(final @NotNull FunctionDecl functionDecl) {
-        pushScope(functionDecl);
-        var transformedFunction = ElementVisitor.super.visitFunction(functionDecl);
-        if (transformedFunction instanceof FunctionDecl transformedDecl) {
-            transformedFunction = visitFunctionInScope(transformedDecl);
+    public @NotNull Element visitElement(final @NotNull Element element) {
+        var hasScope = false;
+        if (element instanceof ScopeOwner scopeOwner) {
+            pushScope(scopeOwner);
+            hasScope = true;
         }
-        popScope();
-        return transformedFunction;
-    }
-
-    public @NotNull Declaration visitMacroInScope(final @NotNull MacroDecl macroDecl) {
-        return macroDecl;
-    }
-
-    @Override
-    public @NotNull Declaration visitMacro(final @NotNull MacroDecl macroDecl) {
-        pushScope(macroDecl);
-        var transformedMacro = ElementVisitor.super.visitMacro(macroDecl);
-        if (transformedMacro instanceof MacroDecl transformedDecl) {
-            transformedMacro = visitMacroInScope(transformedDecl);
+        final var result = ElementVisitor.super.visitElement(element);
+        if (hasScope) {
+            popScope();
         }
-        popScope();
-        return transformedMacro;
-    }
-
-    public @NotNull Declaration visitInjectorInScope(final @NotNull InjectorDecl injectorDecl) {
-        return injectorDecl;
-    }
-
-    @Override
-    public @NotNull Declaration visitInjector(final @NotNull InjectorDecl injectorDecl) {
-        pushScope(injectorDecl);
-        var transformedInjector = ElementVisitor.super.visitInjector(injectorDecl);
-        if (transformedInjector instanceof InjectorDecl transformedDecl) {
-            transformedInjector = visitInjectorInScope(transformedDecl);
-        }
-        popScope();
-        return transformedInjector;
-    }
-
-    public @NotNull Declaration visitSelectorInScope(final @NotNull SelectorDecl selectorDecl) {
-        return selectorDecl;
-    }
-
-    @Override
-    public @NotNull Declaration visitSelector(@NotNull SelectorDecl selectorDecl) {
-        pushScope(selectorDecl);
-        var transformedSelector = ElementVisitor.super.visitSelector(selectorDecl);
-        if (transformedSelector instanceof SelectorDecl transformedDecl) {
-            transformedSelector = visitSelectorInScope(transformedDecl);
-        }
-        popScope();
-        return transformedSelector;
+        return result;
     }
 }

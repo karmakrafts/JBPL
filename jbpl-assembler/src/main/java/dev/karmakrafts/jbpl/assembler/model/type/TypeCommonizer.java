@@ -30,7 +30,6 @@ public final class TypeCommonizer {
     private TypeCommonizer() {
     }
 
-    // TODO: check if any element exists after the last return statement
     public static @NotNull Optional<? extends Type> getCommonType(final @NotNull List<? extends Element> elements,
                                                                   final @NotNull EvaluationContext context) {
         // @formatter:off

@@ -134,8 +134,10 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
     @Override
     public @NotNull IfExpr copy() {
         final var result = copyParentAndSourceTo(new IfExpr(condition.copy()));
-        result.addElseIfBranches(getElseIfBranches().stream().map(ElseIfBranch::copy).toList());
-        result.setElseBranch(getElseBranch().copy());
+        result.addElseIfBranches(elseIfBranches.stream().map(ElseIfBranch::copy).toList());
+        if (elseBranch != null) {
+            result.setElseBranch(elseBranch.copy());
+        }
         result.addElements(getElements().stream().map(Element::copy).toList());
         return result;
     }

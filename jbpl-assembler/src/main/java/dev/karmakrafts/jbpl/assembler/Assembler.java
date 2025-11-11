@@ -9,6 +9,7 @@ import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
+import dev.karmakrafts.jbpl.assembler.validation.ReturnValidationVisitor;
 import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
 import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
@@ -121,6 +122,7 @@ public final class Assembler {
                         .toList());
                     // @formatter:on
                     file.updateChildParents(); // Update all parent references recursively
+                    validateFile(file);
                     return file;
                 }
                 catch (IOException error) {
@@ -133,8 +135,9 @@ public final class Assembler {
         }
     }
 
-    private void validateFile(final @NotNull AssemblyFile file) throws ValidationException {
-        file.accept(new VersionValidationVisitor());
+    private void validateFile(final @NotNull AssemblyFile file) {
+        file.accept(VersionValidationVisitor.INSTANCE);
+        file.accept(ReturnValidationVisitor.INSTANCE);
     }
 
     private void validatePostLowering(final @NotNull EvaluationContext context) throws ValidationException {
@@ -151,7 +154,6 @@ public final class Assembler {
 
     private @NotNull EvaluationContext lower(final @NotNull AssemblyFile file,
                                              final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
-        validateFile(file);
         file.transform(includeLowering);
         file.transform(CompoundLowering.INSTANCE);
         file.transform(NoopRemovalLowering.INSTANCE);
