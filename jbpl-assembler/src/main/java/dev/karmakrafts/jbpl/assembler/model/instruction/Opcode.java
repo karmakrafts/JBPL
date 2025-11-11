@@ -97,7 +97,9 @@ public enum Opcode {
     IF_ICMPLE       (Opcodes.IF_ICMPLE),
     IF_ACMPEQ       (Opcodes.IF_ACMPEQ),
     IF_ACMPNE       (Opcodes.IF_ACMPNE),
-    GOTO            (Opcodes.GOTO);
+    GOTO            (Opcodes.GOTO),
+    JSR             (Opcodes.JSR),
+    RET             (Opcodes.RET);
     // @formatter:on
 
     // @formatter:off

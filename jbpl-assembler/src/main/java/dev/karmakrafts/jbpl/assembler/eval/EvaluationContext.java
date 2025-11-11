@@ -57,7 +57,6 @@ public final class EvaluationContext {
         return new StackTrace(frameStack.stream().map(StackFrame::copy).toList());
     }
 
-    // TODO: move this someplace else, but ScopeResolver is not a good one..
     public <E extends NamedElement> @Nullable E resolveByName(final @NotNull Class<E> type,
                                                               final @NotNull String name) {
         return peekFrame().scopeResolver.resolve(type,

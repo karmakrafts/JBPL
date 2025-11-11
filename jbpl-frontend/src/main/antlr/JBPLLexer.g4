@@ -183,8 +183,8 @@ INSN_POP: 'pop' '2'?;
 INSN_DUP: 'dup' '2'? ('_x' [12])?;
 INSN_NOP: 'nop';
 INSN_NEW: 'new';
-INSN_JSR: 'jsr'; // TODO: finish implementing this
-INSN_RET: 'ret'; // TODO: finish implementing this
+INSN_JSR: 'jsr';
+INSN_RET: 'ret';
 INSN_LDC: 'ldc';
 
 INSN_ADD: PRIMITIVE_TYPE 'add';

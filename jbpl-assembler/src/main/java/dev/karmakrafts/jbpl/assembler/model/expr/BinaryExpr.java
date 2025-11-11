@@ -356,7 +356,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                     final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
                     context.pushValue(LiteralExpr.of(String.format("%s%s", lhsString, rhsValue), getTokenRange()));
                 }
-                case CMP -> { // TODO: there are better ways to handle this but this'll do for now..
+                case CMP -> {
                     final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
                     context.pushValue(LiteralExpr.of(lhsString.compareTo(rhsString)));
                 }

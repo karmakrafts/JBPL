@@ -152,6 +152,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_typeLiteral -> new TypeLiteralNode(node);
             case JBPLParser.RULE_opcodeLiteral -> new OpcodeLiteralNode(node);
             case JBPLParser.RULE_versionStatement -> new VersionStatementNode(node);
+            case JBPLParser.RULE_local -> new LocalStatement(node);
             default -> new ANTLRPsiNode(node);
         }; // @formatter:on
     }
