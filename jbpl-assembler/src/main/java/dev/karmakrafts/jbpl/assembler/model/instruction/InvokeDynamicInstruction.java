@@ -33,6 +33,7 @@ import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class InvokeDynamicInstruction extends AbstractExprContainer implements Instruction {
     public static final int INSTANTIATED_SIGNATURE_INDEX = 0;
@@ -199,5 +200,26 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             getTargetInstruction().copy()));
     }
 
-    // TODO: Implement custom toString()
+    @Override
+    public String toString() {
+        final var signature = getInstantiatedSignature();
+        final var samSignature = getSAMSignature();
+        final var arguments = getArguments();
+        final var builder = new StringBuilder("invokedynamic ");
+        builder.append(signature);
+        if (signature != samSignature) { // If we have a distinct SAM signature, render it
+            builder.append(" by ");
+            builder.append(samSignature);
+        }
+        builder.append(" {\n");
+        builder.append(getBSMInstruction()).append(",\n");
+        builder.append(getTargetInstruction());
+        if (!arguments.isEmpty()) {
+            builder.append(",\n(");
+            builder.append(arguments.stream().map(Expr::toString).collect(Collectors.joining(", ")));
+            builder.append(")\n");
+        }
+        builder.append('}');
+        return builder.toString();
+    }
 }
