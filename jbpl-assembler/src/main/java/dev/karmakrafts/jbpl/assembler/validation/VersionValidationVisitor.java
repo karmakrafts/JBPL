@@ -10,7 +10,8 @@ public final class VersionValidationVisitor implements ElementVisitor {
     public static final VersionValidationVisitor INSTANCE = new VersionValidationVisitor();
     private boolean isVersionSet = false;
 
-    private VersionValidationVisitor() {}
+    private VersionValidationVisitor() {
+    }
 
     @Override
     public @NotNull Statement visitVersionStatement(final @NotNull VersionStatement versionStatement) {

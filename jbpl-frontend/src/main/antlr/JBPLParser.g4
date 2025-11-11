@@ -260,7 +260,7 @@ expr:
     | EXCL expr
 
     | expr KW_IS (wrappedExpr | type)
-    | expr KW_AS type
+    | expr KW_AS (wrappedExpr | type)
 
     | ifExpr
     | arrayExpr

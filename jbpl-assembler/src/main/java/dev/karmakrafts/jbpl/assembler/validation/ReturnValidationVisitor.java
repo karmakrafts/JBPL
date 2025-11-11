@@ -33,6 +33,14 @@ public final class ReturnValidationVisitor extends ScopeAwareElementVisitor {
     private ReturnValidationVisitor() {
     }
 
+    @Override
+    public @NotNull Declaration visitMacro(final @NotNull MacroDecl macroDecl) {
+        final var checker = new Checker();
+        checker.restoreFrom(scopeStack);
+        macroDecl.acceptChildren(checker);
+        return super.visitMacro(macroDecl);
+    }
+
     private static final class Checker extends ScopeAwareElementVisitor {
         private final HashSet<Scope> scopes = new HashSet<>();
 
@@ -51,13 +59,5 @@ public final class ReturnValidationVisitor extends ScopeAwareElementVisitor {
             scopes.add(getScope());
             return returnStatement;
         }
-    }
-
-    @Override
-    public @NotNull Declaration visitMacro(final @NotNull MacroDecl macroDecl) {
-        final var checker = new Checker();
-        checker.restoreFrom(scopeStack);
-        macroDecl.acceptChildren(checker);
-        return super.visitMacro(macroDecl);
     }
 }

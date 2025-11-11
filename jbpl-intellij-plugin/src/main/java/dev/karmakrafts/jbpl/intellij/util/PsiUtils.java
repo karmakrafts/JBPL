@@ -29,7 +29,6 @@ public final class PsiUtils {
     }
 
     public static @NotNull String toSingleLine(final @NotNull PsiElement element) {
-        // TODO: get rid of this RegEx, i'm just really lazy right now
         return element.getText().replaceAll("[\\n\\s]+", " ").trim();
     }
 

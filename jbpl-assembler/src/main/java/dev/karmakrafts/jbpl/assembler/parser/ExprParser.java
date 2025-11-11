@@ -209,12 +209,15 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                 if (concreteType != null) {
                     return List.of(new IsExpr(lhs, LiteralExpr.of(TypeParser.parse(concreteType))));
                 }
-                return List.of(new IsExpr(lhs, parse(ctx.expr(1))));
+                return List.of(new IsExpr(lhs, parse(ctx.wrappedExpr())));
             }
             else if (ctx.KW_AS() != null) {
                 final var value = parse(ctx.expr(0));
-                final var targetType = LiteralExpr.of(TypeParser.parse(ctx.type())); // TODO: allow refs here
-                return List.of(new AsExpr(value, targetType));
+                final var concreteType = ctx.type();
+                if (concreteType != null) {
+                    return List.of(new AsExpr(value, LiteralExpr.of(TypeParser.parse(concreteType))));
+                }
+                return List.of(new AsExpr(value, parse(ctx.wrappedExpr())));
             } // @formatter:off
             else if (type != null)              return List.of(LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(type)), TokenRange.fromContext(type)));
             else if (ctx.EQEQ() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
@@ -416,7 +419,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             // @formatter:off
             signature.addExpressions(ctx.functionSignatureParameter().stream()
                 .map(this::parseFunctionSignatureParameter)
-                .map(Pair::right) // TODO: For these expressions, we discard names for now
+                .map(Pair::right)
                 .toList());
             // @formatter:on
             return List.of(signature);
