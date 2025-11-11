@@ -55,9 +55,11 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
         final var slotIdObject = getSlot().evaluateAsConst(context, Object.class);
         if (slotIdObject instanceof Integer slotId) {
             context.emit(new VarInsnNode(encodedOpcode, slotId));
+            return;
         }
-        // If we fall through the above case, we need to resolve the local using pre-defined locals in the sack frame
-        // TODO: context.emit(new VarInsnNode(encodedOpcode, lineIndex));
+        // Otherwise slotIdObject is a String and we need to resolve the local by name, fail if we can't find it
+        final var slotId = context.peekFrame().getOrAssignLocalIndex((String) slotIdObject, context);
+        context.emit(new VarInsnNode(encodedOpcode, slotId));
     }
 
     @Override

@@ -522,7 +522,7 @@ local:
     COLON
     exprOrType
     (EQ
-    expr)?
+    expr)? // Allow explicit assignment of local slot index
     ;
 
 instructionLiteral:

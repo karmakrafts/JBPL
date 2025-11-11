@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.scope.Scope;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
@@ -37,7 +38,10 @@ public final class StackFrame implements Copyable<StackFrame> {
     public final HashMap<String, Expr> arguments = new HashMap<>(); // Named arguments of the current macro
     public final InsnList instructionBuffer = new InsnList();
     public final HashMap<String, LocalStatement> locals = new HashMap<>();
+    private final HashMap<String, Integer> localIndices = new HashMap<>();
     private final HashMap<String, LabelNode> labelNodes = new HashMap<>();
+    public int localFrameOffset = 0; // This may be adjusted by the patched method in the future
+    private int localIndex = 0;
 
     public StackFrame(final @NotNull Scope scope) {
         this.scope = scope;
@@ -46,6 +50,28 @@ public final class StackFrame implements Copyable<StackFrame> {
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
         return labelNodes.computeIfAbsent(name, n -> new LabelNode());
+    }
+
+    public int getOrAssignLocalIndex(final @NotNull String name,
+                                     final @NotNull EvaluationContext context) throws EvaluationException {
+        var index = localIndices.get(name);
+        if (index == null) {
+            final var associatedLocal = locals.get(name);
+            if (associatedLocal != null) {
+                final var indexExpr = associatedLocal.getIndex();
+                if (indexExpr != LiteralExpr.UNIT) {
+                    index = indexExpr.evaluateAsConst(context, Integer.class);
+                }
+                else {
+                    index = localFrameOffset + localIndex++;
+                }
+            }
+            else {
+                index = localFrameOffset + localIndex++;
+            }
+            localIndices.put(name, index);
+        }
+        return index;
     }
 
     @Override

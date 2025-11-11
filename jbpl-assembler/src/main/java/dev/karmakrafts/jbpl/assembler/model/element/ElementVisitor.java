@@ -345,7 +345,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull Statement visitLocal(final @NotNull LocalStatement localStatement) {
-        return localStatement;
+        return visitExprContainer(localStatement);
     }
 
     default @NotNull Statement visitLabel(final @NotNull LabelStatement labelStatement) {

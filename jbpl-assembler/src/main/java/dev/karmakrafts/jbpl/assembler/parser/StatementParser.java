@@ -52,7 +52,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
             // @formatter:off
             final var value = valueNode != null
                 ? ExprParser.parse(valueNode)
-                : LiteralExpr.unit();
+                : LiteralExpr.UNIT;
             // @formatter:on
             return List.of(new ReturnStatement(value));
         });
@@ -120,7 +120,12 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     public @NotNull List<Statement> visitLocal(final @NotNull LocalContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
-            return List.of(new LocalStatement(name));
+            // @formatter:off
+            final var index = ctx.expr() != null
+                ? ExprParser.parse(ctx.expr())
+                : LiteralExpr.UNIT;
+            // @formatter:on
+            return List.of(new LocalStatement(name, index));
         });
     }
 

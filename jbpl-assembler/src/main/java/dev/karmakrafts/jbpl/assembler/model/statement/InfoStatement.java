@@ -27,7 +27,7 @@ public final class InfoStatement extends AbstractExprContainer implements Statem
     public static final int VALUE_INDEX = 0;
 
     public InfoStatement() {
-        addExpression(LiteralExpr.unit()); // Value
+        addExpression(LiteralExpr.UNIT); // Value
     }
 
     public @NotNull Expr getValue() {

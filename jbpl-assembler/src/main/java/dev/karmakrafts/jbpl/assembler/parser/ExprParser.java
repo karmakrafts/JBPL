@@ -258,7 +258,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitReference(final @NotNull ReferenceContext ctx) {
-        return parseReference(ctx, LiteralExpr.unit());
+        return parseReference(ctx, LiteralExpr.UNIT);
     }
 
     private @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx, final @NotNull Expr receiver) {
@@ -273,7 +273,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitMacroCall(final @NotNull MacroCallContext ctx) {
-        return parseMacroCall(ctx, LiteralExpr.unit());
+        return parseMacroCall(ctx, LiteralExpr.UNIT);
     }
 
     @Override
