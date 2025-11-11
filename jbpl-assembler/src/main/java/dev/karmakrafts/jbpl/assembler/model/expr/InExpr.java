@@ -151,4 +151,9 @@ public final class InExpr extends AbstractExprContainer implements Expr {
     public @NotNull InExpr copy() {
         return copyParentAndSourceTo(new InExpr(getLhs().copy(), getRhs().copy()));
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("%s in %s", getLhs(), getRhs());
+    }
 }

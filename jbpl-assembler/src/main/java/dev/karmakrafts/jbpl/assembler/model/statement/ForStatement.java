@@ -64,13 +64,13 @@ public final class ForStatement extends AbstractElementContainer implements Stat
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        // Enhanced for loop
         final var valueType = value.getType(context);
         final var variableName = this.variableName.evaluateAsConst(context, String.class);
         if (valueType instanceof ArrayType) {
             final var array = value.evaluateAsConst(context, Object.class);
             final var arrayLength = Array.getLength(array);
             // TODO: implement continue flag
+            arrayLoop:
             for (var i = 0; i < arrayLength; i++) {
                 final var value = Array.get(array, i);
                 context.pushFrame(this);
@@ -80,8 +80,13 @@ public final class ForStatement extends AbstractElementContainer implements Stat
                         continue;
                     }
                     element.evaluate(context);
-                    if (context.clearRet()) {
-                        break;
+                    if (context.clearCnt()) {
+                        context.popFrame();
+                        continue arrayLoop;
+                    }
+                    if (context.clearBrk() || context.clearRet()) {
+                        context.popFrame();
+                        break arrayLoop;
                     }
                 }
                 context.popFrame();

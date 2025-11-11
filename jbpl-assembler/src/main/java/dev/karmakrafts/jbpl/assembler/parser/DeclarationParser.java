@@ -2,7 +2,6 @@ package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
-import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.Order;

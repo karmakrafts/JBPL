@@ -107,8 +107,8 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
         final var elements = getElements();
         for (final var element : elements) {
             element.evaluate(context);
-            if (context.clearRet()) { // Macro scope always clears the return flag
-                break;
+            if (context.clearReturnMask()) { // Macro scope always clears all status flags
+                break; // Break loop if we returned
             }
         }
     }

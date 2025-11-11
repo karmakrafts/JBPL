@@ -88,6 +88,8 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_MACRO,
                  JBPLLexer.KW_DEFINE,
                  JBPLLexer.KW_SIZEOF,
+                 JBPLLexer.KW_BREAK,
+                 JBPLLexer.KW_CONTINUE,
                  JBPLLexer.KW_PREPRO_ASSERT,
                  JBPLLexer.KW_PREPRO_CLASS,
                  JBPLLexer.KW_PREPRO_INFO,

@@ -108,6 +108,14 @@ yeetStatement:
     | classType)
     ;
 
+continueStatement:
+    KW_CONTINUE
+    ;
+
+breakStatement:
+    KW_BREAK
+    ;
+
 returnStatement:
     KW_PREPRO_RETURN
     expr?
@@ -227,6 +235,9 @@ preproClassInstantiation:
 expr:
     L_PAREN NL*? expr NL*? R_PAREN
     | expr NL*? L_SQBRACKET NL*? expr NL*? R_SQBRACKET
+
+    | expr NL*? EXCL_RANGE NL*? expr
+    | expr NL*? DOTDOT NL*? expr
 
     | expr NL*? DOT NL*? macroCall
     | expr NL*? DOT NL*? reference
@@ -514,6 +525,8 @@ statement:
     | infoStatement
     | errorStatement
     | assertStatement
+    | breakStatement
+    | continueStatement
     | label
     | local
     | instruction

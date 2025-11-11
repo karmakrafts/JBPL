@@ -59,7 +59,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     }
 
     @Override
-    public List<Statement> visitInfoStatement(final @NotNull InfoStatementContext ctx) {
+    public @NotNull List<Statement> visitInfoStatement(final @NotNull InfoStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var statement = new InfoStatement();
             statement.setValue(ExprParser.parse(ctx.expr()));
@@ -68,7 +68,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     }
 
     @Override
-    public List<Statement> visitErrorStatement(ErrorStatementContext ctx) {
+    public @NotNull List<Statement> visitErrorStatement(final @NotNull ErrorStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var value = ExprParser.parse(ctx.expr());
             return List.of(new ErrorStatement(value));
@@ -76,11 +76,21 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     }
 
     @Override
-    public List<Statement> visitVersionStatement(final @NotNull VersionStatementContext ctx) {
+    public @NotNull List<Statement> visitVersionStatement(final @NotNull VersionStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var version = ExprParser.parse(ctx.expr());
             return List.of(new VersionStatement(version));
         });
+    }
+
+    @Override
+    public @NotNull List<Statement> visitContinueStatement(final @NotNull ContinueStatementContext ctx) {
+        return List.of(new ContinueStatement());
+    }
+
+    @Override
+    public @NotNull List<Statement> visitBreakStatement(final @NotNull BreakStatementContext ctx) {
+        return List.of(new BreakStatement());
     }
 
     @Override

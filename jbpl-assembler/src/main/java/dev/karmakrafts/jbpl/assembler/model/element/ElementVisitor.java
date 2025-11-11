@@ -147,8 +147,8 @@ public interface ElementVisitor {
         else if (expr instanceof ArrayExpr arrayExpr) {
             return visitArrayExpr(arrayExpr);
         }
-        else if (expr instanceof ArrayAccessExpr arrayAccessExpr) {
-            return visitArrayAccessExpr(arrayAccessExpr);
+        else if (expr instanceof ArrayAccessExpr arrayGetExpr) {
+            return visitArrayAccessExpr(arrayGetExpr);
         }
         else if (expr instanceof DefaultExpr defaultExpr) {
             return visitDefaultExpr(defaultExpr);
@@ -302,6 +302,9 @@ public interface ElementVisitor {
         else if (statement instanceof ReturnStatement returnStatement) {
             return visitReturnStatement(returnStatement);
         }
+        else if (statement instanceof BreakStatement breakStatement) {
+            return visitBreakStatement(breakStatement);
+        }
         else if (statement instanceof AssertStatement assertStatement) {
             return visitAssertStatement(assertStatement);
         }
@@ -335,10 +338,21 @@ public interface ElementVisitor {
         else if (statement instanceof ForStatement forStatement) {
             return visitForStatement(forStatement);
         }
+        else if (statement instanceof ContinueStatement continueStatement) {
+            return visitContinueStatement(continueStatement);
+        }
         else if (statement instanceof Expr expr) {
             return visitExpr(expr);
         }
         throw new IllegalStateException(String.format("Unsupported statement type %s", statement.getClass()));
+    }
+
+    default @NotNull Statement visitContinueStatement(final @NotNull ContinueStatement continueStatement) {
+        return continueStatement;
+    }
+
+    default @NotNull Statement visitBreakStatement(final @NotNull BreakStatement breakStatement) {
+        return breakStatement;
     }
 
     default @NotNull Statement visitAssertStatement(final @NotNull AssertStatement assertStatement) {

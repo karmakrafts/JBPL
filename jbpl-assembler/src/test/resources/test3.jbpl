@@ -12,6 +12,7 @@ define test_array: [string] = []{"Hellou", "Wourld", "Test"}
 
 define var_name: string = "element"
 for(${var_name} in test_array) {
+    if (element == "Hellou") continue
     ^info element
 }
 

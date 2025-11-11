@@ -172,7 +172,7 @@ public interface ElementContainer extends Element {
             hasScope = true;
         }
         for (final var element : getElements()) {
-            if (!element.isEvaluatedDirectly()) {
+            if (!element.isEvaluatedDirectly() || context.clearCnt()) {
                 continue;
             }
             element.evaluate(context);

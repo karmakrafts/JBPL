@@ -33,6 +33,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class EvaluationContext {
+    // @formatter:off
+    public static final byte RET_MASK_NONE      = 0b0000_0000;
+    public static final byte RET_MASK_RETURN    = 0b0000_0001;
+    public static final byte RET_MASK_CONTINUE  = 0b0000_0010;
+    public static final byte RET_MASK_BREAK     = 0b0000_0100;
+    // @formatter:on
+
     public final AssemblyFile file;
     public final Function<String, ClassNode> classResolver;
     public final Consumer<String> infoConsumer;
@@ -41,7 +48,7 @@ public final class EvaluationContext {
     private final Stack<StackFrame> frameStack = new Stack<>();
     public int bytecodeVersion = Opcodes.V17;
     public int bytecodeApi = Opcodes.ASM9;
-    private boolean hasReturned = false;
+    private byte returnMask = RET_MASK_NONE;
 
     public EvaluationContext(final @NotNull AssemblyFile file,
                              final @NotNull Function<String, ClassNode> classResolver,
@@ -63,18 +70,52 @@ public final class EvaluationContext {
             ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
     }
 
-    public boolean hasRet() {
-        return hasReturned;
-    }
-
-    public boolean clearRet() {
-        final var result = hasReturned;
-        hasReturned = false;
+    public boolean clearReturnMask() {
+        final var result = hasRet();
+        returnMask = RET_MASK_NONE;
         return result;
     }
 
+    public boolean hasCnt() {
+        return (returnMask & RET_MASK_CONTINUE) != 0;
+    }
+
+    public boolean clearCnt() {
+        final var result = returnMask;
+        returnMask &= ~RET_MASK_CONTINUE;
+        return (result & RET_MASK_CONTINUE) != 0;
+    }
+
+    public void cnt() {
+        returnMask |= RET_MASK_CONTINUE;
+    }
+
+    public boolean hasBrk() {
+        return (returnMask & RET_MASK_BREAK) != 0;
+    }
+
+    public boolean clearBrk() {
+        final var result = returnMask;
+        returnMask &= ~RET_MASK_BREAK;
+        return (result & RET_MASK_BREAK) != 0;
+    }
+
+    public void brk() {
+        returnMask |= RET_MASK_BREAK;
+    }
+
+    public boolean hasRet() {
+        return (returnMask & RET_MASK_RETURN) != 0;
+    }
+
+    public boolean clearRet() {
+        final var result = returnMask;
+        returnMask &= ~RET_MASK_RETURN;
+        return (result & RET_MASK_RETURN) != 0;
+    }
+
     public void ret() {
-        hasReturned = true;
+        returnMask |= RET_MASK_RETURN;
     }
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
