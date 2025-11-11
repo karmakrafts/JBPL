@@ -94,7 +94,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitTypeLiteral(final @NotNull TypeLiteralContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(TypeParser.parse(ctx.type()))));
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(TypeParser.parse(ctx.type()),
+            TokenRange.fromContext(ctx))));
     }
 
     @Override
@@ -104,7 +105,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitOpcodeLiteral(final @NotNull OpcodeLiteralContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(ParserUtils.parseOpcode(ctx.opcode()))));
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(ParserUtils.parseOpcode(ctx.opcode()),
+            TokenRange.fromContext(ctx))));
     }
 
     @Override
@@ -208,7 +210,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                 final var concreteType = ctx.type();
                 final var lhs = parse(ctx.expr(0));
                 if (concreteType != null) {
-                    return List.of(new IsExpr(lhs, LiteralExpr.of(TypeParser.parse(concreteType))));
+                    return List.of(new IsExpr(lhs,
+                        LiteralExpr.of(TypeParser.parse(concreteType), TokenRange.fromContext(concreteType))));
                 }
                 return List.of(new IsExpr(lhs, parse(ctx.wrappedExpr())));
             }
@@ -216,7 +219,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                 final var value = parse(ctx.expr(0));
                 final var concreteType = ctx.type();
                 if (concreteType != null) {
-                    return List.of(new AsExpr(value, LiteralExpr.of(TypeParser.parse(concreteType))));
+                    return List.of(new AsExpr(value,
+                        LiteralExpr.of(TypeParser.parse(concreteType), TokenRange.fromContext(concreteType))));
                 }
                 return List.of(new AsExpr(value, parse(ctx.wrappedExpr())));
             } // @formatter:off
@@ -364,7 +368,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitInstructionLiteral(final @NotNull InstructionLiteralContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(InstructionParser.parse(ctx.instruction()))));
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(InstructionParser.parse(ctx.instruction()),
+            TokenRange.fromContext(ctx))));
     }
 
     @Override

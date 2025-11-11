@@ -88,7 +88,8 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var classType = ctx.classType();
             if (classType != null) {
-                return List.of(new YeetStatement(LiteralExpr.of(TypeParser.parse(classType))));
+                return List.of(new YeetStatement(LiteralExpr.of(TypeParser.parse(classType),
+                    TokenRange.fromContext(classType))));
             }
             final var fieldSignature = ctx.fieldSignature();
             if (fieldSignature != null) {

@@ -65,7 +65,7 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var array = getReference().evaluateAsConst(context, Object.class);
         final var index = getIndex().evaluateAsConst(context, Integer.class);
-        context.pushValue(LiteralExpr.of(Array.get(array, index)));
+        context.pushValue(LiteralExpr.of(Array.get(array, index), getTokenRange()));
     }
 
     @Override

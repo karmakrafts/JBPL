@@ -56,10 +56,6 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
         addExpression(type);
     }
 
-    public ArrayExpr(final @NotNull Type type) {
-        this(LiteralExpr.of(type));
-    }
-
     /**
      * The offset into the expression list until array values start
      */
@@ -138,7 +134,7 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
         for (var i = 0; i < size; ++i) {
             Array.set(array, i, values.get(i).evaluateAsConst(context, Object.class));
         }
-        context.pushValue(LiteralExpr.of(array));
+        context.pushValue(LiteralExpr.of(array, getTokenRange()));
     }
 
     @Override

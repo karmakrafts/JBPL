@@ -30,7 +30,7 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
         final var signature = new FieldSignatureExpr(owner, name, type);
         signature.setParent(getParent());
         signature.setTokenRange(getTokenRange());
-        context.pushValue(LiteralExpr.of(signature));
+        context.pushValue(LiteralExpr.of(signature, getTokenRange()));
     }
 
     @Override

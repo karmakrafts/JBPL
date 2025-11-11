@@ -97,7 +97,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
             // @formatter:off
             final var returnType = signature.exprOrType() != null
                 ? ParserUtils.parseExprOrType(signature.exprOrType())
-                : LiteralExpr.of(BuiltinType.VOID);
+                : LiteralExpr.UNIT;
             // @formatter:on
             final var macro = new MacroDecl(name, returnType);
             // @formatter:off

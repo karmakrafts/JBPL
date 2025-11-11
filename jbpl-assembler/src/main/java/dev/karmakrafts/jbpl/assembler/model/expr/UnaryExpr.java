@@ -34,22 +34,22 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         return switch (op) {
             case MINUS, PLUS -> {
                 if (value instanceof Byte byteValue) {
-                    yield LiteralExpr.of(-byteValue);
+                    yield LiteralExpr.of(-byteValue, getTokenRange());
                 }
                 else if (value instanceof Short shortValue) {
-                    yield LiteralExpr.of(-shortValue);
+                    yield LiteralExpr.of(-shortValue, getTokenRange());
                 }
                 else if (value instanceof Integer integerValue) {
-                    yield LiteralExpr.of(-integerValue);
+                    yield LiteralExpr.of(-integerValue, getTokenRange());
                 }
                 else if (value instanceof Long longValue) {
-                    yield LiteralExpr.of(-longValue);
+                    yield LiteralExpr.of(-longValue, getTokenRange());
                 }
                 else if (value instanceof Float floatValue) {
-                    yield LiteralExpr.of(-floatValue);
+                    yield LiteralExpr.of(-floatValue, getTokenRange());
                 }
                 else if (value instanceof Double doubleValue) {
-                    yield LiteralExpr.of(-doubleValue);
+                    yield LiteralExpr.of(-doubleValue, getTokenRange());
                 }
                 throw new IllegalStateException(String.format("Unsupported negation expression operand %s %s",
                     op,
@@ -57,16 +57,16 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
             }
             case INVERSE -> {
                 if (value instanceof Byte byteValue) {
-                    yield LiteralExpr.of(~byteValue);
+                    yield LiteralExpr.of(~byteValue, getTokenRange());
                 }
                 else if (value instanceof Short shortValue) {
-                    yield LiteralExpr.of(~shortValue);
+                    yield LiteralExpr.of(~shortValue, getTokenRange());
                 }
                 else if (value instanceof Integer integerValue) {
-                    yield LiteralExpr.of(~integerValue);
+                    yield LiteralExpr.of(~integerValue, getTokenRange());
                 }
                 else if (value instanceof Long longValue) {
-                    yield LiteralExpr.of(~longValue);
+                    yield LiteralExpr.of(~longValue, getTokenRange());
                 }
                 throw new IllegalStateException(String.format("Unsupported inverse expression operand %s", value));
             }
@@ -79,7 +79,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
     private @NotNull LiteralExpr evaluateForBool(final boolean value,
                                                  final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
-            case NOT -> LiteralExpr.of(!value);
+            case NOT -> LiteralExpr.of(!value, getTokenRange());
             default ->
                 throw new EvaluationException(String.format("Unary operator %s cannot be applied to boolean", op),
                     SourceDiagnostic.from(this),

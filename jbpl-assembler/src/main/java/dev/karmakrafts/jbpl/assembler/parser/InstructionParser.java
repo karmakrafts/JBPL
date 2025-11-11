@@ -48,7 +48,7 @@ public final class InstructionParser extends JBPLParserBaseVisitor<List<Instruct
                 final var localIndex = ExprParser.parse(localIndexNode);
                 return List.of(new StackInstruction(opcode, localIndex));
             }
-            final var localName = LiteralExpr.of(ctx.IDENT().getText());
+            final var localName = LiteralExpr.of(ctx.IDENT().getText(), TokenRange.fromTerminalNode(ctx.IDENT()));
             return List.of(new StackInstruction(opcode, localName));
         });
     }
@@ -62,7 +62,7 @@ public final class InstructionParser extends JBPLParserBaseVisitor<List<Instruct
                 final var localIndex = ExprParser.parse(localIndexNode);
                 return List.of(new StackInstruction(opcode, localIndex));
             }
-            final var localName = LiteralExpr.of(ctx.IDENT().getText());
+            final var localName = LiteralExpr.of(ctx.IDENT().getText(), TokenRange.fromTerminalNode(ctx.IDENT()));
             return List.of(new StackInstruction(opcode, localName));
         });
     }

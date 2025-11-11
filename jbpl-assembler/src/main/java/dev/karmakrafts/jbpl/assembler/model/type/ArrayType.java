@@ -4,6 +4,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.ArrayExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +46,7 @@ public record ArrayType(Type elementType) implements Type {
 
     @Override
     public @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) {
-        return new ArrayExpr(this);
+        return new ArrayExpr(LiteralExpr.of(this));
     }
 
     @Override

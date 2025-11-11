@@ -74,7 +74,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
             for (var i = 0; i < arrayLength; i++) {
                 final var value = Array.get(array, i);
                 context.pushFrame(this);
-                context.peekFrame().injectedValues.put(variableName, LiteralExpr.of(value));
+                context.peekFrame().injectedValues.put(variableName, LiteralExpr.of(value, this.value.getTokenRange()));
                 for (final var element : getElements()) {
                     if (!element.isEvaluatedDirectly()) {
                         continue;

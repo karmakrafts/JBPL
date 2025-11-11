@@ -118,7 +118,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             }
             case SC_AND -> {
                 if (!lhsBool) {
-                    yield LiteralExpr.of(false);
+                    yield LiteralExpr.of(false, getTokenRange());
                 }
                 yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class), getTokenRange());
             }
@@ -358,15 +358,15 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                 }
                 case CMP -> {
                     final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(lhsString.compareTo(rhsString)));
+                    context.pushValue(LiteralExpr.of(lhsString.compareTo(rhsString), getTokenRange()));
                 }
                 case EQ -> {
                     final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(lhsString.equals(rhsString)));
+                    context.pushValue(LiteralExpr.of(lhsString.equals(rhsString), getTokenRange()));
                 }
                 case NE -> {
                     final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(!lhsString.equals(rhsString)));
+                    context.pushValue(LiteralExpr.of(!lhsString.equals(rhsString), getTokenRange()));
                 }
             }
             return;

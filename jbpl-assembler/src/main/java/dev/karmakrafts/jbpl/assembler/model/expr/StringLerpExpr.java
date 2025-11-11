@@ -21,7 +21,7 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
         for (final var expr : expressions) {
             buffer.append(expr.evaluateAsConst(context, Object.class));
         }
-        context.pushValue(LiteralExpr.of(buffer.toString()));
+        context.pushValue(LiteralExpr.of(buffer.toString(), getTokenRange()));
     }
 
     @Override

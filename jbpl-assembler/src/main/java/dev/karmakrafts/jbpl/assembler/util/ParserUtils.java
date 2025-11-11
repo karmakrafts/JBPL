@@ -7,6 +7,7 @@ import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.parser.ExprParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
 import dev.karmakrafts.jbpl.assembler.parser.TypeParser;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.frontend.JBPLParser;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -49,7 +50,7 @@ public final class ParserUtils {
         final var specialName = ctx.specialFunctionName();
         // @formatter:off
         return specialName != null
-            ? LiteralExpr.of(specialName.getText())
+            ? LiteralExpr.of(specialName.getText(), TokenRange.fromContext(specialName))
             : parseExprOrName(ctx.exprOrName());
         // @formatter:on
     }
@@ -59,7 +60,7 @@ public final class ParserUtils {
         // @formatter:off
         return expr != null
             ? ExprParser.parse(expr)
-            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.classType())));
+            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.classType())), TokenRange.fromContext(ctx.classType()));
         // @formatter:on
     }
 
@@ -68,7 +69,7 @@ public final class ParserUtils {
         // @formatter:off
         return expr != null
             ? ExprParser.parse(expr)
-            : LiteralExpr.of(ctx.nameSegment().getText());
+            : LiteralExpr.of(ctx.nameSegment().getText(), TokenRange.fromContext(ctx.nameSegment()));
         // @formatter:on
     }
 
@@ -106,7 +107,7 @@ public final class ParserUtils {
         // @formatter:off
         return expr != null
             ? ExprParser.parse(expr)
-            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.type())));
+            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.type())), TokenRange.fromContext(ctx.type()));
         // @formatter:on
     }
 

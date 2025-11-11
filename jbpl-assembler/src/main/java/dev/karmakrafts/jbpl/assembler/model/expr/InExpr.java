@@ -63,14 +63,14 @@ public final class InExpr extends AbstractExprContainer implements Expr {
         final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
         final var rhsType = getRhs().getType(context);
         if (rhsType == BuiltinType.STRING) {
-            context.pushValue(LiteralExpr.of(rhsValue.toString().contains(lhsValue.toString())));
+            context.pushValue(LiteralExpr.of(rhsValue.toString().contains(lhsValue.toString()), getTokenRange()));
             return;
         }
         else if (rhsType == PreproType.FUNCTION_SIGNATURE) {
             final var signature = (FunctionSignatureExpr) rhsValue;
             if (lhsType == BuiltinType.STRING) {
                 context.pushValue(LiteralExpr.of(signature.getFunctionName().evaluateAsConst(context,
-                    String.class).equals(lhsValue)));
+                    String.class).equals(lhsValue), getTokenRange()));
                 return;
             }
             else if (lhsType == PreproType.TYPE) {
@@ -79,7 +79,7 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                     .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
                     .collect(Collectors.toSet());
                 // @formatter:on
-                context.pushValue(LiteralExpr.of(types.contains((Type) lhsValue)));
+                context.pushValue(LiteralExpr.of(types.contains((Type) lhsValue), getTokenRange()));
                 return;
             }
         }
@@ -92,7 +92,7 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                     .findFirst();
                 // @formatter:on
                 context.pushValue(LiteralExpr.of(name.isPresent() && name.get().evaluateAsConst(context,
-                    String.class).equals(lhsValue)));
+                    String.class).equals(lhsValue), getTokenRange()));
                 return;
             }
             else if (lhsType == PreproType.TYPE) {
@@ -101,7 +101,7 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                     .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
                     .collect(Collectors.toSet());
                 // @formatter:on
-                context.pushValue(LiteralExpr.of(types.contains((Type) lhsValue)));
+                context.pushValue(LiteralExpr.of(types.contains((Type) lhsValue), getTokenRange()));
             }
         }
         else if (rhsValue instanceof IntersectionType rhsIntersectionType) {
