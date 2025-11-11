@@ -35,7 +35,7 @@ public final class StackFrame implements Copyable<StackFrame> {
     public final Scope scope;
     public final ScopeResolver scopeResolver;
     public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
-    public final HashMap<String, Expr> arguments = new HashMap<>(); // Named arguments of the current macro
+    public final HashMap<String, Expr> injectedValues = new HashMap<>(); // Named arguments of the current macro
     public final InsnList instructionBuffer = new InsnList();
     public final HashMap<String, LocalStatement> locals = new HashMap<>();
     private final HashMap<String, Integer> localIndices = new HashMap<>();
@@ -79,7 +79,7 @@ public final class StackFrame implements Copyable<StackFrame> {
         final var frame = new StackFrame(scope);
         frame.valueStack.addAll(valueStack.stream().map(Expr::copy).toList());
         // @formatter:off
-        frame.arguments.putAll(arguments.entrySet().stream()
+        frame.injectedValues.putAll(injectedValues.entrySet().stream()
             .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
             .collect(Collectors.toMap(Pair::left, Pair::right)));
         // @formatter:on

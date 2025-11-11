@@ -35,9 +35,7 @@ CONST_STR_START: '"' -> pushMode(M_CONST_STR), type(QUOTE);
 
 KW_PREPRO_INCLUDE: '^include';
 KW_PREPRO_RETURN: '^return';
-KW_PREPRO_DEFINE: '^define';
 KW_PREPRO_ASSERT: '^assert';
-KW_PREPRO_MACRO: '^macro';
 KW_PREPRO_CLASS: '^class';
 KW_PREPRO_ERROR: '^error';
 KW_PREPRO_INFO: '^info';
@@ -53,6 +51,7 @@ KW_DEFINED: 'defined';
 KW_PRIVATE: 'private';
 KW_DEFAULT: 'default';
 KW_VERSION: 'version'; // This indicates the ASM (classfile) version we assemble against
+KW_DEFINE: 'define';
 KW_NAMEOF: 'nameof';
 KW_PUBLIC: 'public';
 KW_OPCODE: 'opcode';
@@ -62,6 +61,7 @@ KW_INJECT: 'inject';
 KW_STRING: 'string';
 KW_STATIC: 'static';
 KW_TYPEOF: 'typeof';
+KW_MACRO: 'macro';
 KW_CLASS: 'class';
 KW_FINAL: 'final';
 KW_FIELD: 'field';

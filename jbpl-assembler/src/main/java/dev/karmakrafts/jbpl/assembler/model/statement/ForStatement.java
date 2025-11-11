@@ -38,6 +38,10 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         setValue(value);
     }
 
+    public @NotNull Expr getVariableName() {
+        return variableName;
+    }
+
     public void setVariableName(final @NotNull Expr variableName) {
         if (this.variableName != null) {
             this.variableName.setParent(null);
@@ -46,8 +50,8 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         this.variableName = variableName;
     }
 
-    public @NotNull Expr getVariableName() {
-        return variableName;
+    public @NotNull Expr getValue() {
+        return value;
     }
 
     public void setValue(final @NotNull Expr value) {
@@ -56,10 +60,6 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         }
         value.setParent(this);
         this.value = value;
-    }
-
-    public @NotNull Expr getValue() {
-        return value;
     }
 
     @Override
@@ -74,7 +74,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
             for (var i = 0; i < arrayLength; i++) {
                 final var value = Array.get(array, i);
                 context.pushFrame(this);
-                context.peekFrame().arguments.put(variableName, LiteralExpr.of(value));
+                context.peekFrame().injectedValues.put(variableName, LiteralExpr.of(value));
                 for (final var element : getElements()) {
                     if (!element.isEvaluatedDirectly()) {
                         continue;
@@ -88,9 +88,8 @@ public final class ForStatement extends AbstractElementContainer implements Stat
             }
             return;
         }
-        throw new EvaluationException(String.format("Cannot use value of type %s in right hand side of for loop", valueType),
-            SourceDiagnostic.from(this, value),
-            context.createStackTrace());
+        throw new EvaluationException(String.format("Cannot use value of type %s in right hand side of for loop",
+            valueType), SourceDiagnostic.from(this, value), context.createStackTrace());
     }
 
     @Override

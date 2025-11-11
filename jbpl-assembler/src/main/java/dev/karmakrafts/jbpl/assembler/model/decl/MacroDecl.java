@@ -103,7 +103,7 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
         for (final var name : paramNames) {
             arguments.put(name, argumentValues.get(index++));
         }
-        context.peekFrame().arguments.putAll(arguments); // Make current macro args available to child elements
+        context.peekFrame().injectedValues.putAll(arguments); // Make current macro args available to child elements
         final var elements = getElements();
         for (final var element : elements) {
             element.evaluate(context);

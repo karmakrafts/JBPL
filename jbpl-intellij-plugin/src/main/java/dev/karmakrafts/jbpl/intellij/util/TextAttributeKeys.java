@@ -42,6 +42,10 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.METADATA);
     public static final TextAttributesKey DOT = TextAttributesKey.createTextAttributesKey("JBPL_DOT",
         DefaultLanguageHighlighterColors.DOT);
+    public static final TextAttributesKey LINE_COMMENT = TextAttributesKey.createTextAttributesKey("JBPL_LINE_COMMENT",
+        DefaultLanguageHighlighterColors.LINE_COMMENT);
+    public static final TextAttributesKey BLOCK_COMMENT = TextAttributesKey.createTextAttributesKey("JBPL_BLOCK_COMMENT",
+        DefaultLanguageHighlighterColors.BLOCK_COMMENT);
 
     public static final TextAttributesKey DEFINE_NAME = TextAttributesKey.createTextAttributesKey("JBPL_DEFINE_NAME",
         DefaultLanguageHighlighterColors.STATIC_FIELD);

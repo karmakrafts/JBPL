@@ -57,13 +57,15 @@ public final class SourceColorizer {
         JBPLLexer.KW_ELSE,
         JBPLLexer.KW_IS,
         JBPLLexer.KW_AS,
-        JBPLLexer.KW_BY);
-    private static final Set<Integer> PREPRO_KEYWORDS = Set.of(JBPLLexer.KW_PREPRO_DEFINE,
-        JBPLLexer.KW_PREPRO_INFO,
+        JBPLLexer.KW_BY,
+        JBPLLexer.KW_IN,
+        JBPLLexer.KW_MACRO,
+        JBPLLexer.KW_DEFINE,
+        JBPLLexer.KW_FOR);
+    private static final Set<Integer> PREPRO_KEYWORDS = Set.of(JBPLLexer.KW_PREPRO_INFO,
         JBPLLexer.KW_PREPRO_ERROR,
         JBPLLexer.KW_PREPRO_CLASS,
         JBPLLexer.KW_PREPRO_INCLUDE,
-        JBPLLexer.KW_PREPRO_MACRO,
         JBPLLexer.KW_PREPRO_RETURN);
     private static final Set<Integer> STRING_TOKENS = Set.of(JBPLLexer.QUOTE,
         JBPLLexer.M_CONST_STR_TEXT,

@@ -85,14 +85,14 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_ELSE,
                  JBPLLexer.KW_OFFSET,
                  JBPLLexer.KW_SIGNATURE,
+                 JBPLLexer.KW_MACRO,
+                 JBPLLexer.KW_DEFINE,
                  JBPLLexer.KW_PREPRO_ASSERT,
                  JBPLLexer.KW_PREPRO_CLASS,
-                 JBPLLexer.KW_PREPRO_DEFINE,
                  JBPLLexer.KW_PREPRO_INFO,
                  JBPLLexer.KW_PREPRO_ERROR,
                  JBPLLexer.KW_PREPRO_RETURN,
-                 JBPLLexer.KW_PREPRO_INCLUDE,
-                 JBPLLexer.KW_PREPRO_MACRO -> keys.add(TextAttributeKeys.KEYWORD);
+                 JBPLLexer.KW_PREPRO_INCLUDE -> keys.add(TextAttributeKeys.KEYWORD);
             case JBPLLexer.LITERAL_INT,
                  JBPLLexer.LITERAL_FLOAT_LIKE -> keys.add(TextAttributeKeys.NUMBER);
             case JBPLLexer.QUOTE,
@@ -145,6 +145,8 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_DUP -> keys.add(TextAttributeKeys.INSTRUCTION);
             case JBPLLexer.DOT -> keys.add(TextAttributeKeys.DOT);
             case JBPLLexer.IDENT -> keys.add(TextAttributeKeys.IDENT);
+            case JBPLLexer.LINE_COMMENT -> keys.add(TextAttributeKeys.LINE_COMMENT);
+            case JBPLLexer.BLOCK_COMMENT -> keys.add(TextAttributeKeys.BLOCK_COMMENT);
         } // @formatter:on
         return keys.toArray(TextAttributesKey[]::new);
     }

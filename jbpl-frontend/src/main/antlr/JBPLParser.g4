@@ -67,7 +67,7 @@ elseBranch:
     ;
 
 define:
-    KW_PREPRO_DEFINE
+    KW_DEFINE
     NL*?
     exprOrName
     COLON
@@ -126,7 +126,7 @@ macroSignature:
     ;
 
 macro:
-    KW_PREPRO_MACRO
+    KW_MACRO
     macroSignature
     L_BRACE
     (bodyElement
@@ -339,7 +339,8 @@ signatureExpr:
     ;
 
 reference: // Impplicit references
-    IDENT
+    (softKeyword
+    | IDENT)
     ;
 
 opcodeOfExpr:

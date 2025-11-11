@@ -36,7 +36,7 @@ public final class AssemblyFileTest {
             name -> new ClassNode()));
         final var tokens = context.file.getTokens();
         Assertions.assertEquals(JBPLLexer.NL, tokens.get(0).getType());
-        Assertions.assertEquals(JBPLLexer.KW_PREPRO_DEFINE, tokens.get(1).getType());
+        Assertions.assertEquals(JBPLLexer.KW_DEFINE, tokens.get(1).getType());
         Assertions.assertEquals(JBPLLexer.WS, tokens.get(2).getType());
         Assertions.assertEquals(JBPLLexer.IDENT, tokens.get(3).getType());
         Assertions.assertEquals(JBPLLexer.COLON, tokens.get(4).getType());
@@ -57,7 +57,7 @@ public final class AssemblyFileTest {
         Assertions.assertEquals(0, sourceRange.startLine());
         Assertions.assertEquals(0, sourceRange.startColumn());
         Assertions.assertEquals(1, sourceRange.endLine());
-        Assertions.assertEquals(19, sourceRange.endColumn());
+        Assertions.assertEquals(18, sourceRange.endColumn());
     }
 
     @Test
@@ -68,8 +68,8 @@ public final class AssemblyFileTest {
         final var value = file.findElementInTree(LiteralExpr.class).orElseThrow();
         final var sourceRange = file.getSourceRange(value.getTokenRange());
         Assertions.assertEquals(1, sourceRange.startLine());
-        Assertions.assertEquals(17, sourceRange.startColumn());
+        Assertions.assertEquals(16, sourceRange.startColumn());
         Assertions.assertEquals(1, sourceRange.endLine());
-        Assertions.assertEquals(18, sourceRange.endColumn());
+        Assertions.assertEquals(17, sourceRange.endColumn());
     }
 }

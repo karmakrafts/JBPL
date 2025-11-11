@@ -17,7 +17,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     }
 
     private @Nullable Expr findArgument(final @NotNull EvaluationContext context) {
-        return context.peekFrame().arguments.get(name);
+        return context.peekFrame().injectedValues.get(name);
     }
 
     private @NotNull DefineStatement getDefine(final @NotNull EvaluationContext context) throws EvaluationException {

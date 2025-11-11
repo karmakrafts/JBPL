@@ -36,24 +36,24 @@ public final class InExpr extends AbstractExprContainer implements Expr {
         addExpression(rhs);
     }
 
+    public @NotNull Expr getLhs() {
+        return getExpressions().get(LHS_INDEX);
+    }
+
     public void setLhs(final @NotNull Expr lhs) {
         getLhs().setParent(null);
         lhs.setParent(this);
         getExpressions().set(LHS_INDEX, lhs);
     }
 
-    public @NotNull Expr getLhs() {
-        return getExpressions().get(LHS_INDEX);
+    public @NotNull Expr getRhs() {
+        return getExpressions().get(RHS_INDEX);
     }
 
     public void setRhs(final @NotNull Expr rhs) {
         getRhs().setParent(null);
         rhs.setParent(this);
         getExpressions().set(RHS_INDEX, rhs);
-    }
-
-    public @NotNull Expr getRhs() {
-        return getExpressions().get(RHS_INDEX);
     }
 
     @Override
