@@ -125,7 +125,6 @@ public final class SourceDiagnostic {
             .collect(Collectors.toCollection(ArrayList::new));
         // @formatter:on
         // We only want to keep lines that contain a highlight
-        // TODO: reimplement additional context lines around the highlighted ones?
         if (!highlights.isEmpty()) {
             final var allLines = new ArrayList<>(sortedLines);
             sortedLines.clear();
