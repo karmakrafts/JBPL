@@ -31,14 +31,13 @@ public final class MacroCallNode extends ANTLRPsiNode implements Annotated {
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
         final var children = getChildren();
+        if (children.length < 1) {
+            return;
+        }
         // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[0])
             .textAttributes(TextAttributeKeys.MACRO_NAME)
-            .create();
-        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(children[1])
-            .textAttributes(TextAttributeKeys.KEYWORD)
             .create();
         // @formatter:on
     }

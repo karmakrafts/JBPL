@@ -58,7 +58,7 @@ macro testing2(s: string, x: i32): i32 {
 }
 
 macro testing(p: i32): i32 {
-    define y: i32 = testing2^("Testing", 200)
+    define y: i32 = testing2("Testing", 200)
     if(y == -20) {
         ^return y
     }
@@ -66,7 +66,7 @@ macro testing(p: i32): i32 {
 }
 
 define xxx: i32 = 10
-^info "Call to testing returned ${testing^(y)}"
+^info "Call to testing returned ${testing(y)}"
 
 ^info "xxx is i32: ${xxx is i32}"
 ^info "xxx: ${xxx}"
@@ -85,7 +85,7 @@ macro print_pos(x: i32, y: i32, z: i32) {
     ^info "Position at [${x}, ${y}, ${z}]"
 }
 
-print_pos^(z: 2, x: 4, y: 6)
+print_pos(z: 2, x: 4, y: 6)
 
 ^info "Hex value is ${10 * 0x10}"
 ^info "Dec value is ${10 * 10}"

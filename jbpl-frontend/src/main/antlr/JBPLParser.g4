@@ -136,7 +136,6 @@ macro:
 
 macroCall:
     IDENT
-    CARET
     L_PAREN
     (argument
     (COMMA
