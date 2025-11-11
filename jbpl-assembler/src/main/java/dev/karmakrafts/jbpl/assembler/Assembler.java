@@ -187,7 +187,7 @@ public final class Assembler {
                                 final @NotNull String msg,
                                 final @NotNull RecognitionException e) {
             final var token = (Token) offendingSymbol;
-            if (token == null) { // TODO: improve this..
+            if (token == null) {
                 throw new SyntaxError(new ParserException(msg, e, null));
             }
             if (e instanceof NoViableAltException noViableAltException) {
