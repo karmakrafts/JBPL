@@ -35,15 +35,11 @@ public final class DefineNode extends ANTLRPsiNode implements StructuralPsiEleme
 
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
-        final var children = getChildren();
-        if (children.length < 2) {
-            return;
-        }
         // @formatter:off
-        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(children[1])
+        PsiUtils.find(this, "/define/exprOrName/nameSegment").ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+            .range(name)
             .textAttributes(TextAttributeKeys.DEFINE_NAME)
-            .create();
+            .create());
         // @formatter:on
     }
 
@@ -53,7 +49,7 @@ public final class DefineNode extends ANTLRPsiNode implements StructuralPsiEleme
         if (children.length < 2) {
             return null;
         }
-        return PsiUtils.toSingleLine(children[1]); // TODO: Use PsiUtils.getRefOrName
+        return PsiUtils.toSingleLine(children[1]);
     }
 
     // Defines should be rendered as <name>: <type> = <value>
@@ -61,7 +57,7 @@ public final class DefineNode extends ANTLRPsiNode implements StructuralPsiEleme
     public @NotNull String getDetailedStructureText() {
         // @formatter:off
         final var name = getName();
-        final var type = PsiUtils.find(this, "/define/type")
+        final var type = PsiUtils.find(this, "/define/exprOrType")
             .map(PsiUtils::toSingleLine)
             .orElse("Unknown");
         final var value = PsiUtils.find(this, "/define/expr", ExpressionNode.class)

@@ -36,7 +36,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         if (argument != null) {
             return argument.getType(context);
         }
-        return getDefine(context).type;
+        return getDefine(context).getType().evaluateAsConst(context, Type.class);
     }
 
     @Override

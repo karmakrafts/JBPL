@@ -10,14 +10,34 @@ import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 
 public final class DefineStatement extends AbstractExprContainer implements Statement, NamedElement {
-    public static final int VALUE_INDEX = 0;
-    public String name;
-    public Type type;
+    public static final int NAME_INDEX = 0;
+    public static final int TYPE_INDEX = 1;
+    public static final int VALUE_INDEX = 2;
 
-    public DefineStatement(final @NotNull String name, final @NotNull Type type, final @NotNull Expr value) {
-        this.name = name;
-        this.type = type;
+    public DefineStatement(final @NotNull Expr name, final @NotNull Expr type, final @NotNull Expr value) {
+        addExpression(name);
+        addExpression(type);
         addExpression(value);
+    }
+
+    public @NotNull Expr getName() {
+        return getExpressions().get(NAME_INDEX);
+    }
+
+    public void setName(final @NotNull Expr name) {
+        getName().setParent(null);
+        name.setParent(this);
+        getExpressions().set(NAME_INDEX, name);
+    }
+
+    public @NotNull Expr getType() {
+        return getExpressions().get(TYPE_INDEX);
+    }
+
+    public void setType(final @NotNull Expr type) {
+        getType().setParent(null);
+        type.setParent(this);
+        getExpressions().set(TYPE_INDEX, type);
     }
 
     public @NotNull Expr getValue() {
@@ -28,21 +48,18 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
         getExpressions().set(VALUE_INDEX, value);
     }
 
-    public @NotNull String getName() {
-        return name;
-    }
-
     @Override
-    public @NotNull String getName(final @NotNull EvaluationContext context) {
-        return name;
+    public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
+        return getName().evaluateAsConst(context, String.class);
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
-        final var type = value.getType(context);
-        if (!this.type.isAssignableFrom(type)) {
-            final var message = String.format("Cannot assign value of type %s to define of type %s", type, this.type);
+        final var type = getType().evaluateAsConst(context, Type.class);
+        final var otherType = value.getType(context);
+        if (!type.isAssignableFrom(otherType)) {
+            final var message = String.format("Cannot assign value of type %s to define of type %s", otherType, type);
             final var diagnostic = SourceDiagnostic.from(this, value, message);
             throw new EvaluationException("Incompatible define value type", diagnostic, context.createStackTrace());
         }
@@ -51,7 +68,7 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
 
     @Override
     public @NotNull DefineStatement copy() {
-        return copyParentAndSourceTo(new DefineStatement(name, type, getValue().copy()));
+        return copyParentAndSourceTo(new DefineStatement(getName().copy(), getType().copy(), getValue().copy()));
     }
 
     @Override
@@ -61,6 +78,6 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
 
     @Override
     public @NotNull String toString() {
-        return String.format("^define %s: %s = %s", name, type, getValue());
+        return String.format("^define %s: %s = %s", getName(), getType(), getValue());
     }
 }

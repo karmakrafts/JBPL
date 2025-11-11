@@ -69,9 +69,9 @@ elseBranch:
 define:
     KW_PREPRO_DEFINE
     NL*?
-    IDENT
+    exprOrName
     COLON
-    type
+    exprOrType
     EQ
     expr
     ;

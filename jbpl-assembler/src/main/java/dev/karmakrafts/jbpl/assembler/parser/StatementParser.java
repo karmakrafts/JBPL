@@ -132,8 +132,8 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitDefine(final @NotNull DefineContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ctx.IDENT().getText();
-            final var type = TypeParser.parse(ctx.type());
+            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
+            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
             final var value = ExprParser.parse(ctx.expr());
             return List.of(new DefineStatement(name, type, value));
         });
