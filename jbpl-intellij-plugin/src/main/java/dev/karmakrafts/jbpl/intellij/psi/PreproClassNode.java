@@ -37,8 +37,8 @@ public final class PreproClassNode extends ANTLRPsiNode implements StructuralPsi
 
     @Override
     public @Nullable String getName() { // @formatter:off
-        return PsiUtils.find(this, "/preproClass/refOrName", RefOrNameNode.class)
-            .map(RefOrNameNode::getName)
+        return PsiUtils.find(this, "/preproClass/exprOrName", ExprOrNameNode.class)
+            .map(ExprOrNameNode::getName)
             .orElseGet(super::getName);
     } // @formatter:on
 }

@@ -37,8 +37,8 @@ public final class SelectorNode extends ANTLRPsiNode implements StructuralPsiEle
 
     @Override
     public @Nullable String getName() { // @formatter:off
-        return PsiUtils.find(this, "/selector/refOrName", RefOrNameNode.class)
-            .map(RefOrNameNode::getName)
+        return PsiUtils.find(this, "/selector/exprOrName", ExprOrNameNode.class)
+            .map(ExprOrNameNode::getName)
             .orElseGet(super::getName);
     } // @formatter:on
 }

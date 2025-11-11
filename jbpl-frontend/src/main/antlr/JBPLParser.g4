@@ -114,7 +114,7 @@ returnStatement:
     ;
 
 macroSignature:
-    refOrName
+    exprOrName
     L_PAREN
     (parameter
     (COMMA
@@ -122,7 +122,7 @@ macroSignature:
     )?
     R_PAREN
     (COLON
-    refOrType)?
+    exprOrType)?
     ;
 
 macro:
@@ -151,7 +151,7 @@ argument:
     ;
 
 namedArgument:
-    refOrName
+    exprOrName
     COLON
     expr
     ;
@@ -172,7 +172,7 @@ enumDecl:
 
 preproClass:
     KW_PREPRO_CLASS
-    refOrName
+    exprOrName
     L_PAREN
     (parameter
     (COMMA
@@ -182,18 +182,18 @@ preproClass:
     ;
 
 parameter:
-    refOrName
+    exprOrName
     COLON
-    refOrType
+    exprOrType
     ;
 
-refOrName:
-    explicitReference
+exprOrName:
+    wrappedExpr
     | nameSegment
     ;
 
-refOrType:
-    explicitReference
+exprOrType:
+    wrappedExpr
     | type
     ;
 
@@ -259,7 +259,7 @@ expr:
     | PLUS expr
     | EXCL expr
 
-    | expr KW_IS type
+    | expr KW_IS (wrappedExpr | type)
     | expr KW_AS type
 
     | ifExpr
@@ -278,6 +278,13 @@ expr:
     | literal
     ;
 
+wrappedExpr:
+    DOLLAR
+    L_BRACE
+    expr
+    R_BRACE
+    ;
+
 defaultExpr:
     KW_DEFAULT
     L_PAREN
@@ -287,7 +294,7 @@ defaultExpr:
 
 arrayExpr:
     L_SQBRACKET
-    refOrType?
+    exprOrType?
     R_SQBRACKET
     L_BRACE
     (expr
@@ -334,14 +341,6 @@ reference: // Impplicit references
     IDENT
     ;
 
-explicitReference:
-    DOLLAR
-    L_BRACE
-    (IDENT
-    | softKeyword)
-    R_BRACE
-    ;
-
 opcodeOfExpr:
     KW_OPCODEOF
     L_PAREN
@@ -383,7 +382,7 @@ declaration:
 field:
     accessModifier*?
     KW_FIELD
-    (explicitReference
+    (wrappedExpr
     | fieldSignature)
     (EQ
     expr)?
@@ -394,15 +393,15 @@ fieldSignature:
     NL*?
     DOT
     NL*?
-    refOrName
+    exprOrName
     NL*?
     COLON
     NL*?
-    refOrType
+    exprOrType
     ;
 
 signatureOwner:
-    explicitReference
+    wrappedExpr
     | classType
     ;
 
@@ -428,7 +427,7 @@ function:
 selector:
     KW_SELECTOR
     NL*?
-    refOrName
+    exprOrName
     NL*?
     L_BRACE
     (selectionStatement
@@ -456,7 +455,7 @@ injector:
     NL*?
     KW_BY
     NL*?
-    refOrName
+    exprOrName
     L_BRACE
     (statement
     | NL)*?
@@ -482,13 +481,13 @@ functionSignature:
     NL*?
     COLON
     NL*?
-    refOrType
+    exprOrType
     ;
 
 functionSignatureParameter:
-    (refOrName
+    (exprOrName
     COLON)?
-    refOrType
+    exprOrType
     ;
 
 specialFunctionName:
@@ -499,7 +498,7 @@ specialFunctionName:
 
 functionName:
     specialFunctionName
-    | refOrName
+    | exprOrName
     ;
 
 statement:
@@ -519,9 +518,9 @@ statement:
 
 local:
     KW_LOCAL
-    refOrName
+    exprOrName
     COLON
-    refOrType
+    exprOrType
     (EQ
     expr)?
     ;
@@ -580,7 +579,7 @@ fieldStore:
 
 label:
     COLON
-    refOrName
+    exprOrName
     ;
 
 jumpInstruction:
@@ -593,7 +592,7 @@ jumpInstruction:
 
 jump:
     jumpInstruction
-    refOrName
+    exprOrName
     ;
 
 typeInstruction:

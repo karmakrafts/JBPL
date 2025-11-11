@@ -35,8 +35,8 @@ public final class SignatureOwnerNode extends ANTLRPsiNode {
             .map(type -> PsiUtils.findAll(type, "/classType/nameSegment")
                 .map(PsiElement::getText)
                 .collect(Collectors.joining(".")))
-            .or(() -> PsiUtils.find(this, "/signatureOwner/explicitReference", ExplicitReferenceNode.class)
-                .map(ExplicitReferenceNode::getName))
+            .or(() -> PsiUtils.find(this, "/signatureOwner/wrappedExpr", WrappedExprNode.class)
+                .map(WrappedExprNode::getName))
             .orElse("Unknown");
     } // @formatter:on
 }

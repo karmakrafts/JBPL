@@ -23,8 +23,8 @@ import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class ExplicitReferenceNode extends ANTLRPsiNode implements Annotated {
-    public ExplicitReferenceNode(final @NotNull ASTNode node) {
+public final class WrappedExprNode extends ANTLRPsiNode implements Annotated {
+    public WrappedExprNode(final @NotNull ASTNode node) {
         super(node);
     }
 
@@ -41,10 +41,6 @@ public final class ExplicitReferenceNode extends ANTLRPsiNode implements Annotat
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[1])
             .textAttributes(TextAttributeKeys.INTERPOLATION)
-            .create();
-        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(children[2])
-            .textAttributes(TextAttributeKeys.DEFINE_NAME)
             .create();
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[3])

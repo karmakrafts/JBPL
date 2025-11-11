@@ -111,7 +111,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitLabel(final @NotNull LabelContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
             return List.of(new LabelStatement(name));
         });
     }
@@ -119,7 +119,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitLocal(final @NotNull LocalContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
             return List.of(new LocalStatement(name));
         });
     }

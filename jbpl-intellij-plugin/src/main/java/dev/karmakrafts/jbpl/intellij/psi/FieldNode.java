@@ -47,8 +47,8 @@ public final class FieldNode extends ANTLRPsiNode implements StructuralPsiElemen
         // @formatter:off
         final var signature = PsiUtils.find(this, "/field/fieldSignature")
             .map(PsiUtils::toSingleLine)
-            .or(() -> PsiUtils.find(this, "/field/explicitReference", ExplicitReferenceNode.class)
-                .map(ExplicitReferenceNode::getName))
+            .or(() -> PsiUtils.find(this, "/field/wrappedExpr", WrappedExprNode.class)
+                .map(WrappedExprNode::getName))
             .orElse("Unknown");
         final var value = PsiUtils.find(this, "/field/expr")
             .map(PsiUtils::toSingleLine)

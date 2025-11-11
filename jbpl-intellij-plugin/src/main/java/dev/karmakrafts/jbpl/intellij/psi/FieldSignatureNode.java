@@ -36,14 +36,14 @@ public final class FieldSignatureNode extends ANTLRPsiNode implements Annotated 
 
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
-        PsiUtils.find(this, "/fieldSignature/refOrName", RefOrNameNode.class)
+        PsiUtils.find(this, "/fieldSignature/exprOrName", ExprOrNameNode.class)
             .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.FIELD_NAME, holder));
     } // @formatter:on
 
     @Override
     public @NotNull String getName() { // @formatter:off
-        return PsiUtils.find(this, "/fieldSignature/refOrName", RefOrNameNode.class)
-            .map(RefOrNameNode::getName)
+        return PsiUtils.find(this, "/fieldSignature/exprOrName", ExprOrNameNode.class)
+            .map(ExprOrNameNode::getName)
             .orElse("Unknown");
     } // @formatter:on
 

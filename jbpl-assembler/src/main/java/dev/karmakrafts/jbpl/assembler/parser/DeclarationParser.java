@@ -1,7 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
-import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
@@ -50,7 +49,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var injector = new InjectorDecl();
             injector.setTarget(ExprParser.parse(ctx.functionSignature()));
-            injector.setSelector(ParserUtils.parseRefOrName(ctx.refOrName()));
+            injector.setSelector(ParserUtils.parseExprOrName(ctx.exprOrName()));
             // @formatter:off
             injector.addStatements(ctx.statement().stream()
                 .map(ExceptionUtils.unsafeFunction(StatementParser::parse))
@@ -73,7 +72,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitSelector(final @NotNull SelectorContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
             // @formatter:off
             final var offset = ctx.selectionOffset().stream()
                 .findFirst()
@@ -94,10 +93,10 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     public @NotNull List<Declaration> visitMacro(final @NotNull MacroContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var signature = ctx.macroSignature();
-            final var name = ParserUtils.parseRefOrName(signature.refOrName());
+            final var name = ParserUtils.parseExprOrName(signature.exprOrName());
             // @formatter:off
-            final var returnType = signature.refOrType() != null
-                ? ParserUtils.parseRefOrType(signature.refOrType())
+            final var returnType = signature.exprOrType() != null
+                ? ParserUtils.parseExprOrType(signature.exprOrType())
                 : LiteralExpr.of(BuiltinType.VOID);
             // @formatter:on
             final var macro = new MacroDecl(name, returnType);
@@ -114,7 +113,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitPreproClass(final @NotNull PreproClassContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
             final var clazz = new PreproClassDecl(name);
             clazz.addFields(ParserUtils.parseParameters(ctx.parameter()));
             return List.of(clazz);

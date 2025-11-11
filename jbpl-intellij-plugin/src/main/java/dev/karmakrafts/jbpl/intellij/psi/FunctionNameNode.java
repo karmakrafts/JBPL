@@ -32,7 +32,7 @@ public final class FunctionNameNode extends ANTLRPsiNode implements Annotated {
 
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
-        PsiUtils.find(this, "/functionName/refOrName/nameSegment")
+        PsiUtils.find(this, "/functionName/exprOrName/nameSegment")
             .or(() -> PsiUtils.find(this, "/functionName/specialFunctionName"))
             .ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                 .range(name)
@@ -42,8 +42,8 @@ public final class FunctionNameNode extends ANTLRPsiNode implements Annotated {
 
     @Override
     public @NotNull String getName() { // @formatter:off
-        return PsiUtils.find(this, "/functionName/refOrName", RefOrNameNode.class)
-            .map(RefOrNameNode::getName)
+        return PsiUtils.find(this, "/functionName/exprOrName", ExprOrNameNode.class)
+            .map(ExprOrNameNode::getName)
             .or(() -> PsiUtils.find(this, "/functionName/specialFunctionName").map(PsiElement::getText))
             .orElseGet(this::getText);
     } // @formatter:on

@@ -130,10 +130,10 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_macro -> new MacroNode(node);
             case JBPLParser.RULE_parameter -> new ParameterNode(node);
             case JBPLParser.RULE_macroCall -> new MacroCallNode(node);
-            case JBPLParser.RULE_explicitReference -> new ExplicitReferenceNode(node);
+            case JBPLParser.RULE_wrappedExpr -> new WrappedExprNode(node);
             case JBPLParser.RULE_stringSegment -> new StringSegmentNode(node);
-            case JBPLParser.RULE_refOrName -> new RefOrNameNode(node);
-            case JBPLParser.RULE_refOrType -> new RefOrTypeNode(node);
+            case JBPLParser.RULE_exprOrName -> new ExprOrNameNode(node);
+            case JBPLParser.RULE_exprOrType -> new ExprOrTypeNode(node);
             case JBPLParser.RULE_fieldSignature -> new FieldSignatureNode(node);
             case JBPLParser.RULE_nameSegment -> new NameSegmentNode(node);
             case JBPLParser.RULE_functionName -> new FunctionNameNode(node);

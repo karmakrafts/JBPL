@@ -26,12 +26,12 @@ public final class ParserUtils {
     public static @NotNull Pair<@Nullable Expr, Expr> parseArgument(final @NotNull ArgumentContext ctx) throws ParserException {
         final var namedCtx = ctx.namedArgument();
         if (namedCtx != null) {
-            return new Pair<>(ParserUtils.parseRefOrName(namedCtx.refOrName()), ExprParser.parse(namedCtx.expr()));
+            return new Pair<>(ParserUtils.parseExprOrName(namedCtx.exprOrName()), ExprParser.parse(namedCtx.expr()));
         }
         return new Pair<>(null, ExprParser.parse(ctx.expr()));
     }
 
-    public static @NotNull List<Pair<@Nullable Expr, Expr>> parseArguments(final @NotNull List<ArgumentContext> args) throws ParserException { // @formatter:off
+    public static @NotNull List<Pair<@Nullable Expr, Expr>> parseArguments(final @NotNull List<ArgumentContext> args) { // @formatter:off
         return args.stream()
             .map(ExceptionUtils.unsafeFunction(ParserUtils::parseArgument))
             .toList();
@@ -50,24 +50,24 @@ public final class ParserUtils {
         // @formatter:off
         return specialName != null
             ? LiteralExpr.of(specialName.getText())
-            : parseRefOrName(ctx.refOrName());
+            : parseExprOrName(ctx.exprOrName());
         // @formatter:on
     }
 
     public static @NotNull Expr parseSignatureOwner(final @NotNull SignatureOwnerContext ctx) throws ParserException {
-        final var ref = ctx.explicitReference();
+        final var expr = ctx.wrappedExpr();
         // @formatter:off
-        return ref != null
-            ? ExprParser.parse(ref)
+        return expr != null
+            ? ExprParser.parse(expr)
             : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.classType())));
         // @formatter:on
     }
 
-    public static @NotNull Expr parseRefOrName(final @NotNull JBPLParser.RefOrNameContext ctx) throws ParserException {
-        final var ref = ctx.explicitReference();
+    public static @NotNull Expr parseExprOrName(final @NotNull JBPLParser.ExprOrNameContext ctx) throws ParserException {
+        final var expr = ctx.wrappedExpr();
         // @formatter:off
-        return ref != null
-            ? ExprParser.parse(ref)
+        return expr != null
+            ? ExprParser.parse(expr)
             : LiteralExpr.of(ctx.nameSegment().getText());
         // @formatter:on
     }
@@ -101,11 +101,11 @@ public final class ParserUtils {
         // @formatter:on
     }
 
-    public static @NotNull Expr parseRefOrType(final @NotNull RefOrTypeContext ctx) throws ParserException {
-        final var typeRef = ctx.explicitReference();
+    public static @NotNull Expr parseExprOrType(final @NotNull ExprOrTypeContext ctx) throws ParserException {
+        final var expr = ctx.wrappedExpr();
         // @formatter:off
-        return typeRef != null
-            ? ExprParser.parse(typeRef)
+        return expr != null
+            ? ExprParser.parse(expr)
             : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.type())));
         // @formatter:on
     }
@@ -113,8 +113,8 @@ public final class ParserUtils {
     public static @NotNull List<Pair<Expr, Expr>> parseParameters(final @NotNull List<ParameterContext> params) throws ParserException {
         final var paramPairs = new ArrayList<Pair<Expr, Expr>>();
         for (final var param : params) {
-            final var name = parseRefOrName(param.refOrName());
-            final var type = parseRefOrType(param.refOrType());
+            final var name = parseExprOrName(param.exprOrName());
+            final var type = parseExprOrType(param.exprOrType());
             paramPairs.add(new Pair<>(name, type));
         }
         return paramPairs;

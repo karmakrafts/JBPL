@@ -107,7 +107,7 @@ public final class InstructionParser extends JBPLParserBaseVisitor<List<Instruct
     public List<Instruction> visitJump(final @NotNull JumpContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var opcode = ParserUtils.parseOpcode(ctx.jumpInstruction());
-            final var signature = ParserUtils.parseRefOrName(ctx.refOrName());
+            final var signature = ParserUtils.parseExprOrName(ctx.exprOrName());
             return List.of(new JumpInstruction(opcode, signature));
         });
     }

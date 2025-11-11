@@ -20,13 +20,8 @@ import com.intellij.lang.ASTNode;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class RefOrTypeNode extends ANTLRPsiNode {
-    public RefOrTypeNode(final @NotNull ASTNode node) {
+public final class ExprOrTypeNode extends ANTLRPsiNode {
+    public ExprOrTypeNode(final @NotNull ASTNode node) {
         super(node);
-    }
-
-    @Override
-    public String getName() {
-        return super.getName();
     }
 }

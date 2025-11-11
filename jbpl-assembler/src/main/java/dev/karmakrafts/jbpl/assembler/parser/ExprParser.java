@@ -79,8 +79,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public @NotNull List<Expr> visitArrayExpr(final @NotNull ArrayExprContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             // @formatter:off
-            final var array = ctx.refOrType() != null
-                ? new ArrayExpr(ParserUtils.parseRefOrType(ctx.refOrType()))
+            final var array = ctx.exprOrType() != null
+                ? new ArrayExpr(ParserUtils.parseExprOrType(ctx.exprOrType()))
                 : new ArrayExpr();
             // @formatter:on
             array.addValues(ctx.expr().stream().map(ExceptionUtils.unsafeFunction(ExprParser::parse)).toList());
@@ -204,7 +204,12 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                 return List.of(new ArrayAccessExpr(reference, index));
             }
             else if (ctx.KW_IS() != null) {
-                return List.of(new IsExpr(parse(ctx.expr(0)), TypeParser.parse(type)));
+                final var concreteType = ctx.type();
+                final var lhs = parse(ctx.expr(0));
+                if (concreteType != null) {
+                    return List.of(new IsExpr(lhs, LiteralExpr.of(TypeParser.parse(concreteType))));
+                }
+                return List.of(new IsExpr(lhs, parse(ctx.expr(1))));
             }
             else if (ctx.KW_AS() != null) {
                 final var value = parse(ctx.expr(0));
@@ -245,17 +250,10 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return List.of(ref);
     }
 
-    private @NotNull List<Expr> parseExplicitReference(final @NotNull ExplicitReferenceContext ctx,
-                                                       final @NotNull Expr receiver) {
-        final var name = ctx.IDENT().getText();
-        final var ref = new ReferenceExpr(name);
-        ref.setReceiver(receiver);
-        return List.of(ref);
-    }
-
+    // Simply unwrap the expression
     @Override
-    public List<Expr> visitExplicitReference(final @NotNull ExplicitReferenceContext ctx) {
-        return parseExplicitReference(ctx, LiteralExpr.unit());
+    public List<Expr> visitWrappedExpr(final @NotNull WrappedExprContext ctx) {
+        return List.of(ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr())));
     }
 
     @Override
@@ -391,9 +389,9 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     private @NotNull Pair<Expr, Expr> parseFunctionSignatureParameter(final @NotNull FunctionSignatureParameterContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = Optional.ofNullable(ctx.refOrName()).map(ExceptionUtils.unsafeFunction(ParserUtils::parseRefOrName)).orElse(
+            final var name = Optional.ofNullable(ctx.exprOrName()).map(ExceptionUtils.unsafeFunction(ParserUtils::parseExprOrName)).orElse(
                 null);
-            final var type = ParserUtils.parseRefOrType(ctx.refOrType());
+            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
             return new Pair<>(name, type);
         });
     }
@@ -402,8 +400,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public @NotNull List<Expr> visitFieldSignature(final @NotNull FieldSignatureContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
-            final var name = ParserUtils.parseRefOrName(ctx.refOrName());
-            final var type = ParserUtils.parseRefOrType(ctx.refOrType());
+            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
+            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
             return List.of(new FieldSignatureExpr(owner, name, type));
         });
     }
@@ -413,7 +411,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
             final var name = ParserUtils.parseFunctionName(ctx.functionName());
-            final var returnType = ParserUtils.parseRefOrType(ctx.refOrType());
+            final var returnType = ParserUtils.parseExprOrType(ctx.exprOrType());
             final var signature = new FunctionSignatureExpr(owner, name, returnType);
             // @formatter:off
             signature.addExpressions(ctx.functionSignatureParameter().stream()

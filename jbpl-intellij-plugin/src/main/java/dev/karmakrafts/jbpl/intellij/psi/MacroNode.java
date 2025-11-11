@@ -35,15 +35,15 @@ public final class MacroNode extends ANTLRPsiNode implements Annotated, Structur
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
         // @formatter:off
-        PsiUtils.find(this, "/macro/macroSignature/refOrName", RefOrNameNode.class)
+        PsiUtils.find(this, "/macro/macroSignature/exprOrName", ExprOrNameNode.class)
             .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.MACRO_NAME, holder));
         // @formatter:on
     }
 
     @Override
     public @Nullable String getName() { // @formatter:off
-        return PsiUtils.find(this, "/macro/macroSignature/refOrName", RefOrNameNode.class)
-            .map(RefOrNameNode::getName)
+        return PsiUtils.find(this, "/macro/macroSignature/exprOrName", ExprOrNameNode.class)
+            .map(ExprOrNameNode::getName)
             .orElseGet(super::getName);
     } // @formatter:on
 

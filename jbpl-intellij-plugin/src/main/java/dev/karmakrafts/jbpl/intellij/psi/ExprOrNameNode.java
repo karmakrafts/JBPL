@@ -25,13 +25,13 @@ import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class RefOrNameNode extends ANTLRPsiNode {
-    public RefOrNameNode(final @NotNull ASTNode node) {
+public final class ExprOrNameNode extends ANTLRPsiNode {
+    public ExprOrNameNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     public void annotateNameWith(final @NotNull TextAttributesKey key, final @NotNull AnnotationHolder holder) {
-        PsiUtils.find(this, "/refOrName/nameSegment").ifPresent(name -> { // @formatter:off
+        PsiUtils.find(this, "/exprOrName/nameSegment").ifPresent(name -> { // @formatter:off
             holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                 .range(name)
                 .textAttributes(key)
@@ -41,7 +41,7 @@ public final class RefOrNameNode extends ANTLRPsiNode {
 
     @Override
     public @NotNull String getName() { // @formatter:off
-        return PsiUtils.find(this, "/refOrName/nameSegment")
+        return PsiUtils.find(this, "/exprOrName/nameSegment")
             .map(PsiElement::getText)
             .orElseGet(this::getText);
     } // @formatter:on
