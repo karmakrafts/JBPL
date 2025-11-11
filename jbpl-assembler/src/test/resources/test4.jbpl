@@ -1,87 +1,87 @@
-^define z: i32 = 10
+define z: i32 = 10
 ^info "Testing: ${z << 1 << 1}"
-^define str: string = z as string
-^define x: i32 = (str as i32) << 1
+define str: string = z as string
+define x: i32 = (str as i32) << 1
 ^info "Cast: ${str}"
 ^info "Parse: ${x}"
 
-^define t1: type = type(i32)
-^define t2: type = type(f32)
-^define intersect: type = t1 + t2
-^define intersect2: type = type((i32 | i64 | bool | void))
-^define t3: type = intersect - type(f32)
+define t1: type = type(i32)
+define t2: type = type(f32)
+define intersect: type = t1 + t2
+define intersect2: type = type((i32 | i64 | bool | void))
+define t3: type = intersect - type(f32)
 ^info "Type is ${t3}"
 
 ^info t3
 
-^define d: i32 = default(t1)
+define d: i32 = default(t1)
 ^info d
 
 public static fun <com/example/Example>.testing(): void {
     return
 }
 
-^define OFFSET: i32 = 20
+define OFFSET: i32 = 20
 
-^define cond: i32 = 0
+define cond: i32 = 0
 
-^define y: i32 = if (cond > 0) 44
+define y: i32 = if (cond > 0) 44
     else if (cond < 0) 22
     else 88i8
 
 ^info "y is ${y}"
 
-^define comp: i32 = y <=> OFFSET
+define comp: i32 = y <=> OFFSET
 
 ^assert true
 ^assert 10 == 10
 ^assert "Hello, World!" == "Hello, World!"
 ^assert "FOO" != "BAR"
 
-^define op: opcode = opcode(invokestatic)
+define op: opcode = opcode(invokestatic)
 ^info op
 ^info typeof(op)
 
-^define insn: instruction = instruction(ldc "Hello, World!")
+define insn: instruction = instruction(ldc "Hello, World!")
 ^info insn
 ^info typeof(insn)
 
-^define insnOp: opcode = opcodeof(insn)
+define insnOp: opcode = opcodeof(insn)
 ^info insnOp
 ^info typeof(insnOp)
 
 ^info "HELLO WORLD! ${comp}"
 ^info "HELLO WORLD!"
 
-^macro testing2(s: string, x: i32): i32 {
+macro testing2(s: string, x: i32): i32 {
     ^return -10
 }
 
-^macro testing(p: i32): i32 {
-    ^define y: i32 = testing2^("Testing", 200)
+macro testing(p: i32): i32 {
+    define y: i32 = testing2^("Testing", 200)
     if(y == -20) {
         ^return y
     }
     ^return y * p
 }
 
-^define xxx: i32 = 10
+define xxx: i32 = 10
 ^info "Call to testing returned ${testing^(y)}"
 
 ^info "xxx is i32: ${xxx is i32}"
 ^info "xxx: ${xxx}"
 
-^define arr: [i32] = []{0, 1, 2, 4, 8, 16}
-^define arr_idx: i32 = 2
+define arr: [i32] = []{0, 1, 2, 4, 8, 16}
+define arr_idx: i32 = 2
 ^info "Value 2 from arr is ${arr[arr_idx]}"
 
-^define md_arr: [[i32]] = []{[]{0}, []{1}}
-^define sub_arr: [i32] = md_arr[0]
+define md_arr: [[i32]] = []{[]{0}, []{1}}
+define sub_arr: [i32] = md_arr[0]
 ^info "Value from sub-array is ${sub_arr[0]}"
 
 public static field <com/example/Example>.test: i32 = md_arr[0][0]
 
-^macro print_pos(x: i32, y: i32, z: i32) {
+macro print_pos(x: i32, y: i32, z: i32) {
     ^info "Position at [${x}, ${y}, ${z}]"
 }
 

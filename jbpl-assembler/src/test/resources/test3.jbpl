@@ -2,15 +2,15 @@
 
 ^include "test4.jbpl"
 
-^define _t: string = "test_define"
-^define _tt: type = type(string)
-^define ${_t}: ${_tt} = "HELLO, WORLD"
+define _t: string = "test_define"
+define _tt: type = type(string)
+define ${_t}: ${_tt} = "HELLO, WORLD"
 ^info test_define
 ^info typeof(test_define)
 
-^define test_array: [string] = []{"Hellou", "Wourld", "Test"}
+define test_array: [string] = []{"Hellou", "Wourld", "Test"}
 
-^define var_name: string = "element"
+define var_name: string = "element"
 for(${var_name} in test_array) {
     ^info element
 }
@@ -23,3 +23,7 @@ for(${var_name} in test_array) {
 
 ^info type(i32) in type((i32 | i64))
 ^info type(string) in type((char | void))
+
+^info sizeof(_t)
+^info sizeof(test_array)
+^info sizeof(type(i32))

@@ -1,2 +1,2 @@
-^define TEST1: bool = true
-^define TEST2: bool = false
+define TEST1: bool = true
+define TEST2: bool = false

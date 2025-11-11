@@ -4,7 +4,6 @@ import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
-import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -95,9 +94,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitTypeLiteral(final @NotNull TypeLiteralContext ctx) {
-        if (ctx.diamond() != null) {
-            return List.of(LiteralExpr.of(BuiltinType.OBJECT));
-        }
         return ExceptionUtils.rethrowUnchecked(() -> List.of(LiteralExpr.of(TypeParser.parse(ctx.type()))));
     }
 
@@ -260,8 +256,13 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     // Simply unwrap the expression
     @Override
-    public List<Expr> visitWrappedExpr(final @NotNull WrappedExprContext ctx) {
+    public @NotNull List<Expr> visitWrappedExpr(final @NotNull WrappedExprContext ctx) {
         return List.of(ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr())));
+    }
+
+    @Override
+    public @NotNull List<Expr> visitSizeOfExpr(final @NotNull SizeOfExprContext ctx) {
+        return List.of(new SizeOfExpr(ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx.expr()))));
     }
 
     @Override

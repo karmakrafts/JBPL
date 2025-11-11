@@ -269,14 +269,15 @@ expr:
     | signatureExpr
     | typeOfExpr
     | opcodeOfExpr
+    | sizeOfExpr
     | defaultExpr
     | definedExpr
     | nameOfExpr
     | preproClassInstantiation
     | injectorReference
     | selectorReference
-    | reference
     | literal
+    | reference
     ;
 
 wrappedExpr:
@@ -343,6 +344,13 @@ reference: // Impplicit references
     | IDENT)
     ;
 
+sizeOfExpr:
+    KW_SIZEOF
+    L_PAREN
+    expr
+    R_PAREN
+    ;
+
 opcodeOfExpr:
     KW_OPCODEOF
     L_PAREN
@@ -360,14 +368,8 @@ typeOfExpr:
 typeLiteral:
     KW_TYPE
     L_PAREN
-    (type
-    | diamond)
+    type
     R_PAREN
-    ;
-
-diamond:
-    L_ABRACKET
-    R_ABRACKET
     ;
 
 declaration:

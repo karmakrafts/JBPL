@@ -61,6 +61,7 @@ KW_INJECT: 'inject';
 KW_STRING: 'string';
 KW_STATIC: 'static';
 KW_TYPEOF: 'typeof';
+KW_SIZEOF: 'sizeof';
 KW_MACRO: 'macro';
 KW_CLASS: 'class';
 KW_FINAL: 'final';

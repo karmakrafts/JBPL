@@ -162,7 +162,14 @@ public interface ElementVisitor {
         else if (expr instanceof InExpr inExpr) {
             return visitInExpr(inExpr);
         }
+        else if (expr instanceof SizeOfExpr sizeOfExpr) {
+            return visitSizeOfExpr(sizeOfExpr);
+        }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitSizeOfExpr(final @NotNull SizeOfExpr sizeOfExpr) {
+        return visitExprContainer(sizeOfExpr);
     }
 
     default @NotNull Expr visitInExpr(final @NotNull InExpr inExpr) {
