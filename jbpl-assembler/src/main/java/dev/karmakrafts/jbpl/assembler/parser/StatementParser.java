@@ -138,4 +138,19 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
             return List.of(new DefineStatement(name, type, value));
         });
     }
+
+    @Override
+    public List<Statement> visitForLoop(final @NotNull ForLoopContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var variableName = ParserUtils.parseExprOrName(ctx.exprOrName());
+            final var value = ExprParser.parse(ctx.expr());
+            final var statement = new ForStatement(variableName, value);
+            // @formatter:off
+            statement.addElements(ctx.bodyElement().stream()
+                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
+                .toList());
+            // @formatter:on
+            return List.of(statement);
+        });
+    }
 }

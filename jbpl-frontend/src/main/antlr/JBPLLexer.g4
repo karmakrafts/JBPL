@@ -75,6 +75,8 @@ KW_TRUE: 'true';
 KW_ELSE: 'else';
 KW_YEET: 'yeet';
 KW_FUN: 'fun';
+KW_FOR: 'for';
+KW_IN: 'in';
 KW_IF: 'if';
 KW_IS: 'is';
 KW_AS: 'as';

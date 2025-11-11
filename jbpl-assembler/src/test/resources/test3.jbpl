@@ -1,3 +1,18 @@
 ^include "test2.jbpl"
 
 ^include "test4.jbpl"
+
+^define _t: string = "test_define"
+^define _tt: type = type(string)
+^define ${_t}: ${_tt} = "HELLO, WORLD"
+^info test_define
+^info typeof(test_define)
+
+^define test_array: [string] = []{"Hellou", "Wourld", "Test"}
+
+for(element in test_array) {
+    ^info element
+}
+
+^info "Hellou" in test_array
+^info "Andy" in test_array

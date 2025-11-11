@@ -261,6 +261,7 @@ expr:
 
     | expr KW_IS (wrappedExpr | type)
     | expr KW_AS (wrappedExpr | type)
+    | expr KW_IN expr
 
     | ifExpr
     | arrayExpr
@@ -504,6 +505,7 @@ functionName:
 statement:
     include
     | define
+    | forLoop
     | returnStatement
     | yeetStatement
     | versionStatement
@@ -514,6 +516,19 @@ statement:
     | local
     | instruction
     | expr
+    ;
+
+forLoop:
+    KW_FOR
+    L_PAREN
+    exprOrName
+    KW_IN
+    expr
+    R_PAREN
+    L_BRACE
+    (bodyElement
+    | NL)*?
+    R_BRACE
     ;
 
 local:

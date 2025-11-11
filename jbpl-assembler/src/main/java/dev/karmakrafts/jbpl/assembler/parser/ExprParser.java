@@ -203,6 +203,11 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                 final var index = parse(ctx.expr(1));
                 return List.of(new ArrayAccessExpr(reference, index));
             }
+            else if (ctx.KW_IN() != null) {
+                final var lhs = parse(ctx.expr(0));
+                final var rhs = parse(ctx.expr(1));
+                return List.of(new InExpr(lhs, rhs));
+            }
             else if (ctx.KW_IS() != null) {
                 final var concreteType = ctx.type();
                 final var lhs = parse(ctx.expr(0));

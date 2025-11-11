@@ -159,7 +159,14 @@ public interface ElementVisitor {
         else if (expr instanceof IfExpr ifExpr) {
             return visitIfExpr(ifExpr);
         }
+        else if (expr instanceof InExpr inExpr) {
+            return visitInExpr(inExpr);
+        }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitInExpr(final @NotNull InExpr inExpr) {
+        return visitExprContainer(inExpr);
     }
 
     // For macro calls & prepro class instantiations
@@ -318,6 +325,9 @@ public interface ElementVisitor {
         else if (statement instanceof ErrorStatement errorStatement) {
             return visitErrorStatement(errorStatement);
         }
+        else if (statement instanceof ForStatement forStatement) {
+            return visitForStatement(forStatement);
+        }
         else if (statement instanceof Expr expr) {
             return visitExpr(expr);
         }
@@ -362,6 +372,10 @@ public interface ElementVisitor {
 
     default @NotNull Statement visitReturnStatement(final @NotNull ReturnStatement returnStatement) {
         return visitExprContainer(returnStatement);
+    }
+
+    default @NotNull Statement visitForStatement(final @NotNull ForStatement forStatement) {
+        return visitElementContainer(forStatement);
     }
 
     default @NotNull Statement visitDefine(final @NotNull DefineStatement defineStatement) {
