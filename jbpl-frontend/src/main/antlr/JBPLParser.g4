@@ -274,6 +274,7 @@ expr:
     | expr KW_IN expr
 
     | ifExpr
+    | whenExpr
     | arrayExpr
     | macroCall
     | signatureExpr
@@ -288,6 +289,40 @@ expr:
     | selectorReference
     | literal
     | reference
+    ;
+
+whenExpr:
+    KW_WHEN
+    L_PAREN
+    expr
+    R_PAREN
+    L_BRACE
+    (whenBranch
+    | NL)*?
+    defaultWhenBranch?
+    R_BRACE
+    ;
+
+defaultWhenBranch:
+    KW_ELSE
+    ARROW
+    whenBranchBody
+    ;
+
+whenBranch:
+    expr
+    ARROW
+    whenBranchBody
+    ;
+
+whenBranchBody:
+    ((L_BRACE
+    (bodyElement
+    | NL)*?
+    R_BRACE
+    NL+)
+    | bodyElement
+    NL+)
     ;
 
 wrappedExpr:
@@ -518,7 +553,7 @@ functionName:
 statement:
     include
     | define
-    | forLoop
+    | forStatement
     | returnStatement
     | yeetStatement
     | versionStatement
@@ -533,7 +568,7 @@ statement:
     | expr
     ;
 
-forLoop:
+forStatement:
     KW_FOR
     L_PAREN
     exprOrName

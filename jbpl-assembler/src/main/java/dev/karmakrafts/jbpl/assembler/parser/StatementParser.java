@@ -151,7 +151,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     }
 
     @Override
-    public List<Statement> visitForLoop(final @NotNull ForLoopContext ctx) {
+    public List<Statement> visitForStatement(final @NotNull ForStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var variableName = ParserUtils.parseExprOrName(ctx.exprOrName());
             final var value = ExprParser.parse(ctx.expr());

@@ -165,7 +165,29 @@ public interface ElementVisitor {
         else if (expr instanceof SizeOfExpr sizeOfExpr) {
             return visitSizeOfExpr(sizeOfExpr);
         }
+        else if (expr instanceof WhenExpr whenExpr) {
+            return visitWhenExpr(whenExpr);
+        }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitWhenExpr(final @NotNull WhenExpr whenExpr) {
+        final var transformedBranches = whenExpr.getBranches().stream().map(this::visitWhenBranch).toList();
+        whenExpr.clearBranches();
+        whenExpr.addBranches(transformedBranches);
+        return visitExprContainer(whenExpr);
+    }
+
+    default @NotNull WhenExpr.Branch visitWhenBranch(final @NotNull WhenExpr.Branch branch) {
+        if (branch instanceof WhenExpr.ConditionalBranch conditionalBranch) {
+            return visitConditionalWhenBranch(conditionalBranch);
+        }
+        return visitElementContainer(branch);
+    }
+
+    default @NotNull WhenExpr.ConditionalBranch visitConditionalWhenBranch(final @NotNull WhenExpr.ConditionalBranch branch) {
+        branch.setValue(visitExpr(branch.getValue()));
+        return visitElementContainer(branch);
     }
 
     default @NotNull Expr visitSizeOfExpr(final @NotNull SizeOfExpr sizeOfExpr) {

@@ -28,3 +28,11 @@ for(${var_name} in test_array) {
 ^info sizeof(_t)
 ^info sizeof(test_array)
 ^info sizeof(type(i32))
+
+define when_var: i32 = 101
+
+^info when(when_var) {
+    100 -> "HELLOU"
+    101 -> "MORE TESTING"
+    else -> "TESTING"
+}

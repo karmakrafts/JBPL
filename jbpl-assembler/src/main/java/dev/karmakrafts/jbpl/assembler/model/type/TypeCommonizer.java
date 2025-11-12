@@ -30,7 +30,7 @@ public final class TypeCommonizer {
     private TypeCommonizer() {
     }
 
-    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull List<? extends Element> elements,
+    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Collection<? extends Element> elements,
                                                                   final @NotNull EvaluationContext context) {
         // @formatter:off
         final var returnedTypes = elements.stream()

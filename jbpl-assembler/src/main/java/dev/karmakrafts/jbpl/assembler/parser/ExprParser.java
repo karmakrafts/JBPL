@@ -98,6 +98,51 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             TokenRange.fromContext(ctx))));
     }
 
+    private @NotNull WhenExpr.Branch parseWhenBranch(final @NotNull WhenBranchContext ctx) {
+        final var condition = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx.expr()));
+        final var body = ctx.whenBranchBody();
+        if (body.L_BRACE() != null) { // This is a scoped body
+            final var branch = new WhenExpr.ScopedBranch(condition);
+            // @formatter:off
+            branch.addElements(body.bodyElement().stream()
+                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
+                .toList());
+            // @formatter:on
+            return branch;
+        }
+        final var branch = new WhenExpr.ScopelessBranch(condition);
+        branch.addElement(ExceptionUtils.rethrowUnchecked(() -> ElementParser.parse(body.bodyElement(0))));
+        return branch;
+    }
+
+    private @NotNull WhenExpr.Branch parseDefaultWhenBranch(final @NotNull DefaultWhenBranchContext ctx) {
+        final var body = ctx.whenBranchBody();
+        if (body.L_BRACE() != null) { // This is a scoped body
+            final var branch = new WhenExpr.ScopedDefaultBranch();
+            // @formatter:off
+            branch.addElements(body.bodyElement().stream()
+                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
+                .toList());
+            // @formatter:on
+            return branch;
+        }
+        final var branch = new WhenExpr.ScopelessDefaultBranch();
+        branch.addElement(ExceptionUtils.rethrowUnchecked(() -> ElementParser.parse(body.bodyElement(0))));
+        return branch;
+    }
+
+    @Override
+    public @NotNull List<Expr> visitWhenExpr(final @NotNull WhenExprContext ctx) {
+        final var value = ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()));
+        final var whenExpr = new WhenExpr(value);
+        whenExpr.addBranches(ctx.whenBranch().stream().map(this::parseWhenBranch).toList());
+        final var defaultBranch = ctx.defaultWhenBranch();
+        if (defaultBranch != null) {
+            whenExpr.addBranch(parseDefaultWhenBranch(defaultBranch));
+        }
+        return List.of(whenExpr);
+    }
+
     @Override
     public @NotNull List<Expr> visitOpcodeOfExpr(final @NotNull OpcodeOfExprContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr()))));
