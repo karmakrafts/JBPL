@@ -38,13 +38,13 @@ public final class LocalStatement extends AbstractExprContainer implements State
 
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getName().evaluateAsConst(context, String.class);
+        return getName().evaluateAs(context, String.class);
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         // Make this local available in the current frame during further evaluation, no forward refs
-        final var name = getName().evaluateAsConst(context, String.class);
+        final var name = getName().evaluateAs(context, String.class);
         context.peekFrame().locals.put(name, this);
     }
 

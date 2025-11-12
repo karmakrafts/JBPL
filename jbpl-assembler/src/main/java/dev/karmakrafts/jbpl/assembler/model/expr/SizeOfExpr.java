@@ -52,7 +52,7 @@ public final class SizeOfExpr extends AbstractExprContainer implements Expr {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var valueType = getValue().getType(context);
-        final var value = getValue().evaluateAsConst(context, Object.class);
+        final var value = getValue().evaluateAs(context, Object.class);
         if (valueType == PreproType.TYPE && value instanceof BuiltinType builtinType) {
             switch (builtinType) {
                 case VOID -> {

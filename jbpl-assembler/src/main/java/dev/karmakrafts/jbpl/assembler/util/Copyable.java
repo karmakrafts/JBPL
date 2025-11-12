@@ -16,9 +16,18 @@
 
 package dev.karmakrafts.jbpl.assembler.util;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public interface Copyable<C extends Copyable<C>> {
     @SuppressWarnings("unchecked")
     static <T> T copyIfPossible(final T value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.getClass().isArray()) {
+            return (T) Arrays.copyOf((Object[]) value, Array.getLength(value));
+        }
         if (value instanceof Copyable<?> copyable) {
             return (T) copyable.copy();
         }

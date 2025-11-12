@@ -55,13 +55,13 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
 
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getName().evaluateAsConst(context, String.class);
+        return getName().evaluateAs(context, String.class);
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
-        final var type = getType().evaluateAsConst(context, Type.class);
+        final var type = getType().evaluateAs(context, Type.class);
         final var otherType = value.getType(context);
         if (!type.isAssignableFrom(otherType)) {
             final var message = String.format("Cannot assign value of type %s to define of type %s", otherType, type);

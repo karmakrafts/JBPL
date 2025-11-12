@@ -36,18 +36,16 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         if (argument != null) {
             return argument.getType(context);
         }
-        return getDefine(context).getType().evaluateAsConst(context, Type.class);
+        return getDefine(context).getType().evaluateAs(context, Type.class);
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var argument = findArgument(context);
-        // If we find a named argument in the current frame that matches the name of this ref
         if (argument != null) {
             context.pushValue(argument.evaluateAsConst(context));
             return;
         }
-        // Otherwise resolve as define
         getDefine(context).evaluate(context);
     }
 

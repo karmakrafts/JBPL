@@ -90,7 +90,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
-        final var constValue = value.evaluateAsConst(context, Object.class);
+        final var constValue = value.evaluateAs(context, Object.class);
         final var type = value.getType(context);
         if (type == BuiltinType.BOOL) {
             context.pushValue(evaluateForBool((boolean) constValue, context));

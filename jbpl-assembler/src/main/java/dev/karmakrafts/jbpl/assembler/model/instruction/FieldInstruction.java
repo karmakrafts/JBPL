@@ -50,9 +50,9 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
-        final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
-        final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
-        final var name = signature.getFieldName().evaluateAsConst(context, String.class);
+        final var signature = getSignature().evaluateAs(context, FieldSignatureExpr.class);
+        final var owner = signature.getFieldOwner().evaluateAs(context, ClassType.class);
+        final var name = signature.getFieldName().evaluateAs(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
         context.emit(new FieldInsnNode(encodedOpcode, owner.name(), name, descriptor));
     }

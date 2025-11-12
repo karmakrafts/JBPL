@@ -22,6 +22,8 @@ import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
+
 public final class AssignExpr extends AbstractExprContainer implements Expr {
     public static final int REFERENCE_INDEX = 0;
     public static final int VALUE_INDEX = 1;
@@ -87,8 +89,12 @@ public final class AssignExpr extends AbstractExprContainer implements Expr {
             return;
         }
         else if (reference instanceof ArrayAccessExpr arrayAccessExpr) {
-            // In this case, we are storing into the array
-            // TODO: implement me
+            // In this case, we are storing into the array. Reference evaluates to an array ref, against what the function name suggests.
+            final var arrayRef = arrayAccessExpr.getReference().evaluateAs(context, Object.class);
+            final var arrayIndex = arrayAccessExpr.getIndex().evaluateAs(context, Integer.class);
+            Array.set(arrayRef, arrayIndex, value.evaluateAs(context, Object.class));
+            context.pushValue(value.evaluateAsConst(context));
+            return;
         }
         final var message = String.format("Cannot re-assign expression %s", reference);
         throw new EvaluationException(message,

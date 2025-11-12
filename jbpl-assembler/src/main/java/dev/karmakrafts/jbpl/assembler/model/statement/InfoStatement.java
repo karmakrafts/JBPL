@@ -40,7 +40,7 @@ public final class InfoStatement extends AbstractExprContainer implements Statem
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var message = getValue().evaluateAsConst(context, Object.class).toString();
+        final var message = getValue().evaluateAs(context, Object.class).toString();
         context.infoConsumer.accept(message);
     }
 

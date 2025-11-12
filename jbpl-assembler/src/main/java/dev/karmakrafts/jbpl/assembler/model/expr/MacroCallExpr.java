@@ -37,7 +37,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getMacro(context).getReturnType().evaluateAsConst(context, Type.class);
+        return getMacro(context).getReturnType().evaluateAs(context, Type.class);
     }
 
     private @NotNull List<Pair<@Nullable String, LiteralExpr>> evaluateArguments(final @NotNull EvaluationContext context) throws EvaluationException {
@@ -47,7 +47,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                 final var name = pair.left();
                 final var value = pair.right().evaluateAsConst(context);
                 if(name != null) {
-                    return new Pair<>(name.evaluateAsConst(context, String.class), value);
+                    return new Pair<>(name.evaluateAs(context, String.class), value);
                 }
                 return new Pair<>((String)null, value);
             }))

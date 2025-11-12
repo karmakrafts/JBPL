@@ -81,8 +81,8 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
         }
         final var resolvedParams = new LinkedHashMap<String, Type>(16, 0.75F, true);
         for (final var pair : params) {
-            final var name = pair.left().evaluateAsConst(context, String.class);
-            final var type = pair.right().evaluateAsConst(context, Type.class);
+            final var name = pair.left().evaluateAs(context, String.class);
+            final var type = pair.right().evaluateAs(context, Type.class);
             resolvedParams.put(name, type);
         }
         return resolvedParams;
@@ -90,7 +90,7 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
 
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
-        return name.evaluateAsConst(context, String.class);
+        return name.evaluateAs(context, String.class);
     }
 
     @Override

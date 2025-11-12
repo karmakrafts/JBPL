@@ -49,14 +49,14 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var signature = getSignature().evaluateAsConst(context, FieldSignatureExpr.class);
-        final var owner = signature.getFieldOwner().evaluateAsConst(context, ClassType.class);
+        final var signature = getSignature().evaluateAs(context, FieldSignatureExpr.class);
+        final var owner = signature.getFieldOwner().evaluateAs(context, ClassType.class);
         final var modifier = AccessModifier.combine(accessModifiers);
-        final var name = signature.getFieldName().evaluateAsConst(context, String.class);
+        final var name = signature.getFieldName().evaluateAs(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
         final var initializer = getInitializer();
         final var initializerType = initializer.getType(context);
-        final var fieldType = signature.getFieldType().evaluateAsConst(context, Type.class);
+        final var fieldType = signature.getFieldType().evaluateAs(context, Type.class);
         // @formatter:off
         // Handle cases where the initializer never gets updated from unit-expr by creating default value from field type
         final var initialValue = initializerType == BuiltinType.VOID

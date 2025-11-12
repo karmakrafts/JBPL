@@ -61,7 +61,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
 
     private byte performIteration(final @NotNull Expr variableValue,
                                   final @NotNull EvaluationContext context) throws EvaluationException {
-        final var variableName = this.variableName.evaluateAsConst(context, String.class);
+        final var variableName = this.variableName.evaluateAs(context, String.class);
         context.pushFrame(this);
         context.peekFrame().namedLocalValues.put(variableName, variableValue);
         for (final var element : getElements()) {
@@ -80,7 +80,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
     }
 
     private void iterateArray(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var array = value.evaluateAsConst(context, Object.class);
+        final var array = value.evaluateAs(context, Object.class);
         final var arrayLength = Array.getLength(array);
         for (var i = 0; i < arrayLength; i++) {
             final var value = Array.get(array, i);
@@ -98,7 +98,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
     private <T extends Comparable<T>> void iterateNumericRange(final @NotNull Class<T> type,
                                                                final @NotNull Function<T, T> inc,
                                                                final @NotNull EvaluationContext context) throws EvaluationException {
-        final var values = getValue().evaluateAsConst(context, (Class<T[]>) type.arrayType());
+        final var values = getValue().evaluateAs(context, (Class<T[]>) type.arrayType());
         final var start = values[0];
         final var end = values[1];
         for (var value = start; value.compareTo(end) != 0; value = inc.apply(value)) {

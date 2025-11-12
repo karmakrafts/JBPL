@@ -38,7 +38,7 @@ public final class DefaultExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getType().evaluateAsConst(context, Type.class);
+        return getType().evaluateAs(context, Type.class);
     }
 
     @Override

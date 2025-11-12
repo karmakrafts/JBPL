@@ -52,7 +52,7 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = getOpcode(context).encodedValue;
-        final var slotIdObject = getSlot().evaluateAsConst(context, Object.class);
+        final var slotIdObject = getSlot().evaluateAs(context, Object.class);
         if (slotIdObject instanceof Integer slotId) {
             context.emit(new VarInsnNode(encodedOpcode, slotId));
             return;

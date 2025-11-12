@@ -24,20 +24,20 @@ public final class YeetStatement extends AbstractExprContainer implements Statem
             context.removeClass(type.name());
         }
         else if (target instanceof FunctionSignatureExpr functionSignatureExpr) {
-            final var result = functionSignatureExpr.evaluateAsConst(context, FunctionSignatureExpr.class);
-            final var name = result.getFunctionName().evaluateAsConst(context, String.class);
-            final var owner = result.getFunctionOwner().evaluateAsConst(context, ClassType.class);
-            final var returnType = result.getFunctionReturnType().evaluateAsConst(context, Type.class);
+            final var result = functionSignatureExpr.evaluateAs(context, FunctionSignatureExpr.class);
+            final var name = result.getFunctionName().evaluateAs(context, String.class);
+            final var owner = result.getFunctionOwner().evaluateAs(context, ClassType.class);
+            final var returnType = result.getFunctionReturnType().evaluateAs(context, Type.class);
             // @formatter:off
             final var paramTypes = result.getFunctionParameters().stream()
-                .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class)))
+                .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAs(context, Type.class)))
                 .toArray(Type[]::new);
             // @formatter:on
             context.removeFunction(owner.name(), name, returnType, paramTypes);
         }
         else if (target instanceof FieldSignatureExpr fieldSignatureExpr) {
-            final var name = fieldSignatureExpr.getFieldName().evaluateAsConst(context, String.class);
-            final var owner = fieldSignatureExpr.getFieldOwner().evaluateAsConst(context, ClassType.class);
+            final var name = fieldSignatureExpr.getFieldName().evaluateAs(context, String.class);
+            final var owner = fieldSignatureExpr.getFieldOwner().evaluateAs(context, ClassType.class);
             context.removeField(owner.name(), name);
         }
         else {

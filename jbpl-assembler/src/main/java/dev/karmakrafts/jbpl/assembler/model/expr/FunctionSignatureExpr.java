@@ -49,10 +49,10 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
 
     @Override
     public @NotNull String evaluateAsConstDescriptor(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var returnType = getFunctionReturnType().evaluateAsConst(context, Type.class).materialize(context);
+        final var returnType = getFunctionReturnType().evaluateAs(context, Type.class).materialize(context);
         // @formatter:off
         final var paramTypes = getFunctionParameters().stream()
-            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
+            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAs(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         return org.objectweb.asm.Type.getMethodDescriptor(returnType, paramTypes);

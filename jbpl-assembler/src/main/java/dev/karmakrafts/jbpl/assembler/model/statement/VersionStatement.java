@@ -23,7 +23,7 @@ public final class VersionStatement extends AbstractExprContainer implements Sta
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        context.bytecodeVersion = getVersion().evaluateAsConst(context, Integer.class);
+        context.bytecodeVersion = getVersion().evaluateAs(context, Integer.class);
     }
 
     @Override

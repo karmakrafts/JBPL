@@ -34,9 +34,9 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var access = AccessModifier.combine(accessModifiers);
-        final var signature = this.signature.evaluateAsConst(context, FunctionSignatureExpr.class);
-        final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class);
-        final var name = signature.getFunctionName().evaluateAsConst(context, String.class);
+        final var signature = this.signature.evaluateAs(context, FunctionSignatureExpr.class);
+        final var owner = signature.getFunctionOwner().evaluateAs(context, ClassType.class);
+        final var name = signature.getFunctionName().evaluateAs(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
         final var method = new MethodNode(context.bytecodeApi, access, name, descriptor, descriptor, null);
         super.evaluate(context); // Evaluate child statements

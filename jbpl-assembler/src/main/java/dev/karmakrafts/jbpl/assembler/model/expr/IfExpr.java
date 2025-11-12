@@ -107,7 +107,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var condition = this.condition.evaluateAsConst(context, Boolean.class);
+        final var condition = this.condition.evaluateAs(context, Boolean.class);
         if (!condition) {
             // If the condition of this if() expression didn't evaluate to true, attempt to take one of the else if() branches..
             for (final var branch : elseIfBranches) {
@@ -192,7 +192,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
 
         @Override
         public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-            final var condition = this.condition.evaluateAsConst(context, Boolean.class);
+            final var condition = this.condition.evaluateAs(context, Boolean.class);
             if (!condition) {
                 return;
             }

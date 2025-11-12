@@ -66,13 +66,13 @@ public final class WhenExpr extends AbstractExprContainer implements Expr, Scope
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var value = getValue().evaluateAsConst(context, Object.class);
+        final var value = getValue().evaluateAs(context, Object.class);
         // Attempt evaluating branches in order
         for (final var branch : branches) {
             if (!(branch instanceof ConditionalBranch conditionalBranch)) {
                 continue;
             }
-            if (!conditionalBranch.getValue().evaluateAsConst(context, Object.class).equals(value)) {
+            if (!conditionalBranch.getValue().evaluateAs(context, Object.class).equals(value)) {
                 continue;
             }
             branch.evaluate(context);

@@ -60,7 +60,7 @@ public final class StackFrame implements Copyable<StackFrame> {
             if (associatedLocal != null) {
                 final var indexExpr = associatedLocal.getIndex();
                 if (indexExpr.isUnit()) {
-                    index = indexExpr.evaluateAsConst(context, Integer.class);
+                    index = indexExpr.evaluateAs(context, Integer.class);
                 }
                 else {
                     index = localFrameOffset + localIndex++;

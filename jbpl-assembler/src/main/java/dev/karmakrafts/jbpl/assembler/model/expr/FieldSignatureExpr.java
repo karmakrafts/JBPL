@@ -35,7 +35,7 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
 
     @Override
     public @NotNull String evaluateAsConstDescriptor(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getFieldType().evaluateAsConst(context, Type.class).materialize(context).getDescriptor();
+        return getFieldType().evaluateAs(context, Type.class).materialize(context).getDescriptor();
     }
 
     public @NotNull Expr getFieldOwner() {

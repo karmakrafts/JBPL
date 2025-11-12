@@ -47,6 +47,10 @@ test_message = "Assignments now work!"
 
 final define forbidden_fruit: i32 = 420 // Cannot be re-assigned
 
+define just_another_array: [[string]] = []{[]{"Testing"}}
+just_another_array[0][0] = "1234567890"
+^info just_another_array[0][0]
+
 ^info when(when_var) {
     100 -> "HELLOU"
     101 -> "MORE TESTING"

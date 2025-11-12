@@ -41,7 +41,7 @@ public final class AssertStatement extends AbstractExprContainer implements Stat
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
-        if (value.evaluateAsConst(context, Boolean.class)) {
+        if (value.evaluateAs(context, Boolean.class)) {
             return;
         }
         throw new EvaluationException(String.format("Assertion %s failed", getValue()), null, null);

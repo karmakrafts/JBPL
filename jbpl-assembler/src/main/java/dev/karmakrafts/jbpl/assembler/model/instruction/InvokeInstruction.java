@@ -50,10 +50,10 @@ public final class InvokeInstruction extends AbstractExprContainer implements In
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
-        final var signature = getSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
-        final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class);
+        final var signature = getSignature().evaluateAs(context, FunctionSignatureExpr.class);
+        final var owner = signature.getFunctionOwner().evaluateAs(context, ClassType.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
-        final var name = signature.getFunctionName().evaluateAsConst(context, String.class);
+        final var name = signature.getFunctionName().evaluateAs(context, String.class);
         context.emit(new MethodInsnNode(encodedOpcode, owner.name(), name, descriptor));
     }
 

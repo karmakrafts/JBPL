@@ -25,7 +25,7 @@ public record PreproClassType(@NotNull String name) implements Type {
         final var result = new PreproClassExpr(this);
         for (final var entry : clazz.getFields().entrySet()) {
             final var name = entry.getKey().evaluateAsConst(context);
-            final var value = entry.getValue().evaluateAsConst(context, Type.class).createDefaultValue(context);
+            final var value = entry.getValue().evaluateAs(context, Type.class).createDefaultValue(context);
             result.addArgument(name, value);
         }
         return result;

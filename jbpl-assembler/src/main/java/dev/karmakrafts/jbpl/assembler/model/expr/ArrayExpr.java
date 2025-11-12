@@ -39,6 +39,7 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
     private final XBiFunction<EvaluationContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver;
     private boolean hasUnresolvedType = false; // Whether the type is an Expr or not
     private int valueIndex = 0;
+    private Object arrayReference; // Cache array ref to allow mutability
 
     private ArrayExpr(final @NotNull XBiFunction<EvaluationContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver,
                       final boolean hasInferredType) {
@@ -51,7 +52,7 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
     }
 
     public ArrayExpr(final @NotNull Expr type) {
-        this((ctx, commonType) -> type.evaluateAsConst(ctx, Type.class), false);
+        this((ctx, commonType) -> type.evaluateAs(ctx, Type.class), false);
         hasUnresolvedType = true;
         addExpression(type);
     }
@@ -127,14 +128,16 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var type = TypeMapper.map(getType(context));
-        final var values = getValues();
-        final var size = values.size();
-        final var array = Array.newInstance(type.componentType(), size);
-        for (var i = 0; i < size; ++i) {
-            Array.set(array, i, values.get(i).evaluateAsConst(context, Object.class));
+        if (arrayReference == null) {
+            final var type = TypeMapper.map(getType(context));
+            final var values = getValues();
+            final var size = values.size();
+            arrayReference = Array.newInstance(type.componentType(), size);
+            for (var i = 0; i < size; ++i) {
+                Array.set(arrayReference, i, values.get(i).evaluateAs(context, Object.class));
+            }
         }
-        context.pushValue(LiteralExpr.of(array, getTokenRange()));
+        context.pushValue(LiteralExpr.of(arrayReference, getTokenRange()));
     }
 
     @Override

@@ -20,8 +20,8 @@ public interface Expr extends Statement {
         return (LiteralExpr) context.popValue();
     }
 
-    default <T> @NotNull T evaluateAsConst(final @NotNull EvaluationContext context,
-                                           final @NotNull Class<T> type) throws EvaluationException {
+    default <T> @NotNull T evaluateAs(final @NotNull EvaluationContext context,
+                                      final @NotNull Class<T> type) throws EvaluationException {
         return type.cast(evaluateAsConst(context).value);
     }
 
@@ -29,9 +29,9 @@ public interface Expr extends Statement {
         final var type = getType(context);
         if (type == PreproType.TYPE) {
             // Const types are materialized after unwrapping
-            return evaluateAsConst(context, Type.class).materialize(context);
+            return evaluateAs(context, Type.class).materialize(context);
         }
-        return evaluateAsConst(context, Object.class);
+        return evaluateAs(context, Object.class);
     }
 
     default boolean isUnit() {

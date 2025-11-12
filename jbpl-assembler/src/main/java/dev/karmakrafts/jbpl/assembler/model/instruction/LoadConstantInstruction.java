@@ -91,7 +91,7 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var value = getValue().evaluateAsConst(context, Number.class);
+        final var value = getValue().evaluateAs(context, Number.class);
         if (value instanceof Integer intValue) {
             context.emit(createConstantInt(intValue));
             return;

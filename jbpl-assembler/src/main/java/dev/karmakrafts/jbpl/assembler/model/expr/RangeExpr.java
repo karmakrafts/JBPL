@@ -72,8 +72,8 @@ public final class RangeExpr extends AbstractExprContainer implements Expr {
     private <T> void evaluateNumericRange(final @NotNull Class<T> type,
                                           final @NotNull Function<T, T> inc,
                                           final @NotNull EvaluationContext context) throws EvaluationException {
-        var start = getStart().evaluateAsConst(context, type);
-        var end = getEnd().evaluateAsConst(context, type);
+        var start = getStart().evaluateAs(context, type);
+        var end = getEnd().evaluateAs(context, type);
         if (isInclusive) {
             end = inc.apply(end);
         }

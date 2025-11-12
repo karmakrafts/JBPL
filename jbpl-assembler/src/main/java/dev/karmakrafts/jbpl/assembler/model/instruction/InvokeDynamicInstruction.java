@@ -132,7 +132,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
 
     private @NotNull Handle evaluateInvokeHandle(final @NotNull Expr expr,
                                                  final @NotNull EvaluationContext context) throws EvaluationException {
-        final var instruction = expr.evaluateAsConst(context, Instruction.class);
+        final var instruction = expr.evaluateAs(context, Instruction.class);
         if (!(instruction instanceof InvokeInstruction invokeInstruction)) {
             throw new EvaluationException(
                 "Invoke handle requires INVOKESTATIC, INVOKEVIRTUAL, INVOKESPECIAL or INVOKEINTERFACE target",
@@ -141,9 +141,9 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         }
         final var opcode = invokeInstruction.getOpcode(context);
         final var tag = getInvokeTag(opcode, context);
-        final var signature = invokeInstruction.getSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
-        final var owner = signature.getFunctionOwner().evaluateAsConst(context, ClassType.class).materialize(context);
-        final var name = signature.getFunctionName().evaluateAsConst(context, String.class);
+        final var signature = invokeInstruction.getSignature().evaluateAs(context, FunctionSignatureExpr.class);
+        final var owner = signature.getFunctionOwner().evaluateAs(context, ClassType.class).materialize(context);
+        final var name = signature.getFunctionName().evaluateAs(context, String.class);
         final var isInterface = opcode == Opcode.INVOKEINTERFACE;
         final var descriptor = signature.evaluateAsConstDescriptor(context);
         return new Handle(tag, owner.getInternalName(), name, descriptor, isInterface);
@@ -151,24 +151,23 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var instantiatedSignature = getInstantiatedSignature().evaluateAsConst(context,
-            FunctionSignatureExpr.class);
-        final var samSignature = getSAMSignature().evaluateAsConst(context, FunctionSignatureExpr.class);
-        final var name = instantiatedSignature.getFunctionName().evaluateAsConst(context, String.class);
-        final var owner = instantiatedSignature.getFunctionOwner().evaluateAsConst(context, ClassType.class);
+        final var instantiatedSignature = getInstantiatedSignature().evaluateAs(context, FunctionSignatureExpr.class);
+        final var samSignature = getSAMSignature().evaluateAs(context, FunctionSignatureExpr.class);
+        final var name = instantiatedSignature.getFunctionName().evaluateAs(context, String.class);
+        final var owner = instantiatedSignature.getFunctionOwner().evaluateAs(context, ClassType.class);
         final var factoryDescriptor = computeFactoryDescriptor(owner, context);
         // @formatter:off
         final var samReturnType = samSignature.getFunctionReturnType()
-            .evaluateAsConst(context, Type.class)
+            .evaluateAs(context, Type.class)
             .materialize(context);
         final var samParamTypes = samSignature.getFunctionParameters().stream()
-            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
+            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAs(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         final var returnType = instantiatedSignature.getFunctionReturnType()
-            .evaluateAsConst(context, Type.class)
+            .evaluateAs(context, Type.class)
             .materialize(context);
         final var paramTypes = instantiatedSignature.getFunctionParameters().stream()
-            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAsConst(context, Type.class).materialize(context)))
+            .map(ExceptionUtils.unsafeFunction(type -> type.evaluateAs(context, Type.class).materialize(context)))
             .toArray(org.objectweb.asm.Type[]::new);
         // @formatter:on
         final var bsmHandle = evaluateInvokeHandle(getBSMInstruction(), context);
@@ -177,7 +176,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         final var instantiatedType = org.objectweb.asm.Type.getMethodType(returnType, paramTypes);
         // @formatter:off
         final var arguments = getArguments().stream()
-            .map(ExceptionUtils.unsafeFunction(expr -> expr.evaluateAsConst(context, Object.class)))
+            .map(ExceptionUtils.unsafeFunction(expr -> expr.evaluateAs(context, Object.class)))
             .toList();
         // @formatter:on
         // Compose BSM arguments

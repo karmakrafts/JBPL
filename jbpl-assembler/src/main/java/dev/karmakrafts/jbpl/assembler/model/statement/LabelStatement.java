@@ -16,12 +16,12 @@ public final class LabelStatement extends AbstractExprContainer implements State
 
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getName().evaluateAsConst(context, String.class);
+        return getName().evaluateAs(context, String.class);
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var name = getName().evaluateAsConst(context, String.class);
+        final var name = getName().evaluateAs(context, String.class);
         context.peekFrame().getOrCreateLabelNode(name); // Pre-allocate label
     }
 

@@ -50,7 +50,7 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
     public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
         final var target = getTarget();
-        final var label = context.getOrCreateLabelNode(target.evaluateAsConst(context, String.class));
+        final var label = context.getOrCreateLabelNode(target.evaluateAs(context, String.class));
         context.emit(new JumpInsnNode(encodedOpcode, label));
     }
 

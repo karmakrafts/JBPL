@@ -58,9 +58,9 @@ public final class InExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var lhsValue = getLhs().evaluateAsConst(context, Object.class);
+        final var lhsValue = getLhs().evaluateAs(context, Object.class);
         final var lhsType = getLhs().getType(context);
-        final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
+        final var rhsValue = getRhs().evaluateAs(context, Object.class);
         final var rhsType = getRhs().getType(context);
         if (rhsType == BuiltinType.STRING) {
             context.pushValue(LiteralExpr.of(rhsValue.toString().contains(lhsValue.toString()), getTokenRange()));
@@ -69,8 +69,8 @@ public final class InExpr extends AbstractExprContainer implements Expr {
         else if (rhsType == PreproType.FUNCTION_SIGNATURE) {
             final var signature = (FunctionSignatureExpr) rhsValue;
             if (lhsType == BuiltinType.STRING) {
-                context.pushValue(LiteralExpr.of(signature.getFunctionName().evaluateAsConst(context,
-                    String.class).equals(lhsValue), getTokenRange()));
+                context.pushValue(LiteralExpr.of(signature.getFunctionName().evaluateAs(context, String.class).equals(
+                    lhsValue), getTokenRange()));
                 return;
             }
             else if (lhsType == PreproType.TYPE) {
@@ -91,7 +91,7 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                     .filter(ExceptionUtils.unsafePredicate(expr -> expr.getType(context) == BuiltinType.STRING))
                     .findFirst();
                 // @formatter:on
-                context.pushValue(LiteralExpr.of(name.isPresent() && name.get().evaluateAsConst(context,
+                context.pushValue(LiteralExpr.of(name.isPresent() && name.get().evaluateAs(context,
                     String.class).equals(lhsValue), getTokenRange()));
                 return;
             }

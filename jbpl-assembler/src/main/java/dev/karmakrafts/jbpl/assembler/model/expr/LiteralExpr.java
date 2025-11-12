@@ -22,7 +22,9 @@ public final class LiteralExpr extends AbstractElement implements Expr {
     }
 
     public static @NotNull LiteralExpr unit() {
-        return new LiteralExpr(BuiltinType.VOID, TokenRange.SYNTHETIC);
+        final var expr = new LiteralExpr(BuiltinType.VOID, null);
+        expr.setTokenRange(TokenRange.SYNTHETIC);
+        return expr;
     }
 
     public static @NotNull LiteralExpr unit(final @NotNull TokenRange tokenRange) {

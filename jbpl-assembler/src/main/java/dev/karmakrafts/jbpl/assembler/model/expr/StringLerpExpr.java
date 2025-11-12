@@ -19,7 +19,7 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
         final var buffer = new StringBuilder();
         final var expressions = getExpressions();
         for (final var expr : expressions) {
-            buffer.append(expr.evaluateAsConst(context, Object.class));
+            buffer.append(expr.evaluateAs(context, Object.class));
         }
         context.pushValue(LiteralExpr.of(buffer.toString(), getTokenRange()));
     }

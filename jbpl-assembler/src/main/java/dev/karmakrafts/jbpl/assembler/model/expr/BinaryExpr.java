@@ -96,44 +96,42 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         return switch (op) {
             // Boolean equality
             case EQ -> {
-                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                final var rhsBool = getRhs().evaluateAs(context, Boolean.class);
                 yield LiteralExpr.of(lhsBool == rhsBool, getTokenRange());
             }
             case NE -> {
-                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                final var rhsBool = getRhs().evaluateAs(context, Boolean.class);
                 yield LiteralExpr.of(lhsBool != rhsBool, getTokenRange());
             }
             // Boolean logic
             case AND -> {
-                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                final var rhsBool = getRhs().evaluateAs(context, Boolean.class);
                 yield LiteralExpr.of(lhsBool & rhsBool, getTokenRange());
             }
             case OR -> {
-                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                final var rhsBool = getRhs().evaluateAs(context, Boolean.class);
                 yield LiteralExpr.of(lhsBool | rhsBool, getTokenRange());
             }
             case XOR -> {
-                final var rhsBool = getRhs().evaluateAsConst(context, Boolean.class);
+                final var rhsBool = getRhs().evaluateAs(context, Boolean.class);
                 yield LiteralExpr.of(lhsBool ^ rhsBool, getTokenRange());
             }
             case SC_AND -> {
                 if (!lhsBool) {
                     yield LiteralExpr.of(false, getTokenRange());
                 }
-                yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class), getTokenRange());
+                yield LiteralExpr.of(getRhs().evaluateAs(context, Boolean.class), getTokenRange());
             }
             case SC_OR -> {
                 if (lhsBool) {
                     yield LiteralExpr.of(true, getTokenRange());
                 }
-                yield LiteralExpr.of(getRhs().evaluateAsConst(context, Boolean.class), getTokenRange());
+                yield LiteralExpr.of(getRhs().evaluateAs(context, Boolean.class), getTokenRange());
             }
             default -> throw new EvaluationException(String.format("Unsupported boolean binary expression: %s %s %s",
                 lhsBool,
                 op,
-                getRhs().evaluateAsConst(context, Object.class)),
-                SourceDiagnostic.from(this),
-                context.createStackTrace());
+                getRhs().evaluateAs(context, Object.class)), SourceDiagnostic.from(this), context.createStackTrace());
         };
     }
 
@@ -317,7 +315,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
 
     private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number lhsNumber,
                                                    final @NotNull EvaluationContext context) throws EvaluationException {
-        final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
+        final var rhsValue = getRhs().evaluateAs(context, Object.class);
         if (!(rhsValue instanceof Number rhsNumber)) {
             throw new EvaluationException("Numeric binary expression must have a number on the right hand side!",
                 SourceDiagnostic.from(this),
@@ -349,30 +347,30 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var lhsValue = getLhs().evaluateAsConst(context, Object.class);
+        final var lhsValue = getLhs().evaluateAs(context, Object.class);
         if (lhsValue instanceof String lhsString) { // String concatenation with any type
             switch (op) {
                 case ADD -> {
-                    final var rhsValue = getRhs().evaluateAsConst(context, Object.class);
+                    final var rhsValue = getRhs().evaluateAs(context, Object.class);
                     context.pushValue(LiteralExpr.of(String.format("%s%s", lhsString, rhsValue), getTokenRange()));
                 }
                 case CMP -> {
-                    final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
+                    final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
                     context.pushValue(LiteralExpr.of(lhsString.compareTo(rhsString), getTokenRange()));
                 }
                 case EQ -> {
-                    final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
+                    final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
                     context.pushValue(LiteralExpr.of(lhsString.equals(rhsString), getTokenRange()));
                 }
                 case NE -> {
-                    final var rhsString = getRhs().evaluateAsConst(context, Object.class).toString();
+                    final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
                     context.pushValue(LiteralExpr.of(!lhsString.equals(rhsString), getTokenRange()));
                 }
             }
             return;
         }
         else if (lhsValue instanceof Type lhsType) { // Type addition/subtraction creates intersection types
-            final var rhsType = getRhs().evaluateAsConst(context, Type.class);
+            final var rhsType = getRhs().evaluateAs(context, Type.class);
             context.pushValue(evaluateForType(lhsType, rhsType, context));
             return;
         }
@@ -387,7 +385,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         throw new EvaluationException(String.format("Unsupported binary expression operands: %s %s %s",
             lhsValue,
             op,
-            getRhs().evaluateAsConst(context, Object.class)), SourceDiagnostic.from(this), context.createStackTrace());
+            getRhs().evaluateAs(context, Object.class)), SourceDiagnostic.from(this), context.createStackTrace());
     }
 
     @Override

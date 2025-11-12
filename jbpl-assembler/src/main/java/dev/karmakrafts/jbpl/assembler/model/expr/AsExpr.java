@@ -52,7 +52,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getType().evaluateAsConst(context, Type.class);
+        return getType().evaluateAs(context, Type.class);
     }
 
     private @NotNull LiteralExpr castFromNumber(final @NotNull Type type,
@@ -179,7 +179,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
             context.pushValue(value.evaluateAsConst(context));
             return;
         }
-        final var constValue = value.evaluateAsConst(context, Object.class);
+        final var constValue = value.evaluateAs(context, Object.class);
         // Anything may be cast to a string to allow string conversions
         if (type == BuiltinType.STRING) {
             context.pushValue(LiteralExpr.of(constValue.toString(), getTokenRange()));

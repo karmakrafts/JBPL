@@ -44,7 +44,7 @@ public final class SelectorDecl extends AbstractExprContainer implements Declara
 
     @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getName().evaluateAsConst(context, String.class);
+        return getName().evaluateAs(context, String.class);
     }
 
     @Override

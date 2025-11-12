@@ -26,18 +26,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     private ExprParser() {
     }
 
-    @Override
-    protected @NotNull List<Expr> defaultResult() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    protected @NotNull List<Expr> aggregateResult(final @NotNull List<Expr> aggregate,
-                                                  final @NotNull List<Expr> nextResult) {
-        aggregate.addAll(nextResult);
-        return aggregate;
-    }
-
     public static @NotNull Expr parse(final @NotNull ParserRuleContext ctx) throws ParserException {
         // @formatter:off
         final var expr = ctx.accept(INSTANCE).stream()
@@ -181,6 +169,18 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
             return new Pair<>(name, type);
         });
+    }
+
+    @Override
+    protected @NotNull List<Expr> defaultResult() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    protected @NotNull List<Expr> aggregateResult(final @NotNull List<Expr> aggregate,
+                                                  final @NotNull List<Expr> nextResult) {
+        aggregate.addAll(nextResult);
+        return aggregate;
     }
 
     @Override

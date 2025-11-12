@@ -40,7 +40,7 @@ public final class ErrorStatement extends AbstractExprContainer implements State
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        context.errorConsumer.accept(getValue().evaluateAsConst(context, Object.class).toString());
+        context.errorConsumer.accept(getValue().evaluateAs(context, Object.class).toString());
     }
 
     @Override
