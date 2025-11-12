@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler;
 
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
+import joptsimple.OptionParser;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -32,12 +33,40 @@ public final class Main {
         return Files.newByteChannel(Path.of(path));
     }
 
-    static void main(final @NotNull String[] args) {
+    public static void main(final @NotNull String[] args) {
+        if(args.length == 0) {
+            System.out.println("Assembler requires at least an input file to be specified.");
+            System.out.println("Run 'jbpl --help' to get more information.");
+            return;
+        }
+        final var optionParser = new OptionParser(true);
+        // @formatter:off
+        final var helpSpec = optionParser.accepts("help", "Display this help summary");
+        final var inputSpec = optionParser.accepts("input", "A path to the input file to be assembled")
+            .availableUnless(helpSpec)
+            .withRequiredArg()
+            .ofType(String.class);
+        final var outputSpec = optionParser.accepts("output", "A path to the output directory")
+            .availableUnless(helpSpec)
+            .withOptionalArg()
+            .ofType(String.class)
+            .defaultsTo("");
+        // @formatter:on
+        final var options = optionParser.parse(args);
+        if (options.has(helpSpec)) {
+            try {
+                optionParser.printHelpOn(System.out);
+            }
+            catch (Throwable error) {
+                System.err.println(error.getMessage());
+            }
+            return;
+        }
         try {
             final var assembler = new Assembler(ExceptionUtils.unsafeFunction(Main::readFile),
                 System.out::println,
                 System.err::println);
-            final var context = assembler.getOrParseAndLowerFile(args[0], name -> new ClassNode());
+            final var context = assembler.getOrParseAndLowerFile(options.valueOf(inputSpec), name -> new ClassNode());
             final var output = context.output.values();
             for (final var clazz : output) {
                 if (clazz == null) {
@@ -45,11 +74,10 @@ public final class Main {
                 }
                 final var writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
                 clazz.accept(writer);
-                final var outputPath = String.format("%s.class", clazz.name);
-                Files.write(Path.of(outputPath),
-                    writer.toByteArray(),
-                    StandardOpenOption.WRITE,
-                    StandardOpenOption.CREATE);
+                final var outputDirPath = Path.of(options.valueOf(outputSpec));
+                Files.createDirectories(outputDirPath);
+                final var outputPath = outputDirPath.resolve(String.format("%s.class", clazz.name));
+                Files.write(outputPath, writer.toByteArray(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             }
         }
         catch (Throwable error) {

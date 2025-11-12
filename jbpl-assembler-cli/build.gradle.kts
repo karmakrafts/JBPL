@@ -27,6 +27,7 @@ application {
 
 dependencies {
     implementation(projects.jbplAssembler)
+    implementation(libs.joptSimple)
 }
 
 tasks {
