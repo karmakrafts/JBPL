@@ -2,9 +2,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
-import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
-import dev.karmakrafts.jbpl.assembler.model.type.IntersectionType;
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.model.type.*;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +47,15 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             // All other binary expressions evaluate to their left hand side type
             default -> getLhs().getType(context);
         };
+    }
+
+    private @NotNull LiteralExpr evaluateForArray(final @NotNull Object lhs,
+                                                  final @NotNull Object rhs,
+                                                  final @NotNull EvaluationContext context) throws EvaluationException {
+        throw new EvaluationException(String.format("Unsupported boolean binary expression: %s %s %s",
+            getLhs(),
+            op,
+            getRhs().evaluateAs(context, Object.class)), SourceDiagnostic.from(this), context.createStackTrace());
     }
 
     private @NotNull LiteralExpr evaluateForType(final @NotNull Type lhs,
@@ -314,6 +321,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     }
 
     private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number lhsNumber,
+                                                   final @NotNull BuiltinType type,
                                                    final @NotNull EvaluationContext context) throws EvaluationException {
         final var rhsValue = getRhs().evaluateAs(context, Object.class);
         if (!(rhsValue instanceof Number rhsNumber)) {
@@ -321,65 +329,61 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                 SourceDiagnostic.from(this),
                 context.createStackTrace());
         }
-        if (lhsNumber instanceof Byte lhsByte) {
-            return evaluateForByte(lhsByte, rhsNumber, context);
-        }
-        else if (lhsNumber instanceof Short lhsShort) {
-            return evaluateForShort(lhsShort, rhsNumber, context);
-        }
-        else if (lhsNumber instanceof Integer lhsInteger) {
-            return evaluateForInteger(lhsInteger, rhsNumber, context);
-        }
-        else if (lhsNumber instanceof Long lhsLong) {
-            return evaluateForLong(lhsLong, rhsNumber, context);
-        }
-        else if (lhsNumber instanceof Float lhsFloat) {
-            return evaluateForFloat(lhsFloat, rhsNumber, context);
-        }
-        else if (lhsNumber instanceof Double lhsDouble) {
-            return evaluateForDouble(lhsDouble, rhsNumber, context);
-        }
-        throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
-            lhsNumber,
-            op,
-            rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
+        return switch (type) {
+            case I8 -> evaluateForByte(lhsNumber.byteValue(), rhsNumber, context);
+            case I16 -> evaluateForShort(lhsNumber.shortValue(), rhsNumber, context);
+            case I32 -> evaluateForInteger(lhsNumber.intValue(), rhsNumber, context);
+            case I64 -> evaluateForLong(lhsNumber.longValue(), rhsNumber, context);
+            case F32 -> evaluateForFloat(lhsNumber.floatValue(), rhsNumber, context);
+            case F64 -> evaluateForDouble(lhsNumber.doubleValue(), rhsNumber, context);
+            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
+                lhsNumber,
+                op,
+                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
+        };
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var lhsValue = getLhs().evaluateAs(context, Object.class);
-        if (lhsValue instanceof String lhsString) { // String concatenation with any type
+        final var lhsType = getLhs().getType(context);
+        if (lhsType instanceof ArrayType) {
+            context.pushValue(evaluateForArray(lhsValue, getRhs().evaluateAs(context, Object.class), context));
+            return;
+        }
+        if (lhsType == BuiltinType.STRING) { // String concatenation with any type
             switch (op) {
                 case ADD -> {
                     final var rhsValue = getRhs().evaluateAs(context, Object.class);
-                    context.pushValue(LiteralExpr.of(String.format("%s%s", lhsString, rhsValue), getTokenRange()));
+                    context.pushValue(LiteralExpr.of(String.format("%s%s", lhsValue, rhsValue), getTokenRange()));
                 }
                 case CMP -> {
                     final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(lhsString.compareTo(rhsString), getTokenRange()));
+                    context.pushValue(LiteralExpr.of(((String) lhsValue).compareTo(rhsString), getTokenRange()));
                 }
                 case EQ -> {
                     final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(lhsString.equals(rhsString), getTokenRange()));
+                    context.pushValue(LiteralExpr.of(lhsValue.equals(rhsString), getTokenRange()));
                 }
                 case NE -> {
                     final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(!lhsString.equals(rhsString), getTokenRange()));
+                    context.pushValue(LiteralExpr.of(!lhsValue.equals(rhsString), getTokenRange()));
                 }
             }
             return;
         }
-        else if (lhsValue instanceof Type lhsType) { // Type addition/subtraction creates intersection types
-            final var rhsType = getRhs().evaluateAs(context, Type.class);
-            context.pushValue(evaluateForType(lhsType, rhsType, context));
+        else if (lhsType == PreproType.TYPE) { // Type addition/subtraction creates intersection types
+            final var lhsTypeValue = getLhs().evaluateAs(context, Type.class);
+            final var rhsTypeValue = getRhs().evaluateAs(context, Type.class);
+            context.pushValue(evaluateForType(lhsTypeValue, rhsTypeValue, context));
             return;
         }
-        else if (lhsValue instanceof Boolean lhsBool) { // Boolean binary expressions
-            context.pushValue(evaluateForBool(lhsBool, context));
+        else if (lhsType == BuiltinType.BOOL) { // Boolean binary expressions
+            context.pushValue(evaluateForBool((Boolean) lhsValue, context));
             return;
         }
-        else if (lhsValue instanceof Number lhsNumber) { // Numeric binary expressions
-            context.pushValue(evaluateForNumber(lhsNumber, context));
+        else if (lhsType.getCategory().isNumber()) { // Numeric binary expressions
+            context.pushValue(evaluateForNumber((Number) lhsValue, (BuiltinType) lhsType, context));
             return;
         }
         throw new EvaluationException(String.format("Unsupported binary expression operands: %s %s %s",
