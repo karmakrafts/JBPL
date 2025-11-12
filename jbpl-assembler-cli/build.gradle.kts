@@ -31,7 +31,11 @@ dependencies {
 }
 
 tasks {
+    jar {
+        archiveClassifier = "slim"
+    }
     shadowJar {
+        archiveClassifier = ""
         manifest {
             attributes("Main-Class" to application.mainClass)
         }
