@@ -87,6 +87,7 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
             }
             element.evaluate(context);
             context.clearReturnMask(); // Top level clears return mask completely
+            context.clearStack(); // Clear of current frame, we don't care about any top level values
         }
         context.popFrame();
     }

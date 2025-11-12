@@ -26,6 +26,18 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     private ExprParser() {
     }
 
+    @Override
+    protected @NotNull List<Expr> defaultResult() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    protected @NotNull List<Expr> aggregateResult(final @NotNull List<Expr> aggregate,
+                                                  final @NotNull List<Expr> nextResult) {
+        aggregate.addAll(nextResult);
+        return aggregate;
+    }
+
     public static @NotNull Expr parse(final @NotNull ParserRuleContext ctx) throws ParserException {
         // @formatter:off
         final var expr = ctx.accept(INSTANCE).stream()
@@ -172,18 +184,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
-    protected @NotNull List<Expr> defaultResult() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    protected @NotNull List<Expr> aggregateResult(final @NotNull List<Expr> aggregate,
-                                                  final @NotNull List<Expr> nextResult) {
-        aggregate.addAll(nextResult);
-        return aggregate;
-    }
-
-    @Override
     public @NotNull List<Expr> visitDefaultExpr(final @NotNull DefaultExprContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> List.of(new DefaultExpr(ExprParser.parse(ctx.expr()))));
     }
@@ -285,7 +285,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     @Override
     public @NotNull List<Expr> visitExpr(final @NotNull ExprContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var type = ctx.type();
             if (ctx.DOT() != null) {
                 // This is a member reference which takes precedence over top level refs
                 // @formatter:off
@@ -305,6 +304,11 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             else if (ctx.EXCL_RANGE() != null) {
                 return parseRangeExpr(ctx, false);
             }
+            else if (ctx.EQ() != null) {
+                final var reference = parse(ctx.expr(0));
+                final var value = parse(ctx.expr(1));
+                return List.of(new AssignExpr(reference, value));
+            }
             else if (ctx.L_SQBRACKET() != null) {
                 // We know this is a subscript operator
                 final var reference = parse(ctx.expr(0));
@@ -317,24 +321,15 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                 return List.of(new InExpr(lhs, rhs));
             }
             else if (ctx.KW_IS() != null) {
-                final var concreteType = ctx.type();
                 final var lhs = parse(ctx.expr(0));
-                if (concreteType != null) {
-                    return List.of(new IsExpr(lhs,
-                        LiteralExpr.of(TypeParser.parse(concreteType), TokenRange.fromContext(concreteType))));
-                }
-                return List.of(new IsExpr(lhs, parse(ctx.wrappedExpr())));
+                final var rhs = ParserUtils.parseExprOrType(ctx.exprOrType());
+                return List.of(new IsExpr(lhs, rhs));
             }
             else if (ctx.KW_AS() != null) {
-                final var value = parse(ctx.expr(0));
-                final var concreteType = ctx.type();
-                if (concreteType != null) {
-                    return List.of(new AsExpr(value,
-                        LiteralExpr.of(TypeParser.parse(concreteType), TokenRange.fromContext(concreteType))));
-                }
-                return List.of(new AsExpr(value, parse(ctx.wrappedExpr())));
+                final var lhs = parse(ctx.expr(0));
+                final var rhs = ParserUtils.parseExprOrType(ctx.exprOrType());
+                return List.of(new AsExpr(lhs, rhs));
             } // @formatter:off
-            else if (type != null)              return List.of(LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(type)), TokenRange.fromContext(type)));
             else if (ctx.EQEQ() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
             else if (ctx.NEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.NE);
             else if (ctx.L_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.LT);

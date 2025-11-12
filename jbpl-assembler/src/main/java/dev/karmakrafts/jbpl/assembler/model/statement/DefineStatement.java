@@ -14,10 +14,16 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     public static final int TYPE_INDEX = 1;
     public static final int VALUE_INDEX = 2;
 
-    public DefineStatement(final @NotNull Expr name, final @NotNull Expr type, final @NotNull Expr value) {
+    public boolean isFinal;
+
+    public DefineStatement(final @NotNull Expr name,
+                           final @NotNull Expr type,
+                           final @NotNull Expr value,
+                           final boolean isFinal) {
         addExpression(name);
         addExpression(type);
         addExpression(value);
+        this.isFinal = isFinal;
     }
 
     public @NotNull Expr getName() {
@@ -67,7 +73,10 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
 
     @Override
     public @NotNull DefineStatement copy() {
-        return copyParentAndSourceTo(new DefineStatement(getName().copy(), getType().copy(), getValue().copy()));
+        return copyParentAndSourceTo(new DefineStatement(getName().copy(),
+            getType().copy(),
+            getValue().copy(),
+            isFinal));
     }
 
     @Override
@@ -77,6 +86,9 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
 
     @Override
     public @NotNull String toString() {
+        if (isFinal) {
+            return String.format("final define %s: %s = %s", getName(), getType(), getValue());
+        }
         return String.format("define %s: %s = %s", getName(), getType(), getValue());
     }
 }

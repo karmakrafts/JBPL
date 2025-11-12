@@ -39,6 +39,13 @@ for(${var_name} in test_array) {
 ^info sizeof(type(i32))
 
 define when_var: i32 = 101
+when_var = 100
+
+define test_message: string = "Assignments don't work"
+test_message = "Assignments now work!"
+^info test_message
+
+final define forbidden_fruit: i32 = 420 // Cannot be re-assigned
 
 ^info when(when_var) {
     100 -> "HELLOU"

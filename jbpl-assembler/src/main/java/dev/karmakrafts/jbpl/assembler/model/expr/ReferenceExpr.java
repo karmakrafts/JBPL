@@ -16,11 +16,11 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         this.name = name;
     }
 
-    private @Nullable Expr findArgument(final @NotNull EvaluationContext context) {
+    public @Nullable Expr findArgument(final @NotNull EvaluationContext context) {
         return context.peekFrame().namedLocalValues.get(name);
     }
 
-    private @NotNull DefineStatement getDefine(final @NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull DefineStatement getDefine(final @NotNull EvaluationContext context) throws EvaluationException {
         final var scope = context.getScope();
         final var define = context.resolveByName(DefineStatement.class, name);
         if (define == null) {

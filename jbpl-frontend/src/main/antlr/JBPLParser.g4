@@ -67,6 +67,7 @@ elseBranch:
     ;
 
 define:
+    KW_FINAL? // Immutable define
     KW_DEFINE
     NL*?
     exprOrName
@@ -236,6 +237,8 @@ expr:
     L_PAREN NL*? expr NL*? R_PAREN
     | expr NL*? L_SQBRACKET NL*? expr NL*? R_SQBRACKET
 
+    | expr NL*? EQ NL*? expr // Assignments
+
     | expr NL*? EXCL_RANGE NL*? expr
     | expr NL*? DOTDOT NL*? expr
 
@@ -269,8 +272,8 @@ expr:
     | PLUS expr
     | EXCL expr
 
-    | expr KW_IS (wrappedExpr | type)
-    | expr KW_AS (wrappedExpr | type)
+    | expr KW_IS exprOrType
+    | expr KW_AS exprOrType
     | expr KW_IN expr
 
     | ifExpr

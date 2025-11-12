@@ -70,6 +70,10 @@ public final class EvaluationContext {
             ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
     }
 
+    public void clearStack() {
+        peekFrame().valueStack.clear();
+    }
+
     public byte getReturnMask() {
         return returnMask;
     }
