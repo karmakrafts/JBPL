@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class AssemblyFile extends AbstractElementContainer implements ScopeOwner {
-    public final String path;
     public final ArrayList<Token> source = new ArrayList<>();
+    public String path;
 
     public AssemblyFile(final @NotNull String path) {
         this.path = path;
@@ -67,8 +67,8 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     }
 
     @Override
-    public @NotNull ElementContainer getParent() {
-        return this;
+    public @Nullable ElementContainer getParent() {
+        return null;
     }
 
     @Override

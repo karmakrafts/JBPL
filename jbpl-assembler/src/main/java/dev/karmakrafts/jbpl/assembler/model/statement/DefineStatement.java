@@ -25,7 +25,6 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     }
 
     public void setName(final @NotNull Expr name) {
-        getName().setParent(null);
         name.setParent(this);
         getExpressions().set(NAME_INDEX, name);
     }
@@ -35,7 +34,6 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     }
 
     public void setType(final @NotNull Expr type) {
-        getType().setParent(null);
         type.setParent(this);
         getExpressions().set(TYPE_INDEX, type);
     }
@@ -45,6 +43,7 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     }
 
     public void setValue(final @NotNull Expr value) {
+        value.setParent(this);
         getExpressions().set(VALUE_INDEX, value);
     }
 
@@ -78,6 +77,6 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
 
     @Override
     public @NotNull String toString() {
-        return String.format("^define %s: %s = %s", getName(), getType(), getValue());
+        return String.format("define %s: %s = %s", getName(), getType(), getValue());
     }
 }

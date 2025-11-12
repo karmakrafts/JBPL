@@ -104,7 +104,8 @@ public final class Assembler {
         try {
             return files.computeIfAbsent(path, p -> {
                 try (final var channel = resourceProvider.apply(path)) {
-                    final var file = new AssemblyFile(path);
+                    final var file = new AssemblyFile(p);
+                    file.path = path;
                     final var errorListener = new ErrorListener(file);
                     final var charStream = CharStreams.fromChannel(channel, 4096, CodingErrorAction.REPLACE, path);
                     final var lexer = new JBPLLexer(charStream);
@@ -121,7 +122,6 @@ public final class Assembler {
                         .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
                         .toList());
                     // @formatter:on
-                    file.updateChildParents(); // Update all parent references recursively
                     validateFile(file);
                     return file;
                 }

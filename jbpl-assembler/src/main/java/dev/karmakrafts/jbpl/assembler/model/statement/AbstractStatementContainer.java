@@ -20,14 +20,10 @@ public abstract class AbstractStatementContainer extends AbstractElementContaine
     @Override
     public void removeStatement(@NotNull Statement statement) {
         elements.remove(statement);
-        statement.setParent(null);
     }
 
     @Override
     public void clearStatements() {
-        for (final var statement : elements) {
-            statement.setParent(null);
-        }
         elements.clear();
     }
 

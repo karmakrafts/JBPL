@@ -20,14 +20,10 @@ public abstract class AbstractExprContainer extends AbstractElementContainer imp
     @Override
     public void removeExpression(final @NotNull Expr expr) {
         elements.remove(expr);
-        expr.setParent(null);
     }
 
     @Override
     public void clearExpressions() {
-        for (final var expr : elements) {
-            expr.setParent(null);
-        }
         elements.clear();
     }
 

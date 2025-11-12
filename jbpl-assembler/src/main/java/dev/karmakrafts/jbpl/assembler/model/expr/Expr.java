@@ -3,6 +3,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
@@ -31,5 +32,9 @@ public interface Expr extends Statement {
             return evaluateAsConst(context, Type.class).materialize(context);
         }
         return evaluateAsConst(context, Object.class);
+    }
+
+    default boolean isUnit() {
+        return this instanceof LiteralExpr literalExpr && literalExpr.type == BuiltinType.VOID;
     }
 }

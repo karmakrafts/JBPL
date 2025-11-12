@@ -13,13 +13,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public final class LiteralExpr extends AbstractElement implements Expr {
-    public static final LiteralExpr UNIT = new LiteralExpr(BuiltinType.VOID, null);
     public Type type;
     public Object value;
 
     public LiteralExpr(final @NotNull Type type, final @Nullable Object value) {
         this.type = type;
         this.value = value;
+    }
+
+    public static @NotNull LiteralExpr unit() {
+        return new LiteralExpr(BuiltinType.VOID, TokenRange.SYNTHETIC);
+    }
+
+    public static @NotNull LiteralExpr unit(final @NotNull TokenRange tokenRange) {
+        final var expr = new LiteralExpr(BuiltinType.VOID, null);
+        expr.setTokenRange(tokenRange);
+        return expr;
     }
 
     public static @NotNull LiteralExpr of(final @NotNull Object value) {

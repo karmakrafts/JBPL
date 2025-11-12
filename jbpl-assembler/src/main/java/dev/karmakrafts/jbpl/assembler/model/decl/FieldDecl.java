@@ -23,8 +23,8 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     public final EnumSet<AccessModifier> accessModifiers = EnumSet.noneOf(AccessModifier.class);
 
     public FieldDecl() {
-        addExpression(LiteralExpr.UNIT); // Signature
-        addExpression(LiteralExpr.UNIT); // Initializer
+        addExpression(LiteralExpr.unit()); // Signature
+        addExpression(LiteralExpr.unit()); // Initializer
     }
 
     public @NotNull Expr getInitializer() {

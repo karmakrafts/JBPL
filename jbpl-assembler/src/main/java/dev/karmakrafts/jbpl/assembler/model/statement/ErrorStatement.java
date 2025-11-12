@@ -34,6 +34,7 @@ public final class ErrorStatement extends AbstractExprContainer implements State
     }
 
     public void setValue(final @NotNull Expr value) {
+        value.setParent(this);
         getExpressions().set(VALUE_INDEX, value);
     }
 

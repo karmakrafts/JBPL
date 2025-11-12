@@ -297,7 +297,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     private @NotNull List<Expr> parseReference(final @NotNull ReferenceContext ctx, final @NotNull Expr receiver) {
-        final var name = ctx.IDENT().getText();
+        var name = ctx.getText();
         final var ref = new ReferenceExpr(name);
         ref.setReceiver(receiver);
         return List.of(ref);
@@ -316,7 +316,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitReference(final @NotNull ReferenceContext ctx) {
-        return parseReference(ctx, LiteralExpr.UNIT);
+        return parseReference(ctx, LiteralExpr.unit());
     }
 
     private @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx, final @NotNull Expr receiver) {
@@ -331,7 +331,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitMacroCall(final @NotNull MacroCallContext ctx) {
-        return parseMacroCall(ctx, LiteralExpr.UNIT);
+        return parseMacroCall(ctx, LiteralExpr.unit());
     }
 
     @Override
@@ -349,7 +349,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                     default -> throw new IllegalStateException("Unsupported character escape sequence");
                 };
             }
-            return List.of(LiteralExpr.of(value.charAt(0), TokenRange.fromTerminalNode(literalChar)));
+            return List.of(LiteralExpr.of(value.charAt(0), TokenRange.fromContext(ctx)));
         }
         return super.visitLiteral(ctx);
     }

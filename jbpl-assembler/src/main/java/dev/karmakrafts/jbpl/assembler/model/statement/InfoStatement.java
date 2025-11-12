@@ -20,14 +20,13 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import org.jetbrains.annotations.NotNull;
 
 public final class InfoStatement extends AbstractExprContainer implements Statement {
     public static final int VALUE_INDEX = 0;
 
-    public InfoStatement() {
-        addExpression(LiteralExpr.UNIT); // Value
+    public InfoStatement(final @NotNull Expr value) {
+        addExpression(value);
     }
 
     public @NotNull Expr getValue() {
@@ -35,6 +34,7 @@ public final class InfoStatement extends AbstractExprContainer implements Statem
     }
 
     public void setValue(final @NotNull Expr value) {
+        value.setParent(this);
         getExpressions().set(VALUE_INDEX, value);
     }
 
@@ -46,8 +46,6 @@ public final class InfoStatement extends AbstractExprContainer implements Statem
 
     @Override
     public @NotNull InfoStatement copy() {
-        final var statement = copyParentAndSourceTo(new InfoStatement());
-        statement.setValue(getValue().copy());
-        return statement;
+        return copyParentAndSourceTo(new InfoStatement(getValue().copy()));
     }
 }

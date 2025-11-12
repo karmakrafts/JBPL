@@ -96,17 +96,22 @@ public final class WhenExpr extends AbstractExprContainer implements Expr, Scope
     @Override
     public @NotNull WhenExpr copy() {
         final var expr = copyParentAndSourceTo(new WhenExpr(getValue().copy()));
-        expr.addExpressions(getExpressions().stream().map(Expr::copy).toList());
+        expr.addBranches(branches.stream().map(Branch::copy).toList());
         return expr;
     }
 
-    public sealed interface Branch extends ElementContainer {
+    public interface Branch extends ElementContainer {
+        @Override
+        Branch copy();
     }
 
-    public sealed interface ConditionalBranch extends Branch {
+    public interface ConditionalBranch extends Branch {
         @NotNull Expr getValue();
 
         void setValue(final @NotNull Expr condition);
+
+        @Override
+        ConditionalBranch copy();
     }
 
     public static sealed abstract class AbstractConditionalBranch extends AbstractElementContainer
@@ -114,7 +119,7 @@ public final class WhenExpr extends AbstractExprContainer implements Expr, Scope
         protected Expr value;
 
         protected AbstractConditionalBranch(final @NotNull Expr value) {
-            this.value = value;
+            setValue(value);
         }
 
         @Override

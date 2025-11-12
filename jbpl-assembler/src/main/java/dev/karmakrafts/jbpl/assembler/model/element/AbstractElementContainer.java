@@ -23,14 +23,10 @@ public abstract class AbstractElementContainer extends AbstractElement implement
     @Override
     public void removeElement(final @NotNull Element element) {
         elements.remove(element);
-        element.setParent(null);
     }
 
     @Override
     public void clearElements() {
-        for (final var element : elements) {
-            element.setParent(null);
-        }
         elements.clear();
     }
 

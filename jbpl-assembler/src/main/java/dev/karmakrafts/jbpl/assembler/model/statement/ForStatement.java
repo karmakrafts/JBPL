@@ -43,9 +43,6 @@ public final class ForStatement extends AbstractElementContainer implements Stat
     }
 
     public void setVariableName(final @NotNull Expr variableName) {
-        if (this.variableName != null) {
-            this.variableName.setParent(null);
-        }
         variableName.setParent(this);
         this.variableName = variableName;
     }
@@ -55,9 +52,6 @@ public final class ForStatement extends AbstractElementContainer implements Stat
     }
 
     public void setValue(final @NotNull Expr value) {
-        if (this.value != null) {
-            this.value.setParent(null);
-        }
         value.setParent(this);
         this.value = value;
     }
@@ -73,7 +67,8 @@ public final class ForStatement extends AbstractElementContainer implements Stat
             for (var i = 0; i < arrayLength; i++) {
                 final var value = Array.get(array, i);
                 context.pushFrame(this);
-                context.peekFrame().injectedValues.put(variableName, LiteralExpr.of(value, this.value.getTokenRange()));
+                context.peekFrame().namedLocalValues.put(variableName,
+                    LiteralExpr.of(value, this.value.getTokenRange()));
                 for (final var element : getElements()) {
                     if (!element.isEvaluatedDirectly()) {
                         continue;
@@ -83,7 +78,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
                         context.popFrame();
                         continue arrayLoop;
                     }
-                    if (context.clearBrk() || context.clearRet()) {
+                    if (context.clearBrk() || context.hasRet()) {
                         context.popFrame();
                         break arrayLoop;
                     }
@@ -93,12 +88,12 @@ public final class ForStatement extends AbstractElementContainer implements Stat
             return;
         }
         throw new EvaluationException(String.format("Cannot use value of type %s in right hand side of for loop",
-            valueType), SourceDiagnostic.from(this, value), context.createStackTrace());
+            valueType), SourceDiagnostic.from(this), context.createStackTrace());
     }
 
     @Override
     public @NotNull ForStatement copy() {
-        final var forStatement = copyParentAndSourceTo(new ForStatement(variableName.copy(), value.copy()));
+        final var forStatement = copyParentAndSourceTo(new ForStatement(getVariableName().copy(), getValue().copy()));
         forStatement.addElements(getElements().stream().map(Element::copy).toList());
         return forStatement;
     }

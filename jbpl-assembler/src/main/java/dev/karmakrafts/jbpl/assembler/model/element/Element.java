@@ -31,12 +31,8 @@ public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
     }
 
     default @NotNull AssemblyFile getContainingFile() {
-        final var parent = getParent();
-        if (parent == null) {
-            throw new IllegalStateException("Element doesn't have a parent");
-        }
         final var parentStack = new Stack<Element>();
-        parentStack.push(parent);
+        parentStack.push(this);
         while (!parentStack.isEmpty()) {
             final var currentParent = parentStack.pop();
             if (currentParent instanceof AssemblyFile file) {

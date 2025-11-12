@@ -52,7 +52,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
             // @formatter:off
             final var value = valueNode != null
                 ? ExprParser.parse(valueNode)
-                : LiteralExpr.UNIT;
+                : LiteralExpr.unit();
             // @formatter:on
             return List.of(new ReturnStatement(value));
         });
@@ -60,27 +60,17 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
 
     @Override
     public @NotNull List<Statement> visitInfoStatement(final @NotNull InfoStatementContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var statement = new InfoStatement();
-            statement.setValue(ExprParser.parse(ctx.expr()));
-            return List.of(statement);
-        });
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new InfoStatement(ExprParser.parse(ctx.expr()))));
     }
 
     @Override
     public @NotNull List<Statement> visitErrorStatement(final @NotNull ErrorStatementContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var value = ExprParser.parse(ctx.expr());
-            return List.of(new ErrorStatement(value));
-        });
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new ErrorStatement(ExprParser.parse(ctx.expr()))));
     }
 
     @Override
     public @NotNull List<Statement> visitVersionStatement(final @NotNull VersionStatementContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var version = ExprParser.parse(ctx.expr());
-            return List.of(new VersionStatement(version));
-        });
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new VersionStatement(ExprParser.parse(ctx.expr()))));
     }
 
     @Override
@@ -134,7 +124,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
             // @formatter:off
             final var index = ctx.expr() != null
                 ? ExprParser.parse(ctx.expr())
-                : LiteralExpr.UNIT;
+                : LiteralExpr.unit();
             // @formatter:on
             return List.of(new LocalStatement(name, index));
         });
@@ -142,20 +132,16 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
 
     @Override
     public @NotNull List<Statement> visitDefine(final @NotNull DefineContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
-            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
-            final var value = ExprParser.parse(ctx.expr());
-            return List.of(new DefineStatement(name, type, value));
-        });
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new DefineStatement(ParserUtils.parseExprOrName(ctx.exprOrName()),
+            ParserUtils.parseExprOrType(ctx.exprOrType()),
+            ExprParser.parse(ctx.expr()))));
     }
 
     @Override
     public List<Statement> visitForStatement(final @NotNull ForStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var variableName = ParserUtils.parseExprOrName(ctx.exprOrName());
-            final var value = ExprParser.parse(ctx.expr());
-            final var statement = new ForStatement(variableName, value);
+            final var statement = new ForStatement(ParserUtils.parseExprOrName(ctx.exprOrName()),
+                ExprParser.parse(ctx.expr()));
             // @formatter:off
             statement.addElements(ctx.bodyElement().stream()
                 .map(ExceptionUtils.unsafeFunction(ElementParser::parse))

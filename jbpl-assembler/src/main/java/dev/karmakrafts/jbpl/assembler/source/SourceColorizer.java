@@ -61,8 +61,8 @@ public final class SourceColorizer {
         JBPLLexer.KW_IN,
         JBPLLexer.KW_MACRO,
         JBPLLexer.KW_DEFINE,
-        JBPLLexer.KW_FOR);
-    private static final Set<Integer> PREPRO_KEYWORDS = Set.of(JBPLLexer.KW_PREPRO_INFO,
+        JBPLLexer.KW_FOR,
+        JBPLLexer.KW_PREPRO_INFO,
         JBPLLexer.KW_PREPRO_ERROR,
         JBPLLexer.KW_PREPRO_CLASS,
         JBPLLexer.KW_PREPRO_INCLUDE,
@@ -115,11 +115,6 @@ public final class SourceColorizer {
         }
         if (INSN_TOKENS.contains(type)) {
             builder.fgBrightCyan();
-            state.previousType = type;
-            return;
-        }
-        if (PREPRO_KEYWORDS.contains(type)) {
-            builder.fgMagenta();
             state.previousType = type;
             return;
         }

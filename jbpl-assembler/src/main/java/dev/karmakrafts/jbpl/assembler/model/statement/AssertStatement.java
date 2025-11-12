@@ -34,12 +34,8 @@ public final class AssertStatement extends AbstractExprContainer implements Stat
     }
 
     public void setValue(final @NotNull Expr value) {
+        value.setParent(this);
         getExpressions().set(VALUE_INDEX, value);
-    }
-
-    @Override
-    public @NotNull AssertStatement copy() {
-        return new AssertStatement(getValue().copy());
     }
 
     @Override
@@ -49,5 +45,10 @@ public final class AssertStatement extends AbstractExprContainer implements Stat
             return;
         }
         throw new EvaluationException(String.format("Assertion %s failed", getValue()), null, null);
+    }
+
+    @Override
+    public @NotNull AssertStatement copy() {
+        return copyParentAndSourceTo(new AssertStatement(getValue().copy()));
     }
 }

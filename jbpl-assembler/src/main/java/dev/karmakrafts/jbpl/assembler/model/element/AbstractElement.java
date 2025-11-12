@@ -8,9 +8,6 @@ public abstract class AbstractElement implements Element {
     public ElementContainer parent;
     public TokenRange tokenRange = TokenRange.UNDEFINED;
 
-    protected AbstractElement() {
-    }
-
     @Override
     public @Nullable ElementContainer getParent() {
         return parent;

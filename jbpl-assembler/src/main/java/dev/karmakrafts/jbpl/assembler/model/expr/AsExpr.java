@@ -169,7 +169,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         final var type = getType(context);
         // Always return unit literal for void type so we can have proper generic evaluation
         if (type == BuiltinType.VOID) {
-            context.pushValue(LiteralExpr.UNIT);
+            context.pushValue(LiteralExpr.unit(getTokenRange()));
             return;
         }
         final var value = getValue();

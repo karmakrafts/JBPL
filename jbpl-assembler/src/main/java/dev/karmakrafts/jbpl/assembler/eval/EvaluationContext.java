@@ -208,7 +208,12 @@ public final class EvaluationContext {
 
     public void pushFrame(final @NotNull ScopeOwner owner) {
         final var parentScope = frameStack.empty() ? null : frameStack.peek().scope;
-        frameStack.push(new StackFrame(new Scope(parentScope, owner)));
+        final var newFrame = new StackFrame(new Scope(parentScope, owner));
+        if (!frameStack.empty()) {
+            // If we currently already have a frame, propagate named values scope-inwards
+            newFrame.namedLocalValues.putAll(peekFrame().namedLocalValues);
+        }
+        frameStack.push(newFrame);
     }
 
     public void popFrame() {

@@ -17,7 +17,6 @@
 package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
 import dev.karmakrafts.jbpl.assembler.scope.Scope;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
@@ -35,7 +34,8 @@ public final class StackFrame implements Copyable<StackFrame> {
     public final Scope scope;
     public final ScopeResolver scopeResolver;
     public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
-    public final HashMap<String, Expr> injectedValues = new HashMap<>(); // Named arguments of the current macro
+    public final HashMap<String, Expr> namedLocalValues = new HashMap<>(); // Named arguments of the current macro
+
     public final InsnList instructionBuffer = new InsnList();
     public final HashMap<String, LocalStatement> locals = new HashMap<>();
     private final HashMap<String, Integer> localIndices = new HashMap<>();
@@ -59,7 +59,7 @@ public final class StackFrame implements Copyable<StackFrame> {
             final var associatedLocal = locals.get(name);
             if (associatedLocal != null) {
                 final var indexExpr = associatedLocal.getIndex();
-                if (indexExpr != LiteralExpr.UNIT) {
+                if (indexExpr.isUnit()) {
                     index = indexExpr.evaluateAsConst(context, Integer.class);
                 }
                 else {
@@ -79,7 +79,7 @@ public final class StackFrame implements Copyable<StackFrame> {
         final var frame = new StackFrame(scope);
         frame.valueStack.addAll(valueStack.stream().map(Expr::copy).toList());
         // @formatter:off
-        frame.injectedValues.putAll(injectedValues.entrySet().stream()
+        frame.namedLocalValues.putAll(namedLocalValues.entrySet().stream()
             .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
             .collect(Collectors.toMap(Pair::left, Pair::right)));
         // @formatter:on

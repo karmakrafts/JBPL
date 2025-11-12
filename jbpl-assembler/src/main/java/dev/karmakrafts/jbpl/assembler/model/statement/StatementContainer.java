@@ -26,7 +26,7 @@ public interface StatementContainer extends ElementContainer {
         statements.forEach(this::addStatement);
     }
 
-    default void removeStataments(final @NotNull Iterable<? extends Statement> statements) {
+    default void removeStatements(final @NotNull Iterable<? extends Statement> statements) {
         statements.forEach(this::removeStatement);
     }
 

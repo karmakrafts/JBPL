@@ -6,7 +6,7 @@ public abstract class AbstractReceiverExpr extends AbstractExprContainer {
     public static final int RECEIVER_INDEX = 0;
 
     public AbstractReceiverExpr() {
-        addExpression(LiteralExpr.UNIT); // Receiver
+        addExpression(LiteralExpr.unit()); // Receiver
     }
 
     public @NotNull Expr getReceiver() {

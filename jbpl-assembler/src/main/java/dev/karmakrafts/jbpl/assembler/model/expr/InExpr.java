@@ -138,7 +138,7 @@ public final class InExpr extends AbstractExprContainer implements Expr {
             return;
         }
         throw new EvaluationException("Incompatible types in in-expression",
-            SourceDiagnostic.from(this),
+            SourceDiagnostic.from(this, getRhs(), "Incompatible types in in-expression"),
             context.createStackTrace());
     }
 

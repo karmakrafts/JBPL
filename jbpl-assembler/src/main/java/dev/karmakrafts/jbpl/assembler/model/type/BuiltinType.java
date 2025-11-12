@@ -65,7 +65,7 @@ public enum BuiltinType implements Type {
     @Override
     public @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) {
         return switch (this) {
-            case VOID -> LiteralExpr.UNIT;
+            case VOID -> LiteralExpr.unit();
             case I8 -> LiteralExpr.of((byte) 0);
             case I16 -> LiteralExpr.of((short) 0);
             case I32 -> LiteralExpr.of(0);
