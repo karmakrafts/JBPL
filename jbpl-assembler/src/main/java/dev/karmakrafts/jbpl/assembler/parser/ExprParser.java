@@ -57,6 +57,120 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return List.of(LiteralExpr.of(parseFunction.apply(value, 10), TokenRange.fromContext(ctx)));
     }
 
+    private static @NotNull WhenExpr.Branch parseWhenBranch(final @NotNull WhenBranchContext ctx) {
+        final var condition = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx.expr()));
+        final var body = ctx.whenBranchBody();
+        if (body.L_BRACE() != null) { // This is a scoped body
+            final var branch = new WhenExpr.ScopedBranch(condition);
+            // @formatter:off
+            branch.addElements(body.bodyElement().stream()
+                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
+                .toList());
+            // @formatter:on
+            return branch;
+        }
+        final var branch = new WhenExpr.ScopelessBranch(condition);
+        branch.addElement(ExceptionUtils.rethrowUnchecked(() -> ElementParser.parse(body.bodyElement(0))));
+        return branch;
+    }
+
+    private static @NotNull WhenExpr.Branch parseDefaultWhenBranch(final @NotNull DefaultWhenBranchContext ctx) {
+        final var body = ctx.whenBranchBody();
+        if (body.L_BRACE() != null) { // This is a scoped body
+            final var branch = new WhenExpr.ScopedDefaultBranch();
+            // @formatter:off
+            branch.addElements(body.bodyElement().stream()
+                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
+                .toList());
+            // @formatter:on
+            return branch;
+        }
+        final var branch = new WhenExpr.ScopelessDefaultBranch();
+        branch.addElement(ExceptionUtils.rethrowUnchecked(() -> ElementParser.parse(body.bodyElement(0))));
+        return branch;
+    }
+
+    private static @NotNull List<Expr> parseBinaryExpr(final @NotNull ExprContext ctx,
+                                                       final @NotNull BinaryExpr.Op op) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var expressions = ctx.expr();
+            final var lhs = parse(expressions.get(0));
+            final var rhs = parse(expressions.get(1));
+            return List.of(new BinaryExpr(lhs, rhs, op));
+        });
+    }
+
+    private static @NotNull List<Expr> parseUnaryExpr(final @NotNull ExprContext ctx, final @NotNull UnaryExpr.Op op) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
+            return List.of(new UnaryExpr(expr, op));
+        });
+    }
+
+    private static @NotNull List<Expr> parseBinaryExprWithUnaryVariant(final @NotNull ExprContext ctx,
+                                                                       final @NotNull BinaryExpr.Op binaryOp,
+                                                                       final @NotNull UnaryExpr.Op unaryOp) {
+        final var expressions = ctx.expr();
+        if (expressions.size() == 1) {
+            return parseUnaryExpr(ctx, unaryOp);
+        }
+        return parseBinaryExpr(ctx, binaryOp);
+    }
+
+    private static @NotNull List<Expr> parseRangeExpr(final @NotNull ExprContext ctx,
+                                                      final boolean isInclusive) throws ParserException {
+        final var start = ExprParser.parse(ctx.expr(0));
+        final var end = ExprParser.parse(ctx.expr(1));
+        return List.of(new RangeExpr(start, end, isInclusive));
+    }
+
+    private static @NotNull List<Expr> parseReference(final @NotNull ReferenceContext ctx,
+                                                      final @NotNull Expr receiver) {
+        var name = ctx.getText();
+        final var ref = new ReferenceExpr(name);
+        ref.setReceiver(receiver);
+        return List.of(ref);
+    }
+
+    private static @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx,
+                                                      final @NotNull Expr receiver) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ctx.IDENT().getText();
+            final var call = new MacroCallExpr(name);
+            call.setReceiver(receiver);
+            call.addArguments(ParserUtils.parseArguments(ctx.argument()));
+            return List.of(call);
+        });
+    }
+
+    private static @NotNull Expr parseStringSegment(final @NotNull StringSegmentContext ctx) {
+        final var text = ctx.M_CONST_STR_TEXT();
+        if (text != null) {
+            return LiteralExpr.of(text.getText(), TokenRange.fromTerminalNode(text));
+        }
+        return ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()));
+    }
+
+    private static @NotNull LiteralExpr mergeStringLiterals(final @NotNull ArrayDeque<LiteralExpr> queue) {
+        final var builder = new StringBuilder();
+        final var ranges = new ArrayList<TokenRange>();
+        while (!queue.isEmpty()) {
+            final var segment = queue.pop();
+            ranges.add(segment.getTokenRange());
+            builder.append(segment.value);
+        }
+        return LiteralExpr.of(builder.toString(), TokenRange.union(ranges));
+    }
+
+    private static @NotNull Pair<Expr, Expr> parseFunctionSignatureParameter(final @NotNull FunctionSignatureParameterContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = Optional.ofNullable(ctx.exprOrName()).map(ExceptionUtils.unsafeFunction(ParserUtils::parseExprOrName)).orElse(
+                null);
+            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
+            return new Pair<>(name, type);
+        });
+    }
+
     @Override
     protected @NotNull List<Expr> defaultResult() {
         return new ArrayList<>();
@@ -98,44 +212,11 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             TokenRange.fromContext(ctx))));
     }
 
-    private @NotNull WhenExpr.Branch parseWhenBranch(final @NotNull WhenBranchContext ctx) {
-        final var condition = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx.expr()));
-        final var body = ctx.whenBranchBody();
-        if (body.L_BRACE() != null) { // This is a scoped body
-            final var branch = new WhenExpr.ScopedBranch(condition);
-            // @formatter:off
-            branch.addElements(body.bodyElement().stream()
-                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
-                .toList());
-            // @formatter:on
-            return branch;
-        }
-        final var branch = new WhenExpr.ScopelessBranch(condition);
-        branch.addElement(ExceptionUtils.rethrowUnchecked(() -> ElementParser.parse(body.bodyElement(0))));
-        return branch;
-    }
-
-    private @NotNull WhenExpr.Branch parseDefaultWhenBranch(final @NotNull DefaultWhenBranchContext ctx) {
-        final var body = ctx.whenBranchBody();
-        if (body.L_BRACE() != null) { // This is a scoped body
-            final var branch = new WhenExpr.ScopedDefaultBranch();
-            // @formatter:off
-            branch.addElements(body.bodyElement().stream()
-                .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
-                .toList());
-            // @formatter:on
-            return branch;
-        }
-        final var branch = new WhenExpr.ScopelessDefaultBranch();
-        branch.addElement(ExceptionUtils.rethrowUnchecked(() -> ElementParser.parse(body.bodyElement(0))));
-        return branch;
-    }
-
     @Override
     public @NotNull List<Expr> visitWhenExpr(final @NotNull WhenExprContext ctx) {
         final var value = ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()));
         final var whenExpr = new WhenExpr(value);
-        whenExpr.addBranches(ctx.whenBranch().stream().map(this::parseWhenBranch).toList());
+        whenExpr.addBranches(ctx.whenBranch().stream().map(ExprParser::parseWhenBranch).toList());
         final var defaultBranch = ctx.defaultWhenBranch();
         if (defaultBranch != null) {
             whenExpr.addBranch(parseDefaultWhenBranch(defaultBranch));
@@ -201,44 +282,28 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         });
     }
 
-    private @NotNull List<Expr> parseBinaryExpr(final @NotNull ExprContext ctx, final @NotNull BinaryExpr.Op op) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var expressions = ctx.expr();
-            final var lhs = parse(expressions.get(0));
-            final var rhs = parse(expressions.get(1));
-            return List.of(new BinaryExpr(lhs, rhs, op));
-        });
-    }
-
-    private @NotNull List<Expr> parseUnaryExpr(final @NotNull ExprContext ctx, final @NotNull UnaryExpr.Op op) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
-            return List.of(new UnaryExpr(expr, op));
-        });
-    }
-
-    private @NotNull List<Expr> parseBinaryExprWithUnaryVariant(final @NotNull ExprContext ctx,
-                                                                final @NotNull BinaryExpr.Op binaryOp,
-                                                                final @NotNull UnaryExpr.Op unaryOp) {
-        final var expressions = ctx.expr();
-        if (expressions.size() == 1) {
-            return parseUnaryExpr(ctx, unaryOp);
-        }
-        return parseBinaryExpr(ctx, binaryOp);
-    }
-
     @Override
     public @NotNull List<Expr> visitExpr(final @NotNull ExprContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var type = ctx.type();
             if (ctx.DOT() != null) {
                 // This is a member reference which takes precedence over top level refs
-                final var receiver = parse(ctx.expr().stream().findFirst().orElseThrow());
+                // @formatter:off
+                final var receiver = parse(ctx.expr().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new ParserException("Could not parse reference receiver", null)));
+                // @formatter:on
                 final var call = ctx.macroCall();
                 if (call != null) {
                     return parseMacroCall(call, receiver);
                 }
                 return parseReference(ctx.reference(), receiver);
+            }
+            else if (ctx.DOTDOT() != null) { // Inclusive
+                return parseRangeExpr(ctx, true);
+            }
+            else if (ctx.EXCL_RANGE() != null) {
+                return parseRangeExpr(ctx, false);
             }
             else if (ctx.L_SQBRACKET() != null) {
                 // We know this is a subscript operator
@@ -296,13 +361,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         });
     }
 
-    private @NotNull List<Expr> parseReference(final @NotNull ReferenceContext ctx, final @NotNull Expr receiver) {
-        var name = ctx.getText();
-        final var ref = new ReferenceExpr(name);
-        ref.setReceiver(receiver);
-        return List.of(ref);
-    }
-
     // Simply unwrap the expression
     @Override
     public @NotNull List<Expr> visitWrappedExpr(final @NotNull WrappedExprContext ctx) {
@@ -317,16 +375,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     @Override
     public @NotNull List<Expr> visitReference(final @NotNull ReferenceContext ctx) {
         return parseReference(ctx, LiteralExpr.unit());
-    }
-
-    private @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx, final @NotNull Expr receiver) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ctx.IDENT().getText();
-            final var call = new MacroCallExpr(name);
-            call.setReceiver(receiver);
-            call.addArguments(ParserUtils.parseArguments(ctx.argument()));
-            return List.of(call);
-        });
     }
 
     @Override
@@ -354,30 +402,11 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return super.visitLiteral(ctx);
     }
 
-    private @NotNull Expr parseStringSegment(final @NotNull StringSegmentContext ctx) {
-        final var text = ctx.M_CONST_STR_TEXT();
-        if (text != null) {
-            return LiteralExpr.of(text.getText(), TokenRange.fromTerminalNode(text));
-        }
-        return ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()));
-    }
-
-    private @NotNull LiteralExpr mergeStringLiterals(final @NotNull ArrayDeque<LiteralExpr> queue) {
-        final var builder = new StringBuilder();
-        final var ranges = new ArrayList<TokenRange>();
-        while (!queue.isEmpty()) {
-            final var segment = queue.pop();
-            ranges.add(segment.getTokenRange());
-            builder.append(segment.value);
-        }
-        return LiteralExpr.of(builder.toString(), TokenRange.union(ranges));
-    }
-
     @Override
     public @NotNull List<Expr> visitStringLiteral(final @NotNull StringLiteralContext ctx) {
         // @formatter:off
         final var segments = ctx.stringSegment().stream()
-            .map(this::parseStringSegment)
+            .map(ExprParser::parseStringSegment)
             .toList();
         // @formatter:on
         // Handle empty strings
@@ -446,15 +475,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return List.of(LiteralExpr.of(Double.parseDouble(value.getText()), tokenRange));
     }
 
-    private @NotNull Pair<Expr, Expr> parseFunctionSignatureParameter(final @NotNull FunctionSignatureParameterContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = Optional.ofNullable(ctx.exprOrName()).map(ExceptionUtils.unsafeFunction(ParserUtils::parseExprOrName)).orElse(
-                null);
-            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
-            return new Pair<>(name, type);
-        });
-    }
-
     @Override
     public @NotNull List<Expr> visitFieldSignature(final @NotNull FieldSignatureContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
@@ -474,7 +494,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             final var signature = new FunctionSignatureExpr(owner, name, returnType);
             // @formatter:off
             signature.addExpressions(ctx.functionSignatureParameter().stream()
-                .map(this::parseFunctionSignatureParameter)
+                .map(ExprParser::parseFunctionSignatureParameter)
                 .map(Pair::right)
                 .toList());
             // @formatter:on

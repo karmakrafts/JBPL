@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.jbpl.assembler.source;
 
+import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +42,7 @@ public record SourceLine(List<Token> tokens, int lineIndex) implements Comparabl
     }
 
     public boolean endsWithNewline() {
-        return toString().endsWith("\n");
+        return toString().endsWith("\n") && !tokens.isEmpty() && tokens.get(tokens.size() - 1).getType() != JBPLLexer.EOF;
     }
 
     public @NotNull String renderWithColor() { // @formatter:off

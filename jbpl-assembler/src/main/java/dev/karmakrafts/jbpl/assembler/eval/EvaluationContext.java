@@ -70,6 +70,10 @@ public final class EvaluationContext {
             ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
     }
 
+    public byte getReturnMask() {
+        return returnMask;
+    }
+
     public boolean clearReturnMask() {
         final var result = hasRet();
         returnMask = RET_MASK_NONE;

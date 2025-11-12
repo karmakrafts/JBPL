@@ -211,6 +211,9 @@ public final class SourceDiagnostic {
                 builder.append(" ".repeat(lineNumberSpaceCount));
                 builder.append(V_BORDER_CHAR).append(' ');
                 builder.append(line.renderWithColor());
+                if (!line.endsWithNewline()) {
+                    builder.append('\n');
+                }
                 // Render all highlights for this line
                 renderLineHighlight(builder, line, highlight, highlightSpacing);
                 builder.append('\n');

@@ -27,10 +27,15 @@ public enum TypeCategory {
     STRING,
     OBJECT,
     INTERSECTION,
-    PREPROCESSOR;
+    PREPROCESSOR,
+    RANGE;
     // @formatter:on
 
+    public boolean isNumber() {
+        return this == INTEGER || this == FLOAT;
+    }
+
     public boolean isMaterializable() {
-        return this != INTERSECTION && this != PREPROCESSOR;
+        return this != INTERSECTION && this != PREPROCESSOR && this != RANGE;
     }
 }

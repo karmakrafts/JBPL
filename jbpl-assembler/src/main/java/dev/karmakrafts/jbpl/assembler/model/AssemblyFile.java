@@ -1,5 +1,7 @@
 package dev.karmakrafts.jbpl.assembler.model;
 
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
@@ -74,6 +76,19 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     @Override
     public void setParent(final @Nullable ElementContainer parent) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
+        context.pushFrame(this);
+        for (final var element : getElements()) {
+            if (!element.isEvaluatedDirectly() || context.clearCnt()) {
+                continue;
+            }
+            element.evaluate(context);
+            context.clearReturnMask(); // Top level clears return mask completely
+        }
+        context.popFrame();
     }
 
     @Override

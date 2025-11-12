@@ -168,7 +168,14 @@ public interface ElementVisitor {
         else if (expr instanceof WhenExpr whenExpr) {
             return visitWhenExpr(whenExpr);
         }
+        else if (expr instanceof RangeExpr rangeExpr) {
+            return visitRangeExpr(rangeExpr);
+        }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitRangeExpr(final @NotNull RangeExpr rangeExpr) {
+        return visitExprContainer(rangeExpr);
     }
 
     default @NotNull Expr visitWhenExpr(final @NotNull WhenExpr whenExpr) {

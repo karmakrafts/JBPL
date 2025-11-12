@@ -8,7 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public sealed interface Type permits ArrayType, BuiltinType, ClassType, IntersectionType, PreproClassType, PreproType {
+public sealed interface Type
+    permits ArrayType, BuiltinType, ClassType, IntersectionType, PreproClassType, PreproType, RangeType {
     /**
      * Attempt to parse a type from the given string value.
      * This will assume the input values are in one of the following formats:
