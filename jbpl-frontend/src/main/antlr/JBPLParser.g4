@@ -250,6 +250,7 @@ expr:
     | expr NL*? PIPE NL*? expr
     | expr NL*? CARET NL*? expr
     | expr NL*? LSH NL*? expr
+    | expr NL*? URSH NL*? expr
     | expr NL*? RSH NL*? expr
 
     | expr NL*? LEQ NL*? expr
@@ -275,6 +276,17 @@ expr:
     | expr KW_IN expr
 
     | <assoc=right> expr NL*? EQ NL*? expr // Assignments
+    | <assoc=right> expr NL*? PLUS_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? MINUS_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? TIMES_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? DIV_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? REM_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? LSH_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? RSH_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? URSH_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? AND_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? OR_ASSIGN NL*? expr
+    | <assoc=right> expr NL*? XOR_ASSIGN NL*? expr
 
     | ifExpr
     | whenExpr

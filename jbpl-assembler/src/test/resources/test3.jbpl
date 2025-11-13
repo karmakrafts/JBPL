@@ -55,6 +55,17 @@ define s1: string = "ASSIGNED REF"
 s1 = s1 + "!!!"
 ^info s1
 
+define xyz: i32 = 0
+^info "xyz re-assign: ${xyz += 1}"
+^info "xyz: ${xyz <<= 1}"
+^info "xyz: ${xyz}"
+
+define my_flag: bool = false
+define my_other_flag: bool = false
+my_other_flag |= xyz == 2
+define my_third_flag: bool = my_flag | my_other_flag
+^info "my_third_flag: ${my_third_flag}"
+
 ^info when(when_var) {
     100 -> "Complex code is in ${just_another_array[0][0]}"
     101 -> "MORE TESTING"

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler;
+package dev.karmakrafts.jbpl.assembler.cli;
 
+import dev.karmakrafts.jbpl.assembler.Assembler;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import joptsimple.OptionParser;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +35,7 @@ public final class Main {
     }
 
     public static void main(final @NotNull String[] args) {
-        if(args.length == 0) {
+        if (args.length == 0) {
             System.out.println("Assembler requires at least an input file to be specified.");
             System.out.println("Run 'jbpl --help' to get more information.");
             return;

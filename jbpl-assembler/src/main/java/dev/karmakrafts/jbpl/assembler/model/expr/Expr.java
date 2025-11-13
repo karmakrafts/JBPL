@@ -17,7 +17,11 @@ public interface Expr extends Statement {
     default @NotNull LiteralExpr evaluateAsConst(final @NotNull EvaluationContext context) throws EvaluationException {
         // After evaluation
         evaluate(context);
-        return (LiteralExpr) context.popValue();
+        var result = context.popValue();
+        if (result instanceof LiteralExpr literalExpr) {
+            return literalExpr;
+        }
+        return result.evaluateAsConst(context);
     }
 
     default <T> @NotNull T evaluateAs(final @NotNull EvaluationContext context,

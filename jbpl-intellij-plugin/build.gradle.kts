@@ -35,6 +35,9 @@ java {
 }
 
 tasks {
+    publishPlugin {
+        token = System.getenv("JB_MARKETPLACE_TOKEN")
+    }
     runIde {
         // Automatically enable native wayland support when the host is using Wayland
         if (System.getenv("XDG_SESSION_TYPE") == "wayland") {

@@ -96,6 +96,21 @@ KW_F32: 'f32';
 KW_F64: 'f64';
 KW_I8: 'i8';
 
+PLUS_ASSIGN: '+=';
+MINUS_ASSIGN: '-=';
+TIMES_ASSIGN: '*=';
+DIV_ASSIGN: '/=';
+REM_ASSIGN: '%=';
+LSH_ASSIGN: '<<=';
+URSH_ASSIGN: '>>>=';
+RSH_ASSIGN: '>>=';
+AND_ASSIGN: '&=';
+OR_ASSIGN: '|=';
+XOR_ASSIGN: '^=';
+
+INC: '++';
+DEC: '--';
+
 SPACESHIP: '<=>';
 EQEQ: '==';
 NEQ: '!=';
@@ -114,6 +129,7 @@ DOLLAR: '$';
 SLASH: '/';
 LSH: '<<';
 L_ABRACKET: '<';
+URSH: '>>>';
 RSH: '>>';
 R_ABRACKET: '>';
 L_PAREN: '(' -> pushMode(DEFAULT_MODE);

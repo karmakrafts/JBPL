@@ -297,60 +297,46 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                     return parseMacroCall(call, receiver);
                 }
                 return parseReference(ctx.reference(), receiver);
-            }
-            else if (ctx.DOTDOT() != null) { // Inclusive
-                return parseRangeExpr(ctx, true);
-            }
-            else if (ctx.EXCL_RANGE() != null) {
-                return parseRangeExpr(ctx, false);
-            }
-            else if (ctx.EQ() != null) {
-                final var reference = parse(ctx.expr(0));
-                final var value = parse(ctx.expr(1));
-                return List.of(new AssignExpr(reference, value));
-            }
-            else if (ctx.L_SQBRACKET() != null) {
-                // We know this is a subscript operator
-                final var reference = parse(ctx.expr(0));
-                final var index = parse(ctx.expr(1));
-                return List.of(new ArrayAccessExpr(reference, index));
-            }
-            else if (ctx.KW_IN() != null) {
-                final var lhs = parse(ctx.expr(0));
-                final var rhs = parse(ctx.expr(1));
-                return List.of(new InExpr(lhs, rhs));
-            }
-            else if (ctx.KW_IS() != null) {
-                final var lhs = parse(ctx.expr(0));
-                final var rhs = ParserUtils.parseExprOrType(ctx.exprOrType());
-                return List.of(new IsExpr(lhs, rhs));
-            }
-            else if (ctx.KW_AS() != null) {
-                final var lhs = parse(ctx.expr(0));
-                final var rhs = ParserUtils.parseExprOrType(ctx.exprOrType());
-                return List.of(new AsExpr(lhs, rhs));
             } // @formatter:off
-            else if (ctx.EQEQ() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
-            else if (ctx.NEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.NE);
-            else if (ctx.L_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.LT);
-            else if (ctx.LEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.LE);
-            else if (ctx.R_ABRACKET() != null)  return parseBinaryExpr(ctx, BinaryExpr.Op.GT);
-            else if (ctx.GEQ() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.GE);
-            else if (ctx.SPACESHIP() != null)   return parseBinaryExpr(ctx, BinaryExpr.Op.CMP);
-            else if (ctx.PLUS() != null)        return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.ADD, UnaryExpr.Op.PLUS);
-            else if (ctx.MINUS() != null)       return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.SUB, UnaryExpr.Op.MINUS);
-            else if (ctx.ASTERISK() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.MUL);
-            else if (ctx.SLASH() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.DIV);
-            else if (ctx.REM() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.REM);
-            else if (ctx.LSH() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.LSH);
-            else if (ctx.RSH() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.RSH);
-            else if (ctx.CARET() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.XOR);
-            else if (ctx.AMPAMP() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.SC_AND);
-            else if (ctx.AMP() != null)         return parseBinaryExpr(ctx, BinaryExpr.Op.AND);
-            else if (ctx.PIPEPIPE() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.SC_OR);
-            else if (ctx.PIPE() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.OR);
-            else if (ctx.TILDE() != null)       return parseUnaryExpr(ctx, UnaryExpr.Op.INVERSE);
-            else if (ctx.EXCL() != null)        return parseUnaryExpr(ctx, UnaryExpr.Op.NOT);
+            else if (ctx.L_SQBRACKET() != null)     return List.of(new ArrayAccessExpr(parse(ctx.expr(0)), parse(ctx.expr(1))));
+            else if (ctx.KW_IN() != null)           return List.of(new InExpr(parse(ctx.expr(0)), parse(ctx.expr(1))));
+            else if (ctx.KW_IS() != null)           return List.of(new IsExpr(parse(ctx.expr(0)), ParserUtils.parseExprOrType(ctx.exprOrType())));
+            else if (ctx.KW_AS() != null)           return List.of(new AsExpr(parse(ctx.expr(0)), ParserUtils.parseExprOrType(ctx.exprOrType())));
+            else if (ctx.DOTDOT() != null)          return parseRangeExpr(ctx, true);
+            else if (ctx.EXCL_RANGE() != null)      return parseRangeExpr(ctx, false);
+            else if (ctx.EQEQ() != null)            return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
+            else if (ctx.NEQ() != null)             return parseBinaryExpr(ctx, BinaryExpr.Op.NE);
+            else if (ctx.L_ABRACKET() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.LT);
+            else if (ctx.LEQ() != null)             return parseBinaryExpr(ctx, BinaryExpr.Op.LE);
+            else if (ctx.R_ABRACKET() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.GT);
+            else if (ctx.GEQ() != null)             return parseBinaryExpr(ctx, BinaryExpr.Op.GE);
+            else if (ctx.SPACESHIP() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.CMP);
+            else if (ctx.PLUS() != null)            return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.ADD, UnaryExpr.Op.PLUS);
+            else if (ctx.MINUS() != null)           return parseBinaryExprWithUnaryVariant(ctx, BinaryExpr.Op.SUB, UnaryExpr.Op.MINUS);
+            else if (ctx.ASTERISK() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.MUL);
+            else if (ctx.SLASH() != null)           return parseBinaryExpr(ctx, BinaryExpr.Op.DIV);
+            else if (ctx.REM() != null)             return parseBinaryExpr(ctx, BinaryExpr.Op.REM);
+            else if (ctx.LSH() != null)             return parseBinaryExpr(ctx, BinaryExpr.Op.LSH);
+            else if (ctx.RSH() != null)             return parseBinaryExpr(ctx, BinaryExpr.Op.RSH);
+            else if (ctx.CARET() != null)           return parseBinaryExpr(ctx, BinaryExpr.Op.XOR);
+            else if (ctx.AMPAMP() != null)          return parseBinaryExpr(ctx, BinaryExpr.Op.SC_AND);
+            else if (ctx.AMP() != null)             return parseBinaryExpr(ctx, BinaryExpr.Op.AND);
+            else if (ctx.PIPEPIPE() != null)        return parseBinaryExpr(ctx, BinaryExpr.Op.SC_OR);
+            else if (ctx.PIPE() != null)            return parseBinaryExpr(ctx, BinaryExpr.Op.OR);
+            else if (ctx.TILDE() != null)           return parseUnaryExpr(ctx, UnaryExpr.Op.INVERSE);
+            else if (ctx.EXCL() != null)            return parseUnaryExpr(ctx, UnaryExpr.Op.NOT);
+            else if (ctx.PLUS_ASSIGN() != null)     return parseBinaryExpr(ctx, BinaryExpr.Op.PLUS_ASSIGN);
+            else if (ctx.MINUS_ASSIGN() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.MINUS_ASSIGN);
+            else if (ctx.TIMES_ASSIGN() != null)    return parseBinaryExpr(ctx, BinaryExpr.Op.TIMES_ASSIGN);
+            else if (ctx.DIV_ASSIGN() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.DIV_ASSIGN);
+            else if (ctx.REM_ASSIGN() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.REM_ASSIGN);
+            else if (ctx.LSH_ASSIGN() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.LSH_ASSIGN);
+            else if (ctx.RSH_ASSIGN() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.RSH_ASSIGN);
+            else if (ctx.URSH_ASSIGN() != null)     return parseBinaryExpr(ctx, BinaryExpr.Op.URSH_ASSIGN);
+            else if (ctx.AND_ASSIGN() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.AND_ASSIGN);
+            else if (ctx.OR_ASSIGN() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.OR_ASSIGN);
+            else if (ctx.XOR_ASSIGN() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.XOR_ASSIGN);
+            else if (ctx.EQ() != null)              return parseBinaryExpr(ctx, BinaryExpr.Op.ASSIGN);
             // @formatter:on
             return super.visitExpr(ctx);
         });
