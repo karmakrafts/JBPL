@@ -56,45 +56,45 @@ public final class SizeOfExpr extends AbstractExprContainer implements Expr {
         if (valueType == PreproType.TYPE && value instanceof BuiltinType builtinType) {
             switch (builtinType) {
                 case VOID -> {
-                    context.pushValue(LiteralExpr.of(0, getTokenRange()));
+                    context.pushValue(ConstExpr.of(0, getTokenRange()));
                     return;
                 }
                 case I8 -> {
-                    context.pushValue(LiteralExpr.of(Byte.BYTES, getTokenRange()));
+                    context.pushValue(ConstExpr.of(Byte.BYTES, getTokenRange()));
                     return;
                 }
                 case I16 -> {
-                    context.pushValue(LiteralExpr.of(Short.BYTES, getTokenRange()));
+                    context.pushValue(ConstExpr.of(Short.BYTES, getTokenRange()));
                     return;
                 }
                 case I32 -> {
-                    context.pushValue(LiteralExpr.of(Integer.BYTES, getTokenRange()));
+                    context.pushValue(ConstExpr.of(Integer.BYTES, getTokenRange()));
                     return;
                 }
                 case I64 -> {
-                    context.pushValue(LiteralExpr.of(Long.BYTES, getTokenRange()));
+                    context.pushValue(ConstExpr.of(Long.BYTES, getTokenRange()));
                     return;
                 }
                 case F32 -> {
-                    context.pushValue(LiteralExpr.of(Float.BYTES, getTokenRange()));
+                    context.pushValue(ConstExpr.of(Float.BYTES, getTokenRange()));
                     return;
                 }
                 case F64 -> {
-                    context.pushValue(LiteralExpr.of(Double.BYTES, getTokenRange()));
+                    context.pushValue(ConstExpr.of(Double.BYTES, getTokenRange()));
                     return;
                 }
                 case CHAR -> {
-                    context.pushValue(LiteralExpr.of(Character.BYTES, getTokenRange()));
+                    context.pushValue(ConstExpr.of(Character.BYTES, getTokenRange()));
                     return;
                 }
             }
         }
         else if (valueType == BuiltinType.STRING) {
-            context.pushValue(LiteralExpr.of(((String) value).length(), getTokenRange()));
+            context.pushValue(ConstExpr.of(((String) value).length(), getTokenRange()));
             return;
         }
         else if (valueType instanceof ArrayType) {
-            context.pushValue(LiteralExpr.of(Array.getLength(value), getTokenRange()));
+            context.pushValue(ConstExpr.of(Array.getLength(value), getTokenRange()));
             return;
         }
         throw new EvaluationException(String.format("Incompatible type %s for sizeof-expression", valueType),

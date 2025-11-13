@@ -24,7 +24,7 @@ import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, ExprContainer {
+public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, ExprContainer, Reference {
     public String name;
 
     public ReferenceExpr(final @NotNull String name) {
@@ -47,6 +47,27 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     }
 
     @Override
+    public @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var argument = findArgument(context);
+        if (argument != null) {
+            return argument.evaluateAsConst(context);
+        }
+        getDefine(context).evaluate(context);
+        return (ConstExpr)context.popValue();
+    }
+
+    @Override
+    public void storeToReference(final @NotNull ConstExpr value,
+                                 final @NotNull EvaluationContext context) throws EvaluationException {
+        final var argument = findArgument(context);
+        if (argument != null) {
+            context.peekFrame().namedLocalValues.put(name, ConstExpr.of(value, getTokenRange()));
+            return;
+        }
+        getDefine(context).setValue(value);
+    }
+
+    @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var argument = findArgument(context);
         if (argument != null) {
@@ -57,12 +78,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var argument = findArgument(context);
-        if (argument != null) {
-            context.pushValue(argument.evaluateAsConst(context));
-            return;
-        }
-        getDefine(context).evaluate(context);
+        context.pushValue(loadFromReference(context));
     }
 
     @Override

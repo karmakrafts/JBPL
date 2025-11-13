@@ -46,7 +46,7 @@ public final class SelectorReferenceExpr extends AbstractElement implements Expr
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) {
-        context.pushValue(LiteralExpr.of(getSelector(context), getTokenRange()));
+        context.pushValue(ConstExpr.of(getSelector(context), getTokenRange()));
     }
 
     @Override

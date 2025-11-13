@@ -80,7 +80,7 @@ public final class RangeExpr extends AbstractExprContainer implements Expr {
         final var array = Array.newInstance(type, 2);
         Array.set(array, 0, start);
         Array.set(array, 1, end);
-        context.pushValue(LiteralExpr.of(array, getTokenRange()));
+        context.pushValue(ConstExpr.of(array, getTokenRange()));
     }
 
     @Override

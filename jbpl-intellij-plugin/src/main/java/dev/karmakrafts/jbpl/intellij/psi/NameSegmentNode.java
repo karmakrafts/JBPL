@@ -17,10 +17,9 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class NameSegmentNode extends ANTLRPsiNode {
+public final class NameSegmentNode extends JBPLPsiNode {
     public NameSegmentNode(final @NotNull ASTNode node) {
         super(node);
     }

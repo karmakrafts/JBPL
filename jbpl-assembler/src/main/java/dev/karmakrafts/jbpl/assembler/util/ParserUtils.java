@@ -17,8 +17,8 @@
 package dev.karmakrafts.jbpl.assembler.util;
 
 import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.parser.ExprParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
@@ -66,7 +66,7 @@ public final class ParserUtils {
         final var specialName = ctx.specialFunctionName();
         // @formatter:off
         return specialName != null
-            ? LiteralExpr.of(specialName.getText(), TokenRange.fromContext(specialName))
+            ? ConstExpr.of(specialName.getText(), TokenRange.fromContext(specialName))
             : parseExprOrName(ctx.exprOrName());
         // @formatter:on
     }
@@ -76,7 +76,7 @@ public final class ParserUtils {
         // @formatter:off
         return expr != null
             ? ExprParser.parse(expr)
-            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.classType())), TokenRange.fromContext(ctx.classType()));
+            : ConstExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.classType())), TokenRange.fromContext(ctx.classType()));
         // @formatter:on
     }
 
@@ -85,7 +85,7 @@ public final class ParserUtils {
         // @formatter:off
         return expr != null
             ? ExprParser.parse(expr)
-            : LiteralExpr.of(ctx.nameSegment().getText(), TokenRange.fromContext(ctx.nameSegment()));
+            : ConstExpr.of(ctx.nameSegment().getText(), TokenRange.fromContext(ctx.nameSegment()));
         // @formatter:on
     }
 
@@ -123,7 +123,7 @@ public final class ParserUtils {
         // @formatter:off
         return expr != null
             ? ExprParser.parse(expr)
-            : LiteralExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.type())), TokenRange.fromContext(ctx.type()));
+            : ConstExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.type())), TokenRange.fromContext(ctx.type()));
         // @formatter:on
     }
 

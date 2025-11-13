@@ -17,17 +17,25 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.annotation.AnnotationHolder;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
+import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public final class PreproClassNode extends ANTLRPsiNode implements StructuralPsiElement {
+public final class PreproClassNode extends JBPLPsiNode implements StructuralPsiElement, Annotated {
     public PreproClassNode(final @NotNull ASTNode node) {
         super(node);
+    }
+
+    @Override
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        PsiUtils.find(this, "preproClass/exprOrName", ExprOrNameNode.class).ifPresent(name -> name.annotateNameWith(
+            TextAttributeKeys.PREPRO_CLASS,
+            holder));
     }
 
     @Override

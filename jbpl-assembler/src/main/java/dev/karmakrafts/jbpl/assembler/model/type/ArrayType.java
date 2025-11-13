@@ -19,8 +19,8 @@ package dev.karmakrafts.jbpl.assembler.model.type;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.ArrayExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,7 +62,7 @@ public record ArrayType(Type elementType) implements Type {
 
     @Override
     public @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) {
-        return new ArrayExpr(LiteralExpr.of(this));
+        return new ArrayExpr(ConstExpr.of(this));
     }
 
     @Override

@@ -22,7 +22,7 @@ public abstract class AbstractReceiverExpr extends AbstractExprContainer {
     public static final int RECEIVER_INDEX = 0;
 
     public AbstractReceiverExpr() {
-        addExpression(LiteralExpr.unit()); // Receiver
+        addExpression(ConstExpr.unit()); // Receiver
     }
 
     public @NotNull Expr getReceiver() {

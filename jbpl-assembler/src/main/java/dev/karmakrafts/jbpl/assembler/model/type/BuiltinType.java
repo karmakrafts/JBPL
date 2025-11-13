@@ -18,7 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -81,16 +81,16 @@ public enum BuiltinType implements Type {
     @Override
     public @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) {
         return switch (this) {
-            case VOID -> LiteralExpr.unit();
-            case I8 -> LiteralExpr.of((byte) 0);
-            case I16 -> LiteralExpr.of((short) 0);
-            case I32 -> LiteralExpr.of(0);
-            case I64 -> LiteralExpr.of(0L);
-            case F32 -> LiteralExpr.of(0F);
-            case F64 -> LiteralExpr.of(0.0);
-            case CHAR -> LiteralExpr.of(' ');
-            case BOOL -> LiteralExpr.of(false);
-            case STRING -> LiteralExpr.of("");
+            case VOID -> ConstExpr.unit();
+            case I8 -> ConstExpr.of((byte) 0);
+            case I16 -> ConstExpr.of((short) 0);
+            case I32 -> ConstExpr.of(0);
+            case I64 -> ConstExpr.of(0L);
+            case F32 -> ConstExpr.of(0F);
+            case F64 -> ConstExpr.of(0.0);
+            case CHAR -> ConstExpr.of(' ');
+            case BOOL -> ConstExpr.of(false);
+            case STRING -> ConstExpr.of("");
             default -> throw new IllegalStateException(String.format("%s has no default value!", this));
         };
     }

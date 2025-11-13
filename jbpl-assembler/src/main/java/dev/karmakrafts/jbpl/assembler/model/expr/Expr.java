@@ -22,7 +22,10 @@ import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public interface Expr extends Statement {
     @Override
@@ -30,19 +33,21 @@ public interface Expr extends Statement {
 
     @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException;
 
-    default @NotNull LiteralExpr evaluateAsConst(final @NotNull EvaluationContext context) throws EvaluationException {
+    default @NotNull ConstExpr evaluateAsConst(final @NotNull EvaluationContext context) throws EvaluationException {
         // After evaluation
         evaluate(context);
         var result = context.popValue();
-        if (result instanceof LiteralExpr literalExpr) {
-            return literalExpr;
+        if (!(result instanceof ConstExpr constResult)) {
+            final var message = "Could not evaluate expression as const value";
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        return result.evaluateAsConst(context);
+        constResult.ensureLazyConstValue(context);
+        return constResult;
     }
 
     default <T> @NotNull T evaluateAs(final @NotNull EvaluationContext context,
                                       final @NotNull Class<T> type) throws EvaluationException {
-        return type.cast(evaluateAsConst(context).value);
+        return type.cast(Objects.requireNonNull(evaluateAsConst(context).getConstValue()));
     }
 
     default @NotNull Object evaluateAsConstAndMaterialize(final @NotNull EvaluationContext context) throws EvaluationException {

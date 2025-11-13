@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.jbpl.assembler.parser;
 
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.*;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -56,46 +56,26 @@ public final class InstructionParser extends JBPLParserBaseVisitor<List<Instruct
     }
 
     @Override
-    public List<Instruction> visitLoad(final @NotNull LoadContext ctx) {
+    public List<Instruction> visitStackInstruction(final @NotNull StackInstructionContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var opcode = ParserUtils.parseOpcode(ctx.INSN_LOAD());
+            final var wrappedExpr = ctx.wrappedExpr();
+            if (wrappedExpr != null) {
+                return List.of(new StackInstruction(opcode, ExprParser.parse(wrappedExpr)));
+            }
             final var localIndexNode = ctx.intLiteral();
             if (localIndexNode != null) {
-                final var localIndex = ExprParser.parse(localIndexNode);
-                return List.of(new StackInstruction(opcode, localIndex));
+                return List.of(new StackInstruction(opcode, ExprParser.parse(localIndexNode)));
             }
-            final var localName = LiteralExpr.of(ctx.IDENT().getText(), TokenRange.fromTerminalNode(ctx.IDENT()));
+            final var localName = ConstExpr.of(ctx.IDENT().getText(), TokenRange.fromTerminalNode(ctx.IDENT()));
             return List.of(new StackInstruction(opcode, localName));
         });
     }
 
     @Override
-    public List<Instruction> visitStore(final @NotNull StoreContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var opcode = ParserUtils.parseOpcode(ctx.INSN_STORE());
-            final var localIndexNode = ctx.intLiteral();
-            if (localIndexNode != null) {
-                final var localIndex = ExprParser.parse(localIndexNode);
-                return List.of(new StackInstruction(opcode, localIndex));
-            }
-            final var localName = LiteralExpr.of(ctx.IDENT().getText(), TokenRange.fromTerminalNode(ctx.IDENT()));
-            return List.of(new StackInstruction(opcode, localName));
-        });
-    }
-
-    @Override
-    public List<Instruction> visitFieldLoad(final @NotNull FieldLoadContext ctx) {
+    public List<Instruction> visitFieldInstruction(final @NotNull FieldInstructionContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var opcode = ParserUtils.parseOpcode(ctx.INSN_GET());
-            final var signature = ExprParser.parse(ctx.fieldSignature());
-            return List.of(new FieldInstruction(opcode, signature));
-        });
-    }
-
-    @Override
-    public List<Instruction> visitFieldStore(final @NotNull FieldStoreContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var opcode = ParserUtils.parseOpcode(ctx.INSN_PUT());
             final var signature = ExprParser.parse(ctx.fieldSignature());
             return List.of(new FieldInstruction(opcode, signature));
         });
@@ -105,7 +85,11 @@ public final class InstructionParser extends JBPLParserBaseVisitor<List<Instruct
     public List<Instruction> visitLdc(final @NotNull LdcContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var opcode = ParserUtils.parseOpcode(ctx.INSN_LDC());
-            final var value = ExprParser.parse(ctx.literal());
+            // @formatter:off
+            final var value = ctx.literal() != null
+                ? ExprParser.parse(ctx.literal())
+                : ExprParser.parse(ctx.wrappedExpr());
+            // @formatter:on
             return List.of(new LoadConstantInstruction(opcode, value));
         });
     }

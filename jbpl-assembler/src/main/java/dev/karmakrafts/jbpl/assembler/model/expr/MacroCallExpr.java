@@ -56,7 +56,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return getMacro(context).getReturnType().evaluateAs(context, Type.class);
     }
 
-    private @NotNull List<Pair<@Nullable String, LiteralExpr>> evaluateArguments(final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull List<Pair<@Nullable String, ConstExpr>> evaluateArguments(final @NotNull EvaluationContext context) {
         // @formatter:off
         return getArguments().stream()
             .map(ExceptionUtils.unsafeFunction(pair -> {

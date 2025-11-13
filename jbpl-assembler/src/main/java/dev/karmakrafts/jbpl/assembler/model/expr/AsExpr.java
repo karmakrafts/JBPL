@@ -55,20 +55,20 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         return getType().evaluateAs(context, Type.class);
     }
 
-    private @NotNull LiteralExpr castFromNumber(final @NotNull Type type,
-                                                final @NotNull Number number,
-                                                final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr castFromNumber(final @NotNull Type type,
+                                              final @NotNull Number number,
+                                              final @NotNull EvaluationContext context) throws EvaluationException {
         // If we have a number, we may cast into other numbers and chars/bools with special rules
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
-                case I8 -> LiteralExpr.of(number.byteValue(), getTokenRange());
-                case I16 -> LiteralExpr.of(number.shortValue(), getTokenRange());
-                case I32 -> LiteralExpr.of(number.intValue(), getTokenRange());
-                case I64 -> LiteralExpr.of(number.longValue(), getTokenRange());
-                case F32 -> LiteralExpr.of(number.floatValue(), getTokenRange());
-                case F64 -> LiteralExpr.of(number.doubleValue(), getTokenRange());
-                case CHAR -> LiteralExpr.of((char) number.intValue(), getTokenRange());
-                case BOOL -> LiteralExpr.of(number.longValue() != 0, getTokenRange());
+                case I8 -> ConstExpr.of(number.byteValue(), getTokenRange());
+                case I16 -> ConstExpr.of(number.shortValue(), getTokenRange());
+                case I32 -> ConstExpr.of(number.intValue(), getTokenRange());
+                case I64 -> ConstExpr.of(number.longValue(), getTokenRange());
+                case F32 -> ConstExpr.of(number.floatValue(), getTokenRange());
+                case F64 -> ConstExpr.of(number.doubleValue(), getTokenRange());
+                case CHAR -> ConstExpr.of((char) number.intValue(), getTokenRange());
+                case BOOL -> ConstExpr.of(number.longValue() != 0, getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast numeric type into %s", type),
                     SourceDiagnostic.from(this),
                     context.createStackTrace());
@@ -79,18 +79,18 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
             context.createStackTrace());
     }
 
-    private @NotNull LiteralExpr castFromBoolean(final @NotNull Type type,
-                                                 final @NotNull Boolean bool,
-                                                 final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr castFromBoolean(final @NotNull Type type,
+                                               final @NotNull Boolean bool,
+                                               final @NotNull EvaluationContext context) throws EvaluationException {
         // Booleans can be cast into any integer and floating point type
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
-                case I8 -> LiteralExpr.of((byte) (bool ? 1 : 0), getTokenRange());
-                case I16 -> LiteralExpr.of((short) (bool ? 1 : 0), getTokenRange());
-                case I32 -> LiteralExpr.of(bool ? 1 : 0, getTokenRange());
-                case I64 -> LiteralExpr.of(bool ? 1L : 0L, getTokenRange());
-                case F32 -> LiteralExpr.of(bool ? 1F : 0F, getTokenRange());
-                case F64 -> LiteralExpr.of(bool ? 1.0 : 0.0, getTokenRange());
+                case I8 -> ConstExpr.of((byte) (bool ? 1 : 0), getTokenRange());
+                case I16 -> ConstExpr.of((short) (bool ? 1 : 0), getTokenRange());
+                case I32 -> ConstExpr.of(bool ? 1 : 0, getTokenRange());
+                case I64 -> ConstExpr.of(bool ? 1L : 0L, getTokenRange());
+                case F32 -> ConstExpr.of(bool ? 1F : 0F, getTokenRange());
+                case F64 -> ConstExpr.of(bool ? 1.0 : 0.0, getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast boolean into %s", type),
                     SourceDiagnostic.from(this),
                     context.createStackTrace());
@@ -101,20 +101,20 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
             context.createStackTrace());
     }
 
-    private @NotNull LiteralExpr castFromString(final @NotNull Type type,
-                                                final @NotNull String string,
-                                                final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr castFromString(final @NotNull Type type,
+                                              final @NotNull String string,
+                                              final @NotNull EvaluationContext context) throws EvaluationException {
         // Strings can be cast into any builtin type for parsing numerics and converting into chars/bools
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
-                case I8 -> LiteralExpr.of(Byte.parseByte(string), getTokenRange());
-                case I16 -> LiteralExpr.of(Short.parseShort(string), getTokenRange());
-                case I32 -> LiteralExpr.of(Integer.parseInt(string), getTokenRange());
-                case I64 -> LiteralExpr.of(Long.parseLong(string), getTokenRange());
-                case F32 -> LiteralExpr.of(Float.parseFloat(string), getTokenRange());
-                case F64 -> LiteralExpr.of(Double.parseDouble(string), getTokenRange());
-                case BOOL -> LiteralExpr.of(Boolean.parseBoolean(string), getTokenRange());
-                case CHAR -> LiteralExpr.of(string.charAt(0), getTokenRange());
+                case I8 -> ConstExpr.of(Byte.parseByte(string), getTokenRange());
+                case I16 -> ConstExpr.of(Short.parseShort(string), getTokenRange());
+                case I32 -> ConstExpr.of(Integer.parseInt(string), getTokenRange());
+                case I64 -> ConstExpr.of(Long.parseLong(string), getTokenRange());
+                case F32 -> ConstExpr.of(Float.parseFloat(string), getTokenRange());
+                case F64 -> ConstExpr.of(Double.parseDouble(string), getTokenRange());
+                case BOOL -> ConstExpr.of(Boolean.parseBoolean(string), getTokenRange());
+                case CHAR -> ConstExpr.of(string.charAt(0), getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast string into %s", type),
                     SourceDiagnostic.from(this),
                     context.createStackTrace());
@@ -122,11 +122,11 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         }
         else if (type instanceof PreproType preproType) {
             return switch (preproType) {
-                case TYPE -> LiteralExpr.of(Type.tryParse(string).orElseThrow(() -> new EvaluationException(
+                case TYPE -> ConstExpr.of(Type.tryParse(string).orElseThrow(() -> new EvaluationException(
                     "Could not parse type from string",
                     SourceDiagnostic.from(this),
                     context.createStackTrace())), getTokenRange());
-                case OPCODE -> LiteralExpr.of(Opcode.findByName(string).orElseThrow(() -> new EvaluationException(
+                case OPCODE -> ConstExpr.of(Opcode.findByName(string).orElseThrow(() -> new EvaluationException(
                     "Could not parse opcode from string",
                     SourceDiagnostic.from(this),
                     context.createStackTrace())), getTokenRange());
@@ -140,20 +140,20 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
             context.createStackTrace());
     }
 
-    private @NotNull LiteralExpr castFromChar(final @NotNull Type type,
-                                              final @NotNull Character value,
-                                              final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr castFromChar(final @NotNull Type type,
+                                            final @NotNull Character value,
+                                            final @NotNull EvaluationContext context) throws EvaluationException {
         // Strings can be cast into any builtin type for parsing numerics and converting into chars/bools
         if (type instanceof BuiltinType builtinType) {
             return switch (builtinType) {
-                case I8 -> LiteralExpr.of(Byte.parseByte(value.toString()), getTokenRange());
-                case I16 -> LiteralExpr.of(Short.parseShort(value.toString()), getTokenRange());
-                case I32 -> LiteralExpr.of(Integer.parseInt(value.toString()), getTokenRange());
-                case I64 -> LiteralExpr.of(Long.parseLong(value.toString()), getTokenRange());
-                case F32 -> LiteralExpr.of(Float.parseFloat(value.toString()), getTokenRange());
-                case F64 -> LiteralExpr.of(Double.parseDouble(value.toString()), getTokenRange());
-                case BOOL -> LiteralExpr.of(Boolean.parseBoolean(value.toString()), getTokenRange());
-                case CHAR -> LiteralExpr.of(value.toString(), getTokenRange());
+                case I8 -> ConstExpr.of(Byte.parseByte(value.toString()), getTokenRange());
+                case I16 -> ConstExpr.of(Short.parseShort(value.toString()), getTokenRange());
+                case I32 -> ConstExpr.of(Integer.parseInt(value.toString()), getTokenRange());
+                case I64 -> ConstExpr.of(Long.parseLong(value.toString()), getTokenRange());
+                case F32 -> ConstExpr.of(Float.parseFloat(value.toString()), getTokenRange());
+                case F64 -> ConstExpr.of(Double.parseDouble(value.toString()), getTokenRange());
+                case BOOL -> ConstExpr.of(Boolean.parseBoolean(value.toString()), getTokenRange());
+                case CHAR -> ConstExpr.of(value.toString(), getTokenRange());
                 default -> throw new EvaluationException(String.format("Cannot cast string into %s", type),
                     SourceDiagnostic.from(this),
                     context.createStackTrace());
@@ -169,7 +169,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         final var type = getType(context);
         // Always return unit literal for void type so we can have proper generic evaluation
         if (type == BuiltinType.VOID) {
-            context.pushValue(LiteralExpr.unit(getTokenRange()));
+            context.pushValue(ConstExpr.unit(getTokenRange()));
             return;
         }
         final var value = getValue();
@@ -182,7 +182,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         final var constValue = value.evaluateAs(context, Object.class);
         // Anything may be cast to a string to allow string conversions
         if (type == BuiltinType.STRING) {
-            context.pushValue(LiteralExpr.of(constValue.toString(), getTokenRange()));
+            context.pushValue(ConstExpr.of(constValue.toString(), getTokenRange()));
             return;
         }
         // We decide which conversions are possible based on the incoming type

@@ -16,11 +16,12 @@
 
 package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.lang.ASTNode;
+import com.intellij.psi.tree.IElementType;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiLeafNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class ExprOrTypeNode extends JBPLPsiNode {
-    public ExprOrTypeNode(final @NotNull ASTNode node) {
-        super(node);
+public class JBPLPsiLeafNode extends ANTLRPsiLeafNode {
+    public JBPLPsiLeafNode(final @NotNull IElementType type, final @NotNull CharSequence text) {
+        super(type, text);
     }
 }

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij.psi;
+package dev.karmakrafts.jbpl.assembler.model.expr;
 
-import com.intellij.lang.ASTNode;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import org.jetbrains.annotations.NotNull;
 
-public final class ExprOrTypeNode extends JBPLPsiNode {
-    public ExprOrTypeNode(final @NotNull ASTNode node) {
-        super(node);
-    }
+public interface Reference {
+    @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException;
+
+    void storeToReference(final @NotNull ConstExpr value,
+                          final @NotNull EvaluationContext context) throws EvaluationException;
 }

@@ -20,6 +20,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ArrayType;
@@ -84,7 +85,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         final var arrayLength = Array.getLength(array);
         for (var i = 0; i < arrayLength; i++) {
             final var value = Array.get(array, i);
-            final var result = performIteration(LiteralExpr.of(value, getTokenRange()), context);
+            final var result = performIteration(ConstExpr.of(value, getTokenRange()), context);
             if ((result & EvaluationContext.RET_MASK_CONTINUE) != 0) {
                 continue;
             }
@@ -102,7 +103,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         final var start = values[0];
         final var end = values[1];
         for (var value = start; value.compareTo(end) != 0; value = inc.apply(value)) {
-            final var result = performIteration(LiteralExpr.of(value, getTokenRange()), context);
+            final var result = performIteration(ConstExpr.of(value, getTokenRange()), context);
             if ((result & EvaluationContext.RET_MASK_CONTINUE) != 0) {
                 continue;
             }

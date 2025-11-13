@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.jbpl.assembler.parser;
 
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.*;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -68,7 +68,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
             // @formatter:off
             final var value = valueNode != null
                 ? ExprParser.parse(valueNode)
-                : LiteralExpr.unit();
+                : ConstExpr.unit();
             // @formatter:on
             return List.of(new ReturnStatement(value));
         });
@@ -104,7 +104,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var classType = ctx.classType();
             if (classType != null) {
-                return List.of(new YeetStatement(LiteralExpr.of(TypeParser.parse(classType),
+                return List.of(new YeetStatement(ConstExpr.of(TypeParser.parse(classType),
                     TokenRange.fromContext(classType))));
             }
             final var fieldSignature = ctx.fieldSignature();
@@ -140,7 +140,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
             // @formatter:off
             final var index = ctx.expr() != null
                 ? ExprParser.parse(ctx.expr())
-                : LiteralExpr.unit();
+                : ConstExpr.unit();
             // @formatter:on
             return List.of(new LocalStatement(name, index));
         });

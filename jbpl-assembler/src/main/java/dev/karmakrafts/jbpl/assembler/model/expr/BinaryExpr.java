@@ -26,7 +26,6 @@ import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,10 +69,10 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     }
 
     // Use number logic from regular arithmetic operators as pre-assignment step
-    private @NotNull LiteralExpr evaluatePreAssignmentForNumber(final @NotNull Number lhsNumber,
-                                                                final @NotNull Number rhsNumber,
-                                                                final @NotNull BuiltinType type,
-                                                                final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluatePreAssignmentForNumber(final @NotNull Number lhsNumber,
+                                                              final @NotNull Number rhsNumber,
+                                                              final @NotNull BuiltinType type,
+                                                              final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (type) {
             case I8 -> evaluateForByte(lhsNumber.byteValue(), rhsNumber, op.discardAssign(), context);
             case I16 -> evaluateForShort(lhsNumber.shortValue(), rhsNumber, op.discardAssign(), context);
@@ -88,19 +87,19 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluatePreAssignment(final @NotNull EvaluationContext context,
-                                                       final @NotNull LiteralExpr oldValue,
-                                                       final @NotNull LiteralExpr operand) throws EvaluationException {
+    private @NotNull ConstExpr evaluatePreAssignment(final @NotNull EvaluationContext context,
+                                                     final @NotNull ConstExpr oldValue,
+                                                     final @NotNull ConstExpr operand) throws EvaluationException {
         if (op == Op.ASSIGN) {
             return oldValue; // On regular assignments, we just forward the value as is
         }
-        final var type = oldValue.type;
+        final var type = oldValue.getType(context);
         if (!(type instanceof BuiltinType builtinType)) {
             final var message = String.format("Cannot perform re-assignment with operator %s on type %s", op, type);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        final var oldValueRef = oldValue.value;
-        final var operandRef = operand.value;
+        final var oldValueRef = oldValue.getConstValue();
+        final var operandRef = operand.getConstValue();
         if (oldValueRef instanceof Number lhsNumber && operandRef instanceof Number rhsNumber) {
             return evaluatePreAssignmentForNumber(lhsNumber, rhsNumber, builtinType, context);
         }
@@ -112,7 +111,11 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     }
 
     private void evaluateAssignment(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var reference = getLhs();
+        final var lhs = getLhs();
+        if (!(lhs instanceof Reference reference)) {
+            final var message = "Left-hand side of assignment must be a reference";
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
         final var expectedType = getType(context);
         final var value = getRhs();
         final var valueType = value.getType(context);
@@ -122,60 +125,27 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                 SourceDiagnostic.from(this, value, message),
                 context.createStackTrace());
         }
-        if (reference instanceof ReferenceExpr refExpr) {
-            // In this case, the only valid option is that we are re-assigning a define, since params are always immutable
-            if (refExpr.findArgument(context) != null) {
-                final var message = String.format("Cannot re-assign parameter '%s'", refExpr.name);
-                throw new EvaluationException(message,
-                    SourceDiagnostic.from(this, reference, message),
-                    context.createStackTrace());
-            }
-            final var define = refExpr.getDefine(context);
-            if (define.isFinal) {
-                final var message = String.format("Cannot re-assign final define '%s'", refExpr.name);
-                throw new EvaluationException(message,
-                    SourceDiagnostic.from(this, reference, message),
-                    context.createStackTrace());
-            }
-            final var oldValue = define.getValue().evaluateAsConst(context);
-            final var wrappedValue = evaluatePreAssignment(context, oldValue, value.evaluateAsConst(context));
-            define.setValue(wrappedValue);
-            context.pushValue(wrappedValue); // Assignments evaluate to their assigned value
-            return;
-        }
-        else if (reference instanceof ArrayAccessExpr arrayAccessExpr) {
-            // In this case, we are storing into the array. Reference evaluates to an array ref, against what the function name suggests.
-            final var arrayRef = arrayAccessExpr.getReference().evaluateAs(context, Object.class);
-            final int arrayIndex = arrayAccessExpr.getIndex().evaluateAs(context, Integer.class);
-            final var oldValue = Array.get(arrayRef, arrayIndex);
-            final var wrappedValue = evaluatePreAssignment(context,
-                LiteralExpr.of(oldValue),
-                value.evaluateAsConst(context));
-            Array.set(arrayRef, arrayIndex, wrappedValue.value);
-            context.pushValue(wrappedValue);
-            return;
-        }
-        final var message = String.format("Cannot re-assign expression %s", reference);
-        throw new EvaluationException(message,
-            SourceDiagnostic.from(this, reference, message),
-            context.createStackTrace());
+        final var oldValue = reference.loadFromReference(context);
+        final var newValue = evaluatePreAssignment(context, oldValue, value.evaluateAsConst(context));
+        reference.storeToReference(newValue, context);
+        context.pushValue(newValue);
     }
 
-    private @NotNull LiteralExpr evaluateForType(final @NotNull Type lhs,
-                                                 final @NotNull Type rhs,
-                                                 final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForType(final @NotNull Type lhs,
+                                               final @NotNull Type rhs,
+                                               final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
-            case ADD -> LiteralExpr.of(IntersectionType.unfold(List.of(lhs, rhs)), getTokenRange());
+            case ADD -> ConstExpr.of(IntersectionType.unfold(List.of(lhs, rhs)), getTokenRange());
             case SUB -> {
                 if (lhs instanceof IntersectionType lhsIntersectionType) {
                     final var newType = lhsIntersectionType.unfold();
                     final var alternatives = newType.alternatives();
                     alternatives.remove(rhs);
                     if (alternatives.size() == 1) {
-                        yield LiteralExpr.of(alternatives.get(0),
+                        yield ConstExpr.of(alternatives.get(0),
                             getTokenRange()); // Unwrap single type from intersection type
                     }
-                    yield LiteralExpr.of(newType, getTokenRange());
+                    yield ConstExpr.of(newType, getTokenRange());
                 }
                 final var message = "Left hand side type must be an intersection type for subtraction operation!";
                 throw new EvaluationException(message,
@@ -189,7 +159,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                 final var rhsAlternatives = rhs instanceof IntersectionType rhsIntersectionType
                     ? rhsIntersectionType.alternatives()
                     : List.of(rhs);
-                yield LiteralExpr.of(IntersectionType.unfold(
+                yield ConstExpr.of(IntersectionType.unfold(
                     CollectionUtils.intersect(lhsAlternatives, rhsAlternatives, ArrayList::new)), getTokenRange());
             } // @formatter:on
             default -> {
@@ -201,29 +171,29 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForBool(final @NotNull Boolean lhsBool,
-                                                 final @NotNull Boolean rhsBool,
-                                                 final @NotNull Op op,
-                                                 final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForBool(final @NotNull Boolean lhsBool,
+                                               final @NotNull Boolean rhsBool,
+                                               final @NotNull Op op,
+                                               final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Boolean equality
-            case EQ -> LiteralExpr.of(lhsBool == rhsBool, getTokenRange());
-            case NE -> LiteralExpr.of(lhsBool != rhsBool, getTokenRange());
+            case EQ -> ConstExpr.of(lhsBool == rhsBool, getTokenRange());
+            case NE -> ConstExpr.of(lhsBool != rhsBool, getTokenRange());
             // Boolean logic
-            case AND -> LiteralExpr.of(lhsBool & rhsBool, getTokenRange());
-            case OR -> LiteralExpr.of(lhsBool | rhsBool, getTokenRange());
-            case XOR -> LiteralExpr.of(lhsBool ^ rhsBool, getTokenRange());
+            case AND -> ConstExpr.of(lhsBool & rhsBool, getTokenRange());
+            case OR -> ConstExpr.of(lhsBool | rhsBool, getTokenRange());
+            case XOR -> ConstExpr.of(lhsBool ^ rhsBool, getTokenRange());
             case SC_AND -> {
                 if (!lhsBool) {
-                    yield LiteralExpr.of(false, getTokenRange());
+                    yield ConstExpr.of(false, getTokenRange());
                 }
-                yield LiteralExpr.of(getRhs().evaluateAs(context, Boolean.class), getTokenRange());
+                yield ConstExpr.of(getRhs().evaluateAs(context, Boolean.class), getTokenRange());
             }
             case SC_OR -> {
                 if (lhsBool) {
-                    yield LiteralExpr.of(true, getTokenRange());
+                    yield ConstExpr.of(true, getTokenRange());
                 }
-                yield LiteralExpr.of(getRhs().evaluateAs(context, Boolean.class), getTokenRange());
+                yield ConstExpr.of(getRhs().evaluateAs(context, Boolean.class), getTokenRange());
             }
             default -> {
                 final var message = String.format("Unsupported boolean binary expression: %s %s %s",
@@ -237,32 +207,32 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForByte(final @NotNull Byte lhsByte,
-                                                 final @NotNull Number rhsNumber,
-                                                 final @NotNull Op op,
-                                                 final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForByte(final @NotNull Byte lhsByte,
+                                               final @NotNull Number rhsNumber,
+                                               final @NotNull Op op,
+                                               final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
-            case EQ -> LiteralExpr.of(lhsByte == rhsNumber.byteValue(), getTokenRange());
-            case NE -> LiteralExpr.of(lhsByte != rhsNumber.byteValue(), getTokenRange());
-            case LT -> LiteralExpr.of(lhsByte < rhsNumber.byteValue(), getTokenRange());
-            case LE -> LiteralExpr.of(lhsByte <= rhsNumber.byteValue(), getTokenRange());
-            case GT -> LiteralExpr.of(lhsByte > rhsNumber.byteValue(), getTokenRange());
-            case GE -> LiteralExpr.of(lhsByte >= rhsNumber.byteValue(), getTokenRange());
-            case CMP -> LiteralExpr.of(lhsByte.compareTo(rhsNumber.byteValue()), getTokenRange());
+            case EQ -> ConstExpr.of(lhsByte == rhsNumber.byteValue(), getTokenRange());
+            case NE -> ConstExpr.of(lhsByte != rhsNumber.byteValue(), getTokenRange());
+            case LT -> ConstExpr.of(lhsByte < rhsNumber.byteValue(), getTokenRange());
+            case LE -> ConstExpr.of(lhsByte <= rhsNumber.byteValue(), getTokenRange());
+            case GT -> ConstExpr.of(lhsByte > rhsNumber.byteValue(), getTokenRange());
+            case GE -> ConstExpr.of(lhsByte >= rhsNumber.byteValue(), getTokenRange());
+            case CMP -> ConstExpr.of(lhsByte.compareTo(rhsNumber.byteValue()), getTokenRange());
             // Arithmetic operations
-            case ADD -> LiteralExpr.of(lhsByte + rhsNumber.byteValue(), getTokenRange());
-            case SUB -> LiteralExpr.of(lhsByte - rhsNumber.byteValue(), getTokenRange());
-            case MUL -> LiteralExpr.of(lhsByte * rhsNumber.byteValue(), getTokenRange());
-            case DIV -> LiteralExpr.of(lhsByte / rhsNumber.byteValue(), getTokenRange());
-            case REM -> LiteralExpr.of(lhsByte % rhsNumber.byteValue(), getTokenRange());
+            case ADD -> ConstExpr.of(lhsByte + rhsNumber.byteValue(), getTokenRange());
+            case SUB -> ConstExpr.of(lhsByte - rhsNumber.byteValue(), getTokenRange());
+            case MUL -> ConstExpr.of(lhsByte * rhsNumber.byteValue(), getTokenRange());
+            case DIV -> ConstExpr.of(lhsByte / rhsNumber.byteValue(), getTokenRange());
+            case REM -> ConstExpr.of(lhsByte % rhsNumber.byteValue(), getTokenRange());
             // Bitwise operations
-            case LSH -> LiteralExpr.of(lhsByte << rhsNumber.intValue(), getTokenRange());
-            case RSH -> LiteralExpr.of(lhsByte >> rhsNumber.intValue(), getTokenRange());
-            case URSH -> LiteralExpr.of(lhsByte >>> rhsNumber.intValue(), getTokenRange());
-            case AND -> LiteralExpr.of(lhsByte & rhsNumber.byteValue(), getTokenRange());
-            case OR -> LiteralExpr.of(lhsByte | rhsNumber.byteValue(), getTokenRange());
-            case XOR -> LiteralExpr.of(lhsByte ^ rhsNumber.byteValue(), getTokenRange());
+            case LSH -> ConstExpr.of(lhsByte << rhsNumber.intValue(), getTokenRange());
+            case RSH -> ConstExpr.of(lhsByte >> rhsNumber.intValue(), getTokenRange());
+            case URSH -> ConstExpr.of(lhsByte >>> rhsNumber.intValue(), getTokenRange());
+            case AND -> ConstExpr.of(lhsByte & rhsNumber.byteValue(), getTokenRange());
+            case OR -> ConstExpr.of(lhsByte | rhsNumber.byteValue(), getTokenRange());
+            case XOR -> ConstExpr.of(lhsByte ^ rhsNumber.byteValue(), getTokenRange());
             default -> {
                 final var message = String.format("Unsupported numeric binary expression: %s %s %s",
                     lhsByte,
@@ -275,32 +245,32 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForShort(final @NotNull Short lhsShort,
-                                                  final @NotNull Number rhsNumber,
-                                                  final @NotNull Op op,
-                                                  final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForShort(final @NotNull Short lhsShort,
+                                                final @NotNull Number rhsNumber,
+                                                final @NotNull Op op,
+                                                final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
-            case EQ -> LiteralExpr.of(lhsShort == rhsNumber.shortValue(), getTokenRange());
-            case NE -> LiteralExpr.of(lhsShort != rhsNumber.shortValue(), getTokenRange());
-            case LT -> LiteralExpr.of(lhsShort < rhsNumber.shortValue(), getTokenRange());
-            case LE -> LiteralExpr.of(lhsShort <= rhsNumber.shortValue(), getTokenRange());
-            case GT -> LiteralExpr.of(lhsShort > rhsNumber.shortValue(), getTokenRange());
-            case GE -> LiteralExpr.of(lhsShort >= rhsNumber.shortValue(), getTokenRange());
-            case CMP -> LiteralExpr.of(lhsShort.compareTo(rhsNumber.shortValue()), getTokenRange());
+            case EQ -> ConstExpr.of(lhsShort == rhsNumber.shortValue(), getTokenRange());
+            case NE -> ConstExpr.of(lhsShort != rhsNumber.shortValue(), getTokenRange());
+            case LT -> ConstExpr.of(lhsShort < rhsNumber.shortValue(), getTokenRange());
+            case LE -> ConstExpr.of(lhsShort <= rhsNumber.shortValue(), getTokenRange());
+            case GT -> ConstExpr.of(lhsShort > rhsNumber.shortValue(), getTokenRange());
+            case GE -> ConstExpr.of(lhsShort >= rhsNumber.shortValue(), getTokenRange());
+            case CMP -> ConstExpr.of(lhsShort.compareTo(rhsNumber.shortValue()), getTokenRange());
             // Arithmetic operations
-            case ADD -> LiteralExpr.of(lhsShort + rhsNumber.shortValue(), getTokenRange());
-            case SUB -> LiteralExpr.of(lhsShort - rhsNumber.shortValue(), getTokenRange());
-            case MUL -> LiteralExpr.of(lhsShort * rhsNumber.shortValue(), getTokenRange());
-            case DIV -> LiteralExpr.of(lhsShort / rhsNumber.shortValue(), getTokenRange());
-            case REM -> LiteralExpr.of(lhsShort % rhsNumber.shortValue(), getTokenRange());
+            case ADD -> ConstExpr.of(lhsShort + rhsNumber.shortValue(), getTokenRange());
+            case SUB -> ConstExpr.of(lhsShort - rhsNumber.shortValue(), getTokenRange());
+            case MUL -> ConstExpr.of(lhsShort * rhsNumber.shortValue(), getTokenRange());
+            case DIV -> ConstExpr.of(lhsShort / rhsNumber.shortValue(), getTokenRange());
+            case REM -> ConstExpr.of(lhsShort % rhsNumber.shortValue(), getTokenRange());
             // Bitwise operations
-            case LSH -> LiteralExpr.of(lhsShort << rhsNumber.intValue(), getTokenRange());
-            case RSH -> LiteralExpr.of(lhsShort >> rhsNumber.intValue(), getTokenRange());
-            case URSH -> LiteralExpr.of(lhsShort >>> rhsNumber.intValue(), getTokenRange());
-            case AND -> LiteralExpr.of(lhsShort & rhsNumber.shortValue(), getTokenRange());
-            case OR -> LiteralExpr.of(lhsShort | rhsNumber.shortValue(), getTokenRange());
-            case XOR -> LiteralExpr.of(lhsShort ^ rhsNumber.shortValue(), getTokenRange());
+            case LSH -> ConstExpr.of(lhsShort << rhsNumber.intValue(), getTokenRange());
+            case RSH -> ConstExpr.of(lhsShort >> rhsNumber.intValue(), getTokenRange());
+            case URSH -> ConstExpr.of(lhsShort >>> rhsNumber.intValue(), getTokenRange());
+            case AND -> ConstExpr.of(lhsShort & rhsNumber.shortValue(), getTokenRange());
+            case OR -> ConstExpr.of(lhsShort | rhsNumber.shortValue(), getTokenRange());
+            case XOR -> ConstExpr.of(lhsShort ^ rhsNumber.shortValue(), getTokenRange());
             default -> {
                 final var message = String.format("Unsupported numeric binary expression: %s %s %s",
                     lhsShort,
@@ -313,32 +283,32 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForInteger(final @NotNull Integer lhsInteger,
-                                                    final @NotNull Number rhsNumber,
-                                                    final @NotNull Op op,
-                                                    final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForInteger(final @NotNull Integer lhsInteger,
+                                                  final @NotNull Number rhsNumber,
+                                                  final @NotNull Op op,
+                                                  final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
-            case EQ -> LiteralExpr.of(lhsInteger == rhsNumber.intValue(), getTokenRange());
-            case NE -> LiteralExpr.of(lhsInteger != rhsNumber.intValue(), getTokenRange());
-            case LT -> LiteralExpr.of(lhsInteger < rhsNumber.intValue(), getTokenRange());
-            case LE -> LiteralExpr.of(lhsInteger <= rhsNumber.intValue(), getTokenRange());
-            case GT -> LiteralExpr.of(lhsInteger > rhsNumber.intValue(), getTokenRange());
-            case GE -> LiteralExpr.of(lhsInteger >= rhsNumber.intValue(), getTokenRange());
-            case CMP -> LiteralExpr.of(lhsInteger.compareTo(rhsNumber.intValue()), getTokenRange());
+            case EQ -> ConstExpr.of(lhsInteger == rhsNumber.intValue(), getTokenRange());
+            case NE -> ConstExpr.of(lhsInteger != rhsNumber.intValue(), getTokenRange());
+            case LT -> ConstExpr.of(lhsInteger < rhsNumber.intValue(), getTokenRange());
+            case LE -> ConstExpr.of(lhsInteger <= rhsNumber.intValue(), getTokenRange());
+            case GT -> ConstExpr.of(lhsInteger > rhsNumber.intValue(), getTokenRange());
+            case GE -> ConstExpr.of(lhsInteger >= rhsNumber.intValue(), getTokenRange());
+            case CMP -> ConstExpr.of(lhsInteger.compareTo(rhsNumber.intValue()), getTokenRange());
             // Arithmetic operations
-            case ADD -> LiteralExpr.of(lhsInteger + rhsNumber.intValue(), getTokenRange());
-            case SUB -> LiteralExpr.of(lhsInteger - rhsNumber.intValue(), getTokenRange());
-            case MUL -> LiteralExpr.of(lhsInteger * rhsNumber.intValue(), getTokenRange());
-            case DIV -> LiteralExpr.of(lhsInteger / rhsNumber.intValue(), getTokenRange());
-            case REM -> LiteralExpr.of(lhsInteger % rhsNumber.intValue(), getTokenRange());
+            case ADD -> ConstExpr.of(lhsInteger + rhsNumber.intValue(), getTokenRange());
+            case SUB -> ConstExpr.of(lhsInteger - rhsNumber.intValue(), getTokenRange());
+            case MUL -> ConstExpr.of(lhsInteger * rhsNumber.intValue(), getTokenRange());
+            case DIV -> ConstExpr.of(lhsInteger / rhsNumber.intValue(), getTokenRange());
+            case REM -> ConstExpr.of(lhsInteger % rhsNumber.intValue(), getTokenRange());
             // Bitwise operations
-            case LSH -> LiteralExpr.of(lhsInteger << rhsNumber.intValue(), getTokenRange());
-            case RSH -> LiteralExpr.of(lhsInteger >> rhsNumber.intValue(), getTokenRange());
-            case URSH -> LiteralExpr.of(lhsInteger >>> rhsNumber.intValue(), getTokenRange());
-            case AND -> LiteralExpr.of(lhsInteger & rhsNumber.intValue(), getTokenRange());
-            case OR -> LiteralExpr.of(lhsInteger | rhsNumber.intValue(), getTokenRange());
-            case XOR -> LiteralExpr.of(lhsInteger ^ rhsNumber.intValue(), getTokenRange());
+            case LSH -> ConstExpr.of(lhsInteger << rhsNumber.intValue(), getTokenRange());
+            case RSH -> ConstExpr.of(lhsInteger >> rhsNumber.intValue(), getTokenRange());
+            case URSH -> ConstExpr.of(lhsInteger >>> rhsNumber.intValue(), getTokenRange());
+            case AND -> ConstExpr.of(lhsInteger & rhsNumber.intValue(), getTokenRange());
+            case OR -> ConstExpr.of(lhsInteger | rhsNumber.intValue(), getTokenRange());
+            case XOR -> ConstExpr.of(lhsInteger ^ rhsNumber.intValue(), getTokenRange());
             default -> {
                 final var message = String.format("Unsupported numeric binary expression: %s %s %s",
                     lhsInteger,
@@ -351,32 +321,32 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForLong(final @NotNull Long lhsLong,
-                                                 final @NotNull Number rhsNumber,
-                                                 final @NotNull Op op,
-                                                 final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForLong(final @NotNull Long lhsLong,
+                                               final @NotNull Number rhsNumber,
+                                               final @NotNull Op op,
+                                               final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
-            case EQ -> LiteralExpr.of(lhsLong == rhsNumber.longValue(), getTokenRange());
-            case NE -> LiteralExpr.of(lhsLong != rhsNumber.longValue(), getTokenRange());
-            case LT -> LiteralExpr.of(lhsLong < rhsNumber.longValue(), getTokenRange());
-            case LE -> LiteralExpr.of(lhsLong <= rhsNumber.longValue(), getTokenRange());
-            case GT -> LiteralExpr.of(lhsLong > rhsNumber.longValue(), getTokenRange());
-            case GE -> LiteralExpr.of(lhsLong >= rhsNumber.longValue(), getTokenRange());
-            case CMP -> LiteralExpr.of(lhsLong.compareTo(rhsNumber.longValue()), getTokenRange());
+            case EQ -> ConstExpr.of(lhsLong == rhsNumber.longValue(), getTokenRange());
+            case NE -> ConstExpr.of(lhsLong != rhsNumber.longValue(), getTokenRange());
+            case LT -> ConstExpr.of(lhsLong < rhsNumber.longValue(), getTokenRange());
+            case LE -> ConstExpr.of(lhsLong <= rhsNumber.longValue(), getTokenRange());
+            case GT -> ConstExpr.of(lhsLong > rhsNumber.longValue(), getTokenRange());
+            case GE -> ConstExpr.of(lhsLong >= rhsNumber.longValue(), getTokenRange());
+            case CMP -> ConstExpr.of(lhsLong.compareTo(rhsNumber.longValue()), getTokenRange());
             // Arithmetic operations
-            case ADD -> LiteralExpr.of(lhsLong + rhsNumber.longValue(), getTokenRange());
-            case SUB -> LiteralExpr.of(lhsLong - rhsNumber.longValue(), getTokenRange());
-            case MUL -> LiteralExpr.of(lhsLong * rhsNumber.longValue(), getTokenRange());
-            case DIV -> LiteralExpr.of(lhsLong / rhsNumber.longValue(), getTokenRange());
-            case REM -> LiteralExpr.of(lhsLong % rhsNumber.longValue(), getTokenRange());
+            case ADD -> ConstExpr.of(lhsLong + rhsNumber.longValue(), getTokenRange());
+            case SUB -> ConstExpr.of(lhsLong - rhsNumber.longValue(), getTokenRange());
+            case MUL -> ConstExpr.of(lhsLong * rhsNumber.longValue(), getTokenRange());
+            case DIV -> ConstExpr.of(lhsLong / rhsNumber.longValue(), getTokenRange());
+            case REM -> ConstExpr.of(lhsLong % rhsNumber.longValue(), getTokenRange());
             // Bitwise operations
-            case LSH -> LiteralExpr.of(lhsLong << rhsNumber.intValue(), getTokenRange());
-            case RSH -> LiteralExpr.of(lhsLong >> rhsNumber.intValue(), getTokenRange());
-            case URSH -> LiteralExpr.of(lhsLong >>> rhsNumber.intValue(), getTokenRange());
-            case AND -> LiteralExpr.of(lhsLong & rhsNumber.longValue(), getTokenRange());
-            case OR -> LiteralExpr.of(lhsLong | rhsNumber.longValue(), getTokenRange());
-            case XOR -> LiteralExpr.of(lhsLong ^ rhsNumber.longValue(), getTokenRange());
+            case LSH -> ConstExpr.of(lhsLong << rhsNumber.intValue(), getTokenRange());
+            case RSH -> ConstExpr.of(lhsLong >> rhsNumber.intValue(), getTokenRange());
+            case URSH -> ConstExpr.of(lhsLong >>> rhsNumber.intValue(), getTokenRange());
+            case AND -> ConstExpr.of(lhsLong & rhsNumber.longValue(), getTokenRange());
+            case OR -> ConstExpr.of(lhsLong | rhsNumber.longValue(), getTokenRange());
+            case XOR -> ConstExpr.of(lhsLong ^ rhsNumber.longValue(), getTokenRange());
             default -> {
                 final var message = String.format("Unsupported numeric binary expression: %s %s %s",
                     lhsLong,
@@ -389,25 +359,25 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForFloat(final @NotNull Float lhsFloat,
-                                                  final @NotNull Number rhsNumber,
-                                                  final @NotNull Op op,
-                                                  final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForFloat(final @NotNull Float lhsFloat,
+                                                final @NotNull Number rhsNumber,
+                                                final @NotNull Op op,
+                                                final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
-            case EQ -> LiteralExpr.of(lhsFloat == rhsNumber.floatValue(), getTokenRange());
-            case NE -> LiteralExpr.of(lhsFloat != rhsNumber.floatValue(), getTokenRange());
-            case LT -> LiteralExpr.of(lhsFloat < rhsNumber.floatValue(), getTokenRange());
-            case LE -> LiteralExpr.of(lhsFloat <= rhsNumber.floatValue(), getTokenRange());
-            case GT -> LiteralExpr.of(lhsFloat > rhsNumber.floatValue(), getTokenRange());
-            case GE -> LiteralExpr.of(lhsFloat >= rhsNumber.floatValue(), getTokenRange());
-            case CMP -> LiteralExpr.of(lhsFloat.compareTo(rhsNumber.floatValue()), getTokenRange());
+            case EQ -> ConstExpr.of(lhsFloat == rhsNumber.floatValue(), getTokenRange());
+            case NE -> ConstExpr.of(lhsFloat != rhsNumber.floatValue(), getTokenRange());
+            case LT -> ConstExpr.of(lhsFloat < rhsNumber.floatValue(), getTokenRange());
+            case LE -> ConstExpr.of(lhsFloat <= rhsNumber.floatValue(), getTokenRange());
+            case GT -> ConstExpr.of(lhsFloat > rhsNumber.floatValue(), getTokenRange());
+            case GE -> ConstExpr.of(lhsFloat >= rhsNumber.floatValue(), getTokenRange());
+            case CMP -> ConstExpr.of(lhsFloat.compareTo(rhsNumber.floatValue()), getTokenRange());
             // Arithmetic operations
-            case ADD -> LiteralExpr.of(lhsFloat + rhsNumber.floatValue(), getTokenRange());
-            case SUB -> LiteralExpr.of(lhsFloat - rhsNumber.floatValue(), getTokenRange());
-            case MUL -> LiteralExpr.of(lhsFloat * rhsNumber.floatValue(), getTokenRange());
-            case DIV -> LiteralExpr.of(lhsFloat / rhsNumber.floatValue(), getTokenRange());
-            case REM -> LiteralExpr.of(lhsFloat % rhsNumber.floatValue(), getTokenRange());
+            case ADD -> ConstExpr.of(lhsFloat + rhsNumber.floatValue(), getTokenRange());
+            case SUB -> ConstExpr.of(lhsFloat - rhsNumber.floatValue(), getTokenRange());
+            case MUL -> ConstExpr.of(lhsFloat * rhsNumber.floatValue(), getTokenRange());
+            case DIV -> ConstExpr.of(lhsFloat / rhsNumber.floatValue(), getTokenRange());
+            case REM -> ConstExpr.of(lhsFloat % rhsNumber.floatValue(), getTokenRange());
             default -> {
                 final var message = String.format("Unsupported numeric binary expression: %s %s %s",
                     lhsFloat,
@@ -420,25 +390,25 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForDouble(final @NotNull Double lhsDouble,
-                                                   final @NotNull Number rhsNumber,
-                                                   final @NotNull Op op,
-                                                   final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForDouble(final @NotNull Double lhsDouble,
+                                                 final @NotNull Number rhsNumber,
+                                                 final @NotNull Op op,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             // Comparisons
-            case EQ -> LiteralExpr.of(lhsDouble == rhsNumber.doubleValue(), getTokenRange());
-            case NE -> LiteralExpr.of(lhsDouble != rhsNumber.doubleValue(), getTokenRange());
-            case LT -> LiteralExpr.of(lhsDouble < rhsNumber.doubleValue(), getTokenRange());
-            case LE -> LiteralExpr.of(lhsDouble <= rhsNumber.doubleValue(), getTokenRange());
-            case GT -> LiteralExpr.of(lhsDouble > rhsNumber.doubleValue(), getTokenRange());
-            case GE -> LiteralExpr.of(lhsDouble >= rhsNumber.doubleValue(), getTokenRange());
-            case CMP -> LiteralExpr.of(lhsDouble.compareTo(rhsNumber.doubleValue()), getTokenRange());
+            case EQ -> ConstExpr.of(lhsDouble == rhsNumber.doubleValue(), getTokenRange());
+            case NE -> ConstExpr.of(lhsDouble != rhsNumber.doubleValue(), getTokenRange());
+            case LT -> ConstExpr.of(lhsDouble < rhsNumber.doubleValue(), getTokenRange());
+            case LE -> ConstExpr.of(lhsDouble <= rhsNumber.doubleValue(), getTokenRange());
+            case GT -> ConstExpr.of(lhsDouble > rhsNumber.doubleValue(), getTokenRange());
+            case GE -> ConstExpr.of(lhsDouble >= rhsNumber.doubleValue(), getTokenRange());
+            case CMP -> ConstExpr.of(lhsDouble.compareTo(rhsNumber.doubleValue()), getTokenRange());
             // Arithmetic operations
-            case ADD -> LiteralExpr.of(lhsDouble + rhsNumber.doubleValue(), getTokenRange());
-            case SUB -> LiteralExpr.of(lhsDouble - rhsNumber.doubleValue(), getTokenRange());
-            case MUL -> LiteralExpr.of(lhsDouble * rhsNumber.doubleValue(), getTokenRange());
-            case DIV -> LiteralExpr.of(lhsDouble / rhsNumber.doubleValue(), getTokenRange());
-            case REM -> LiteralExpr.of(lhsDouble % rhsNumber.doubleValue(), getTokenRange());
+            case ADD -> ConstExpr.of(lhsDouble + rhsNumber.doubleValue(), getTokenRange());
+            case SUB -> ConstExpr.of(lhsDouble - rhsNumber.doubleValue(), getTokenRange());
+            case MUL -> ConstExpr.of(lhsDouble * rhsNumber.doubleValue(), getTokenRange());
+            case DIV -> ConstExpr.of(lhsDouble / rhsNumber.doubleValue(), getTokenRange());
+            case REM -> ConstExpr.of(lhsDouble % rhsNumber.doubleValue(), getTokenRange());
             default -> {
                 final var message = String.format("Unsupported numeric binary expression: %s %s %s",
                     lhsDouble,
@@ -451,9 +421,9 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number lhsNumber,
-                                                   final @NotNull BuiltinType type,
-                                                   final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForNumber(final @NotNull Number lhsNumber,
+                                                 final @NotNull BuiltinType type,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         final var rhsValue = getRhs().evaluateAs(context, Object.class);
         if (!(rhsValue instanceof Number rhsNumber)) {
             final var message = "Numeric binary expression must have a number on the right hand side!";
@@ -490,19 +460,19 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             switch (op) {
                 case ADD -> {
                     final var rhsValue = getRhs().evaluateAs(context, Object.class);
-                    context.pushValue(LiteralExpr.of(String.format("%s%s", lhsValue, rhsValue), getTokenRange()));
+                    context.pushValue(ConstExpr.of(String.format("%s%s", lhsValue, rhsValue), getTokenRange()));
                 }
                 case CMP -> {
                     final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(((String) lhsValue).compareTo(rhsString), getTokenRange()));
+                    context.pushValue(ConstExpr.of(((String) lhsValue).compareTo(rhsString), getTokenRange()));
                 }
                 case EQ -> {
                     final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(lhsValue.equals(rhsString), getTokenRange()));
+                    context.pushValue(ConstExpr.of(lhsValue.equals(rhsString), getTokenRange()));
                 }
                 case NE -> {
                     final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(LiteralExpr.of(!lhsValue.equals(rhsString), getTokenRange()));
+                    context.pushValue(ConstExpr.of(!lhsValue.equals(rhsString), getTokenRange()));
                 }
             }
             return;

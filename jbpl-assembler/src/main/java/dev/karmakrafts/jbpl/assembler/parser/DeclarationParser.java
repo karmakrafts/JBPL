@@ -17,7 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.Order;
@@ -92,7 +92,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
             final var offset = ctx.selectionOffset().stream()
                 .findFirst()
                 .map(ExceptionUtils.unsafeFunction(ExprParser::parse))
-                .orElseGet(() -> LiteralExpr.of(0));
+                .orElseGet(() -> ConstExpr.of(0));
             // @formatter:on
             final var selector = new SelectorDecl(name, offset);
             // @formatter:off
@@ -112,7 +112,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
             // @formatter:off
             final var returnType = signature.exprOrType() != null
                 ? ParserUtils.parseExprOrType(signature.exprOrType())
-                : LiteralExpr.unit();
+                : ConstExpr.unit();
             // @formatter:on
             final var macro = new MacroDecl(name, returnType);
             // @formatter:off

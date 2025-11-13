@@ -60,7 +60,7 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
         signature.setParent(getParent());
         signature.setTokenRange(getTokenRange());
         signature.addFunctionParameters(paramTypes);
-        context.pushValue(LiteralExpr.of(signature, getTokenRange()));
+        context.pushValue(ConstExpr.of(signature, getTokenRange()));
     }
 
     @Override

@@ -148,7 +148,7 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_POP,
                  JBPLLexer.INSN_DUP -> keys.add(TextAttributeKeys.INSTRUCTION);
             case JBPLLexer.DOT -> keys.add(TextAttributeKeys.DOT);
-            case JBPLLexer.IDENT -> keys.add(TextAttributeKeys.IDENT);
+            //case JBPLLexer.IDENT -> keys.add(TextAttributeKeys.IDENT);
             case JBPLLexer.LINE_COMMENT -> keys.add(TextAttributeKeys.LINE_COMMENT);
             case JBPLLexer.BLOCK_COMMENT -> keys.add(TextAttributeKeys.BLOCK_COMMENT);
         } // @formatter:on

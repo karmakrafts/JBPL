@@ -3,7 +3,7 @@
 ^include "test4.jbpl"
 
 define _t: string = "test_define"
-define _tt: type = type(string)
+define _tt: type = type string
 define ${_t}: ${_tt} = "HELLO, WORLD"
 ^info test_define
 ^info typeof(test_define)
@@ -31,12 +31,12 @@ for(${var_name} in test_array) {
 ^info 'A' in "Andy"
 ^info 'Z' in "Andy"
 
-^info type(i32) in type((i32 | i64))
-^info type(string) in type((char | void))
+^info type i32 in type (i32 | i64)
+^info type string in type (char | void)
 
 ^info sizeof(_t)
 ^info sizeof(test_array)
-^info sizeof(type(i32))
+^info sizeof(type i32)
 
 define when_var: i32 = 101
 when_var = 100

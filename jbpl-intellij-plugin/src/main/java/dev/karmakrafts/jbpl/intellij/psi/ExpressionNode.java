@@ -23,10 +23,9 @@ import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.antlr.intellij.adaptor.lexer.TokenIElementType;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class ExpressionNode extends ANTLRPsiNode implements Annotated {
+public final class ExpressionNode extends JBPLPsiNode implements Annotated {
     private static final IntSet BINARY_OPS = IntSet.of(JBPLLexer.AMP,
         JBPLLexer.AMPAMP,
         JBPLLexer.PIPE,

@@ -63,6 +63,11 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey OPERATOR = TextAttributesKey.createTextAttributesKey("JBPL_OPERATOR",
         DefaultLanguageHighlighterColors.OPERATION_SIGN);
+    public static final TextAttributesKey PREPRO_CLASS = TextAttributesKey.createTextAttributesKey("JBPL_PREPRO_CLASS",
+        DefaultLanguageHighlighterColors.CLASS_NAME);
+
+    public static final TextAttributesKey MUTABLE = TextAttributesKey.createTextAttributesKey("JBPL_MUTABLE_MARKER",
+        DefaultLanguageHighlighterColors.HIGHLIGHTED_REFERENCE);
 
     private TextAttributeKeys() {
     }

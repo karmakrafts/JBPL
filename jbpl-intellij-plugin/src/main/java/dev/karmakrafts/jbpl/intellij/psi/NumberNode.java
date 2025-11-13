@@ -20,10 +20,9 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class NumberNode extends ANTLRPsiNode implements Annotated {
+public final class NumberNode extends JBPLPsiNode implements Annotated {
     public NumberNode(final @NotNull ASTNode node) {
         super(node);
     }

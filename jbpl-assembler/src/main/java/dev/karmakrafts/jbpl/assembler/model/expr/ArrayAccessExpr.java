@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 
-public final class ArrayAccessExpr extends AbstractExprContainer implements Expr {
+public final class ArrayAccessExpr extends AbstractExprContainer implements Expr, Reference {
     public static final int REFERENCE_INDEX = 0;
     public static final int INDEX_INDEX = 1;
 
@@ -51,6 +51,31 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     }
 
     @Override
+    public @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var array = getReference().evaluateAs(context, Object.class);
+        final int index = getIndex().evaluateAs(context, Integer.class);
+        final var length = Array.getLength(array);
+        if (index >= length) {
+            final var message = String.format("Array index %d out of bounds for array of length %d", index, length);
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
+        return ConstExpr.of(Array.get(array, index));
+    }
+
+    @Override
+    public void storeToReference(final @NotNull ConstExpr value,
+                                 final @NotNull EvaluationContext context) throws EvaluationException {
+        final var array = getReference().evaluateAs(context, Object.class);
+        final int index = getIndex().evaluateAs(context, Integer.class);
+        final var length = Array.getLength(array);
+        if (index >= length) {
+            final var message = String.format("Array index %d out of bounds for array of length %d", index, length);
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
+        Array.set(array, index, value.getConstValue());
+    }
+
+    @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getReference().getType(context);
         if (!(type instanceof ArrayType arrayType)) {
@@ -63,9 +88,7 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var array = getReference().evaluateAs(context, Object.class);
-        final var index = getIndex().evaluateAs(context, Integer.class);
-        context.pushValue(LiteralExpr.of(Array.get(array, index), getTokenRange()));
+        context.pushValue(loadFromReference(context));
     }
 
     @Override

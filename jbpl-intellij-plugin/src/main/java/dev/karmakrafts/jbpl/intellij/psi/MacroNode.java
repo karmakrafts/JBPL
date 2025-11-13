@@ -21,13 +21,12 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public final class MacroNode extends ANTLRPsiNode implements Annotated, StructuralPsiElement {
+public final class MacroNode extends JBPLPsiNode implements Annotated, StructuralPsiElement {
     public MacroNode(final @NotNull ASTNode node) {
         super(node);
     }

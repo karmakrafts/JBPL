@@ -51,7 +51,7 @@ public final class TypeOfExpr extends AbstractExprContainer implements Expr {
             context.pushValue(value);
             return;
         }
-        context.pushValue(LiteralExpr.of(type, getTokenRange()));
+        context.pushValue(ConstExpr.of(type, getTokenRange()));
     }
 
     @Override

@@ -37,7 +37,7 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
         for (final var expr : expressions) {
             buffer.append(expr.evaluateAs(context, Object.class));
         }
-        context.pushValue(LiteralExpr.of(buffer.toString(), getTokenRange()));
+        context.pushValue(ConstExpr.of(buffer.toString(), getTokenRange()));
     }
 
     @Override
@@ -54,8 +54,8 @@ public final class StringLerpExpr extends AbstractExprContainer implements Expr 
         // @formatter:off
         builder.append(getExpressions().stream()
             .map(expr -> {
-                if(expr instanceof LiteralExpr literalExpr && literalExpr.type == BuiltinType.STRING) {
-                    return literalExpr.value.toString();
+                if(expr instanceof ConstExpr literalExpr) {
+                    return literalExpr.getConstValue().toString();
                 }
                 return expr.toString();
             })

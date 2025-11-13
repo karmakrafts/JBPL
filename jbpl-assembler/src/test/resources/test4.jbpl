@@ -5,11 +5,11 @@ define x: i32 = (str as i32) << 1
 ^info "Cast: ${str}"
 ^info "Parse: ${x}"
 
-define t1: type = type(i32)
-define t2: type = type(f32)
+define t1: type = type i32
+define t2: type = type f32
 define intersect: type = t1 + t2
-define intersect2: type = type((i32 | i64 | bool | void))
-define t3: type = intersect - type(f32)
+define intersect2: type = type (i32 | i64 | bool | void)
+define t3: type = intersect - type f32
 ^info "Type is ${t3}"
 
 ^info t3
@@ -38,7 +38,7 @@ define comp: i32 = y <=> OFFSET
 ^assert "Hello, World!" == "Hello, World!"
 ^assert "FOO" != "BAR"
 
-define op: opcode = opcode(invokestatic)
+define op: opcode = opcode invokestatic
 ^info op
 ^info typeof(op)
 

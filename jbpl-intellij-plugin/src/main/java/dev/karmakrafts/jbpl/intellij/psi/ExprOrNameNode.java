@@ -22,12 +22,27 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
+import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
-public final class ExprOrNameNode extends ANTLRPsiNode {
+public final class ExprOrNameNode extends JBPLPsiNode implements Annotated {
+    private boolean annotationOverride = false;
+
     public ExprOrNameNode(final @NotNull ASTNode node) {
         super(node);
+    }
+
+    @Override
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        if (annotationOverride) {
+            return;
+        }
+        PsiUtils.find(this, "/exprOrName/nameSegment").ifPresent(name -> { // @formatter:off
+            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+                .range(name)
+                .textAttributes(TextAttributeKeys.IDENT)
+                .create();
+        }); // @formatter:on
     }
 
     public void annotateNameWith(final @NotNull TextAttributesKey key, final @NotNull AnnotationHolder holder) {
@@ -37,6 +52,7 @@ public final class ExprOrNameNode extends ANTLRPsiNode {
                 .textAttributes(key)
                 .create();
         }); // @formatter:on
+        annotationOverride = true;
     }
 
     @Override

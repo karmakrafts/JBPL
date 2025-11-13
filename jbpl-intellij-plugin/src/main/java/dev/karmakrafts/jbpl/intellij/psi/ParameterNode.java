@@ -18,27 +18,19 @@ package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.HighlightSeverity;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class ParameterNode extends ANTLRPsiNode implements Annotated {
+public final class ParameterNode extends JBPLPsiNode implements Annotated {
     public ParameterNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
-        final var refOrName = getFirstChild();
-        if (!(refOrName instanceof NameSegmentNode nameSegment)) {
-            return;
-        }
-        // @formatter:off
-        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(nameSegment)
-            .textAttributes(TextAttributeKeys.PARAMETER_NAME)
-            .create();
-        // @formatter:on
+        PsiUtils.find(this, "/parameter/exprOrName", ExprOrNameNode.class).ifPresent(name -> name.annotateNameWith(
+            TextAttributeKeys.PARAMETER_NAME,
+            holder));
     }
 }

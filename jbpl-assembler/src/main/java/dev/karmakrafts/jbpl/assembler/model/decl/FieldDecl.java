@@ -22,7 +22,7 @@ import dev.karmakrafts.jbpl.assembler.model.AccessModifier;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
@@ -39,8 +39,8 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
     public final EnumSet<AccessModifier> accessModifiers = EnumSet.noneOf(AccessModifier.class);
 
     public FieldDecl() {
-        addExpression(LiteralExpr.unit()); // Signature
-        addExpression(LiteralExpr.unit()); // Initializer
+        addExpression(ConstExpr.unit()); // Signature
+        addExpression(ConstExpr.unit()); // Initializer
     }
 
     public @NotNull Expr getInitializer() {

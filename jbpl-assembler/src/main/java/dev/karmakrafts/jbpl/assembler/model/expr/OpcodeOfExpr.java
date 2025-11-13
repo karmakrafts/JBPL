@@ -45,7 +45,7 @@ public final class OpcodeOfExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        context.pushValue(LiteralExpr.of(getValue().evaluateAs(context, Instruction.class).getOpcode(context),
+        context.pushValue(ConstExpr.of(getValue().evaluateAs(context, Instruction.class).getOpcode(context),
             getTokenRange()));
     }
 

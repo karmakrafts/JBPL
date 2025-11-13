@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij.psi;
+macro get_special_name(name: string): string {
+    ^return "<${name}>"
+}
 
-import com.intellij.lang.ASTNode;
-import org.jetbrains.annotations.NotNull;
-
-public final class ExprOrTypeNode extends JBPLPsiNode {
-    public ExprOrTypeNode(final @NotNull ASTNode node) {
-        super(node);
-    }
+macro new(type: type, param_types: [type]) {
+    // instantiate
+    dup
+    invokespecial <java/lang/Object>.<init>(): void
 }

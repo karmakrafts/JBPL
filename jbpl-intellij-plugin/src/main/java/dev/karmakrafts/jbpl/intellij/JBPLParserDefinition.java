@@ -35,8 +35,6 @@ import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory;
 import org.antlr.intellij.adaptor.lexer.RuleIElementType;
 import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.parser.ANTLRParserAdaptor;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiLeafNode;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
@@ -118,10 +116,10 @@ public final class JBPLParserDefinition implements ParserDefinition {
     public @NotNull PsiElement createElement(final @NotNull ASTNode node) {
         final var elementType = node.getElementType();
         if (elementType instanceof TokenIElementType tokenType) {
-            return new ANTLRPsiLeafNode(tokenType, node.getText());
+            return new JBPLPsiLeafNode(tokenType, node.getText());
         }
         if (!(elementType instanceof RuleIElementType ruleType)) {
-            return new ANTLRPsiNode(node);
+            return new JBPLPsiNode(node);
         }
         return switch (ruleType.getRuleIndex()) { // @formatter:off
             case JBPLParser.RULE_define -> new DefineNode(node);
@@ -153,7 +151,8 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_opcodeLiteral -> new OpcodeLiteralNode(node);
             case JBPLParser.RULE_versionStatement -> new VersionStatementNode(node);
             case JBPLParser.RULE_local -> new LocalStatement(node);
-            default -> new ANTLRPsiNode(node);
+            case JBPLParser.RULE_functionSignatureParameter -> new FunctionSignatureParameterNode(node);
+            default -> new JBPLPsiNode(node);
         }; // @formatter:on
     }
 

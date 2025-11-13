@@ -22,18 +22,18 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class FunctionNameNode extends ANTLRPsiNode implements Annotated {
+public final class FunctionNameNode extends JBPLPsiNode implements Annotated {
     public FunctionNameNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
-        PsiUtils.find(this, "/functionName/exprOrName/nameSegment")
-            .or(() -> PsiUtils.find(this, "/functionName/specialFunctionName"))
+        PsiUtils.find(this, "/functionName/exprOrName", ExprOrNameNode.class)
+            .ifPresent(name -> name.annotateNameWith(TextAttributeKeys.FUNCTION_NAME, holder));
+        PsiUtils.find(this, "/functionName/specialFunctionName")
             .ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                 .range(name)
                 .textAttributes(TextAttributeKeys.FUNCTION_NAME)

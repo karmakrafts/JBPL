@@ -22,7 +22,7 @@ import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.model.instruction.OplessInstruction;
@@ -65,9 +65,9 @@ public enum PreproType implements Type {
     @Override
     public @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) {
         return switch (this) {
-            case TYPE -> LiteralExpr.of(BuiltinType.VOID);
-            case OPCODE -> LiteralExpr.of(Opcode.NOP);
-            case INSTRUCTION -> LiteralExpr.of(new OplessInstruction(Opcode.NOP));
+            case TYPE -> ConstExpr.of(BuiltinType.VOID);
+            case OPCODE -> ConstExpr.of(Opcode.NOP);
+            case INSTRUCTION -> ConstExpr.of(new OplessInstruction(Opcode.NOP));
             default -> throw new IllegalStateException(String.format("Type %s does not have a default value", this));
         };
     }

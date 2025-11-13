@@ -45,27 +45,31 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         return getValue().getType(context);
     }
 
-    private @NotNull LiteralExpr evaluateForNumber(final @NotNull Number value,
-                                                   final @NotNull EvaluationContext context) throws EvaluationException {
+    private void evaluateAssignment(final @NotNull EvaluationContext context) {
+
+    }
+
+    private @NotNull ConstExpr evaluateForNumber(final @NotNull Number value,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
             case MINUS, PLUS -> {
                 if (value instanceof Byte byteValue) {
-                    yield LiteralExpr.of(-byteValue, getTokenRange());
+                    yield ConstExpr.of(-byteValue, getTokenRange());
                 }
                 else if (value instanceof Short shortValue) {
-                    yield LiteralExpr.of(-shortValue, getTokenRange());
+                    yield ConstExpr.of(-shortValue, getTokenRange());
                 }
                 else if (value instanceof Integer integerValue) {
-                    yield LiteralExpr.of(-integerValue, getTokenRange());
+                    yield ConstExpr.of(-integerValue, getTokenRange());
                 }
                 else if (value instanceof Long longValue) {
-                    yield LiteralExpr.of(-longValue, getTokenRange());
+                    yield ConstExpr.of(-longValue, getTokenRange());
                 }
                 else if (value instanceof Float floatValue) {
-                    yield LiteralExpr.of(-floatValue, getTokenRange());
+                    yield ConstExpr.of(-floatValue, getTokenRange());
                 }
                 else if (value instanceof Double doubleValue) {
-                    yield LiteralExpr.of(-doubleValue, getTokenRange());
+                    yield ConstExpr.of(-doubleValue, getTokenRange());
                 }
                 throw new IllegalStateException(String.format("Unsupported negation expression operand %s %s",
                     op,
@@ -73,16 +77,16 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
             }
             case INVERSE -> {
                 if (value instanceof Byte byteValue) {
-                    yield LiteralExpr.of(~byteValue, getTokenRange());
+                    yield ConstExpr.of(~byteValue, getTokenRange());
                 }
                 else if (value instanceof Short shortValue) {
-                    yield LiteralExpr.of(~shortValue, getTokenRange());
+                    yield ConstExpr.of(~shortValue, getTokenRange());
                 }
                 else if (value instanceof Integer integerValue) {
-                    yield LiteralExpr.of(~integerValue, getTokenRange());
+                    yield ConstExpr.of(~integerValue, getTokenRange());
                 }
                 else if (value instanceof Long longValue) {
-                    yield LiteralExpr.of(~longValue, getTokenRange());
+                    yield ConstExpr.of(~longValue, getTokenRange());
                 }
                 throw new IllegalStateException(String.format("Unsupported inverse expression operand %s", value));
             }
@@ -92,10 +96,10 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
-    private @NotNull LiteralExpr evaluateForBool(final boolean value,
-                                                 final @NotNull EvaluationContext context) throws EvaluationException {
+    private @NotNull ConstExpr evaluateForBool(final boolean value,
+                                               final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
-            case NOT -> LiteralExpr.of(!value, getTokenRange());
+            case NOT -> ConstExpr.of(!value, getTokenRange());
             default ->
                 throw new EvaluationException(String.format("Unary operator %s cannot be applied to boolean", op),
                     SourceDiagnostic.from(this),
@@ -105,6 +109,10 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (op.isAssignment) {
+            evaluateAssignment(context);
+            return;
+        }
         final var value = getValue();
         final var constValue = value.evaluateAs(context, Object.class);
         final var type = value.getType(context);
@@ -132,6 +140,21 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
     }
 
     public enum Op {
-        PLUS, MINUS, INVERSE, NOT
+        // @formatter:off
+        PLUS    (false),
+        MINUS   (false),
+        INVERSE (false),
+        NOT     (false),
+        PRE_INC (true),
+        POST_INC(true),
+        PRE_DEC (true),
+        POST_DEC(true);
+        // @formatter:on
+
+        public final boolean isAssignment;
+
+        Op(final boolean isAssignment) {
+            this.isAssignment = isAssignment;
+        }
     }
 }

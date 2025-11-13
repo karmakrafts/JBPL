@@ -20,12 +20,11 @@ import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.lang.ASTNode;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public final class FieldNode extends ANTLRPsiNode implements StructuralPsiElement {
+public final class FieldNode extends JBPLPsiNode implements StructuralPsiElement {
     public FieldNode(final @NotNull ASTNode node) {
         super(node);
     }

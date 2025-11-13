@@ -18,7 +18,7 @@ package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
@@ -42,23 +42,23 @@ public final class EvaluationContextTest {
     public void pushAndPopSingleValue() {
         final var context = createContext();
         context.pushFrame(context.file);
-        context.pushValue(LiteralExpr.of("Testing"));
+        context.pushValue(ConstExpr.of("Testing"));
         final var value = context.popValue();
-        Assertions.assertEquals(LiteralExpr.of("Testing"), value);
+        Assertions.assertEquals(ConstExpr.of("Testing"), value);
     }
 
     @Test
     public void pushAndPopMultipleValues() {
         final var context = createContext();
         context.pushFrame(context.file);
-        context.pushValues(List.of(LiteralExpr.of(1), LiteralExpr.of(2)));
+        context.pushValues(List.of(ConstExpr.of(1), ConstExpr.of(2)));
         final var values = context.popValues(2);
-        Assertions.assertEquals(List.of(LiteralExpr.of(1), LiteralExpr.of(2)), values);
+        Assertions.assertEquals(List.of(ConstExpr.of(1), ConstExpr.of(2)), values);
     }
 
     @Test
     public void mergeInstructionBufferOnFrameExit() {
-        final var dummyMacro = new MacroDecl(LiteralExpr.of("test"), LiteralExpr.of(BuiltinType.VOID));
+        final var dummyMacro = new MacroDecl(ConstExpr.of("test"), ConstExpr.of(BuiltinType.VOID));
         final var context = createContext();
         context.pushFrame(context.file);
         context.emit(new InsnNode(Opcodes.DUP));
@@ -78,19 +78,19 @@ public final class EvaluationContextTest {
 
     @Test
     public void mergeValueStackOnFrameExit() {
-        final var dummyMacro = new MacroDecl(LiteralExpr.of("test"), LiteralExpr.of(BuiltinType.VOID));
+        final var dummyMacro = new MacroDecl(ConstExpr.of("test"), ConstExpr.of(BuiltinType.VOID));
         final var context = createContext();
         context.pushFrame(context.file);
-        context.pushValue(LiteralExpr.of(0));
+        context.pushValue(ConstExpr.of(0));
         context.pushFrame(dummyMacro);
-        context.pushValue(LiteralExpr.of(1));
-        context.pushValue(LiteralExpr.of(2));
+        context.pushValue(ConstExpr.of(1));
+        context.pushValue(ConstExpr.of(2));
         context.popFrame();
-        context.pushValue(LiteralExpr.of(3));
+        context.pushValue(ConstExpr.of(3));
 
-        Assertions.assertEquals(LiteralExpr.of(3), context.popValue());
-        Assertions.assertEquals(LiteralExpr.of(2), context.popValue());
-        Assertions.assertEquals(LiteralExpr.of(1), context.popValue());
-        Assertions.assertEquals(LiteralExpr.of(0), context.popValue());
+        Assertions.assertEquals(ConstExpr.of(3), context.popValue());
+        Assertions.assertEquals(ConstExpr.of(2), context.popValue());
+        Assertions.assertEquals(ConstExpr.of(1), context.popValue());
+        Assertions.assertEquals(ConstExpr.of(0), context.popValue());
     }
 }

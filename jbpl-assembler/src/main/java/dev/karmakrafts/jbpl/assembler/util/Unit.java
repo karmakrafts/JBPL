@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij.psi;
+package dev.karmakrafts.jbpl.assembler.util;
 
-import com.intellij.lang.ASTNode;
-import org.jetbrains.annotations.NotNull;
+public final class Unit {
+    public static final Unit INSTANCE = new Unit();
 
-public final class ExprOrTypeNode extends JBPLPsiNode {
-    public ExprOrTypeNode(final @NotNull ASTNode node) {
-        super(node);
-    }
+    private Unit() {}
 }

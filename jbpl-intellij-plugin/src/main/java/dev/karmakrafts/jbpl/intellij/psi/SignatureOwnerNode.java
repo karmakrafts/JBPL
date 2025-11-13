@@ -19,12 +19,11 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Collectors;
 
-public final class SignatureOwnerNode extends ANTLRPsiNode {
+public final class SignatureOwnerNode extends JBPLPsiNode {
     public SignatureOwnerNode(final @NotNull ASTNode node) {
         super(node);
     }

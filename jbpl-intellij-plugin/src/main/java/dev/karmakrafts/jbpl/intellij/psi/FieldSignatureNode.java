@@ -20,10 +20,9 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class FieldSignatureNode extends ANTLRPsiNode implements Annotated {
+public final class FieldSignatureNode extends JBPLPsiNode implements Annotated {
     public FieldSignatureNode(final @NotNull ASTNode node) {
         super(node);
     }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+^include "builtin.jbpl"
+
 /*
  * Emits an invokevirtual instruction to call the property getter
  * of the named property.
@@ -21,7 +23,7 @@
  * the stack and the property value is pushed in return.
  */
 macro kt_get_property(owner: type, name: string, type: type) {
-    invokevirtual ${owner}.${"get-${name}"}(): ${type}
+    invokevirtual ${owner}.${get_special_name("get-${name}")}(): ${type}
 }
 
 /*
@@ -31,7 +33,7 @@ macro kt_get_property(owner: type, name: string, type: type) {
  * are popped from the stack.
  */
 macro kt_set_property(owner: type, name: string, type: type) {
-    invokevirtual ${owner}.${"set-${name}"}(${type}): void
+    invokevirtual ${owner}.${get_special_name("set-${name}")}(${type}): void
 }
 
 /*

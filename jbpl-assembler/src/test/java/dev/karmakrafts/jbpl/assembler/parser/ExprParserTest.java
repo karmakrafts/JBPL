@@ -1,8 +1,8 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
-import dev.karmakrafts.jbpl.assembler.model.expr.LiteralExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -21,11 +21,11 @@ public final class ExprParserTest extends AbstractParserTest {
         final var expr = element.get().statement().expr();
         Assertions.assertNotNull(expr);
         final var parseExpr = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(expr));
-        if (!(parseExpr instanceof LiteralExpr literalExpr)) {
+        if (!(parseExpr instanceof ConstExpr constExpr)) {
             Assertions.fail();
             return;
         }
-        Assertions.assertEquals(expectedValue, literalExpr.value);
+        Assertions.assertEquals(expectedValue, constExpr.getConstValue());
     }
 
     @Test
@@ -95,9 +95,9 @@ public final class ExprParserTest extends AbstractParserTest {
         Assertions.assertTrue(element.isPresent());
         final var signature = element.get().statement().expr().signatureExpr();
         Assertions.assertNotNull(signature);
-        final var expectedField = new FieldSignatureExpr(LiteralExpr.of(new ClassType("com/example/Test")),
-            LiteralExpr.of("myField"),
-            LiteralExpr.of(BuiltinType.I32));
+        final var expectedField = new FieldSignatureExpr(ConstExpr.of(new ClassType("com/example/Test")),
+            ConstExpr.of("myField"),
+            ConstExpr.of(BuiltinType.I32));
         Assertions.assertEquals(expectedField, ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(signature)));
     }
 
@@ -111,10 +111,10 @@ public final class ExprParserTest extends AbstractParserTest {
         Assertions.assertTrue(element.isPresent());
         final var signature = element.get().statement().expr().signatureExpr();
         Assertions.assertNotNull(signature);
-        final var expectedField = new FunctionSignatureExpr(LiteralExpr.of(new ClassType("com/example/Test")),
-            LiteralExpr.of("myFunction"),
-            LiteralExpr.of(BuiltinType.I32));
-        expectedField.addExpression(LiteralExpr.of(BuiltinType.F32));
+        final var expectedField = new FunctionSignatureExpr(ConstExpr.of(new ClassType("com/example/Test")),
+            ConstExpr.of("myFunction"),
+            ConstExpr.of(BuiltinType.I32));
+        expectedField.addExpression(ConstExpr.of(BuiltinType.F32));
         final var expr = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(signature));
         Assertions.assertEquals(expectedField, expr);
     }

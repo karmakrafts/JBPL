@@ -21,6 +21,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeCommonizer;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeMapper;
+import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.XBiFunction;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +29,11 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class ArrayExpr extends AbstractExprContainer implements Expr {
+public final class ArrayExpr extends AbstractExprContainer implements ConstExpr {
     public static final int TYPE_INDEX = 0;
     public static final int VALUES_INDEX = 1;
 
@@ -55,6 +57,25 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
         this((ctx, commonType) -> type.evaluateAs(ctx, Type.class), false);
         hasUnresolvedType = true;
         addExpression(type);
+    }
+
+    public static @NotNull ArrayExpr fromArrayRef(final @NotNull Object arrayRef,
+                                                  final @NotNull TokenRange tokenRange) {
+        final var arrayType = arrayRef.getClass();
+        final var componentType = arrayType.getComponentType();
+        final var elementType = TypeMapper.map(componentType, true);
+        final var expr = new ArrayExpr(ConstExpr.of(elementType));
+        final var length = Array.getLength(arrayRef);
+        for (var i = 0; i < length; i++) {
+            expr.addValue(ConstExpr.of(Array.get(arrayRef, i)));
+        }
+        expr.arrayReference = arrayRef; // Directly set array reference, avoid further evaluation
+        expr.setTokenRange(tokenRange);
+        return expr;
+    }
+
+    public static @NotNull ArrayExpr fromArrayRef(final @NotNull Object arrayRef) {
+        return fromArrayRef(arrayRef, TokenRange.SYNTHETIC);
     }
 
     /**
@@ -120,6 +141,25 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
     }
 
     @Override
+    public void ensureLazyConstValue(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (arrayReference != null) { // Lazily evaluate array to runtime object and cache it
+            return;
+        }
+        final var type = TypeMapper.map(getType(context));
+        final var values = getValues();
+        final var size = values.size();
+        arrayReference = Array.newInstance(type.componentType(), size);
+        for (var i = 0; i < size; i++) {
+            Array.set(arrayReference, i, values.get(i).evaluateAs(context, Object.class));
+        }
+    }
+
+    @Override
+    public @NotNull Object getConstValue() {
+        return Objects.requireNonNull(arrayReference);
+    }
+
+    @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException { // @formatter:off
         return elementTypeResolver.apply(context, TypeCommonizer.getCommonType(getExpressions().stream()
             .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
@@ -128,16 +168,8 @@ public final class ArrayExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        if (arrayReference == null) {
-            final var type = TypeMapper.map(getType(context));
-            final var values = getValues();
-            final var size = values.size();
-            arrayReference = Array.newInstance(type.componentType(), size);
-            for (var i = 0; i < size; ++i) {
-                Array.set(arrayReference, i, values.get(i).evaluateAs(context, Object.class));
-            }
-        }
-        context.pushValue(LiteralExpr.of(arrayReference, getTokenRange()));
+        ensureLazyConstValue(context);
+        context.pushValue(this); // Arrays are ConstValue's under the hood
     }
 
     @Override

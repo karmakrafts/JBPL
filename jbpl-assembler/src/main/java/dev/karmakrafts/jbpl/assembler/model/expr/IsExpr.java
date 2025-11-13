@@ -59,7 +59,7 @@ public final class IsExpr extends AbstractExprContainer implements Expr {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getType().evaluateAs(context, Type.class);
-        context.pushValue(LiteralExpr.of(getValue().getType(context).equals(type), getTokenRange()));
+        context.pushValue(ConstExpr.of(getValue().getType(context).equals(type), getTokenRange()));
     }
 
     @Override

@@ -20,12 +20,11 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public final class TypeNode extends ANTLRPsiNode implements Annotated {
+public final class TypeNode extends JBPLPsiNode implements Annotated {
     private static final Set<String> SOFT_KEYWORDS = Set.of("opcode", "type", "version");
 
     public TypeNode(final @NotNull ASTNode node) {

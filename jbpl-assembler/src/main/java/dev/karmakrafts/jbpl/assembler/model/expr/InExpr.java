@@ -63,13 +63,13 @@ public final class InExpr extends AbstractExprContainer implements Expr {
         final var rhsValue = getRhs().evaluateAs(context, Object.class);
         final var rhsType = getRhs().getType(context);
         if (rhsType == BuiltinType.STRING) {
-            context.pushValue(LiteralExpr.of(rhsValue.toString().contains(lhsValue.toString()), getTokenRange()));
+            context.pushValue(ConstExpr.of(rhsValue.toString().contains(lhsValue.toString()), getTokenRange()));
             return;
         }
         else if (rhsType == PreproType.FUNCTION_SIGNATURE) {
             final var signature = (FunctionSignatureExpr) rhsValue;
             if (lhsType == BuiltinType.STRING) {
-                context.pushValue(LiteralExpr.of(signature.getFunctionName().evaluateAs(context, String.class).equals(
+                context.pushValue(ConstExpr.of(signature.getFunctionName().evaluateAs(context, String.class).equals(
                     lhsValue), getTokenRange()));
                 return;
             }
@@ -79,7 +79,7 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                     .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
                     .collect(Collectors.toSet());
                 // @formatter:on
-                context.pushValue(LiteralExpr.of(types.contains((Type) lhsValue), getTokenRange()));
+                context.pushValue(ConstExpr.of(types.contains((Type) lhsValue), getTokenRange()));
                 return;
             }
         }
@@ -91,8 +91,8 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                     .filter(ExceptionUtils.unsafePredicate(expr -> expr.getType(context) == BuiltinType.STRING))
                     .findFirst();
                 // @formatter:on
-                context.pushValue(LiteralExpr.of(name.isPresent() && name.get().evaluateAs(context,
-                    String.class).equals(lhsValue), getTokenRange()));
+                context.pushValue(ConstExpr.of(name.isPresent() && name.get().evaluateAs(context, String.class).equals(
+                    lhsValue), getTokenRange()));
                 return;
             }
             else if (lhsType == PreproType.TYPE) {
@@ -101,21 +101,21 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                     .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
                     .collect(Collectors.toSet());
                 // @formatter:on
-                context.pushValue(LiteralExpr.of(types.contains((Type) lhsValue), getTokenRange()));
+                context.pushValue(ConstExpr.of(types.contains((Type) lhsValue), getTokenRange()));
             }
         }
         else if (rhsValue instanceof IntersectionType rhsIntersectionType) {
             if (lhsValue instanceof IntersectionType lhsIntersectionType) {
-                context.pushValue(LiteralExpr.of(new HashSet<>(rhsIntersectionType.alternatives()).containsAll(
+                context.pushValue(ConstExpr.of(new HashSet<>(rhsIntersectionType.alternatives()).containsAll(
                     lhsIntersectionType.alternatives()), getTokenRange()));
                 return;
             }
             else if (lhsValue instanceof Type lhsTypeValue) {
-                context.pushValue(LiteralExpr.of(rhsIntersectionType.alternatives().contains(lhsTypeValue),
+                context.pushValue(ConstExpr.of(rhsIntersectionType.alternatives().contains(lhsTypeValue),
                     getTokenRange()));
                 return;
             }
-            context.pushValue(LiteralExpr.of(false, getTokenRange()));
+            context.pushValue(ConstExpr.of(false, getTokenRange()));
             return;
         }
         else if (rhsType instanceof ArrayType arrayType) {
@@ -131,10 +131,10 @@ public final class InExpr extends AbstractExprContainer implements Expr {
                 if (!lhsValue.equals(value)) {
                     continue;
                 }
-                context.pushValue(LiteralExpr.of(true, getTokenRange()));
+                context.pushValue(ConstExpr.of(true, getTokenRange()));
                 return;
             }
-            context.pushValue(LiteralExpr.of(false, getTokenRange()));
+            context.pushValue(ConstExpr.of(false, getTokenRange()));
             return;
         }
         throw new EvaluationException("Incompatible types in in-expression",

@@ -144,7 +144,8 @@ macro:
     ;
 
 macroCall:
-    IDENT
+    (softKeyword
+    | IDENT)
     L_PAREN
     (argument
     (COMMA
@@ -167,14 +168,14 @@ namedArgument:
 classDecl:
     accessModifier*?
     KW_CLASS
-    (reference
+    (wrappedExpr
     | classType)
     ;
 
 enumDecl:
     accessModifier*?
     KW_ENUM
-    (reference
+    (wrappedExpr
     | classType)
     ;
 
@@ -270,6 +271,11 @@ expr:
     | MINUS expr
     | PLUS expr
     | EXCL expr
+
+    | INC expr
+    | expr INC
+    | DEC expr
+    | expr DEC
 
     | expr KW_IS exprOrType
     | expr KW_AS exprOrType
@@ -427,9 +433,7 @@ typeOfExpr:
 
 typeLiteral:
     KW_TYPE
-    L_PAREN
     type
-    R_PAREN
     ;
 
 declaration:
@@ -515,7 +519,7 @@ injector:
     KW_INJECT
     NL*?
     (functionSignature
-    | reference)
+    | wrappedExpr)
     NL*?
     KW_BY
     NL*?
@@ -613,10 +617,8 @@ instructionLiteral:
     ;
 
 instruction:
-    load
-    | fieldLoad
-    | store
-    | fieldStore
+    stackInstruction
+    | fieldInstruction
     | jump
     | invokedynamic
     | invoke
@@ -629,31 +631,23 @@ instruction:
 
 ret:
     INSN_RET
-    (intLiteral
+    (wrappedExpr
+    | intLiteral
     | IDENT)
     ;
 
-load:
-    INSN_LOAD
-    (intLiteral
+stackInstruction:
+    (INSN_LOAD
+    | INSN_STORE)
+    (wrappedExpr
+    | intLiteral
     | IDENT)
     ;
 
-store:
-    INSN_STORE
-    (intLiteral
-    | IDENT)
-    ;
-
-fieldLoad:
-    INSN_GET
-    (reference
-    | fieldSignature)
-    ;
-
-fieldStore:
-    INSN_PUT
-    (reference
+fieldInstruction:
+    (INSN_GET
+    | INSN_PUT)
+    (wrappedExpr
     | fieldSignature)
     ;
 
@@ -679,13 +673,13 @@ typeInstruction:
     (INSN_NEW
     | INSN_CHECKCAST
     | INSN_INSTANCEOF)
-    (reference
+    (wrappedExpr
     | classType)
     ;
 
 ldc:
     INSN_LDC
-    (reference
+    (wrappedExpr
     | literal)
     ;
 
@@ -830,9 +824,7 @@ logicInstruction:
 
 opcodeLiteral:
     KW_OPCODE
-    L_PAREN
     opcode
-    R_PAREN
     ;
 
 opcode:
@@ -889,6 +881,8 @@ softKeyword:
     | KW_OPCODE
     | KW_VERSION
     | KW_LOCAL
+    | INSN_NEW
+    | INSN_RET
     ;
 
 nameSegment:

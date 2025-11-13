@@ -17,10 +17,11 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public final class ExprOrTypeNode extends JBPLPsiNode {
-    public ExprOrTypeNode(final @NotNull ASTNode node) {
+public class JBPLPsiNode extends ANTLRPsiNode {
+    public JBPLPsiNode(final @NotNull ASTNode node) {
         super(node);
     }
 }

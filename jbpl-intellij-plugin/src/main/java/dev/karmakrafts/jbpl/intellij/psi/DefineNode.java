@@ -22,13 +22,12 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public final class DefineNode extends ANTLRPsiNode implements StructuralPsiElement, Annotated {
+public final class DefineNode extends JBPLPsiNode implements StructuralPsiElement, Annotated {
     public DefineNode(final @NotNull ASTNode node) {
         super(node);
     }
