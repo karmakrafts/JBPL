@@ -1,0 +1,43 @@
+/*
+ * Copyright 2025 Karma Krafts & associates
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Emits an invokevirtual instruction to call the property getter
+ * of the named property.
+ * The object instance to use as the call receiver is popped from
+ * the stack and the property value is pushed in return.
+ */
+macro kt_get_property(owner: type, name: string, type: type) {
+    invokevirtual ${owner}.${"get-${name}"}(): ${type}
+}
+
+/*
+ * Emits an invokevirtual instruction to call the property setter
+ * of the named property.
+ * The object instance to use as the call receiver and the value to set
+ * are popped from the stack.
+ */
+macro kt_set_property(owner: type, name: string, type: type) {
+    invokevirtual ${owner}.${"set-${name}"}(${type}): void
+}
+
+/*
+ * Emits a getstatic instruction to load the singleton instance of
+ * the given Kotlin object type.
+ */
+macro kt_get_object(type: type) {
+    getstatic ${type}.INSTANCE: ${type}
+}
