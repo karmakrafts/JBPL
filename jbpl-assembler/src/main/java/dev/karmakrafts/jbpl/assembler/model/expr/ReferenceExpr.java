@@ -53,7 +53,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
             return argument.evaluateAsConst(context);
         }
         getDefine(context).evaluate(context);
-        return (ConstExpr)context.popValue();
+        return (ConstExpr) context.popValue();
     }
 
     @Override

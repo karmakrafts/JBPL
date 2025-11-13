@@ -19,5 +19,6 @@ package dev.karmakrafts.jbpl.assembler.util;
 public final class Unit {
     public static final Unit INSTANCE = new Unit();
 
-    private Unit() {}
+    private Unit() {
+    }
 }
