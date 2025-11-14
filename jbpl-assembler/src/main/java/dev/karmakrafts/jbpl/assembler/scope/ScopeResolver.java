@@ -21,6 +21,7 @@ import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 public final class ScopeResolver {
@@ -28,6 +29,18 @@ public final class ScopeResolver {
 
     public ScopeResolver(final @NotNull Scope scope) {
         this.scope = scope;
+    }
+
+    public static <E extends Element> @NotNull List<E> resolveAll(final @NotNull Scope scope,
+                                                                  final @NotNull Class<E> type,
+                                                                  final @NotNull Predicate<E> filter) {
+        return scope.findAll(currentScope -> {
+            final var owner = currentScope.owner();
+            if (!(owner instanceof ElementContainer ownerElement)) {
+                return null;
+            }
+            return ownerElement.findElement(type, filter).orElse(null);
+        });
     }
 
     public static <E extends Element> @Nullable E resolve(final @NotNull Scope scope,
@@ -44,5 +57,10 @@ public final class ScopeResolver {
 
     public <E extends Element> @Nullable E resolve(final @NotNull Class<E> type, final @NotNull Predicate<E> filter) {
         return resolve(scope, type, filter);
+    }
+
+    public <E extends Element> @NotNull List<E> resolveAll(final @NotNull Class<E> type,
+                                                           final @NotNull Predicate<E> filter) {
+        return resolveAll(scope, type, filter);
     }
 }

@@ -19,6 +19,8 @@ package dev.karmakrafts.jbpl.assembler.scope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 import java.util.function.Function;
 
@@ -51,6 +53,25 @@ public record Scope( // @formatter:off
             return result;
         }
         return null;
+    }
+
+    public <T> @NotNull List<T> findAll(final @NotNull Function<Scope, ? extends T> selector) {
+        final var stack = new Stack<Scope>();
+        stack.push(this);
+        final var results = new ArrayList<T>();
+        while (!stack.isEmpty()) {
+            final var scope = stack.pop();
+            final var parentScope = scope.parent;
+            final var result = selector.apply(scope);
+            if (result == null) {
+                if (parentScope != null) {
+                    stack.push(parentScope);
+                }
+                continue;
+            }
+            results.add(result);
+        }
+        return results;
     }
 
     @Override

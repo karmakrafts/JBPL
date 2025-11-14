@@ -31,6 +31,7 @@ import org.objectweb.asm.tree.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class EvaluationContext {
     // @formatter:off
@@ -65,9 +66,27 @@ public final class EvaluationContext {
     }
 
     public <E extends NamedElement> @Nullable E resolveByName(final @NotNull Class<E> type,
-                                                              final @NotNull String name) {
+                                                              final @NotNull String name,
+                                                              final @NotNull Predicate<E> filter) {
         return peekFrame().scopeResolver.resolve(type,
-            ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
+            filter.and(ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name))));
+    }
+
+    public <E extends NamedElement> @Nullable E resolveByName(final @NotNull Class<E> type,
+                                                              final @NotNull String name) {
+        return resolveByName(type, name, element -> true);
+    }
+
+    public <E extends NamedElement> @NotNull List<E> resolveAllByName(final @NotNull Class<E> type,
+                                                                      final @NotNull String name,
+                                                                      final @NotNull Predicate<E> filter) {
+        return peekFrame().scopeResolver.resolveAll(type,
+            filter.and(ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name))));
+    }
+
+    public <E extends NamedElement> @NotNull List<E> resolveAllByName(final @NotNull Class<E> type,
+                                                                      final @NotNull String name) {
+        return resolveAllByName(type, name, element -> true);
     }
 
     public void clearStack() {
