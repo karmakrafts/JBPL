@@ -45,8 +45,126 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
         return getValue().getType(context);
     }
 
-    private void evaluateAssignment(final @NotNull EvaluationContext context) {
-        
+    private @NotNull ConstExpr evaluateAssignmentForByte(final @NotNull Byte value,
+                                                         final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (op) {
+            case PRE_INC, POST_INC -> ConstExpr.of(value + 1, getTokenRange());
+            case PRE_DEC, POST_DEC -> ConstExpr.of(value - 1, getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported unary re-assignment operator %s for type i8", op);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    private @NotNull ConstExpr evaluateAssignmentForShort(final @NotNull Short value,
+                                                          final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (op) {
+            case PRE_INC, POST_INC -> ConstExpr.of(value + 1, getTokenRange());
+            case PRE_DEC, POST_DEC -> ConstExpr.of(value - 1, getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported unary re-assignment operator %s for type i16", op);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    private @NotNull ConstExpr evaluateAssignmentForInt(final @NotNull Integer value,
+                                                        final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (op) {
+            case PRE_INC, POST_INC -> ConstExpr.of(value + 1, getTokenRange());
+            case PRE_DEC, POST_DEC -> ConstExpr.of(value - 1, getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported unary re-assignment operator %s for type i32", op);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    private @NotNull ConstExpr evaluateAssignmentForLong(final @NotNull Long value,
+                                                         final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (op) {
+            case PRE_INC, POST_INC -> ConstExpr.of(value + 1, getTokenRange());
+            case PRE_DEC, POST_DEC -> ConstExpr.of(value - 1, getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported unary re-assignment operator %s for type i64", op);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    private @NotNull ConstExpr evaluateAssignmentForFloat(final @NotNull Float value,
+                                                          final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (op) {
+            case PRE_INC, POST_INC -> ConstExpr.of(value + 1F, getTokenRange());
+            case PRE_DEC, POST_DEC -> ConstExpr.of(value - 1F, getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported unary re-assignment operator %s for type f32", op);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    private @NotNull ConstExpr evaluateAssignmentForDouble(final @NotNull Double value,
+                                                           final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (op) {
+            case PRE_INC, POST_INC -> ConstExpr.of(value + 1D, getTokenRange());
+            case PRE_DEC, POST_DEC -> ConstExpr.of(value - 1D, getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported unary re-assignment operator %s for type f64", op);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    private @NotNull ConstExpr evaluateAssignmentForBuiltinType(final @NotNull Object value,
+                                                                final @NotNull BuiltinType builtinType,
+                                                                final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (builtinType) {
+            case I8 -> evaluateAssignmentForByte((Byte) value, context);
+            case I16 -> evaluateAssignmentForShort((Short) value, context);
+            case I32 -> evaluateAssignmentForInt((Integer) value, context);
+            case I64 -> evaluateAssignmentForLong((Long) value, context);
+            case F32 -> evaluateAssignmentForFloat((Float) value, context);
+            case F64 -> evaluateAssignmentForDouble((Double) value, context);
+            default -> {
+                final var message = String.format("Unsupported unary re-assignment operator %s for type %s",
+                    op,
+                    builtinType);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    private void evaluateAssignment(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var value = getValue();
+        if (!(value instanceof Reference reference)) {
+            final var message = String.format("Cannot perform unary operation %s on value %s", op, value);
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
+        final var oldValue = reference.loadFromReference(context);
+        final var type = oldValue.getType(context);
+        if (!(type instanceof BuiltinType builtinType)) {
+            final var message = String.format("Cannot perform unary operation %s on type %s", op, type);
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
+        final var newValue = evaluateAssignmentForBuiltinType(oldValue.getConstValue(), builtinType, context);
+        reference.storeToReference(newValue, context);
+        context.pushValue(op.isPostOp ? oldValue : newValue);
     }
 
     private @NotNull ConstExpr evaluateForNumber(final @NotNull Number value,
@@ -141,20 +259,22 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
 
     public enum Op {
         // @formatter:off
-        PLUS    (false),
-        MINUS   (false),
-        INVERSE (false),
-        NOT     (false),
-        PRE_INC (true),
-        POST_INC(true),
-        PRE_DEC (true),
-        POST_DEC(true);
+        PLUS    (false, false),
+        MINUS   (false, false),
+        INVERSE (false, false),
+        NOT     (false, false),
+        PRE_INC (true,  false),
+        POST_INC(true,  true),
+        PRE_DEC (true,  false),
+        POST_DEC(true,  true);
         // @formatter:on
 
         public final boolean isAssignment;
+        public final boolean isPostOp;
 
-        Op(final boolean isAssignment) {
+        Op(final boolean isAssignment, final boolean isPostOp) {
             this.isAssignment = isAssignment;
+            this.isPostOp = isPostOp;
         }
     }
 }
