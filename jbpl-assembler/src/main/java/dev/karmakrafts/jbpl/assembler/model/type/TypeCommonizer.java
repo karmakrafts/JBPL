@@ -59,6 +59,10 @@ public final class TypeCommonizer {
         final var category = categories.stream().findFirst().orElseThrow();
         final var uniqueTypes = new HashSet<>(types);
         return switch(category) { // @formatter:off
+            case ARRAY -> getCommonType(uniqueTypes.stream()
+                .map(ArrayType.class::cast)
+                .map(ArrayType::elementType)
+                .toList()).map(Type::array);
             case INTEGER, FLOAT -> uniqueTypes.stream()
                 .filter(BuiltinType.class::isInstance)
                 .map(BuiltinType.class::cast)

@@ -52,7 +52,10 @@ public final class DefineNode extends JBPLPsiNode implements StructuralPsiElemen
         final var scheme = EditorColorsManager.getInstance().getGlobalScheme();
         final var reAssignAttribs = scheme.getAttributes(DefaultLanguageHighlighterColors.REASSIGNED_LOCAL_VARIABLE);
         final var attribs = scheme.getAttributes(TextAttributeKeys.DEFINE).clone();
-        attribs.withAdditionalEffect(EffectType.LINE_UNDERSCORE, reAssignAttribs.getEffectColor());
+        final var effectColor = reAssignAttribs.getEffectColor();
+        if (effectColor != null) {
+            attribs.withAdditionalEffect(EffectType.LINE_UNDERSCORE, effectColor);
+        }
         // @formatter:off
         PsiUtils.find(this, "/define/exprOrName/nameSegment").ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(name)

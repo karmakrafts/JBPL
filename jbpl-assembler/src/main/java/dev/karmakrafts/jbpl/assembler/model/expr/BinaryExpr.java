@@ -18,15 +18,14 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
-import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
-import dev.karmakrafts.jbpl.assembler.model.type.IntersectionType;
-import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.model.type.*;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public final class BinaryExpr extends AbstractExprContainer implements Expr {
@@ -448,6 +447,72 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
+    private @NotNull ConstExpr evaluateForString(final @NotNull String lhsValue,
+                                                 final @NotNull EvaluationContext context) throws EvaluationException {
+        final var rhsValue = getRhs().evaluateAs(context, Object.class).toString();
+        return switch (op) {
+            case ADD -> ConstExpr.of(String.format("%s%s", lhsValue, rhsValue), getTokenRange());
+            case CMP -> ConstExpr.of(lhsValue.compareTo(rhsValue), getTokenRange());
+            case EQ -> ConstExpr.of(lhsValue.equals(rhsValue), getTokenRange());
+            case NE -> ConstExpr.of(!lhsValue.equals(rhsValue), getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported string binary expression: %s %s %s",
+                    lhsValue,
+                    op,
+                    rhsValue);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
+    @SuppressWarnings("SuspiciousSystemArraycopy")
+    private @NotNull ConstExpr evaluateForArray(final @NotNull Object lhsValue,
+                                                final @NotNull ArrayType lhsType,
+                                                final @NotNull EvaluationContext context) throws EvaluationException {
+        final var rhsValue = getRhs().evaluateAs(context, Object.class);
+        final var rhsType = getRhs().getType(context);
+        final var rhsArrayValue = rhsType instanceof ArrayType ? rhsValue : new Object[]{rhsValue};
+        final var lhsLength = Array.getLength(lhsValue);
+        final var rhsLength = Array.getLength(rhsArrayValue);
+        final var lhsElementType = TypeMapper.map(lhsType.elementType());
+        return switch (op) {
+            case ADD -> {
+                final var newLength = lhsLength + rhsLength;
+                final var newArray = Array.newInstance(lhsElementType, newLength);
+                System.arraycopy(lhsValue, 0, newArray, 0, lhsLength);
+                System.arraycopy(rhsArrayValue, 0, newArray, lhsLength, rhsLength);
+                yield ConstExpr.of(newArray, getTokenRange());
+            }
+            case SUB -> {
+                final var lhsValues = new ArrayList<>(lhsLength);
+                for (var i = 0; i < lhsLength; i++) {
+                    lhsValues.add(Array.get(lhsValue, i));
+                }
+                final var rhsValues = new HashSet<>(rhsLength);
+                for (var i = 0; i < rhsLength; i++) {
+                    rhsValues.add(Array.get(rhsArrayValue, i));
+                }
+                lhsValues.removeAll(rhsValues);
+                final var newArray = Array.newInstance(lhsElementType, lhsValues.size());
+                for (var i = 0; i < lhsValues.size(); i++) {
+                    Array.set(newArray, i, lhsValues.get(i));
+                }
+                yield ConstExpr.of(newArray, getTokenRange());
+            }
+            default -> {
+                final var message = String.format("Unsupported array binary expression: %s %s %s",
+                    lhsValue,
+                    op,
+                    rhsValue);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         if (op.isAssignment) {
@@ -456,25 +521,13 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         }
         final var lhsValue = getLhs().evaluateAs(context, Object.class);
         final var lhsType = getLhs().getType(context);
+        // Arrays are the only thing where we care about either sides type
+        if (lhsType instanceof ArrayType lhsArrayType) {
+            context.pushValue(evaluateForArray(lhsValue, lhsArrayType, context));
+            return;
+        }
         if (lhsType == BuiltinType.STRING) { // String concatenation with any type
-            switch (op) {
-                case ADD -> {
-                    final var rhsValue = getRhs().evaluateAs(context, Object.class);
-                    context.pushValue(ConstExpr.of(String.format("%s%s", lhsValue, rhsValue), getTokenRange()));
-                }
-                case CMP -> {
-                    final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(ConstExpr.of(((String) lhsValue).compareTo(rhsString), getTokenRange()));
-                }
-                case EQ -> {
-                    final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(ConstExpr.of(lhsValue.equals(rhsString), getTokenRange()));
-                }
-                case NE -> {
-                    final var rhsString = getRhs().evaluateAs(context, Object.class).toString();
-                    context.pushValue(ConstExpr.of(!lhsValue.equals(rhsString), getTokenRange()));
-                }
-            }
+            context.pushValue(evaluateForString((String) lhsValue, context));
             return;
         }
         else if (lhsType == PreproType.TYPE) { // Type addition/subtraction creates intersection types

@@ -47,7 +47,14 @@ public interface Expr extends Statement {
 
     default <T> @NotNull T evaluateAs(final @NotNull EvaluationContext context,
                                       final @NotNull Class<T> type) throws EvaluationException {
-        return type.cast(Objects.requireNonNull(evaluateAsConst(context).getConstValue()));
+        try {
+            return type.cast(Objects.requireNonNull(evaluateAsConst(context).getConstValue()));
+        }
+        catch (ClassCastException error) {
+            throw new EvaluationException(error,
+                SourceDiagnostic.from(this, error.getMessage()),
+                context.createStackTrace());
+        }
     }
 
     default @NotNull Object evaluateAsConstAndMaterialize(final @NotNull EvaluationContext context) throws EvaluationException {

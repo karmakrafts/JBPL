@@ -75,6 +75,20 @@ just_another_array[0][0] = "12345 OVERRIDDEN VALUE"
     else -> "TESTING"
 }
 
+define _arr1: [i32] = []{0, 1}
+define _arr2: [i32] = []{2, 3}
+define _arr3: [i32] = _arr1 + _arr2
+
+for(i in 0..<sizeof(_arr3)) {
+    ^info "Array value is ${_arr3[i]}"
+}
+
+_arr3 = _arr3 - []{1, 2}
+
+for(i in 0..<sizeof(_arr3)) {
+    ^info "Array value now is ${_arr3[i]}"
+}
+
 for(f in 0f32 ..< 10f32) {
     ^info "Printing float ${f}"
 }

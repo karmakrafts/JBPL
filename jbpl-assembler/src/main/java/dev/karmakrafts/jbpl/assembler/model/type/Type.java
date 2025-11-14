@@ -64,4 +64,8 @@ public sealed interface Type
     default @NotNull ArrayType array() {
         return new ArrayType(this);
     }
+
+    default @NotNull RangeType range() {
+        return new RangeType(this);
+    }
 }
