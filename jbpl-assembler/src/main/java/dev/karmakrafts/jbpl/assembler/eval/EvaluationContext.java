@@ -78,15 +78,9 @@ public final class EvaluationContext {
     }
 
     public <E extends NamedElement> @NotNull List<E> resolveAllByName(final @NotNull Class<E> type,
-                                                                      final @NotNull String name,
-                                                                      final @NotNull Predicate<E> filter) {
-        return peekFrame().scopeResolver.resolveAll(type,
-            filter.and(ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name))));
-    }
-
-    public <E extends NamedElement> @NotNull List<E> resolveAllByName(final @NotNull Class<E> type,
                                                                       final @NotNull String name) {
-        return resolveAllByName(type, name, element -> true);
+        return peekFrame().scopeResolver.resolveAll(type,
+            ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
     }
 
     public void clearStack() {

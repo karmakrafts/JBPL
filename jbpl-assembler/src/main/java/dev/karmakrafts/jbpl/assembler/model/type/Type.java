@@ -61,6 +61,16 @@ public sealed interface Type
         return equals(other);
     }
 
+    default @NotNull TypeConversion conversionTypeFrom(final @NotNull Type other) {
+        if (other == this) {
+            return TypeConversion.DIRECT;
+        }
+        else if (isAssignableFrom(other)) {
+            return TypeConversion.COERCE;
+        }
+        return TypeConversion.NONE;
+    }
+
     default @NotNull ArrayType array() {
         return new ArrayType(this);
     }
