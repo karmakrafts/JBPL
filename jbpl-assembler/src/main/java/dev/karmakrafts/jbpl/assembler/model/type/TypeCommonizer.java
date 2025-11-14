@@ -53,8 +53,27 @@ public final class TypeCommonizer {
 
     public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Collection<? extends Type> types) {
         final var categories = types.stream().map(Type::getCategory).collect(Collectors.toSet());
-        if (categories.size() != 1) {
-            return Optional.empty(); // If we found more than one type category, no commonization can occur
+        if (categories.contains(TypeCategory.INTEGER) && categories.contains(TypeCategory.FLOAT)) {
+            // @formatter:off
+            final var maxIntSize = types.stream()
+                .filter(type -> type.getCategory() == TypeCategory.INTEGER)
+                .mapToInt(type -> ((BuiltinType)type).byteSize)
+                .max()
+                .orElse(-1);
+            final var maxFloatSize = types.stream()
+                .filter(type -> type.getCategory() == TypeCategory.FLOAT)
+                .mapToInt(type -> ((BuiltinType)type).byteSize)
+                .max()
+                .orElse(-1);
+            // @formatter:on
+            // If either size cannot be resolved or if the max int size > max float size, promotion cannot happen
+            if (maxIntSize == -1 || maxFloatSize == -1 || maxIntSize > maxFloatSize) {
+                return Optional.empty();
+            }
+            return BuiltinType.floatBySize(maxFloatSize); // The largest float type we can fit all floats AND ints into
+        }
+        if (categories.size() > 1) {
+            return Optional.empty();
         }
         final var category = categories.stream().findFirst().orElseThrow();
         final var uniqueTypes = new HashSet<>(types);
@@ -62,7 +81,8 @@ public final class TypeCommonizer {
             case ARRAY -> getCommonType(uniqueTypes.stream()
                 .map(ArrayType.class::cast)
                 .map(ArrayType::elementType)
-                .toList()).map(Type::array);
+                .toList())
+                .map(Type::array);
             case INTEGER, FLOAT -> uniqueTypes.stream()
                 .filter(BuiltinType.class::isInstance)
                 .map(BuiltinType.class::cast)

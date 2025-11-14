@@ -65,14 +65,18 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     @Override
     public void storeToReference(final @NotNull ConstExpr value,
                                  final @NotNull EvaluationContext context) throws EvaluationException {
-        final var array = getReference().evaluateAs(context, Object.class);
+        final var array = getReference().evaluateAsConst(context);
+        final var arrayRef = array.getConstValue();
         final int index = getIndex().evaluateAs(context, Integer.class);
-        final var length = Array.getLength(array);
+        final var length = Array.getLength(arrayRef);
         if (index >= length) {
             final var message = String.format("Array index %d out of bounds for array of length %d", index, length);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        Array.set(array, index, value.getConstValue());
+        Array.set(arrayRef, index, value.getConstValue());
+        if (array instanceof ArrayExpr arrayExpr) {
+            arrayExpr.setValue(index, value); // Update value expression in actual array tree element
+        }
     }
 
     @Override

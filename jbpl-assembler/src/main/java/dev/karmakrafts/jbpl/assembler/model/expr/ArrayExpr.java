@@ -21,41 +21,28 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeCommonizer;
 import dev.karmakrafts.jbpl.assembler.model.type.TypeMapper;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
-import dev.karmakrafts.jbpl.assembler.util.XBiFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class ArrayExpr extends AbstractExprContainer implements ConstExpr {
     public static final int TYPE_INDEX = 0;
     public static final int VALUES_INDEX = 1;
 
-    public final boolean hasInferredType;
-    private final XBiFunction<EvaluationContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver;
-    private boolean hasUnresolvedType = false; // Whether the type is an Expr or not
-    private int valueIndex = 0;
     private Object arrayReference; // Cache array ref to allow mutability
 
-    private ArrayExpr(final @NotNull XBiFunction<EvaluationContext, Optional<? extends Type>, Type, EvaluationException> elementTypeResolver,
-                      final boolean hasInferredType) {
-        this.elementTypeResolver = elementTypeResolver;
-        this.hasInferredType = hasInferredType;
-    }
-
     public ArrayExpr() {
-        this((ctx, commonType) -> commonType.orElseThrow(), true);
+        addExpression(ConstExpr.unit()); // Placeholder for inferred type
     }
 
     public ArrayExpr(final @NotNull Expr type) {
-        this((ctx, commonType) -> type.evaluateAs(ctx, Type.class), false);
-        hasUnresolvedType = true;
         addExpression(type);
     }
 
@@ -78,66 +65,43 @@ public final class ArrayExpr extends AbstractExprContainer implements ConstExpr 
         return fromArrayRef(arrayRef, TokenRange.SYNTHETIC);
     }
 
-    /**
-     * The offset into the expression list until array values start
-     */
-    public int getValueOffset() {
-        return hasUnresolvedType ? VALUES_INDEX : 0;
-    }
-
-    public boolean hasUnresolvedType() {
-        return hasUnresolvedType;
+    public boolean hasInferredType() {
+        return getExpressions().get(TYPE_INDEX).isUnit();
     }
 
     public @NotNull Expr getType() {
-        assert hasUnresolvedType;
         return getExpressions().get(TYPE_INDEX);
     }
 
     public void setType(final @NotNull Expr type) {
-        assert hasUnresolvedType;
         getExpressions().set(TYPE_INDEX, type);
     }
 
     public void clearValues() {
-        final var type = hasUnresolvedType ? getType() : null;
+        final var type = getType();
         clearExpressions();
-        if (type != null) {
-            addExpression(type);
-        }
-        valueIndex = 0;
+        addExpression(type);
     }
 
     public void addValue(final @NotNull Expr value) {
-        if (hasUnresolvedType) {
-            getExpressions().add(VALUES_INDEX + valueIndex++, value);
-            return;
-        }
-        getExpressions().add(valueIndex++, value);
+        addExpression(value);
     }
 
     public void addValues(final @NotNull Collection<Expr> values) {
-        if (hasUnresolvedType) {
-            getExpressions().addAll(VALUES_INDEX + valueIndex, values);
-            return;
-        }
-        getExpressions().addAll(valueIndex++, values);
-        valueIndex += values.size();
+        addExpressions(values);
+    }
+
+    public void setValue(final int index, final @NotNull Expr value) {
+        getExpressions().set(VALUES_INDEX + index, value);
     }
 
     public @NotNull Expr getValue(final int index) {
-        if (hasUnresolvedType) {
-            return getExpressions().get(VALUES_INDEX + index);
-        }
-        return getExpressions().get(index);
+        return getExpressions().get(VALUES_INDEX + index);
     }
 
     public @NotNull List<Expr> getValues() {
         final var expressions = getExpressions();
-        if (hasUnresolvedType) {
-            return expressions.subList(VALUES_INDEX, expressions.size());
-        }
-        return expressions;
+        return expressions.subList(VALUES_INDEX, expressions.size());
     }
 
     @Override
@@ -145,7 +109,7 @@ public final class ArrayExpr extends AbstractExprContainer implements ConstExpr 
         if (arrayReference != null) { // Lazily evaluate array to runtime object and cache it
             return;
         }
-        final var type = TypeMapper.map(getType(context));
+        final var type = TypeMapper.map(getType(context), true);
         final var values = getValues();
         final var size = values.size();
         arrayReference = Array.newInstance(type.componentType(), size);
@@ -161,9 +125,16 @@ public final class ArrayExpr extends AbstractExprContainer implements ConstExpr 
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException { // @formatter:off
-        return elementTypeResolver.apply(context, TypeCommonizer.getCommonType(getExpressions().stream()
-            .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context)))
-            .toList())).array();
+        final var type = getType();
+        if(type.isUnit()) { // We need to infer the array type from the element types
+            final var elementTypes = getValues().stream().map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context))).toList();
+            return TypeCommonizer.getCommonType(elementTypes).orElseThrow(() -> {
+                final var values = getValues().stream().map(Expr::toString).collect(Collectors.joining(", "));
+                final var message = String.format("Could not find common type for array values %s", values);
+                return new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+            }).array();
+        }
+        return type.evaluateAs(context, Type.class).array();
     } // @formatter:on
 
     @Override
@@ -174,7 +145,7 @@ public final class ArrayExpr extends AbstractExprContainer implements ConstExpr 
 
     @Override
     public @NotNull ArrayExpr copy() {
-        final var result = copyParentAndSourceTo(new ArrayExpr(elementTypeResolver, hasInferredType));
+        final var result = copyParentAndSourceTo(new ArrayExpr(getType().copy()));
         result.addValues(getValues().stream().map(Expr::copy).toList());
         return result;
     }

@@ -43,7 +43,9 @@ public final class DefaultExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        context.pushValue(getType(context).createDefaultValue(context).evaluateAsConst(context));
+        final var value = getType(context).createDefaultValue(context);
+        value.setTokenRange(getTokenRange());
+        context.pushValue(value.evaluateAsConst(context));
     }
 
     @Override

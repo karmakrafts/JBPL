@@ -22,43 +22,48 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
 public enum BuiltinType implements Type {
     // @formatter:off
-    VOID    (Void.TYPE,      Void.class,      TypeCategory.VOID,    org.objectweb.asm.Type.VOID_TYPE),
-    I8      (Byte.TYPE,      Byte.class,      TypeCategory.INTEGER, org.objectweb.asm.Type.BYTE_TYPE),
-    I16     (Short.TYPE,     Short.class,     TypeCategory.INTEGER, org.objectweb.asm.Type.SHORT_TYPE),
-    I32     (Integer.TYPE,   Integer.class,   TypeCategory.INTEGER, org.objectweb.asm.Type.INT_TYPE),
-    I64     (Long.TYPE,      Long.class,      TypeCategory.INTEGER, org.objectweb.asm.Type.LONG_TYPE),
-    F32     (Float.TYPE,     Float.class,     TypeCategory.FLOAT,   org.objectweb.asm.Type.FLOAT_TYPE),
-    F64     (Double.TYPE,    Double.class,    TypeCategory.FLOAT,   org.objectweb.asm.Type.DOUBLE_TYPE),
-    CHAR    (Character.TYPE, Character.class, TypeCategory.CHAR,    org.objectweb.asm.Type.CHAR_TYPE),
-    BOOL    (Boolean.TYPE,   Boolean.class,   TypeCategory.BOOL,    org.objectweb.asm.Type.BOOLEAN_TYPE),
-    OBJECT  (Object.class,                    TypeCategory.OBJECT,  org.objectweb.asm.Type.getObjectType("java/lang/Object")),
-    STRING  (String.class,                    TypeCategory.STRING,  org.objectweb.asm.Type.getObjectType("java/lang/String"));
+    VOID    (0,               Void.TYPE,      Void.class,      TypeCategory.VOID,    org.objectweb.asm.Type.VOID_TYPE),
+    I8      (Byte.BYTES,      Byte.TYPE,      Byte.class,      TypeCategory.INTEGER, org.objectweb.asm.Type.BYTE_TYPE),
+    I16     (Short.BYTES,     Short.TYPE,     Short.class,     TypeCategory.INTEGER, org.objectweb.asm.Type.SHORT_TYPE),
+    I32     (Integer.BYTES,   Integer.TYPE,   Integer.class,   TypeCategory.INTEGER, org.objectweb.asm.Type.INT_TYPE),
+    I64     (Long.BYTES,      Long.TYPE,      Long.class,      TypeCategory.INTEGER, org.objectweb.asm.Type.LONG_TYPE),
+    F32     (Float.BYTES,     Float.TYPE,     Float.class,     TypeCategory.FLOAT,   org.objectweb.asm.Type.FLOAT_TYPE),
+    F64     (Double.BYTES,    Double.TYPE,    Double.class,    TypeCategory.FLOAT,   org.objectweb.asm.Type.DOUBLE_TYPE),
+    CHAR    (Character.BYTES, Character.TYPE, Character.class, TypeCategory.CHAR,    org.objectweb.asm.Type.CHAR_TYPE),
+    BOOL    (1,               Boolean.TYPE,   Boolean.class,   TypeCategory.BOOL,    org.objectweb.asm.Type.BOOLEAN_TYPE),
+    OBJECT  (0,               Object.class,                    TypeCategory.OBJECT,  org.objectweb.asm.Type.getObjectType("java/lang/Object")),
+    STRING  (0,               String.class,                    TypeCategory.STRING,  org.objectweb.asm.Type.getObjectType("java/lang/String"));
     // @formatter:on
 
+    public final int byteSize;
     public final Class<?> type;
     public final Class<?> boxedType;
     private final TypeCategory category;
     private final org.objectweb.asm.Type materialType;
 
-    BuiltinType(final @NotNull Class<?> type,
+    BuiltinType(final int byteSize,
+                final @NotNull Class<?> type,
                 final @NotNull Class<?> boxedType,
                 final @NotNull TypeCategory category,
                 final @NotNull org.objectweb.asm.Type materialType) {
+        this.byteSize = byteSize;
         this.type = type;
         this.boxedType = boxedType;
         this.category = category;
         this.materialType = materialType;
     }
 
-    BuiltinType(final @NotNull Class<?> type,
+    BuiltinType(final int byteSize,
+                final @NotNull Class<?> type,
                 final @NotNull TypeCategory category,
                 final @NotNull org.objectweb.asm.Type materialType) {
-        this(type, type, category, materialType);
+        this(byteSize, type, type, category, materialType);
     }
 
     public static @NotNull Optional<BuiltinType> findByType(final @NotNull Class<?> type) {
@@ -71,6 +76,18 @@ public enum BuiltinType implements Type {
 
     public static @NotNull Optional<BuiltinType> findByName(final @NotNull String name) {
         return Arrays.stream(values()).filter(t -> t.name().equalsIgnoreCase(name)).findFirst();
+    }
+
+    public static @NotNull List<BuiltinType> allOfCategory(final @NotNull TypeCategory category) {
+        return Arrays.stream(values()).filter(t -> t.getCategory() == category).toList();
+    }
+
+    public static @NotNull Optional<BuiltinType> intBySize(final int size) {
+        return Arrays.stream(values()).filter(t -> t.getCategory() == TypeCategory.INTEGER && t.byteSize == size).findFirst();
+    }
+
+    public static @NotNull Optional<BuiltinType> floatBySize(final int size) {
+        return Arrays.stream(values()).filter(t -> t.getCategory() == TypeCategory.FLOAT && t.byteSize == size).findFirst();
     }
 
     @Override

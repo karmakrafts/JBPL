@@ -23,14 +23,17 @@ public final class TypeMapper {
     private TypeMapper() {
     }
 
-    public static @NotNull Class<?> map(final @NotNull Type type) {
+    public static @NotNull Class<?> map(final @NotNull Type type, final boolean box) {
         if (type instanceof IntersectionType) {
             throw new IllegalStateException("Intersection types cannot be mapped to the runtime");
         }
         if (type instanceof ArrayType arrayType) {
-            return map(arrayType.elementType()).arrayType();
+            return map(arrayType.elementType(), box).arrayType();
         }
         else if (type instanceof BuiltinType builtinType) {
+            if (box) {
+                return builtinType.boxedType;
+            }
             return builtinType.type;
         }
         else if (type instanceof PreproType preproType) {

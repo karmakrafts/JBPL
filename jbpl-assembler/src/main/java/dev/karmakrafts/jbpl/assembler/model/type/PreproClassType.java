@@ -42,6 +42,7 @@ public record PreproClassType(@NotNull String name) implements Type {
         for (final var entry : clazz.getFields().entrySet()) {
             final var name = entry.getKey().evaluateAsConst(context);
             final var value = entry.getValue().evaluateAs(context, Type.class).createDefaultValue(context);
+            value.setTokenRange(entry.getValue().getTokenRange());
             result.addArgument(name, value);
         }
         return result;

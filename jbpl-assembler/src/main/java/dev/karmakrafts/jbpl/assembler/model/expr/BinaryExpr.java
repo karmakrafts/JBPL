@@ -79,10 +79,15 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             case I64 -> evaluateForLong(lhsNumber.longValue(), rhsNumber, op.discardAssign(), context);
             case F32 -> evaluateForFloat(lhsNumber.floatValue(), rhsNumber, op.discardAssign(), context);
             case F64 -> evaluateForDouble(lhsNumber.doubleValue(), rhsNumber, op.discardAssign(), context);
-            default -> throw new EvaluationException(String.format("Unsupported numeric binary expression: %s %s %s",
-                lhsNumber,
-                op,
-                rhsNumber), SourceDiagnostic.from(this), context.createStackTrace());
+            default -> {
+                final var message = String.format("Unsupported numeric binary expression: %s %s %s",
+                    lhsNumber,
+                    op,
+                    rhsNumber);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
         };
     }
 
@@ -93,12 +98,15 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             return operand; // On regular assignments, we just forward the value as is
         }
         final var type = oldValue.getType(context);
+        final var oldValueRef = oldValue.getConstValue();
+        if (type instanceof ArrayType arrayType) {
+            return evaluateForArray(oldValueRef, arrayType, op.discardAssign(), context);
+        }
+        final var operandRef = operand.getConstValue();
         if (!(type instanceof BuiltinType builtinType)) {
             final var message = String.format("Cannot perform re-assignment with operator %s on type %s", op, type);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        final var oldValueRef = oldValue.getConstValue();
-        final var operandRef = operand.getConstValue();
         if (oldValueRef instanceof Number lhsNumber && operandRef instanceof Number rhsNumber) {
             return evaluatePreAssignmentForNumber(lhsNumber, rhsNumber, builtinType, context);
         }
@@ -115,15 +123,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             final var message = "Left-hand side of assignment must be a reference";
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        final var expectedType = getType(context);
         final var value = getRhs();
-        final var valueType = value.getType(context);
-        if (!expectedType.isAssignableFrom(valueType)) {
-            final var message = String.format("Cannot assign value of type %s to %s", valueType, expectedType);
-            throw new EvaluationException(message,
-                SourceDiagnostic.from(this, value, message),
-                context.createStackTrace());
-        }
         final var oldValue = reference.loadFromReference(context);
         final var newValue = evaluatePreAssignment(context, oldValue, value.evaluateAsConst(context));
         reference.storeToReference(newValue, context);
@@ -467,16 +467,23 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
+    private @NotNull Object createSingletArray(final @NotNull Object value) {
+        final var array = Array.newInstance(value.getClass(), 1);
+        Array.set(array, 0, value);
+        return array;
+    }
+
     @SuppressWarnings("SuspiciousSystemArraycopy")
     private @NotNull ConstExpr evaluateForArray(final @NotNull Object lhsValue,
                                                 final @NotNull ArrayType lhsType,
+                                                final @NotNull Op op,
                                                 final @NotNull EvaluationContext context) throws EvaluationException {
         final var rhsValue = getRhs().evaluateAs(context, Object.class);
         final var rhsType = getRhs().getType(context);
-        final var rhsArrayValue = rhsType instanceof ArrayType ? rhsValue : new Object[]{rhsValue};
+        final var rhsArrayValue = rhsType instanceof ArrayType ? rhsValue : createSingletArray(rhsValue);
         final var lhsLength = Array.getLength(lhsValue);
         final var rhsLength = Array.getLength(rhsArrayValue);
-        final var lhsElementType = TypeMapper.map(lhsType.elementType());
+        final var lhsElementType = TypeMapper.map(lhsType.elementType(), true);
         return switch (op) {
             case ADD -> {
                 final var newLength = lhsLength + rhsLength;
@@ -523,7 +530,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         final var lhsType = getLhs().getType(context);
         // Arrays are the only thing where we care about either sides type
         if (lhsType instanceof ArrayType lhsArrayType) {
-            context.pushValue(evaluateForArray(lhsValue, lhsArrayType, context));
+            context.pushValue(evaluateForArray(lhsValue, lhsArrayType, op, context));
             return;
         }
         if (lhsType == BuiltinType.STRING) { // String concatenation with any type

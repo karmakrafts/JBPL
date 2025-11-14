@@ -76,7 +76,7 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
         // @formatter:off
         // Handle cases where the initializer never gets updated from unit-expr by creating default value from field type
         final var initialValue = initializerType == BuiltinType.VOID
-            ? fieldType.createDefaultValue(context).evaluateAsConstAndMaterialize(context)
+            ? copySourcesTo(fieldType.createDefaultValue(context)).evaluateAsConstAndMaterialize(context)
             : initializer.evaluateAsConstAndMaterialize(context);
         // @formatter:on
         final var node = new FieldNode(context.bytecodeApi, modifier, name, descriptor, descriptor, initialValue);

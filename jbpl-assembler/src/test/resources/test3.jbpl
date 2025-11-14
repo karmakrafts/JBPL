@@ -83,7 +83,9 @@ for(i in 0..<sizeof(_arr3)) {
     ^info "Array value is ${_arr3[i]}"
 }
 
-_arr3 = _arr3 - []{1, 2}
+_arr3 = (_arr3 - []{1, 2}) + []{42}
+_arr3 += 3
+_arr3 += []{44, 444}
 
 for(i in 0..<sizeof(_arr3)) {
     ^info "Array value now is ${_arr3[i]}"
