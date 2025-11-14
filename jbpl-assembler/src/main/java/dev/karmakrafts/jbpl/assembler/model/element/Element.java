@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Stack;
 
 public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
+    @NotNull ElementAttributes getAttributes();
+
     default <E extends Element> @NotNull E copyParentAndSourceTo(final @NotNull E element) {
         element.setParent(getParent());
         return copySourcesTo(element);
