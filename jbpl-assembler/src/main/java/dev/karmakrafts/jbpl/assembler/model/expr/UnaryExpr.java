@@ -46,7 +46,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
     }
 
     private void evaluateAssignment(final @NotNull EvaluationContext context) {
-
+        
     }
 
     private @NotNull ConstExpr evaluateForNumber(final @NotNull Number value,

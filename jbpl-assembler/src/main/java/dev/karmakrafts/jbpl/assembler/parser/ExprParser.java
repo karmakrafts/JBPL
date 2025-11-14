@@ -28,6 +28,7 @@ import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
@@ -118,6 +119,17 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     private static @NotNull List<Expr> parseUnaryExpr(final @NotNull ExprContext ctx, final @NotNull UnaryExpr.Op op) {
         return ExceptionUtils.rethrowUnchecked(() -> {
+            final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
+            return List.of(new UnaryExpr(expr, op));
+        });
+    }
+
+    private static @NotNull List<Expr> parsePrePostUnaryExpr(final @NotNull ExprContext ctx,
+                                                             final @NotNull UnaryExpr.Op preOp,
+                                                             final @NotNull UnaryExpr.Op postOp) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var firstChild = ctx.getChild(0);
+            final var op = firstChild instanceof TerminalNode ? preOp : postOp;
             final var expr = parse(ctx.expr().stream().findFirst().orElseThrow());
             return List.of(new UnaryExpr(expr, op));
         });
@@ -353,8 +365,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             else if (ctx.OR_ASSIGN() != null)       return parseBinaryExpr(ctx, BinaryExpr.Op.OR_ASSIGN);
             else if (ctx.XOR_ASSIGN() != null)      return parseBinaryExpr(ctx, BinaryExpr.Op.XOR_ASSIGN);
             else if (ctx.EQ() != null)              return parseBinaryExpr(ctx, BinaryExpr.Op.ASSIGN);
-            else if (ctx.INC() != null)             return parseUnaryExpr(ctx, UnaryExpr.Op.POST_INC);
-            else if (ctx.DEC() != null)             return parseUnaryExpr(ctx, UnaryExpr.Op.POST_DEC);
+            else if (ctx.INC() != null)             return parsePrePostUnaryExpr(ctx, UnaryExpr.Op.PRE_INC, UnaryExpr.Op.POST_INC);
+            else if (ctx.DEC() != null)             return parsePrePostUnaryExpr(ctx, UnaryExpr.Op.PRE_DEC, UnaryExpr.Op.POST_DEC);
             // @formatter:on
             return super.visitExpr(ctx);
         });
