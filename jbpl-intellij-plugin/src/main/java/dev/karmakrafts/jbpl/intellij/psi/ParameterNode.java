@@ -30,7 +30,7 @@ public final class ParameterNode extends JBPLPsiNode implements Annotated {
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
         PsiUtils.find(this, "/parameter/exprOrName", ExprOrNameNode.class).ifPresent(name -> name.annotateNameWith(
-            TextAttributeKeys.PARAMETER_NAME,
+            TextAttributeKeys.PARAMETER,
             holder));
     }
 }

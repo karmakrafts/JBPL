@@ -36,7 +36,7 @@ public final class MacroCallNode extends JBPLPsiNode implements Annotated {
         // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[0])
-            .textAttributes(TextAttributeKeys.MACRO_NAME)
+            .textAttributes(TextAttributeKeys.MACRO)
             .create();
         // @formatter:on
     }

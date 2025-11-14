@@ -13,3 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+macro reflect_call(signature: signature(fun)) {
+
+}
+
+macro reflect_instanceof(type: type) {
+    invokevirtual <java/lang/Object>.getClass(): <java/lang/Class>
+    invokevirtual <java/lang/Class>.getName(): string
+    // TODO: ...
+    invokevirtual <java/lang/String>.equals(<java/lang/Object>): bool
+}

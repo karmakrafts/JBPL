@@ -35,7 +35,7 @@ public final class MacroNode extends JBPLPsiNode implements Annotated, Structura
     public void annotate(final @NotNull AnnotationHolder holder) {
         // @formatter:off
         PsiUtils.find(this, "/macro/macroSignature/exprOrName", ExprOrNameNode.class)
-            .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.MACRO_NAME, holder));
+            .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.MACRO, holder));
         // @formatter:on
     }
 

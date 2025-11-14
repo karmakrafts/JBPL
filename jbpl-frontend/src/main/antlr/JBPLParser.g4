@@ -849,6 +849,7 @@ softKeyword:
     | KW_OPCODE
     | KW_VERSION
     | KW_LOCAL
+    | KW_SIGNATURE
     ;
 
 nameSegment:

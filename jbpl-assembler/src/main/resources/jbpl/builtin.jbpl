@@ -14,6 +14,34 @@
  * limitations under the License.
  */
 
+macro store(type: type, local: (i32 | string)) {
+    when(type) {
+        type i8 -> iload ${local}
+        type i16 -> iload ${local}
+        type i32 -> iload ${local}
+        type char -> iload ${local}
+        type bool -> iload ${local}
+        type i64 -> lload ${local}
+        type f32 -> fload ${local}
+        type f64 -> dload ${local}
+        else -> aload ${local}
+    }
+}
+
+macro load(type: type, local: (i32 | string)) {
+    when(type) {
+        type i8 -> istore ${local}
+        type i16 -> istore ${local}
+        type i32 -> istore ${local}
+        type char -> istore ${local}
+        type bool -> istore ${local}
+        type i64 -> lstore ${local}
+        type f32 -> fstore ${local}
+        type f64 -> dstore ${local}
+        else -> astore ${local}
+    }
+}
+
 macro get_special_name(name: string): string {
     ^return "<${name}>"
 }

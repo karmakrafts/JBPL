@@ -33,7 +33,7 @@ public final class InjectorNode extends JBPLPsiNode implements StructuralPsiElem
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
         PsiUtils.find(this, "/injector/exprOrName", ExprOrNameNode.class).ifPresent(name -> name.annotateNameWith(
-            TextAttributeKeys.MACRO_NAME,
+            TextAttributeKeys.MACRO,
             holder));
     }
 

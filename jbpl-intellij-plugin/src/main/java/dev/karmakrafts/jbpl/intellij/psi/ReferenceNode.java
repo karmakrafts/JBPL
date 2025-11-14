@@ -31,7 +31,7 @@ public final class ReferenceNode extends JBPLPsiNode implements Annotated {
     public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(this)
-            .textAttributes(TextAttributeKeys.DEFINE_NAME)
+            .textAttributes(TextAttributeKeys.DEFINE)
             .create();
     } // @formatter:on
 

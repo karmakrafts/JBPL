@@ -47,27 +47,26 @@ public final class TextAttributeKeys {
     public static final TextAttributesKey BLOCK_COMMENT = TextAttributesKey.createTextAttributesKey("JBPL_BLOCK_COMMENT",
         DefaultLanguageHighlighterColors.BLOCK_COMMENT);
 
-    public static final TextAttributesKey DEFINE_NAME = TextAttributesKey.createTextAttributesKey("JBPL_DEFINE_NAME",
+    public static final TextAttributesKey DEFINE = TextAttributesKey.createTextAttributesKey("JBPL_DEFINE",
         DefaultLanguageHighlighterColors.STATIC_FIELD);
-    public static final TextAttributesKey MACRO_NAME = TextAttributesKey.createTextAttributesKey("JBPL_MACRO_NAME",
+    public static final TextAttributesKey MACRO = TextAttributesKey.createTextAttributesKey("JBPL_MACRO",
         DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
-    public static final TextAttributesKey CLASS_TYPE = TextAttributesKey.createTextAttributesKey("JBPL_CLASS_TYPE",
+    public static final TextAttributesKey CLASS = TextAttributesKey.createTextAttributesKey("JBPL_CLASS",
         DefaultLanguageHighlighterColors.INTERFACE_NAME);
     public static final TextAttributesKey INTERPOLATION = TextAttributesKey.createTextAttributesKey("JBPL_INTERPOLATION",
         DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey FIELD_NAME = TextAttributesKey.createTextAttributesKey("JBPL_FIELD",
+    public static final TextAttributesKey FIELD = TextAttributesKey.createTextAttributesKey("JBPL_FIELD",
         DefaultLanguageHighlighterColors.INSTANCE_FIELD);
-    public static final TextAttributesKey FUNCTION_NAME = TextAttributesKey.createTextAttributesKey("JBPL_FUNCTION",
+    public static final TextAttributesKey FUNCTION = TextAttributesKey.createTextAttributesKey("JBPL_FUNCTION",
         DefaultLanguageHighlighterColors.INSTANCE_METHOD);
-    public static final TextAttributesKey PARAMETER_NAME = TextAttributesKey.createTextAttributesKey("JBPL_PARAMETER",
+    public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey("JBPL_PARAMETER",
         DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey OPERATOR = TextAttributesKey.createTextAttributesKey("JBPL_OPERATOR",
         DefaultLanguageHighlighterColors.OPERATION_SIGN);
     public static final TextAttributesKey PREPRO_CLASS = TextAttributesKey.createTextAttributesKey("JBPL_PREPRO_CLASS",
         DefaultLanguageHighlighterColors.CLASS_NAME);
-
-    public static final TextAttributesKey MUTABLE = TextAttributesKey.createTextAttributesKey("JBPL_MUTABLE_MARKER",
-        DefaultLanguageHighlighterColors.HIGHLIGHTED_REFERENCE);
+    public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("JBPL_VARIABLE",
+        DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
 
     private TextAttributeKeys() {
     }

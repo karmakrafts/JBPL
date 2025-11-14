@@ -31,6 +31,6 @@ public final class FunctionSignatureParameterNode extends JBPLPsiNode implements
     public void annotate(final @NotNull AnnotationHolder holder) {
         PsiUtils.find(this,
             "/functionSignatureParameter/exprOrName",
-            ExprOrNameNode.class).ifPresent(name -> name.annotateNameWith(TextAttributeKeys.PARAMETER_NAME, holder));
+            ExprOrNameNode.class).ifPresent(name -> name.annotateNameWith(TextAttributeKeys.PARAMETER, holder));
     }
 }

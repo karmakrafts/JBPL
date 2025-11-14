@@ -19,6 +19,10 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.markup.EffectType;
+import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
@@ -32,12 +36,27 @@ public final class DefineNode extends JBPLPsiNode implements StructuralPsiElemen
         super(node);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
+        final var isFinal = PsiUtils.hasToken(this, JBPLLexer.KW_FINAL);
+        if (isFinal) {
+            // @formatter:off
+            PsiUtils.find(this, "/define/exprOrName/nameSegment").ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+                .range(name)
+                .textAttributes(TextAttributeKeys.DEFINE)
+                .create());
+            // @formatter:on
+            return;
+        }
+        final var scheme = EditorColorsManager.getInstance().getGlobalScheme();
+        final var reAssignAttribs = scheme.getAttributes(DefaultLanguageHighlighterColors.REASSIGNED_LOCAL_VARIABLE);
+        final var attribs = scheme.getAttributes(TextAttributeKeys.DEFINE).clone();
+        attribs.withAdditionalEffect(EffectType.LINE_UNDERSCORE, reAssignAttribs.getEffectColor());
         // @formatter:off
         PsiUtils.find(this, "/define/exprOrName/nameSegment").ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(name)
-            .textAttributes(TextAttributeKeys.DEFINE_NAME)
+            .enforcedTextAttributes(attribs)
             .create());
         // @formatter:on
     }

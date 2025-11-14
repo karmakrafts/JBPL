@@ -17,7 +17,10 @@
 package dev.karmakrafts.jbpl.intellij.util;
 
 import com.intellij.psi.PsiElement;
+import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.intellij.JBPLanguage;
+import dev.karmakrafts.jbpl.intellij.psi.JBPLPsiLeafNode;
+import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.xpath.XPath;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +29,20 @@ import java.util.stream.Stream;
 
 public final class PsiUtils {
     private PsiUtils() {
+    }
+
+    public static boolean hasToken(final @NotNull PsiElement element, final int type) {
+        final var token = find(element, String.format("/*/%s", JBPLLexer.VOCABULARY.getLiteralName(type)));
+        if (token.isPresent()) {
+            return true;
+        }
+        if (!(element instanceof JBPLPsiLeafNode node)) {
+            return false;
+        }
+        if (!(node.getElementType() instanceof TokenIElementType elementType)) {
+            return false;
+        }
+        return elementType.getANTLRTokenType() == type;
     }
 
     public static @NotNull String toSingleLine(final @NotNull PsiElement element) {

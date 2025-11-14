@@ -32,11 +32,11 @@ public final class FunctionNameNode extends JBPLPsiNode implements Annotated {
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
         PsiUtils.find(this, "/functionName/exprOrName", ExprOrNameNode.class)
-            .ifPresent(name -> name.annotateNameWith(TextAttributeKeys.FUNCTION_NAME, holder));
+            .ifPresent(name -> name.annotateNameWith(TextAttributeKeys.FUNCTION, holder));
         PsiUtils.find(this, "/functionName/specialFunctionName")
             .ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                 .range(name)
-                .textAttributes(TextAttributeKeys.FUNCTION_NAME)
+                .textAttributes(TextAttributeKeys.FUNCTION)
                 .create());
     } // @formatter:on
 

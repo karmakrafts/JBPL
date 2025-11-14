@@ -32,7 +32,7 @@ public final class ClassTypeNode extends JBPLPsiNode implements Annotated {
         // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(this)
-            .textAttributes(TextAttributeKeys.CLASS_TYPE)
+            .textAttributes(TextAttributeKeys.CLASS)
             .create();
         // @formatter:on
     }

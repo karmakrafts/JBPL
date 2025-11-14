@@ -30,16 +30,6 @@ public final class TypeLiteralNode extends JBPLPsiNode implements Annotated {
 
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
-        final var children = getChildren();
-        if (children.length < 1) {
-            return;
-        }
-        // @formatter:off
-        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(children[0])
-            .textAttributes(TextAttributeKeys.KEYWORD)
-            .create();
-        // @formatter:on
         // Handle preprocessor class type references
         // @formatter:off
         PsiUtils.find(this, "/typeLiteral/type/IDENT").ifPresent(name ->

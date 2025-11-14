@@ -36,7 +36,7 @@ public final class FieldSignatureNode extends JBPLPsiNode implements Annotated {
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
         PsiUtils.find(this, "/fieldSignature/exprOrName", ExprOrNameNode.class)
-            .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.FIELD_NAME, holder));
+            .ifPresent(refOrName -> refOrName.annotateNameWith(TextAttributeKeys.FIELD, holder));
     } // @formatter:on
 
     @Override
