@@ -66,6 +66,9 @@ my_other_flag |= xyz == 2
 define my_third_flag: bool = my_flag | my_other_flag
 ^info "my_third_flag: ${my_third_flag}"
 
+just_another_array[0] = []{"0987654321"}
+just_another_array[0][0] = "12345 OVERRIDDEN VALUE"
+
 ^info when(when_var) {
     100 -> "Complex code is in ${just_another_array[0][0]}"
     101 -> "MORE TESTING"

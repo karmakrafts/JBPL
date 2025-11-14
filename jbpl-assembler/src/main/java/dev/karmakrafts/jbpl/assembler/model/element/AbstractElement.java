@@ -21,9 +21,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractElement implements Element {
+    public final ElementAttributes attributes = new ElementAttributes();
     public ElementContainer parent;
     public TokenRange tokenRange = TokenRange.UNDEFINED;
-    public final ElementAttributes attributes = new ElementAttributes();
 
     @Override
     public @NotNull ElementAttributes getAttributes() {

@@ -91,7 +91,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                                                      final @NotNull ConstExpr oldValue,
                                                      final @NotNull ConstExpr operand) throws EvaluationException {
         if (op == Op.ASSIGN) {
-            return oldValue; // On regular assignments, we just forward the value as is
+            return operand; // On regular assignments, we just forward the value as is
         }
         final var type = oldValue.getType(context);
         if (!(type instanceof BuiltinType builtinType)) {
