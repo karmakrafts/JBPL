@@ -82,7 +82,6 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
         }
         // @formatter:off
         if (ctx.KW_TYPE() != null)             return List.of(PreproType.TYPE);
-        else if (ctx.KW_SELECTOR() != null)    return List.of(PreproType.SELECTOR);
         else if (ctx.KW_OPCODE() != null)      return List.of(PreproType.OPCODE);
         else if (ctx.KW_INSTRUCTION() != null) return List.of(PreproType.INSTRUCTION);
         else if (ctx.KW_STRING() != null)      return List.of(BuiltinType.STRING);

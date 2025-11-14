@@ -66,9 +66,6 @@ public interface ElementVisitor {
         if (declaration instanceof InjectorDecl injectorDecl) {
             return visitInjector(injectorDecl);
         }
-        else if (declaration instanceof SelectorDecl selectorDecl) {
-            return visitSelector(selectorDecl);
-        }
         else if (declaration instanceof FunctionDecl functionDecl) {
             return visitFunction(functionDecl);
         }
@@ -103,15 +100,6 @@ public interface ElementVisitor {
         injectorDecl.setTarget(visitExpr(injectorDecl.getTarget()));
         injectorDecl.setSelector(visitExpr(injectorDecl.getSelector()));
         return visitStatementContainer(injectorDecl);
-    }
-
-    default @NotNull Declaration visitSelector(final @NotNull SelectorDecl selectorDecl) {
-        selectorDecl.conditions.replaceAll(this::visitSelectorCondition);
-        return visitExprContainer(selectorDecl);
-    }
-
-    default @NotNull SelectorDecl.Condition visitSelectorCondition(final @NotNull SelectorDecl.Condition condition) {
-        return visitExprContainer(condition);
     }
 
     default @NotNull Declaration visitFunction(final @NotNull FunctionDecl functionDecl) {
@@ -156,9 +144,6 @@ public interface ElementVisitor {
         }
         else if (expr instanceof IsExpr isExpr) {
             return visitIsExpr(isExpr);
-        }
-        else if (expr instanceof SelectorReferenceExpr selectorReferenceExpr) {
-            return visitSelectorReferenceExpr(selectorReferenceExpr);
         }
         else if (expr instanceof ArrayExpr arrayExpr) {
             return visitArrayExpr(arrayExpr);
@@ -273,10 +258,6 @@ public interface ElementVisitor {
 
     default @NotNull Expr visitArrayExpr(final @NotNull ArrayExpr arrayExpr) {
         return visitExprContainer(arrayExpr);
-    }
-
-    default @NotNull Expr visitSelectorReferenceExpr(final @NotNull SelectorReferenceExpr selectorReferenceExpr) {
-        return selectorReferenceExpr;
     }
 
     default @NotNull Expr visitIsExpr(final @NotNull IsExpr isExpr) {

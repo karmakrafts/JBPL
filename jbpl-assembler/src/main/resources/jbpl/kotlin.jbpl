@@ -16,30 +16,14 @@
 
 ^include "builtin.jbpl"
 
-/*
- * Emits an invokevirtual instruction to call the property getter
- * of the named property.
- * The object instance to use as the call receiver is popped from
- * the stack and the property value is pushed in return.
- */
 macro kt_get_property(owner: type, name: string, type: type) {
     invokevirtual ${owner}.${get_special_name("get-${name}")}(): ${type}
 }
 
-/*
- * Emits an invokevirtual instruction to call the property setter
- * of the named property.
- * The object instance to use as the call receiver and the value to set
- * are popped from the stack.
- */
 macro kt_set_property(owner: type, name: string, type: type) {
     invokevirtual ${owner}.${get_special_name("set-${name}")}(${type}): void
 }
 
-/*
- * Emits a getstatic instruction to load the singleton instance of
- * the given Kotlin object type.
- */
 macro kt_get_object(type: type) {
     getstatic ${type}.INSTANCE: ${type}
 }

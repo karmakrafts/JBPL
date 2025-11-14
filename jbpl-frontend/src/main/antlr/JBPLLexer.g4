@@ -45,7 +45,6 @@ EXCL: '!';
 KW_INSTRUCTION: 'instruction';
 KW_SIGNATURE: 'signature';
 KW_PROTECTED: 'protected';
-KW_SELECTOR: 'selector';
 KW_OPCODEOF: 'opcodeof';
 KW_CONTINUE: 'continue';
 KW_DEFINED: 'defined';

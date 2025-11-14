@@ -500,9 +500,4 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             return List.of(signature);
         });
     }
-
-    @Override
-    public @NotNull List<Expr> visitSelectorReference(final @NotNull SelectorReferenceContext ctx) {
-        return List.of(new SelectorReferenceExpr(ctx.IDENT().getText()));
-    }
 }

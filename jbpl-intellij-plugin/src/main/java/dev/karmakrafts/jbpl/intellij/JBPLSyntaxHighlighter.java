@@ -70,7 +70,6 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_FUN,
                  JBPLLexer.KW_FIELD,
                  JBPLLexer.KW_INJECT,
-                 JBPLLexer.KW_SELECTOR,
                  JBPLLexer.KW_YEET,
                  JBPLLexer.KW_AFTER,
                  JBPLLexer.KW_BEFORE,
@@ -142,10 +141,11 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_IPUSH,
                  JBPLLexer.INSN_SWAP,
                  JBPLLexer.INSN_JSR,
-                 JBPLLexer.INSN_RET,
                  JBPLLexer.INSN_NEG,
                  JBPLLexer.INSN_NOP,
                  JBPLLexer.INSN_POP,
+                 JBPLLexer.INSN_NEW,
+                 JBPLLexer.INSN_RET,
                  JBPLLexer.INSN_DUP -> keys.add(TextAttributeKeys.INSTRUCTION);
             case JBPLLexer.DOT -> keys.add(TextAttributeKeys.DOT);
             //case JBPLLexer.IDENT -> keys.add(TextAttributeKeys.IDENT);

@@ -18,8 +18,8 @@ macro get_special_name(name: string): string {
     ^return "<${name}>"
 }
 
-macro new(type: type, param_types: [type]) {
-    // instantiate
+macro instantiate(type: type, param_types: [type]) {
+    new ${type}
     dup
     invokespecial <java/lang/Object>.<init>(): void
 }

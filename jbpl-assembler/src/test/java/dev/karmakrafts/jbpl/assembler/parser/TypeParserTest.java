@@ -81,11 +81,6 @@ public final class TypeParserTest extends AbstractParserTest {
     }
 
     @Test
-    public void parseSelectorType() {
-        runTest(PreproType.SELECTOR, "type selector");
-    }
-
-    @Test
     public void parseFieldSignatureType() {
         runTest(PreproType.FIELD_SIGNATURE, "type signature(field)");
     }

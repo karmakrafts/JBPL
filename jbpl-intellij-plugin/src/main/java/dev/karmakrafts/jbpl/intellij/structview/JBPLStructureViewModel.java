@@ -62,7 +62,6 @@ public final class JBPLStructureViewModel extends TextEditorBasedStructureViewMo
             MacroNode.class,
             FieldNode.class,
             FunctionNode.class,
-            SelectorNode.class,
             InjectorNode.class,
             PreproClassNode.class,
             YeetStatementNode.class

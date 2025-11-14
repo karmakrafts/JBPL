@@ -17,15 +17,24 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.annotation.AnnotationHolder;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
+import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public final class InjectorNode extends JBPLPsiNode implements StructuralPsiElement {
+public final class InjectorNode extends JBPLPsiNode implements StructuralPsiElement, Annotated {
     public InjectorNode(final @NotNull ASTNode node) {
         super(node);
+    }
+
+    @Override
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        PsiUtils.find(this, "/injector/exprOrName", ExprOrNameNode.class).ifPresent(name -> name.annotateNameWith(
+            TextAttributeKeys.MACRO_NAME,
+            holder));
     }
 
     @Override

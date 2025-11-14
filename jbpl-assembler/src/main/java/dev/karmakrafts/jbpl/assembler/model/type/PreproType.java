@@ -18,7 +18,6 @@ package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.model.decl.InjectorDecl;
-import dev.karmakrafts.jbpl.assembler.model.decl.SelectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
@@ -37,7 +36,6 @@ public enum PreproType implements Type {
     TYPE                (Type.class),
     FIELD_SIGNATURE     (FieldSignatureExpr.class),
     FUNCTION_SIGNATURE  (FunctionSignatureExpr.class),
-    SELECTOR            (SelectorDecl.class),
     OPCODE              (Opcode.class),
     INSTRUCTION         (Instruction.class),
     INJECTOR            (InjectorDecl.class);

@@ -67,6 +67,7 @@ elseBranch:
     ;
 
 define:
+    KW_PRIVATE? // Only accessible current scope
     KW_FINAL? // Immutable define
     KW_DEFINE
     NL*?
@@ -307,7 +308,6 @@ expr:
     | nameOfExpr
     | preproClassInstantiation
     | injectorReference
-    | selectorReference
     | literal
     | reference
     ;
@@ -379,13 +379,6 @@ injectorReference:
     R_PAREN
     ;
 
-selectorReference:
-    KW_SELECTOR
-    L_PAREN
-    IDENT
-    R_PAREN
-    ;
-
 nameOfExpr:
     KW_NAMEOF
     L_PAREN
@@ -444,7 +437,6 @@ declaration:
     | function
     | field
     | injector
-    | selector
     ;
 
 field:
@@ -492,38 +484,15 @@ function:
     R_BRACE
     ;
 
-selector:
-    KW_SELECTOR
-    NL*?
-    exprOrName
-    NL*?
-    L_BRACE
-    (selectionStatement
-    | selectionOffset
-    | NL)*?
-    R_BRACE
-    ;
-
-selectionOffset:
-    KW_OFFSET
-    expr
-    ;
-
-selectionStatement:
-    (KW_AFTER
-    | KW_BEFORE)
-    expr
-    ;
-
 injector:
     KW_INJECT
     NL*?
     (functionSignature
     | wrappedExpr)
     NL*?
-    KW_BY
+    (KW_BY
     NL*?
-    exprOrName
+    exprOrName)?
     L_BRACE
     (statement
     | NL)*?
@@ -851,7 +820,6 @@ type:
     | intersectionType
     | signatureType
     | classType
-    | KW_SELECTOR
     | KW_TYPE
     | KW_STRING
     | KW_OPCODE
@@ -881,8 +849,6 @@ softKeyword:
     | KW_OPCODE
     | KW_VERSION
     | KW_LOCAL
-    | INSN_NEW
-    | INSN_RET
     ;
 
 nameSegment:

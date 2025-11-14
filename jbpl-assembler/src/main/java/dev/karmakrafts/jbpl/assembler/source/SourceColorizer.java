@@ -45,7 +45,6 @@ public final class SourceColorizer {
         JBPLLexer.KW_PUBLIC,
         JBPLLexer.KW_PRIVATE,
         JBPLLexer.KW_PROTECTED,
-        JBPLLexer.KW_SELECTOR,
         JBPLLexer.KW_DEFAULT,
         JBPLLexer.KW_INJECT,
         JBPLLexer.KW_STATIC,

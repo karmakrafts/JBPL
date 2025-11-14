@@ -20,7 +20,6 @@ import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
-import dev.karmakrafts.jbpl.assembler.util.Order;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;
@@ -64,43 +63,16 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var injector = new InjectorDecl();
             injector.setTarget(ExprParser.parse(ctx.functionSignature()));
-            injector.setSelector(ParserUtils.parseExprOrName(ctx.exprOrName()));
+            final var selector = ctx.exprOrName();
+            if (selector != null) {
+                injector.setSelector(ParserUtils.parseExprOrName(selector));
+            }
             // @formatter:off
             injector.addStatements(ctx.statement().stream()
                 .map(ExceptionUtils.unsafeFunction(StatementParser::parse))
                 .toList());
             // @formatter:on
             return List.of(injector);
-        });
-    }
-
-    private @NotNull SelectorDecl.Condition parseSelectorCondition(final @NotNull SelectionStatementContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var order = ctx.KW_BEFORE() != null ? Order.BEFORE : Order.AFTER;
-            final var opcode = ExprParser.parse(ctx.expr());
-            final var condition = new SelectorDecl.Condition(order, opcode);
-            condition.setTokenRange(TokenRange.fromContext(ctx));
-            return condition;
-        });
-    }
-
-    @Override
-    public @NotNull List<Declaration> visitSelector(final @NotNull SelectorContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
-            // @formatter:off
-            final var offset = ctx.selectionOffset().stream()
-                .findFirst()
-                .map(ExceptionUtils.unsafeFunction(ExprParser::parse))
-                .orElseGet(() -> ConstExpr.of(0));
-            // @formatter:on
-            final var selector = new SelectorDecl(name, offset);
-            // @formatter:off
-            selector.conditions.addAll(ctx.selectionStatement().stream()
-                .map(this::parseSelectorCondition)
-                .toList());
-            // @formatter:on
-            return List.of(selector);
         });
     }
 
