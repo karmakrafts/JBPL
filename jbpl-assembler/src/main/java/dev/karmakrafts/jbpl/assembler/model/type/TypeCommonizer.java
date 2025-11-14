@@ -53,7 +53,7 @@ public final class TypeCommonizer {
 
     public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Collection<? extends Type> types) {
         final var categories = types.stream().map(Type::getCategory).collect(Collectors.toSet());
-        if (categories.contains(TypeCategory.INTEGER) && categories.contains(TypeCategory.FLOAT)) {
+        if (categories.size() == 2 && categories.contains(TypeCategory.INTEGER) && categories.contains(TypeCategory.FLOAT)) {
             // @formatter:off
             final var maxIntSize = types.stream()
                 .filter(type -> type.getCategory() == TypeCategory.INTEGER)
