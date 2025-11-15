@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.PsiElement;
+import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -30,6 +31,6 @@ public interface StructuralPsiElement extends PsiElement, NavigationItem {
     }
 
     default @Nullable String getDetailedStructureText() {
-        return getName();
+        return PsiUtils.toSingleLine(this);
     }
 }
