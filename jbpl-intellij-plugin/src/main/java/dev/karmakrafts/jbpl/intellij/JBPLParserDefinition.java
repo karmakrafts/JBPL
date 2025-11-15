@@ -41,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@SuppressWarnings({"StaticInitializationInExtensions", "TokenSetInParserDefinition"})
 public final class JBPLParserDefinition implements ParserDefinition {
     public static final IFileElementType FILE_TYPE = new IFileElementType(JBPLanguage.INSTANCE);
     private static final List<TokenIElementType> TOKEN_TYPES;
@@ -63,9 +64,12 @@ public final class JBPLParserDefinition implements ParserDefinition {
     }
 
     public static void ensureTokenTypesRegistered() {
-        PSIElementTypeFactory.defineLanguageIElementTypes(JBPLanguage.INSTANCE,
-            JBPLParser.tokenNames,
-            JBPLParser.ruleNames);
+        final var tokenCount = JBPLParser.VOCABULARY.getMaxTokenType();
+        final var tokenNames = new String[tokenCount + 1];
+        for (var i = 0; i <= tokenCount; i++) {
+            tokenNames[i] = JBPLParser.VOCABULARY.getDisplayName(i);
+        }
+        PSIElementTypeFactory.defineLanguageIElementTypes(JBPLanguage.INSTANCE, tokenNames, JBPLParser.ruleNames);
     }
 
     @Override
