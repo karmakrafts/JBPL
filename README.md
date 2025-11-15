@@ -1,7 +1,4 @@
-<h1 style="display: inline-flex; align-items: center; gap: 12px;">
-    <img src="./docs/icon.png" width="64">
-    &lt;dev/karmakrafts/<b>JBPL</b>&gt;
-</h1>
+# <img src="./docs/icon.png" width="40"> <dev/karmakrafts/**JBPL**>
 
 Java Bytecode Patch Language (or JBPL) is a fully featured JVM assembly language  
 and macro assembler.  
