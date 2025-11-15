@@ -95,7 +95,7 @@ public final class ExprParserTest extends AbstractParserTest {
         Assertions.assertTrue(element.isPresent());
         final var signature = element.get().statement().expr().signatureExpr();
         Assertions.assertNotNull(signature);
-        final var expectedField = new FieldSignatureExpr(ConstExpr.of(new ClassType("com/example/Test")),
+        final var expectedField = new FieldSignatureExpr(ConstExpr.of(new ClassType("com/example/Test", false)),
             ConstExpr.of("myField"),
             ConstExpr.of(BuiltinType.I32));
         Assertions.assertEquals(expectedField, ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(signature)));
@@ -111,7 +111,7 @@ public final class ExprParserTest extends AbstractParserTest {
         Assertions.assertTrue(element.isPresent());
         final var signature = element.get().statement().expr().signatureExpr();
         Assertions.assertNotNull(signature);
-        final var expectedField = new FunctionSignatureExpr(ConstExpr.of(new ClassType("com/example/Test")),
+        final var expectedField = new FunctionSignatureExpr(ConstExpr.of(new ClassType("com/example/Test", false)),
             ConstExpr.of("myFunction"),
             ConstExpr.of(BuiltinType.I32));
         expectedField.addExpression(ConstExpr.of(BuiltinType.F32));

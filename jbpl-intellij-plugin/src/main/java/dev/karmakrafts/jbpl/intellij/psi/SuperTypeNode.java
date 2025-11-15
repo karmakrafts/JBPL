@@ -22,8 +22,8 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
-public final class VersionStatementNode extends JBPLPsiNode implements Annotated {
-    public VersionStatementNode(final @NotNull ASTNode node) {
+public final class SuperTypeNode extends JBPLPsiNode implements Annotated {
+    public SuperTypeNode(final @NotNull ASTNode node) {
         super(node);
     }
 
@@ -36,8 +36,8 @@ public final class VersionStatementNode extends JBPLPsiNode implements Annotated
         // @formatter:off
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
             .range(children[0])
-            .textAttributes(TextAttributeKeys.KEYWORD)
+            .textAttributes(TextAttributeKeys.CLASS)
             .create();
-        // @formatter:On
+        // @formatter:on
     }
 }

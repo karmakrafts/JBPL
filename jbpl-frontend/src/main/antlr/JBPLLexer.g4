@@ -45,8 +45,10 @@ EXCL: '!';
 KW_INSTRUCTION: 'instruction';
 KW_SIGNATURE: 'signature';
 KW_PROTECTED: 'protected';
+KW_TRANSIENT: 'transient';
 KW_OPCODEOF: 'opcodeof';
 KW_CONTINUE: 'continue';
+KW_VOLATILE: 'volatile';
 KW_DEFINED: 'defined';
 KW_PRIVATE: 'private';
 KW_DEFAULT: 'default';
@@ -148,6 +150,7 @@ MINUS: '-';
 PLUS: '+';
 ASTERISK: '*';
 REM: '%';
+AT: '@';
 
 fragment INT_TYPE: [il];
 fragment FLOAT_TYPE: [fd];

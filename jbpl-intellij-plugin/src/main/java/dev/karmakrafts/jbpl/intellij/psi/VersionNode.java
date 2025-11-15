@@ -19,21 +19,25 @@ package dev.karmakrafts.jbpl.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
-public final class TypeAliasStatementNode extends JBPLPsiNode implements Annotated {
-    public TypeAliasStatementNode(final @NotNull ASTNode node) {
+public final class VersionNode extends JBPLPsiNode implements Annotated {
+    public VersionNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
-    public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
-        PsiUtils.find(this, "/typeAliasStatement/exprOrName", ExprOrNameNode.class).ifPresent(name ->
-            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                .range(name)
-                .textAttributes(TextAttributeKeys.PREPRO_CLASS)
-                .create());
-    } // @formatter:on
+    public void annotate(final @NotNull AnnotationHolder holder) {
+        final var children = getChildren();
+        if (children.length < 1) {
+            return;
+        }
+        // @formatter:off
+        holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+            .range(children[0])
+            .textAttributes(TextAttributeKeys.KEYWORD)
+            .create();
+        // @formatter:On
+    }
 }

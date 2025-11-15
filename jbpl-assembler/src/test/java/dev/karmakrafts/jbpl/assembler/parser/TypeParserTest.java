@@ -93,7 +93,7 @@ public final class TypeParserTest extends AbstractParserTest {
 
     @Test
     public void parseClassType() {
-        runTest(new ClassType("com/example/Foo"), "type <com/example/Foo>");
+        runTest(new ClassType("com/example/Foo", false), "type <com/example/Foo>");
     }
 
     @Test

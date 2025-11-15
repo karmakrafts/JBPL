@@ -112,6 +112,6 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
             .map(NameSegmentContext::getText)
             .collect(Collectors.joining("/"));
         // @formatter:on
-        return List.of(new ClassType(name));
+        return List.of(new ClassType(name, false));
     }
 }

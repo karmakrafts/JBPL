@@ -357,6 +357,17 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
+    public @NotNull List<Expr> visitExprOrClassType(final @NotNull ExprOrClassTypeContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var type = ctx.classType();
+            if (type != null) {
+                return List.of(ConstExpr.of(TypeParser.parse(type), TokenRange.fromContext(ctx)));
+            }
+            return List.of(parse(ctx.wrappedExpr()));
+        });
+    }
+
+    @Override
     public @NotNull List<Expr> visitExprOrName(final @NotNull ExprOrNameContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var name = ctx.nameSegment();

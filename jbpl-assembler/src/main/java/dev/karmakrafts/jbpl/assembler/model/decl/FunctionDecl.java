@@ -25,6 +25,7 @@ import dev.karmakrafts.jbpl.assembler.model.statement.AbstractStatementContainer
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -49,6 +50,11 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (accessModifiers.stream().noneMatch(mod -> mod.applicableToFunction)) {
+            final var mods = accessModifiers.stream().map(AccessModifier::toString).collect(Collectors.joining(" "));
+            final var message = String.format("Modifiers '%s' are not applicable to function", mods);
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
         final var access = AccessModifier.combine(accessModifiers);
         final var signature = this.signature.evaluateAs(context, FunctionSignatureExpr.class);
         final var owner = signature.getFunctionOwner().evaluateAs(context, ClassType.class);

@@ -143,16 +143,17 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_injector -> new InjectorNode(node);
             case JBPLParser.RULE_functionSignature -> new FunctionSignatureNode(node);
             case JBPLParser.RULE_preproClass -> new PreproClassNode(node);
-            case JBPLParser.RULE_yeetStatement -> new YeetStatementNode(node);
+            case JBPLParser.RULE_yeetStatement -> new YeetNode(node);
             case JBPLParser.RULE_signatureOwner -> new SignatureOwnerNode(node);
             case JBPLParser.RULE_type -> new TypeNode(node);
             case JBPLParser.RULE_typeLiteral -> new TypeLiteralNode(node);
-            case JBPLParser.RULE_versionStatement -> new VersionStatementNode(node);
+            case JBPLParser.RULE_versionStatement -> new VersionNode(node);
             case JBPLParser.RULE_local -> new LocalStatement(node);
             case JBPLParser.RULE_functionSignatureParameter -> new FunctionSignatureParameterNode(node);
             case JBPLParser.RULE_forStatement -> new ForStatementNode(node);
-            case JBPLParser.RULE_typeAliasStatement -> new TypeAliasStatementNode(node);
+            case JBPLParser.RULE_typeAliasStatement -> new TypeAliasNode(node);
             case JBPLParser.RULE_namedArgument -> new NamedArgumentNode(node);
+            case JBPLParser.RULE_superType -> new SuperTypeNode(node);
             default -> new JBPLPsiNode(node);
         }; // @formatter:on
     }

@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public final class YeetStatementNode extends JBPLPsiNode implements StructuralPsiElement {
-    public YeetStatementNode(final @NotNull ASTNode node) {
+public final class YeetNode extends JBPLPsiNode implements StructuralPsiElement {
+    public YeetNode(final @NotNull ASTNode node) {
         super(node);
     }
 

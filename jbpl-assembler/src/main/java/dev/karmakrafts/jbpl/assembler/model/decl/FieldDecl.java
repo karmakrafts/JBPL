@@ -26,6 +26,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.FieldNode;
 
@@ -65,6 +66,11 @@ public final class FieldDecl extends AbstractExprContainer implements Declaratio
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (accessModifiers.stream().noneMatch(mod -> mod.applicableToField)) {
+            final var mods = accessModifiers.stream().map(AccessModifier::toString).collect(Collectors.joining(" "));
+            final var message = String.format("Modifiers '%s' are not applicable to field", mods);
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
         final var signature = getSignature().evaluateAs(context, FieldSignatureExpr.class);
         final var owner = signature.getFieldOwner().evaluateAs(context, ClassType.class);
         final var modifier = AccessModifier.combine(accessModifiers);

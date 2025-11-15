@@ -24,18 +24,29 @@ import java.util.Locale;
 
 public enum AccessModifier {
     // @formatter:off
-    PUBLIC   (Opcodes.ACC_PUBLIC),
-    PROTECTED(Opcodes.ACC_PROTECTED),
-    PRIVATE  (Opcodes.ACC_PRIVATE),
-    STATIC   (Opcodes.ACC_STATIC),
-    FINAL    (Opcodes.ACC_FINAL),
-    SYNC     (Opcodes.ACC_SYNCHRONIZED);
+    PUBLIC   (true,  true,  true,  Opcodes.ACC_PUBLIC),
+    PROTECTED(true,  true,  true,  Opcodes.ACC_PROTECTED),
+    PRIVATE  (true,  true,  true,  Opcodes.ACC_PRIVATE),
+    STATIC   (true,  true,  true,  Opcodes.ACC_STATIC),
+    FINAL    (true,  true,  true,  Opcodes.ACC_FINAL),
+    SYNC     (true,  false, false, Opcodes.ACC_SYNCHRONIZED),
+    TRANSIENT(false, true,  false, Opcodes.ACC_TRANSIENT),
+    VOLATILE (false, true,  false, Opcodes.ACC_VOLATILE);
     // @formatter:on
 
     public final int encodedValue;
+    public final boolean applicableToFunction;
+    public final boolean applicableToField;
+    public final boolean applicableToClass;
 
-    AccessModifier(final int encodedValue) {
+    AccessModifier(final boolean applicableToFunction,
+                   final boolean applicableToField,
+                   final boolean applicableToClass,
+                   final int encodedValue) {
         this.encodedValue = encodedValue;
+        this.applicableToFunction = applicableToFunction;
+        this.applicableToField = applicableToField;
+        this.applicableToClass = applicableToClass;
     }
 
     public static int combine(final @NotNull Collection<AccessModifier> modifiers) {

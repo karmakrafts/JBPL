@@ -81,7 +81,14 @@ public interface ElementVisitor {
         else if (declaration instanceof EmptyDecl emptyDecl) {
             return visitEmptyDeclaration(emptyDecl);
         }
+        else if (declaration instanceof ClassDecl classDecl) {
+            return visitClass(classDecl);
+        }
         throw new IllegalStateException("Unsupported declaration type");
+    }
+
+    default @NotNull Declaration visitClass(final @NotNull ClassDecl classDecl) {
+        return visitExprContainer(classDecl);
     }
 
     default @NotNull Declaration visitEmptyDeclaration(final @NotNull EmptyDecl declaration) {

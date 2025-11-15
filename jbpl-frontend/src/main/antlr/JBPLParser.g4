@@ -170,15 +170,28 @@ namedArgument:
 classDecl:
     accessModifier*?
     KW_CLASS
-    (wrappedExpr
-    | classType)
+    exprOrClassType
+    (COLON
+    (superType
+    (COMMA
+    superType)*
+    ))?
+    ;
+
+superType:
+    AT?
+    exprOrClassType
     ;
 
 enumDecl:
     accessModifier*?
     KW_ENUM
-    (wrappedExpr
-    | classType)
+    exprOrClassType
+    ;
+
+exprOrClassType:
+    wrappedExpr
+    | classType
     ;
 
 preproClass:
@@ -473,6 +486,8 @@ accessModifier:
     | KW_STATIC
     | KW_FINAL
     | KW_SYNC
+    | KW_VOLATILE
+    | KW_TRANSIENT
     ;
 
 function:

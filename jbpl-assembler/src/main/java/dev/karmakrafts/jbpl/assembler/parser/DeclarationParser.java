@@ -18,6 +18,8 @@ package dev.karmakrafts.jbpl.assembler.parser;
 
 import dev.karmakrafts.jbpl.assembler.model.decl.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
@@ -44,6 +46,12 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
         // @formatter:on
         declaration.setTokenRange(TokenRange.fromContext(ctx));
         return declaration;
+    }
+
+    private static @NotNull SuperType parseSuperType(final @NotNull SuperTypeContext ctx) throws ParserException {
+        final var type = ExprParser.parse(ctx.exprOrClassType());
+        final var isInterface = ctx.AT() != null;
+        return new SuperType(type, isInterface);
     }
 
     @Override
@@ -99,6 +107,38 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     }
 
     @Override
+    public @NotNull List<Declaration> visitClassDecl(final @NotNull ClassDeclContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var clazz = new ClassDecl(ExprParser.parse(ctx.exprOrClassType()));
+            // @formatter:off
+            final var superTypes = ctx.superType().stream()
+                .map(ExceptionUtils.unsafeFunction(DeclarationParser::parseSuperType))
+                .toList();
+            // @formatter:on
+            final var baseClasses = superTypes.stream().filter(type -> !type.isInterface).toList();
+            if (baseClasses.size() > 1) {
+                final var message = "Class cannot inherit from more than one class";
+                throw new ParserException(message, SourceDiagnostic.from(clazz, message));
+            }
+            final var superType = baseClasses.isEmpty() ? null : baseClasses.get(0);
+            if (superType != null) {
+                clazz.setSuperType(superType.type);
+            }
+            // @formatter:off
+            clazz.addInterfaces(superTypes.stream()
+                .filter(SuperType::isInterface)
+                .map(SuperType::type)
+                .toList());
+            clazz.accessModifiers.addAll(ctx.accessModifier().stream()
+                .map(ParserUtils::parseAccessModifier)
+                .map(Optional::orElseThrow)
+                .toList());
+            // @formatter:on
+            return List.of(clazz);
+        });
+    }
+
+    @Override
     public @NotNull List<Declaration> visitPreproClass(final @NotNull PreproClassContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var name = ExprParser.parse(ctx.exprOrName());
@@ -143,5 +183,8 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
             // @formatter:on
             return List.of(field);
         });
+    }
+
+    private record SuperType(Expr type, boolean isInterface) {
     }
 }

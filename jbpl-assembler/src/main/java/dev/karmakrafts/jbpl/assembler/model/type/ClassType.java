@@ -24,17 +24,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public record ClassType(String name) implements Type {
+public record ClassType(String name, boolean isInterface) implements Type {
     public ClassType(final @NotNull Class<?> type) {
-        this(org.objectweb.asm.Type.getInternalName(type));
+        this(org.objectweb.asm.Type.getInternalName(type), type.isInterface());
     }
 
     public static @NotNull Optional<ClassType> tryParse(final @Nullable String value) {
-        if (value == null || !value.startsWith("<") || !value.endsWith(">")) {
+        if (value == null) {
             return Optional.empty();
         }
-        final var name = value.substring(1, value.length() - 1);
-        return Optional.of(new ClassType(name));
+        final var isInterface = value.startsWith("@");
+        if ((!isInterface && !value.startsWith("<")) || !value.endsWith(">")) {
+            return Optional.empty();
+        }
+        final var name = value.substring(isInterface ? 2 : 1, value.length() - 1);
+        return Optional.of(new ClassType(name, isInterface));
     }
 
     public @NotNull Class<?> loadClass() throws ClassNotFoundException {

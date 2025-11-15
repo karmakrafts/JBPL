@@ -118,6 +118,9 @@ for(i in 0..<sizeof(my_aliased_type_array)) {
     ^info "Aliased array value: ${my_aliased_type_array[i]}"
 }
 
+public final class <com/example/Testing>
+final class <com/example/Testing2>
+
 private macro testing123(i: i32) {
     type MyAliasedType = string
     define s: MyAliasedType = "AHHHHH"
