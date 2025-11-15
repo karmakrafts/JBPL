@@ -107,18 +107,18 @@ for(i in 0 ..< 10) {
     ^info "Printing index ${i}"
 }
 
-type MyAliasedType = i32
-define my_aliased_type_define: MyAliasedType = 100
+private type MyAliasedType = i32
+private define my_aliased_type_define: MyAliasedType = 100
 ^info my_aliased_type_define
 
-type MyAliasedTypeArray = [MyAliasedType]
-define my_aliased_type_array: MyAliasedTypeArray = []{0, 1, 2, 3, 4, 5}
+private type MyAliasedTypeArray = [MyAliasedType]
+private define my_aliased_type_array: MyAliasedTypeArray = []{0, 1, 2, 3, 4, 5}
 
 for(i in 0..<sizeof(my_aliased_type_array)) {
     ^info "Aliased array value: ${my_aliased_type_array[i]}"
 }
 
-macro testing123(i: i32) {
+private macro testing123(i: i32) {
     type MyAliasedType = string
     define s: MyAliasedType = "AHHHHH"
     ^info s

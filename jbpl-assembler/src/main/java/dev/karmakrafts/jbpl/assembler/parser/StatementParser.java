@@ -48,9 +48,10 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitTypeAliasStatement(final @NotNull TypeAliasStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
+            final var isPrivate = ctx.KW_PRIVATE() != null;
             final var name = ExprParser.parse(ctx.exprOrName());
             final var type = ExprParser.parse(ctx.exprOrType());
-            return List.of(new TypeAliasStatement(name, type));
+            return List.of(new TypeAliasStatement(name, type, isPrivate));
         });
     }
 

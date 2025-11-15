@@ -32,12 +32,20 @@ public final class IncludeLowering implements ElementVisitor {
         this.assembler = assembler;
     }
 
+    private boolean shouldGetIncluded(final @NotNull Element element) {
+        if (element instanceof IncludeVisibilityProvider visibilityProvider) {
+            return visibilityProvider.shouldGetIncluded();
+        }
+        return true; // Other elements get included by default
+    }
+
     @Override
     public @NotNull Statement visitInclude(final @NotNull IncludeStatement includeStatement) {
         final var includedFile = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseFile(includeStatement.path));
         final var statement = new CompoundStatement();
         // @formatter:off
         statement.addElementsVerbatim(includedFile.getElements().stream()
+            .filter(this::shouldGetIncluded)
             .map(Element::copy)
             .toList());
         // @formatter:on

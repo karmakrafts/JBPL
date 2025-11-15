@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.lower.IncludeVisibilityProvider;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -25,7 +26,8 @@ import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 
-public final class DefineStatement extends AbstractExprContainer implements Statement, NamedElement {
+public final class DefineStatement extends AbstractExprContainer
+    implements Statement, NamedElement, IncludeVisibilityProvider {
     public static final int NAME_INDEX = 0;
     public static final int TYPE_INDEX = 1;
     public static final int VALUE_INDEX = 2;
@@ -70,6 +72,11 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     public void setValue(final @NotNull Expr value) {
         value.setParent(this);
         getExpressions().set(VALUE_INDEX, value);
+    }
+
+    @Override
+    public boolean shouldGetIncluded() {
+        return !isPrivate;
     }
 
     @Override

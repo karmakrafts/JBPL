@@ -58,7 +58,7 @@ public final class EvaluationContextTest {
 
     @Test
     public void mergeInstructionBufferOnFrameExit() {
-        final var dummyMacro = new MacroDecl(ConstExpr.of("test"), ConstExpr.of(BuiltinType.VOID));
+        final var dummyMacro = new MacroDecl(ConstExpr.of("test"), ConstExpr.of(BuiltinType.VOID), false);
         final var context = createContext();
         context.pushFrame(context.file);
         context.emit(new InsnNode(Opcodes.DUP));
@@ -78,7 +78,7 @@ public final class EvaluationContextTest {
 
     @Test
     public void mergeValueStackOnFrameExit() {
-        final var dummyMacro = new MacroDecl(ConstExpr.of("test"), ConstExpr.of(BuiltinType.VOID));
+        final var dummyMacro = new MacroDecl(ConstExpr.of("test"), ConstExpr.of(BuiltinType.VOID), false);
         final var context = createContext();
         context.pushFrame(context.file);
         context.pushValue(ConstExpr.of(0));

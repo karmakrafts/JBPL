@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.decl;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.lower.IncludeVisibilityProvider;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
@@ -29,16 +30,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public final class MacroDecl extends AbstractElementContainer implements Declaration, ScopeOwner, NamedElement {
+public final class MacroDecl extends AbstractElementContainer
+    implements Declaration, ScopeOwner, NamedElement, IncludeVisibilityProvider {
     private final ArrayList<Pair<Expr, Expr>> parameters = new ArrayList<>();
+    public boolean isPrivate;
     private Expr name;
     private Expr returnType;
 
-    public MacroDecl(final @NotNull Expr name, final @NotNull Expr returnType) {
-        name.setParent(this);
-        this.name = name;
-        returnType.setParent(this);
-        this.returnType = returnType;
+    public MacroDecl(final @NotNull Expr name, final @NotNull Expr returnType, final boolean isPrivate) {
+        setName(name);
+        setReturnType(returnType);
+        this.isPrivate = isPrivate;
     }
 
     public @NotNull Expr getName() {
@@ -105,6 +107,11 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
     }
 
     @Override
+    public boolean shouldGetIncluded() {
+        return !isPrivate;
+    }
+
+    @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
         return name.evaluateAs(context, String.class);
     }
@@ -141,7 +148,7 @@ public final class MacroDecl extends AbstractElementContainer implements Declara
 
     @Override
     public @NotNull MacroDecl copy() {
-        final var macro = copyParentAndSourceTo(new MacroDecl(getName().copy(), getReturnType().copy()));
+        final var macro = copyParentAndSourceTo(new MacroDecl(getName().copy(), getReturnType().copy(), isPrivate));
         macro.addParameters(getParameters().stream().map(Pair::copy).toList());
         macro.addElements(getElements().stream().map(Element::copy).toList());
         return macro;

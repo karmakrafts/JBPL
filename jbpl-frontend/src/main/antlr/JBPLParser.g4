@@ -136,6 +136,7 @@ macroSignature:
     ;
 
 macro:
+    KW_PRIVATE?
     KW_MACRO
     macroSignature
     L_BRACE

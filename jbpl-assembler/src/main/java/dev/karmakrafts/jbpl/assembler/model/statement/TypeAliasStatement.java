@@ -18,19 +18,24 @@ package dev.karmakrafts.jbpl.assembler.model.statement;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.lower.IncludeVisibilityProvider;
 import dev.karmakrafts.jbpl.assembler.model.element.NamedElement;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
-public final class TypeAliasStatement extends AbstractExprContainer implements Statement, NamedElement {
+public final class TypeAliasStatement extends AbstractExprContainer
+    implements Statement, NamedElement, IncludeVisibilityProvider {
     public static final int NAME_INDEX = 0;
     public static final int TYPE_INDEX = 1;
 
-    public TypeAliasStatement(final @NotNull Expr name, final @NotNull Expr type) {
+    public boolean isPrivate;
+
+    public TypeAliasStatement(final @NotNull Expr name, final @NotNull Expr type, final boolean isPrivate) {
         addExpression(name);
         addExpression(type);
+        this.isPrivate = isPrivate;
     }
 
     public @NotNull Expr getName() {
@@ -56,13 +61,18 @@ public final class TypeAliasStatement extends AbstractExprContainer implements S
     }
 
     @Override
+    public boolean shouldGetIncluded() {
+        return !isPrivate;
+    }
+
+    @Override
     public @NotNull String getName(final @NotNull EvaluationContext context) throws EvaluationException {
         return getName().evaluateAs(context, String.class);
     }
 
     @Override
     public @NotNull TypeAliasStatement copy() {
-        return copyParentAndSourceTo(new TypeAliasStatement(getName().copy(), getType().copy()));
+        return copyParentAndSourceTo(new TypeAliasStatement(getName().copy(), getType().copy(), isPrivate));
     }
 
     @Override
