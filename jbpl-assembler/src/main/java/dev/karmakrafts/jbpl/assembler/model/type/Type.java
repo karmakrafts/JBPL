@@ -73,6 +73,16 @@ public sealed interface Type
         return equals(other);
     }
 
+    default boolean canCastTo(final @NotNull Type other,
+                              final @NotNull EvaluationContext context) throws EvaluationException {
+        return equals(other);
+    }
+
+    default @NotNull Expr cast(final @NotNull Expr value,
+                               final @NotNull EvaluationContext context) throws EvaluationException {
+        return value;
+    }
+
     default @NotNull TypeConversion conversionTypeFrom(final @NotNull Type other,
                                                        final @NotNull EvaluationContext context) throws EvaluationException {
         if (other == this) {

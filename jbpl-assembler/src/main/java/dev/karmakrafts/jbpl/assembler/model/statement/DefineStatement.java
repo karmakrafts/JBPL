@@ -81,13 +81,13 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
         final var type = getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
-        final var otherType = value.getType(context).resolveIfNeeded(context);
-        if (!type.isAssignableFrom(otherType, context)) {
-            final var message = String.format("Cannot assign value of type %s to define of type %s", otherType, type);
+        final var valueType = value.getType(context).resolveIfNeeded(context);
+        if (!type.isAssignableFrom(valueType, context)) {
+            final var message = String.format("Cannot assign value of type %s to define of type %s", valueType, type);
             final var diagnostic = SourceDiagnostic.from(this, value, message);
             throw new EvaluationException("Incompatible define value type", diagnostic, context.createStackTrace());
         }
-        context.pushValue(value.evaluateAsConst(context));
+        context.pushValue(type.cast(value.evaluateAsConst(context), context));
     }
 
     @Override

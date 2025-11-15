@@ -35,7 +35,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public static final ExprParser INSTANCE = new ExprParser();
@@ -58,21 +57,6 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
             .toList();
     } // @formatter:on
-
-    private static @NotNull List<Expr> parseIntWithPrefix(final @NotNull IntLiteralContext ctx,
-                                                          final @NotNull BiFunction<String, Integer, Object> parseFunction) {
-        final var value = ctx.LITERAL_INT().getText();
-        if (value.startsWith("0x") || value.startsWith("0X")) {
-            return List.of(ConstExpr.of(parseFunction.apply(value.substring(2), 16), TokenRange.fromContext(ctx)));
-        }
-        else if (value.startsWith("0b") || value.startsWith("0B")) {
-            return List.of(ConstExpr.of(parseFunction.apply(value.substring(2), 2), TokenRange.fromContext(ctx)));
-        }
-        else if (value.startsWith("0o") || value.startsWith("0O")) {
-            return List.of(ConstExpr.of(parseFunction.apply(value.substring(2), 8), TokenRange.fromContext(ctx)));
-        }
-        return List.of(ConstExpr.of(parseFunction.apply(value, 10), TokenRange.fromContext(ctx)));
-    }
 
     private static @NotNull WhenExpr.Branch parseWhenBranch(final @NotNull WhenBranchContext ctx) {
         final var condition = ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()));
@@ -487,12 +471,12 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     @Override
     public @NotNull List<Expr> visitIntLiteral(final @NotNull IntLiteralContext ctx) {
         // @formatter:off
-        if (ctx.KW_I64() != null)       return parseIntWithPrefix(ctx, Long::parseLong);
-        else if (ctx.KW_I16() != null)  return parseIntWithPrefix(ctx, Short::parseShort);
-        else if (ctx.KW_I8() != null)   return parseIntWithPrefix(ctx, Byte::parseByte);
+        if (ctx.KW_I64() != null)       return ParserUtils.parseIntWithPrefix(ctx, Long::parseLong);
+        else if (ctx.KW_I16() != null)  return ParserUtils.parseIntWithPrefix(ctx, Short::parseShort);
+        else if (ctx.KW_I8() != null)   return ParserUtils.parseIntWithPrefix(ctx, Byte::parseByte);
         // @formatter:on
         // Without suffix or with i32, we assume int as the default case
-        return parseIntWithPrefix(ctx, Integer::parseInt);
+        return ParserUtils.parseIntWithPrefix(ctx, Integer::parseInt);
     }
 
     @Override

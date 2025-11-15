@@ -26,6 +26,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Opcode;
 import dev.karmakrafts.jbpl.assembler.model.instruction.OplessInstruction;
+import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -84,6 +85,47 @@ public enum PreproType implements Type {
     @Override
     public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
         return this;
+    }
+
+    @Override
+    public boolean canCastTo(final @NotNull Type other, final @NotNull EvaluationContext context) {
+        return switch (this) {
+            case TYPE, OPCODE -> other == BuiltinType.STRING;
+            default -> false;
+        };
+    }
+
+    @Override
+    public @NotNull Expr cast(final @NotNull Expr value,
+                              final @NotNull EvaluationContext context) throws EvaluationException {
+        if (value.getType(context) == this) {
+            return value;
+        }
+        final var constValue = value.evaluateAs(context, Object.class);
+        if (constValue instanceof String stringValue) {
+            return switch (this) {
+                case TYPE -> ConstExpr.of(Type.tryParse(stringValue).orElseThrow(() -> {
+                    final var message = String.format("Cannot cast string '%s' to literal type", stringValue);
+                    return new EvaluationException(message,
+                        SourceDiagnostic.from(value, message),
+                        context.createStackTrace());
+                }), value.getTokenRange());
+                case OPCODE -> ConstExpr.of(Opcode.findByName(stringValue).orElseThrow(() -> {
+                    final var message = String.format("Cannot cast string '%s' to literal opcode", stringValue);
+                    return new EvaluationException(message,
+                        SourceDiagnostic.from(value, message),
+                        context.createStackTrace());
+                }), value.getTokenRange());
+                default -> {
+                    final var message = String.format("Cannot cast string '%s' to type %s", stringValue, this);
+                    throw new EvaluationException(message,
+                        SourceDiagnostic.from(value, message),
+                        context.createStackTrace());
+                }
+            };
+        }
+        final var message = String.format("Cannot cast type %s to type %s", value.getType(context), this);
+        throw new EvaluationException(message, SourceDiagnostic.from(value, message), context.createStackTrace());
     }
 
     @Override

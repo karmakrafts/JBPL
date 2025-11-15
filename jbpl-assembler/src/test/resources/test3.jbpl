@@ -125,3 +125,7 @@ macro testing123() {
 }
 
 testing123()
+
+define coercion: f32 = 2
+coercion += 0.1f32
+^info coercion

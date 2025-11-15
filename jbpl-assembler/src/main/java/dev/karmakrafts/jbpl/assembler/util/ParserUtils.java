@@ -34,9 +34,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public final class ParserUtils {
     private ParserUtils() {
+    }
+
+    public static @NotNull Object parseIntWithPrefix(final @NotNull String value,
+                                                     final @NotNull BiFunction<String, Integer, Object> parseFunction) {
+        if (value.startsWith("0x") || value.startsWith("0X")) {
+            return parseFunction.apply(value.substring(2), 16);
+        }
+        else if (value.startsWith("0b") || value.startsWith("0B")) {
+            return parseFunction.apply(value.substring(2), 2);
+        }
+        else if (value.startsWith("0o") || value.startsWith("0O")) {
+            return parseFunction.apply(value.substring(2), 8);
+        }
+        return parseFunction.apply(value, 10);
+    }
+
+    public static @NotNull List<Expr> parseIntWithPrefix(final @NotNull IntLiteralContext ctx,
+                                                         final @NotNull BiFunction<String, Integer, Object> parseFunction) {
+        final var value = ctx.LITERAL_INT().getText();
+        return List.of(ConstExpr.of(parseIntWithPrefix(value, parseFunction), TokenRange.fromContext(ctx)));
     }
 
     public static @NotNull Pair<@Nullable Expr, Expr> parseArgument(final @NotNull ArgumentContext ctx) throws ParserException {
