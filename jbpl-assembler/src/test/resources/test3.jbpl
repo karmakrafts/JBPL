@@ -129,3 +129,6 @@ testing123()
 define coercion: f32 = 2
 coercion += 0.1f32
 ^info coercion
+
+define coercion2: i32 = 88i8
+^info typeof(coercion2)

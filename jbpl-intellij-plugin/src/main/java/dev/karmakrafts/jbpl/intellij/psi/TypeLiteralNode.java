@@ -17,26 +17,10 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.HighlightSeverity;
-import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
-import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
-public final class TypeLiteralNode extends JBPLPsiNode implements Annotated {
+public final class TypeLiteralNode extends JBPLPsiNode {
     public TypeLiteralNode(final @NotNull ASTNode node) {
         super(node);
-    }
-
-    @Override
-    public void annotate(final @NotNull AnnotationHolder holder) {
-        // Handle preprocessor class type references
-        // @formatter:off
-        PsiUtils.find(this, "/typeLiteral/type/IDENT").ifPresent(name ->
-            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                .range(name)
-                .textAttributes(TextAttributeKeys.PREPRO_CLASS)
-                .create());
-        // @formatter:on
     }
 }

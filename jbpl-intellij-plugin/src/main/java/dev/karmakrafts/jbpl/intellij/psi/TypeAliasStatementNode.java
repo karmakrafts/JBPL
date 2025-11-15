@@ -23,28 +23,17 @@ import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
-
-public final class TypeNode extends JBPLPsiNode implements Annotated {
-    private static final Set<String> SOFT_KEYWORDS = Set.of("opcode", "type", "version");
-
-    public TypeNode(final @NotNull ASTNode node) {
+public final class TypeAliasStatementNode extends JBPLPsiNode implements Annotated {
+    public TypeAliasStatementNode(final @NotNull ASTNode node) {
         super(node);
     }
 
     @Override
-    public void annotate(final @NotNull AnnotationHolder holder) {
-        // @formatter:off
-        PsiUtils.find(this, "/type/IDENT").ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-            .range(name)
-            .textAttributes(TextAttributeKeys.PREPRO_CLASS)
-            .create());
-        // @formatter:on
-        if(SOFT_KEYWORDS.contains(getText())) { // @formatter:off
+    public void annotate(final @NotNull AnnotationHolder holder) { // @formatter:off
+        PsiUtils.find(this, "/typeAliasStatement/exprOrName", ExprOrNameNode.class).ifPresent(name ->
             holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                .range(this)
-                .textAttributes(TextAttributeKeys.KEYWORD)
-                .create();
-        } // @formatter:on
-    }
+                .range(name)
+                .textAttributes(TextAttributeKeys.PREPRO_CLASS)
+                .create());
+    } // @formatter:on
 }
