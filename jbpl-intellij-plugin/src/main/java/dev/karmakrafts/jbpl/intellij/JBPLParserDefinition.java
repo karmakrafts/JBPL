@@ -152,6 +152,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_functionSignatureParameter -> new FunctionSignatureParameterNode(node);
             case JBPLParser.RULE_forStatement -> new ForStatementNode(node);
             case JBPLParser.RULE_typeAliasStatement -> new TypeAliasStatementNode(node);
+            case JBPLParser.RULE_namedArgument -> new NamedArgumentNode(node);
             default -> new JBPLPsiNode(node);
         }; // @formatter:on
     }
