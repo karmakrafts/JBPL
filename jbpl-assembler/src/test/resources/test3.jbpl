@@ -118,13 +118,13 @@ for(i in 0..<sizeof(my_aliased_type_array)) {
     ^info "Aliased array value: ${my_aliased_type_array[i]}"
 }
 
-macro testing123() {
+macro testing123(i: i32) {
     type MyAliasedType = string
     define s: MyAliasedType = "AHHHHH"
     ^info s
 }
 
-testing123()
+testing123(i: 100)
 
 define coercion: f32 = 2
 coercion += 0.1f32

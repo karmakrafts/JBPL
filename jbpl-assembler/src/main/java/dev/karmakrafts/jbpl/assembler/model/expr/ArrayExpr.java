@@ -109,12 +109,15 @@ public final class ArrayExpr extends AbstractExprContainer implements ConstExpr 
         if (arrayReference != null) { // Lazily evaluate array to runtime object and cache it
             return;
         }
-        final var type = TypeMapper.map(getType(context), true);
+        final var type = getType(context);
+        final var mappedType = TypeMapper.map(type, true);
         final var values = getValues();
         final var size = values.size();
-        arrayReference = Array.newInstance(type.componentType(), size);
+        arrayReference = Array.newInstance(mappedType.componentType(), size);
         for (var i = 0; i < size; i++) {
-            Array.set(arrayReference, i, values.get(i).evaluateAs(context, Object.class));
+            final var value = type.cast(values.get(i).evaluateAsConst(context), context).evaluateAs(context,
+                Object.class);
+            Array.set(arrayReference, i, value);
         }
     }
 
