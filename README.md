@@ -1,4 +1,4 @@
-# ☕ <dev/karmakrafts/**JBPL**>
+# ☕ JBPL
 
 Java Bytecode Patch Language (or JBPL) is a fully featured JVM assembly language  
 and macro assembler.  
