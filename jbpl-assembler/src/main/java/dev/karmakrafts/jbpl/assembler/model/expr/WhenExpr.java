@@ -89,8 +89,8 @@ public final class WhenExpr extends AbstractExprContainer implements Expr, Scope
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException { // @formatter:off
         return TypeCommonizer.getCommonType(branches.stream()
-            .map(branch -> TypeCommonizer.getCommonType(branch.getElements(), context).orElseThrow())
-            .toList()).orElseThrow();
+            .map(branch -> TypeCommonizer.getCommonReturnType(branch.getElements(), context).orElseThrow())
+            .toList(), context).orElseThrow();
     } // @formatter:on
 
     @Override

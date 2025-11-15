@@ -52,7 +52,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getType().evaluateAs(context, Type.class);
+        return getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
     private @NotNull ConstExpr castFromNumber(final @NotNull Type type,

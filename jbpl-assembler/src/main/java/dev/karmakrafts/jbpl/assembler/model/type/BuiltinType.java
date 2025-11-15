@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
@@ -78,20 +79,21 @@ public enum BuiltinType implements Type {
         return Arrays.stream(values()).filter(t -> t.name().equalsIgnoreCase(name)).findFirst();
     }
 
-    public static @NotNull List<BuiltinType> allOfCategory(final @NotNull TypeCategory category) {
-        return Arrays.stream(values()).filter(t -> t.getCategory() == category).toList();
+    public static @NotNull List<BuiltinType> allOfCategory(final @NotNull TypeCategory category,
+                                                           final @NotNull EvaluationContext context) {
+        return Arrays.stream(values()).filter(t -> t.getCategory(context) == category).toList();
     }
 
-    public static @NotNull Optional<BuiltinType> intBySize(final int size) {
-        return Arrays.stream(values()).filter(t -> t.getCategory() == TypeCategory.INTEGER && t.byteSize == size).findFirst();
+    public static @NotNull Optional<BuiltinType> intBySize(final int size, final @NotNull EvaluationContext context) {
+        return Arrays.stream(values()).filter(t -> t.getCategory(context) == TypeCategory.INTEGER && t.byteSize == size).findFirst();
     }
 
-    public static @NotNull Optional<BuiltinType> floatBySize(final int size) {
-        return Arrays.stream(values()).filter(t -> t.getCategory() == TypeCategory.FLOAT && t.byteSize == size).findFirst();
+    public static @NotNull Optional<BuiltinType> floatBySize(final int size, final @NotNull EvaluationContext context) {
+        return Arrays.stream(values()).filter(t -> t.getCategory(context) == TypeCategory.FLOAT && t.byteSize == size).findFirst();
     }
 
     @Override
-    public @NotNull TypeCategory getCategory() {
+    public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return category;
     }
 
@@ -118,20 +120,31 @@ public enum BuiltinType implements Type {
     }
 
     @Override
+    public boolean isResolved() {
+        return true;
+    }
+
+    @Override
+    public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
+        return this;
+    }
+
+    @Override
     public String toString() {
         return name().toLowerCase(Locale.ROOT);
     }
 
     @Override
-    public boolean isAssignableFrom(final @NotNull Type other) {
+    public boolean isAssignableFrom(final @NotNull Type other,
+                                    final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (category) {
             // We need to take into account implicit widening conversions here
-            case INTEGER, FLOAT -> switch (other.getCategory()) {
+            case INTEGER, FLOAT -> switch (other.getCategory(context)) {
                 // If the incoming type is smaller than the type we assign to, we allow assignment
                 case INTEGER, FLOAT -> ((BuiltinType) other).ordinal() <= ordinal();
-                default -> Type.super.isAssignableFrom(other);
+                default -> Type.super.isAssignableFrom(other, context);
             };
-            default -> Type.super.isAssignableFrom(other);
+            default -> Type.super.isAssignableFrom(other, context);
         };
     }
 }

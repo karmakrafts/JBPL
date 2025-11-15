@@ -42,7 +42,7 @@ public final class UnaryExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getValue().getType(context);
+        return getValue().getType(context).resolveIfNeeded(context);
     }
 
     private @NotNull ConstExpr evaluateAssignmentForByte(final @NotNull Byte value,

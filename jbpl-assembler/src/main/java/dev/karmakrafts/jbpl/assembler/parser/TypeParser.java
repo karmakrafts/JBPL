@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.jbpl.assembler.parser;
 
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.*;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
@@ -85,7 +86,6 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
         else if (ctx.KW_OPCODE() != null)      return List.of(PreproType.OPCODE);
         else if (ctx.KW_INSTRUCTION() != null) return List.of(PreproType.INSTRUCTION);
         else if (ctx.KW_STRING() != null)      return List.of(BuiltinType.STRING);
-        else if (ctx.IDENT() != null)          return List.of(new PreproClassType(ctx.IDENT().getText()));
         else if (ctx.KW_I8() != null)          return List.of(BuiltinType.I8);
         else if (ctx.KW_I16() != null)         return List.of(BuiltinType.I16);
         else if (ctx.KW_I32() != null)         return List.of(BuiltinType.I32);
@@ -95,6 +95,7 @@ public final class TypeParser extends JBPLParserBaseVisitor<List<Type>> {
         else if (ctx.KW_VOID() != null)        return List.of(BuiltinType.VOID);
         else if (ctx.KW_BOOL() != null)        return List.of(BuiltinType.BOOL);
         else if (ctx.KW_CHAR() != null)        return List.of(BuiltinType.CHAR);
+        else if (ctx.IDENT() != null)          return List.of(new UnresolvedType(ConstExpr.of(ctx.IDENT().getText())));
         else                                   return super.visitType(ctx);
         // @formatter:on
     }

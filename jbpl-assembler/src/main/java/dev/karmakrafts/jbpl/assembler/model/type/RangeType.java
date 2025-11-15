@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record RangeType(Type type) implements Type {
     @Override
-    public @NotNull TypeCategory getCategory() {
+    public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return TypeCategory.RANGE;
     }
 
@@ -36,5 +36,18 @@ public record RangeType(Type type) implements Type {
     @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) throws EvaluationException {
         throw new UnsupportedOperationException("Range types cannot be materialized");
+    }
+
+    @Override
+    public boolean isResolved() {
+        return type.isResolved();
+    }
+
+    @Override
+    public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (isResolved()) {
+            return this;
+        }
+        return new RangeType(type.resolve(context));
     }
 }

@@ -59,9 +59,10 @@ public final class RangeExpr extends AbstractExprContainer implements Expr {
 
     @Override
     public @NotNull RangeType getType(@NotNull EvaluationContext context) throws EvaluationException {
-        final var startType = getStart().getType(context);
-        final var endType = getEnd().getType(context);
-        final var commonType = TypeCommonizer.getCommonType(startType,
+        final var startType = getStart().getType(context).resolveIfNeeded(context);
+        final var endType = getEnd().getType(context).resolveIfNeeded(context);
+        final var commonType = TypeCommonizer.getCommonType(context,
+            startType,
             endType).orElseThrow(() -> new EvaluationException("Cannot find common type for range",
             SourceDiagnostic.from(this, "Cannot find common type for range"),
             null));

@@ -124,18 +124,24 @@ public final class ArrayExpr extends AbstractExprContainer implements ConstExpr 
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException { // @formatter:off
+    public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getType();
-        if(type.isUnit()) { // We need to infer the array type from the element types
-            final var elementTypes = getValues().stream().map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context))).toList();
-            return TypeCommonizer.getCommonType(elementTypes).orElseThrow(() -> {
+        if (type.isUnit()) { // We need to infer the array type from the element types
+            // @formatter:off
+            final var elementTypes = getValues().stream()
+                .map(ExceptionUtils.unsafeFunction(expr -> expr.getType(context).resolveIfNeeded(context)))
+                .toList();
+            // @formatter:on
+            return TypeCommonizer.getCommonType(elementTypes, context).orElseThrow(() -> {
                 final var values = getValues().stream().map(Expr::toString).collect(Collectors.joining(", "));
                 final var message = String.format("Could not find common type for array values %s", values);
-                return new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+                return new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
             }).array();
         }
-        return type.evaluateAs(context, Type.class).array();
-    } // @formatter:on
+        return type.evaluateAs(context, Type.class).resolveIfNeeded(context).array();
+    }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {

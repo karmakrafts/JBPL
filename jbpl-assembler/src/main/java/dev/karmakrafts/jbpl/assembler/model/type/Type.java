@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public sealed interface Type
-    permits ArrayType, BuiltinType, ClassType, IntersectionType, PreproClassType, PreproType, RangeType {
+    permits ArrayType, BuiltinType, ClassType, IntersectionType, PreproClassType, PreproType, RangeType, UnresolvedType {
     /**
      * Attempt to parse a type from the given string value.
      * This will assume the input values are in one of the following formats:
@@ -51,21 +51,34 @@ public sealed interface Type
         // @formatter:on
     }
 
-    @NotNull TypeCategory getCategory();
+    @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) throws EvaluationException;
 
     @NotNull Expr createDefaultValue(final @NotNull EvaluationContext context) throws EvaluationException;
 
     @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) throws EvaluationException;
 
-    default boolean isAssignableFrom(final @NotNull Type other) {
+    boolean isResolved();
+
+    @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException;
+
+    default @NotNull Type resolveIfNeeded(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (isResolved()) {
+            return this;
+        }
+        return resolve(context);
+    }
+
+    default boolean isAssignableFrom(final @NotNull Type other,
+                                     final @NotNull EvaluationContext context) throws EvaluationException {
         return equals(other);
     }
 
-    default @NotNull TypeConversion conversionTypeFrom(final @NotNull Type other) {
+    default @NotNull TypeConversion conversionTypeFrom(final @NotNull Type other,
+                                                       final @NotNull EvaluationContext context) throws EvaluationException {
         if (other == this) {
             return TypeConversion.DIRECT;
         }
-        else if (isAssignableFrom(other)) {
+        else if (isAssignableFrom(other, context)) {
             return TypeConversion.COERCE;
         }
         return TypeConversion.NONE;

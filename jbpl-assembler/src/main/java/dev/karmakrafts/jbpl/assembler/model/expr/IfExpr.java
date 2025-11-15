@@ -95,14 +95,14 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         // @formatter:off
         final var types = elseIfBranches.stream()
-            .map(ExceptionUtils.unsafeFunction(branch -> branch.getType(context)))
+            .map(ExceptionUtils.unsafeFunction(branch -> branch.getType(context).resolveIfNeeded(context)))
             .collect(Collectors.toCollection(ArrayList::new));
         // @formatter:on
-        types.add(TypeCommonizer.getCommonType(getElements(), context).orElseThrow());
+        types.add(TypeCommonizer.getCommonReturnType(getElements(), context).orElseThrow());
         if (elseBranch != null) {
-            types.add(elseBranch.getType(context));
+            types.add(elseBranch.getType(context).resolveIfNeeded(context));
         }
-        return TypeCommonizer.getCommonType(types).orElseThrow();
+        return TypeCommonizer.getCommonType(types, context).orElseThrow();
     }
 
     @Override
@@ -187,7 +187,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
         }
 
         public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-            return TypeCommonizer.getCommonType(getElements(), context).orElseThrow();
+            return TypeCommonizer.getCommonReturnType(getElements(), context).orElseThrow();
         }
 
         @Override
@@ -230,7 +230,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
 
     public static final class ElseBranch extends AbstractElementContainer implements ScopeOwner {
         public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-            return TypeCommonizer.getCommonType(getElements(), context).orElseThrow();
+            return TypeCommonizer.getCommonReturnType(getElements(), context).orElseThrow();
         }
 
         @Override

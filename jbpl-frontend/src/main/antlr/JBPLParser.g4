@@ -541,6 +541,7 @@ functionName:
 statement:
     include
     | define
+    | typeAliasStatement
     | forStatement
     | returnStatement
     | yeetStatement
@@ -554,6 +555,14 @@ statement:
     | local
     | instruction
     | expr
+    ;
+
+typeAliasStatement:
+    KW_PRIVATE?
+    KW_TYPE
+    exprOrName
+    EQ
+    exprOrType
     ;
 
 forStatement:

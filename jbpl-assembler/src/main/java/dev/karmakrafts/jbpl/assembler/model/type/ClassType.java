@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +42,17 @@ public record ClassType(String name) implements Type {
     }
 
     @Override
-    public @NotNull TypeCategory getCategory() {
+    public boolean isResolved() {
+        return true;
+    }
+
+    @Override
+    public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
+        return this;
+    }
+
+    @Override
+    public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return TypeCategory.OBJECT;
     }
 

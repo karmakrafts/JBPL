@@ -63,7 +63,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             // Spaceship always evaluates to i32
             case CMP -> BuiltinType.I32;
             // All other binary expressions evaluate to their left hand side type
-            default -> getLhs().getType(context);
+            default -> getLhs().getType(context).resolveIfNeeded(context);
         };
     }
 
@@ -548,7 +548,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             context.pushValue(evaluateForBool((Boolean) lhsValue, rhsValue, op, context));
             return;
         }
-        else if (lhsType.getCategory().isNumber()) { // Numeric binary expressions
+        else if (lhsType.getCategory(context).isNumber()) { // Numeric binary expressions
             context.pushValue(evaluateForNumber((Number) lhsValue, (BuiltinType) lhsType, context));
             return;
         }

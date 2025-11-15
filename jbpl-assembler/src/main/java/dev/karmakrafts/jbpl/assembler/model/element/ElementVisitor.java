@@ -367,10 +367,17 @@ public interface ElementVisitor {
         else if (statement instanceof ContinueStatement continueStatement) {
             return visitContinueStatement(continueStatement);
         }
+        else if (statement instanceof TypeAliasStatement typeAliasStatement) {
+            return visitTypeAliasStatement(typeAliasStatement);
+        }
         else if (statement instanceof Expr expr) {
             return visitExpr(expr);
         }
         throw new IllegalStateException(String.format("Unsupported statement type %s", statement.getClass()));
+    }
+
+    default @NotNull Statement visitTypeAliasStatement(final @NotNull TypeAliasStatement typeAliasStatement) {
+        return visitExprContainer(typeAliasStatement);
     }
 
     default @NotNull Statement visitContinueStatement(final @NotNull ContinueStatement continueStatement) {

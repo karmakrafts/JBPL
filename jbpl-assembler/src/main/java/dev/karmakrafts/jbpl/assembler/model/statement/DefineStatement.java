@@ -31,15 +31,18 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     public static final int VALUE_INDEX = 2;
 
     public boolean isFinal;
+    public boolean isPrivate;
 
     public DefineStatement(final @NotNull Expr name,
                            final @NotNull Expr type,
                            final @NotNull Expr value,
-                           final boolean isFinal) {
+                           final boolean isFinal,
+                           final boolean isPrivate) {
         addExpression(name);
         addExpression(type);
         addExpression(value);
         this.isFinal = isFinal;
+        this.isPrivate = isPrivate;
     }
 
     public @NotNull Expr getName() {
@@ -77,9 +80,9 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue();
-        final var type = getType().evaluateAs(context, Type.class);
-        final var otherType = value.getType(context);
-        if (!type.isAssignableFrom(otherType)) {
+        final var type = getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
+        final var otherType = value.getType(context).resolveIfNeeded(context);
+        if (!type.isAssignableFrom(otherType, context)) {
             final var message = String.format("Cannot assign value of type %s to define of type %s", otherType, type);
             final var diagnostic = SourceDiagnostic.from(this, value, message);
             throw new EvaluationException("Incompatible define value type", diagnostic, context.createStackTrace());
@@ -92,7 +95,8 @@ public final class DefineStatement extends AbstractExprContainer implements Stat
         return copyParentAndSourceTo(new DefineStatement(getName().copy(),
             getType().copy(),
             getValue().copy(),
-            isFinal));
+            isFinal,
+            isPrivate));
     }
 
     @Override

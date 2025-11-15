@@ -16,6 +16,9 @@
 
 package dev.karmakrafts.jbpl.assembler.model.type;
 
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -45,7 +48,9 @@ public final class TypeListMatcher {
      * - {@code macro foo(x: i64, y: i64, z: i32)} would be rated <b>1 + 2 + 2 = 5</b><br>
      * - {@code macro foo(s: string)} would be rated <b>0</b>
      */
-    public static int computeRating(final @NotNull List<Type> dstTypes, final @NotNull List<Type> srcTypes) {
+    public static int computeRating(final @NotNull List<Type> dstTypes,
+                                    final @NotNull List<Type> srcTypes,
+                                    final @NotNull EvaluationContext context) throws EvaluationException {
         if (dstTypes.size() != srcTypes.size()) {
             return 0;
         }
@@ -53,7 +58,7 @@ public final class TypeListMatcher {
         for (var i = 0; i < srcTypes.size(); i++) {
             final var srcType = srcTypes.get(i);
             final var dstType = dstTypes.get(i);
-            final var conversion = dstType.conversionTypeFrom(srcType);
+            final var conversion = dstType.conversionTypeFrom(srcType, context);
             if (conversion == TypeConversion.NONE) {
                 return 0; // A single mismatch means a rating of 0
             }
@@ -63,15 +68,17 @@ public final class TypeListMatcher {
     }
 
     public static <D> @NotNull RatedTypeList<D> rate(final @NotNull TypeList<D> dstTypes,
-                                                     final @NotNull List<Type> srcTypes) {
-        return new RatedTypeList<>(srcTypes, computeRating(dstTypes.types, srcTypes), dstTypes.data);
+                                                     final @NotNull List<Type> srcTypes,
+                                                     final @NotNull EvaluationContext context) throws EvaluationException {
+        return new RatedTypeList<>(srcTypes, computeRating(dstTypes.types, srcTypes, context), dstTypes.data);
     }
 
     public static <D> @NotNull List<RatedTypeList<D>> rate(final @NotNull List<TypeList<D>> srcTypeLists,
-                                                           final @NotNull List<Type> dstTypes) {
+                                                           final @NotNull List<Type> dstTypes,
+                                                           final @NotNull EvaluationContext context) {
         // @formatter:off
         return srcTypeLists.stream()
-            .map(list -> rate(list, dstTypes))
+            .map(ExceptionUtils.unsafeFunction(list -> rate(list, dstTypes, context)))
             .filter(list -> list.rating > 0)
             .sorted()
             .toList();
@@ -79,8 +86,9 @@ public final class TypeListMatcher {
     }
 
     public static <D> @NotNull Optional<Result<D>> match(final @NotNull List<TypeList<D>> srcTypeLists,
-                                                         final @NotNull List<Type> dstTypes) {
-        final var ratedLists = rate(srcTypeLists, dstTypes);
+                                                         final @NotNull List<Type> dstTypes,
+                                                         final @NotNull EvaluationContext context) {
+        final var ratedLists = rate(srcTypeLists, dstTypes, context);
         if (ratedLists.isEmpty()) {
             return Optional.empty();
         }

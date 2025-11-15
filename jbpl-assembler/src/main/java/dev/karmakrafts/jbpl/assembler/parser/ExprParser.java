@@ -75,7 +75,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     private static @NotNull WhenExpr.Branch parseWhenBranch(final @NotNull WhenBranchContext ctx) {
-        final var condition = ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx.expr()));
+        final var condition = ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()));
         final var body = ctx.whenBranchBody();
         if (body.L_BRACE() != null) { // This is a scoped body
             final var branch = new WhenExpr.ScopedBranch(condition);
@@ -147,8 +147,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     private static @NotNull List<Expr> parseRangeExpr(final @NotNull ExprContext ctx,
                                                       final boolean isInclusive) throws ParserException {
-        final var start = ExprParser.parse(ctx.expr(0));
-        final var end = ExprParser.parse(ctx.expr(1));
+        final var start = parse(ctx.expr(0));
+        final var end = parse(ctx.expr(1));
         return List.of(new RangeExpr(start, end, isInclusive));
     }
 
@@ -192,9 +192,9 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     private static @NotNull Pair<Expr, Expr> parseFunctionSignatureParameter(final @NotNull FunctionSignatureParameterContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = Optional.ofNullable(ctx.exprOrName()).map(ExceptionUtils.unsafeFunction(ParserUtils::parseExprOrName)).orElse(
+            final var name = Optional.ofNullable(ctx.exprOrName()).map(ExceptionUtils.unsafeFunction(ExprParser::parse)).orElse(
                 null);
-            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
+            final var type = parse(ctx.exprOrType());
             return new Pair<>(name, type);
         });
     }
@@ -213,7 +213,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitDefaultExpr(final @NotNull DefaultExprContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> List.of(new DefaultExpr(ExprParser.parse(ctx.expr()))));
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new DefaultExpr(parse(ctx.expr()))));
     }
 
     @Override
@@ -221,7 +221,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return ExceptionUtils.rethrowUnchecked(() -> {
             // @formatter:off
             final var array = ctx.exprOrType() != null
-                ? new ArrayExpr(ParserUtils.parseExprOrType(ctx.exprOrType()))
+                ? new ArrayExpr(parse(ctx.exprOrType()))
                 : new ArrayExpr();
             // @formatter:on
             array.addValues(ctx.expr().stream().map(ExceptionUtils.unsafeFunction(ExprParser::parse)).toList());
@@ -231,7 +231,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitTypeOfExpr(final @NotNull TypeOfExprContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> List.of(new TypeOfExpr(ExprParser.parse(ctx.expr()))));
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new TypeOfExpr(parse(ctx.expr()))));
     }
 
     @Override
@@ -254,7 +254,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitOpcodeOfExpr(final @NotNull OpcodeOfExprContext ctx) {
-        return ExceptionUtils.rethrowUnchecked(() -> List.of(new OpcodeOfExpr(ExprParser.parse(ctx.expr()))));
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new OpcodeOfExpr(parse(ctx.expr()))));
     }
 
     @Override
@@ -328,8 +328,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             } // @formatter:off
             else if (ctx.L_SQBRACKET() != null)     return List.of(new ArrayAccessExpr(parse(ctx.expr(0)), parse(ctx.expr(1))));
             else if (ctx.KW_IN() != null)           return List.of(new InExpr(parse(ctx.expr(0)), parse(ctx.expr(1))));
-            else if (ctx.KW_IS() != null)           return List.of(new IsExpr(parse(ctx.expr(0)), ParserUtils.parseExprOrType(ctx.exprOrType())));
-            else if (ctx.KW_AS() != null)           return List.of(new AsExpr(parse(ctx.expr(0)), ParserUtils.parseExprOrType(ctx.exprOrType())));
+            else if (ctx.KW_IS() != null)           return List.of(new IsExpr(parse(ctx.expr(0)), parse(ctx.exprOrType())));
+            else if (ctx.KW_AS() != null)           return List.of(new AsExpr(parse(ctx.expr(0)), parse(ctx.exprOrType())));
             else if (ctx.DOTDOT() != null)          return parseRangeExpr(ctx, true);
             else if (ctx.EXCL_RANGE() != null)      return parseRangeExpr(ctx, false);
             else if (ctx.EQEQ() != null)            return parseBinaryExpr(ctx, BinaryExpr.Op.EQ);
@@ -372,6 +372,28 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         });
     }
 
+    @Override
+    public @NotNull List<Expr> visitExprOrName(final @NotNull ExprOrNameContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ctx.nameSegment();
+            if (name != null) {
+                return List.of(ConstExpr.of(name.getText(), TokenRange.fromContext(ctx)));
+            }
+            return List.of(parse(ctx.wrappedExpr()));
+        });
+    }
+
+    @Override
+    public @NotNull List<Expr> visitExprOrType(final @NotNull ExprOrTypeContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var type = ctx.type();
+            if (type != null) {
+                return List.of(ConstExpr.of(TypeParser.parse(type), TokenRange.fromContext(ctx)));
+            }
+            return List.of(parse(ctx.wrappedExpr()));
+        });
+    }
+
     // Simply unwrap the expression
     @Override
     public @NotNull List<Expr> visitWrappedExpr(final @NotNull WrappedExprContext ctx) {
@@ -380,7 +402,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     @Override
     public @NotNull List<Expr> visitSizeOfExpr(final @NotNull SizeOfExprContext ctx) {
-        return List.of(new SizeOfExpr(ExceptionUtils.rethrowUnchecked(() -> ExprParser.parse(ctx.expr()))));
+        return List.of(new SizeOfExpr(ExceptionUtils.rethrowUnchecked(() -> parse(ctx.expr()))));
     }
 
     @Override
@@ -490,8 +512,8 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public @NotNull List<Expr> visitFieldSignature(final @NotNull FieldSignatureContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
-            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
-            final var type = ParserUtils.parseExprOrType(ctx.exprOrType());
+            final var name = parse(ctx.exprOrName());
+            final var type = parse(ctx.exprOrType());
             return List.of(new FieldSignatureExpr(owner, name, type));
         });
     }
@@ -501,7 +523,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var owner = ParserUtils.parseSignatureOwner(ctx.signatureOwner());
             final var name = ParserUtils.parseFunctionName(ctx.functionName());
-            final var returnType = ParserUtils.parseExprOrType(ctx.exprOrType());
+            final var returnType = parse(ctx.exprOrType());
             final var signature = new FunctionSignatureExpr(owner, name, returnType);
             // @formatter:off
             signature.addExpressions(ctx.functionSignatureParameter().stream()

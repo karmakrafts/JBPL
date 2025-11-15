@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.decl.InjectorDecl;
 import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
@@ -56,7 +57,7 @@ public enum PreproType implements Type {
     }
 
     @Override
-    public @NotNull TypeCategory getCategory() {
+    public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return TypeCategory.PREPROCESSOR;
     }
 
@@ -73,6 +74,16 @@ public enum PreproType implements Type {
     @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) {
         throw new UnsupportedOperationException("Preprocessor types cannot be materialized");
+    }
+
+    @Override
+    public boolean isResolved() {
+        return true;
+    }
+
+    @Override
+    public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
+        return this;
     }
 
     @Override

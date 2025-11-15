@@ -24,7 +24,6 @@ import dev.karmakrafts.jbpl.assembler.parser.ExprParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
 import dev.karmakrafts.jbpl.assembler.parser.TypeParser;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
-import dev.karmakrafts.jbpl.frontend.JBPLParser;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -43,7 +42,7 @@ public final class ParserUtils {
     public static @NotNull Pair<@Nullable Expr, Expr> parseArgument(final @NotNull ArgumentContext ctx) throws ParserException {
         final var namedCtx = ctx.namedArgument();
         if (namedCtx != null) {
-            return new Pair<>(ParserUtils.parseExprOrName(namedCtx.exprOrName()), ExprParser.parse(namedCtx.expr()));
+            return new Pair<>(ExprParser.parse(namedCtx.exprOrName()), ExprParser.parse(namedCtx.expr()));
         }
         return new Pair<>(null, ExprParser.parse(ctx.expr()));
     }
@@ -67,7 +66,7 @@ public final class ParserUtils {
         // @formatter:off
         return specialName != null
             ? ConstExpr.of(specialName.getText(), TokenRange.fromContext(specialName))
-            : parseExprOrName(ctx.exprOrName());
+            : ExprParser.parse(ctx.exprOrName());
         // @formatter:on
     }
 
@@ -77,15 +76,6 @@ public final class ParserUtils {
         return expr != null
             ? ExprParser.parse(expr)
             : ConstExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.classType())), TokenRange.fromContext(ctx.classType()));
-        // @formatter:on
-    }
-
-    public static @NotNull Expr parseExprOrName(final @NotNull JBPLParser.ExprOrNameContext ctx) throws ParserException {
-        final var expr = ctx.wrappedExpr();
-        // @formatter:off
-        return expr != null
-            ? ExprParser.parse(expr)
-            : ConstExpr.of(ctx.nameSegment().getText(), TokenRange.fromContext(ctx.nameSegment()));
         // @formatter:on
     }
 
@@ -118,20 +108,11 @@ public final class ParserUtils {
         // @formatter:on
     }
 
-    public static @NotNull Expr parseExprOrType(final @NotNull ExprOrTypeContext ctx) throws ParserException {
-        final var expr = ctx.wrappedExpr();
-        // @formatter:off
-        return expr != null
-            ? ExprParser.parse(expr)
-            : ConstExpr.of(ExceptionUtils.rethrowUnchecked(() -> TypeParser.parse(ctx.type())), TokenRange.fromContext(ctx.type()));
-        // @formatter:on
-    }
-
     public static @NotNull List<Pair<Expr, Expr>> parseParameters(final @NotNull List<ParameterContext> params) throws ParserException {
         final var paramPairs = new ArrayList<Pair<Expr, Expr>>();
         for (final var param : params) {
-            final var name = parseExprOrName(param.exprOrName());
-            final var type = parseExprOrType(param.exprOrType());
+            final var name = ExprParser.parse(param.exprOrName());
+            final var type = ExprParser.parse(param.exprOrType());
             paramPairs.add(new Pair<>(name, type));
         }
         return paramPairs;

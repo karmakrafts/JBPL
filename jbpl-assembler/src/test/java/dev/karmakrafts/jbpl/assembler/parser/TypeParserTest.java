@@ -1,5 +1,6 @@
 package dev.karmakrafts.jbpl.assembler.parser;
 
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.*;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -97,7 +98,7 @@ public final class TypeParserTest extends AbstractParserTest {
 
     @Test
     public void parsePreproClassType() {
-        runTest(new PreproClassType("Testing"), "type Testing");
+        runTest(new UnresolvedType(ConstExpr.of("Testing")), "type Testing");
     }
 
     @Test

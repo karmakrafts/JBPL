@@ -56,7 +56,20 @@ public record ArrayType(Type elementType) implements Type {
     }
 
     @Override
-    public @NotNull TypeCategory getCategory() {
+    public boolean isResolved() {
+        return elementType.isResolved();
+    }
+
+    @Override
+    public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (elementType.isResolved()) {
+            return this;
+        }
+        return new ArrayType(elementType.resolve(context));
+    }
+
+    @Override
+    public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return TypeCategory.ARRAY;
     }
 
@@ -67,7 +80,7 @@ public record ArrayType(Type elementType) implements Type {
 
     @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) throws EvaluationException {
-        if (!elementType.getCategory().isMaterializable()) {
+        if (!elementType.getCategory(context).isMaterializable()) {
             throw new UnsupportedOperationException(String.format("Array of type %s cannot be materialized",
                 elementType));
         }

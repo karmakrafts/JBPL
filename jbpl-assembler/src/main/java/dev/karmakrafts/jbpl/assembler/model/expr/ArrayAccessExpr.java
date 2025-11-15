@@ -81,13 +81,13 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var type = getReference().getType(context);
+        final var type = getReference().getType(context).resolveIfNeeded(context);
         if (!(type instanceof ArrayType arrayType)) {
             throw new EvaluationException("Array access requires array reference type",
                 SourceDiagnostic.from(this),
                 context.createStackTrace());
         }
-        return arrayType.elementType(); // We unwrap one layer of array so return element type
+        return arrayType.elementType().resolveIfNeeded(context); // We unwrap one layer of array so return element type
     }
 
     @Override

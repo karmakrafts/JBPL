@@ -23,7 +23,7 @@ public final class TypeMapper {
     private TypeMapper() {
     }
 
-    public static @NotNull Class<?> map(final @NotNull Type type, final boolean box) {
+    public static @NotNull Class<?> map(@NotNull Type type, final boolean box) {
         if (type instanceof IntersectionType) {
             throw new IllegalStateException("Intersection types cannot be mapped to the runtime");
         }

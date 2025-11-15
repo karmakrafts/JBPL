@@ -17,7 +17,9 @@
 package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,12 +56,29 @@ public record IntersectionType(@NotNull List<Type> alternatives) implements Type
         return Optional.of(new IntersectionType(alternatives.stream().map(Optional::get).toList()));
     }
 
+    @Override
+    public boolean isResolved() {
+        return alternatives.stream().anyMatch(Type::isResolved);
+    }
+
+    @Override
+    public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
+        if (isResolved()) {
+            return this;
+        }
+        // @formatter:off
+        return new IntersectionType(alternatives.stream()
+            .map(ExceptionUtils.unsafeFunction(type -> type.resolve(context)))
+            .toList());
+        // @formatter:on
+    }
+
     public @NotNull IntersectionType unfold() {
         return unfold(alternatives);
     }
 
     @Override
-    public @NotNull TypeCategory getCategory() {
+    public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return TypeCategory.INTERSECTION;
     }
 

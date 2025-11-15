@@ -53,7 +53,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getMacro(context).getReturnType().evaluateAs(context, Type.class);
+        return getMacro(context).getReturnType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
     private @NotNull List<Pair<@Nullable String, ConstExpr>> evaluateArguments(final @NotNull EvaluationContext context) {
@@ -93,7 +93,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     ));
                 // @formatter:on
                 final var paramType = parameter.getValue();
-                if (!paramType.isAssignableFrom(valueType)) {
+                if (!paramType.isAssignableFrom(valueType, context)) {
                     throw new EvaluationException(String.format(
                         "Mismatched argument type %s for parameter %s: %s in call to macro %s",
                         valueType,
@@ -107,7 +107,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
             }
             final var parameter = parameters.get(currentArgIndex);
             final var paramType = parameter.getValue();
-            if (!paramType.isAssignableFrom(valueType)) {
+            if (!paramType.isAssignableFrom(valueType, context)) {
                 throw new EvaluationException(String.format(
                     "Mismatched argument type %s for parameter %s: %s in call to macro %s",
                     valueType,

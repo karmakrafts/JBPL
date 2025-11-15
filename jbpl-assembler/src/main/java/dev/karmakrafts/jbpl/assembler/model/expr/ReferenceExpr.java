@@ -71,9 +71,9 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var argument = findArgument(context);
         if (argument != null) {
-            return argument.getType(context);
+            return argument.getType(context).resolveIfNeeded(context);
         }
-        return getDefine(context).getType().evaluateAs(context, Type.class);
+        return getDefine(context).getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
     @Override

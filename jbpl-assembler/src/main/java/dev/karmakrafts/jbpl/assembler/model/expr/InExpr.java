@@ -120,7 +120,7 @@ public final class InExpr extends AbstractExprContainer implements Expr {
         }
         else if (rhsType instanceof ArrayType arrayType) {
             final var elementType = arrayType.elementType();
-            if (!elementType.isAssignableFrom(lhsType)) {
+            if (!elementType.isAssignableFrom(lhsType, context)) {
                 throw new EvaluationException(String.format("Element type %s cannot appear in array of type %s",
                     lhsType,
                     elementType), SourceDiagnostic.from(this), context.createStackTrace());

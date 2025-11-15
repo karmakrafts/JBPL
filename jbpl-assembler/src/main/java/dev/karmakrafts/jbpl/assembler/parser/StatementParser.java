@@ -20,7 +20,6 @@ import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.statement.*;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
-import dev.karmakrafts.jbpl.assembler.util.ParserUtils;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.*;
 import dev.karmakrafts.jbpl.frontend.JBPLParserBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -47,7 +46,16 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     }
 
     @Override
-    public List<Statement> visitAssertStatement(final @NotNull AssertStatementContext ctx) {
+    public @NotNull List<Statement> visitTypeAliasStatement(final @NotNull TypeAliasStatementContext ctx) {
+        return ExceptionUtils.rethrowUnchecked(() -> {
+            final var name = ExprParser.parse(ctx.exprOrName());
+            final var type = ExprParser.parse(ctx.exprOrType());
+            return List.of(new TypeAliasStatement(name, type));
+        });
+    }
+
+    @Override
+    public @NotNull List<Statement> visitAssertStatement(final @NotNull AssertStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> List.of(new AssertStatement(ExprParser.parse(ctx.expr()))));
     }
 
@@ -128,7 +136,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitLabel(final @NotNull LabelContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
+            final var name = ExprParser.parse(ctx.exprOrName());
             return List.of(new LabelStatement(name));
         });
     }
@@ -136,7 +144,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitLocal(final @NotNull LocalContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
+            final var name = ExprParser.parse(ctx.exprOrName());
             // @formatter:off
             final var index = ctx.expr() != null
                 ? ExprParser.parse(ctx.expr())
@@ -149,17 +157,18 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitDefine(final @NotNull DefineContext ctx) {
         final var isFinal = ctx.KW_FINAL() != null;
-        return ExceptionUtils.rethrowUnchecked(() -> List.of(new DefineStatement(ParserUtils.parseExprOrName(ctx.exprOrName()),
-            ParserUtils.parseExprOrType(ctx.exprOrType()),
+        final var isPrivate = ctx.KW_PRIVATE() != null;
+        return ExceptionUtils.rethrowUnchecked(() -> List.of(new DefineStatement(ExprParser.parse(ctx.exprOrName()),
+            ExprParser.parse(ctx.exprOrType()),
             ExprParser.parse(ctx.expr()),
-            isFinal)));
+            isFinal,
+            isPrivate)));
     }
 
     @Override
     public List<Statement> visitForStatement(final @NotNull ForStatementContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var statement = new ForStatement(ParserUtils.parseExprOrName(ctx.exprOrName()),
-                ExprParser.parse(ctx.expr()));
+            final var statement = new ForStatement(ExprParser.parse(ctx.exprOrName()), ExprParser.parse(ctx.expr()));
             // @formatter:off
             statement.addElements(ctx.bodyElement().stream()
                 .map(ExceptionUtils.unsafeFunction(ElementParser::parse))

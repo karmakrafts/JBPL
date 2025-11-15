@@ -30,38 +30,43 @@ public final class TypeCommonizer {
     private TypeCommonizer() {
     }
 
-    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Collection<? extends Element> elements,
-                                                                  final @NotNull EvaluationContext context) {
+    public static @NotNull Optional<? extends Type> getCommonReturnType(final @NotNull Collection<? extends Element> elements,
+                                                                        final @NotNull EvaluationContext context) {
         // @formatter:off
         final var returnedTypes = elements.stream()
             .filter(ReturnStatement.class::isInstance)
-            .map(ExceptionUtils.unsafeFunction(statement -> ((ReturnStatement)statement).getValue().getType(context)))
+            .map(ExceptionUtils.unsafeFunction(statement -> ((ReturnStatement)statement).getValue().getType(context).resolveIfNeeded(context)))
             .toList();
         // @formatter:on
         if (returnedTypes.isEmpty()) {
             // @formatter:off
             final var expressions = elements.stream()
                 .filter(Expr.class::isInstance)
-                .map(ExceptionUtils.unsafeFunction(statement -> ((Expr)statement).getType(context)))
+                .map(ExceptionUtils.unsafeFunction(statement -> ((Expr)statement).getType(context).resolveIfNeeded(context)))
                 .collect(Collectors.toCollection(ArrayList::new));
             // @formatter:on
             Collections.reverse(expressions);
             return expressions.stream().findFirst();
         }
-        return getCommonType(returnedTypes);
+        return getCommonType(returnedTypes, context);
     }
 
-    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Collection<? extends Type> types) {
-        final var categories = types.stream().map(Type::getCategory).collect(Collectors.toSet());
+    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Collection<? extends Type> types,
+                                                                  final @NotNull EvaluationContext context) {
+        // @formatter:off
+        final var categories = types.stream()
+            .map(ExceptionUtils.unsafeFunction(type -> type.getCategory(context)))
+            .collect(Collectors.toSet());
+        // @formatter:on
         if (categories.size() == 2 && categories.contains(TypeCategory.INTEGER) && categories.contains(TypeCategory.FLOAT)) {
             // @formatter:off
             final var maxIntSize = types.stream()
-                .filter(type -> type.getCategory() == TypeCategory.INTEGER)
+                .filter(ExceptionUtils.unsafePredicate(type -> type.getCategory(context) == TypeCategory.INTEGER))
                 .mapToInt(type -> ((BuiltinType)type).byteSize)
                 .max()
                 .orElse(-1);
             final var maxFloatSize = types.stream()
-                .filter(type -> type.getCategory() == TypeCategory.FLOAT)
+                .filter(ExceptionUtils.unsafePredicate(type -> type.getCategory(context) == TypeCategory.FLOAT))
                 .mapToInt(type -> ((BuiltinType)type).byteSize)
                 .max()
                 .orElse(-1);
@@ -70,7 +75,8 @@ public final class TypeCommonizer {
             if (maxIntSize == -1 || maxFloatSize == -1 || maxIntSize > maxFloatSize) {
                 return Optional.empty();
             }
-            return BuiltinType.floatBySize(maxFloatSize); // The largest float type we can fit all floats AND ints into
+            // The largest float type we can fit all floats AND ints into
+            return BuiltinType.floatBySize(maxFloatSize, context);
         }
         if (categories.size() > 1) {
             return Optional.empty();
@@ -80,8 +86,8 @@ public final class TypeCommonizer {
         return switch(category) { // @formatter:off
             case ARRAY -> getCommonType(uniqueTypes.stream()
                 .map(ArrayType.class::cast)
-                .map(ArrayType::elementType)
-                .toList())
+                .map(ExceptionUtils.unsafeFunction(type -> type.elementType().resolveIfNeeded(context)))
+                .toList(), context)
                 .map(Type::array);
             case INTEGER, FLOAT -> uniqueTypes.stream()
                 .filter(BuiltinType.class::isInstance)
@@ -91,7 +97,8 @@ public final class TypeCommonizer {
         }; // @formatter:on
     }
 
-    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull Type... types) {
-        return getCommonType(List.of(types));
+    public static @NotNull Optional<? extends Type> getCommonType(final @NotNull EvaluationContext context,
+                                                                  final @NotNull Type... types) {
+        return getCommonType(List.of(types), context);
     }
 }

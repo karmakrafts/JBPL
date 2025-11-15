@@ -25,7 +25,17 @@ import org.jetbrains.annotations.NotNull;
 
 public record PreproClassType(@NotNull String name) implements Type {
     @Override
-    public @NotNull TypeCategory getCategory() {
+    public boolean isResolved() {
+        return true;
+    }
+
+    @Override
+    public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
+        return this;
+    }
+
+    @Override
+    public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return TypeCategory.PREPROCESSOR;
     }
 

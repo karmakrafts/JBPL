@@ -65,7 +65,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
             injector.setTarget(ExprParser.parse(ctx.functionSignature()));
             final var selector = ctx.exprOrName();
             if (selector != null) {
-                injector.setSelector(ParserUtils.parseExprOrName(selector));
+                injector.setSelector(ExprParser.parse(selector));
             }
             // @formatter:off
             injector.addStatements(ctx.statement().stream()
@@ -80,10 +80,10 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     public @NotNull List<Declaration> visitMacro(final @NotNull MacroContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var signature = ctx.macroSignature();
-            final var name = ParserUtils.parseExprOrName(signature.exprOrName());
+            final var name = ExprParser.parse(signature.exprOrName());
             // @formatter:off
             final var returnType = signature.exprOrType() != null
-                ? ParserUtils.parseExprOrType(signature.exprOrType())
+                ? ExprParser.parse(signature.exprOrType())
                 : ConstExpr.unit();
             // @formatter:on
             final var macro = new MacroDecl(name, returnType);
@@ -100,7 +100,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitPreproClass(final @NotNull PreproClassContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ParserUtils.parseExprOrName(ctx.exprOrName());
+            final var name = ExprParser.parse(ctx.exprOrName());
             final var clazz = new PreproClassDecl(name);
             clazz.addFields(ParserUtils.parseParameters(ctx.parameter()));
             return List.of(clazz);

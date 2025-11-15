@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public final class CompoundExpr extends AbstractElementContainer implements Expr {
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return TypeCommonizer.getCommonType(getElements(), context).orElseThrow();
+        return TypeCommonizer.getCommonReturnType(getElements(), context).orElseThrow().resolveIfNeeded(context);
     }
 
     @Override

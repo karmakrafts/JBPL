@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
@@ -40,8 +41,8 @@ public final class LiteralExpr extends AbstractElement implements ConstExpr {
     }
 
     @Override
-    public @NotNull Type getType(final @NotNull EvaluationContext context) {
-        return type;
+    public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
+        return type.resolveIfNeeded(context);
     }
 
     @Override
