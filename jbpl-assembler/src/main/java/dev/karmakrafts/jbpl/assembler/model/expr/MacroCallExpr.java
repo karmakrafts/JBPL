@@ -42,7 +42,12 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     private @NotNull MacroDecl getMacro(final @NotNull EvaluationContext context) throws EvaluationException {
         final var scope = context.getScope();
-        final var macro = context.resolveByName(MacroDecl.class, name);
+        var macro = context.resolveByName(MacroDecl.class, name);
+        if (macro == null) { // Second attempt is for resolving private declarations
+            context.pushFrame(getContainingFile());
+            macro = context.resolveByName(MacroDecl.class, name);
+            context.popFrame();
+        }
         if (macro == null) {
             throw new EvaluationException(String.format("Could not find macro '%s' in current scope %s", name, scope),
                 SourceDiagnostic.from(this),
@@ -137,6 +142,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         final var macro = getMacro(context);
         final var arguments = remapArguments(context, macro);
         context.pushFrame(macro); // Create new stack frame for macro body
+        context.peekFrame().resetLocalDefines(); // Reset all local defines within the macro before invoking anything
         context.pushValues(arguments); // Push arguments into callee stack frame
         macro.evaluate(context);
         context.popFrame(); // Frame data will be merged to retain result from callee frame

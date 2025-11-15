@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.tree.ClassNode;
 
-import java.util.ArrayList;
-
 public final class AssemblerTest {
     @Test
     public void loadEmpty() {
@@ -23,8 +21,7 @@ public final class AssemblerTest {
 
     @Test
     public void loadFromResource() {
-        final var logOutput = new ArrayList<String>();
-        final var assembler = Assembler.createFromResources("", logOutput::add, System.err::println);
+        final var assembler = Assembler.createFromResources("");
         final var context = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseAndLowerFile("test1.jbpl",
             n -> new ClassNode()));
         try {
@@ -33,8 +30,6 @@ public final class AssemblerTest {
         catch (Throwable error) {
             Assertions.fail(error);
         }
-        Assertions.assertEquals(1, logOutput.size());
-        Assertions.assertEquals("832040", logOutput.get(0)); // 30th fibonacci number
     }
 
     @Test

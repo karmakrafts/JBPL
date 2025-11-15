@@ -31,6 +31,7 @@ public final class DefineStatement extends AbstractExprContainer
     public static final int NAME_INDEX = 0;
     public static final int TYPE_INDEX = 1;
     public static final int VALUE_INDEX = 2;
+    public static final int INITIAL_VALUE = 3;
 
     public boolean isFinal;
     public boolean isPrivate;
@@ -43,8 +44,22 @@ public final class DefineStatement extends AbstractExprContainer
         addExpression(name);
         addExpression(type);
         addExpression(value);
+        addExpression(value);
         this.isFinal = isFinal;
         this.isPrivate = isPrivate;
+    }
+
+    public void resetValue() {
+        setValue(getInitialValue());
+    }
+
+    public @NotNull Expr getInitialValue() {
+        return getExpressions().get(INITIAL_VALUE);
+    }
+
+    public void setInitialValue(final @NotNull Expr initialValue) {
+        initialValue.setParent(this);
+        getExpressions().set(INITIAL_VALUE, initialValue);
     }
 
     public @NotNull Expr getName() {

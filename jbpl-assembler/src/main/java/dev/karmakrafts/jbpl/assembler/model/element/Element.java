@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.element;
 
 import dev.karmakrafts.jbpl.assembler.eval.Evaluable;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import dev.karmakrafts.jbpl.assembler.source.SourceOwner;
 import dev.karmakrafts.jbpl.assembler.source.SourceRange;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
@@ -26,7 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
+import java.util.function.Predicate;
 
 public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
     @NotNull ElementAttributes getAttributes();
@@ -48,22 +51,33 @@ public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
         return visitor.visitElement(this);
     }
 
-    default @NotNull AssemblyFile getContainingFile() {
+    @SuppressWarnings("unchecked")
+    default <P> @NotNull Optional<P> findParent(final @NotNull Class<P> type, final @NotNull Predicate<P> filter) {
         final var parentStack = new Stack<Element>();
         parentStack.push(this);
         while (!parentStack.isEmpty()) {
             final var currentParent = parentStack.pop();
-            if (currentParent instanceof AssemblyFile file) {
-                return file;
+            if (type.isInstance(currentParent) && filter.test((P) currentParent)) {
+                return Optional.of((P) currentParent);
             }
             final var grandParent = currentParent.getParent();
-            if (grandParent == null) {
-                break;
+            if (grandParent == currentParent) {
+                break; // Prevent endless recursion on tree roots
             }
             parentStack.push(grandParent);
         }
-        throw new IllegalStateException("Could not find parent file for element");
+        return Optional.empty();
     }
+
+    default @NotNull ScopeOwner getContainingScope() { // @formatter:off
+        return findParent(ScopeOwner.class, owner -> true)
+            .orElseThrow(() -> new IllegalStateException("Could not find parent scope for element"));
+    } // @formatter:on
+
+    default @NotNull AssemblyFile getContainingFile() { // @formatter:off
+        return findParent(AssemblyFile.class, file -> true)
+            .orElseThrow(() -> new IllegalStateException("Could not find parent file for element"));
+    } // @formatter:on
 
     default @NotNull SourceRange getSourceRange() {
         return getContainingFile().getSourceRange(getTokenRange());

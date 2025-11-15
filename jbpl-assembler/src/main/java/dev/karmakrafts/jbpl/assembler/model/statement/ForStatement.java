@@ -63,7 +63,9 @@ public final class ForStatement extends AbstractElementContainer implements Stat
                                   final @NotNull EvaluationContext context) throws EvaluationException {
         final var variableName = this.variableName.evaluateAs(context, String.class);
         context.pushFrame(this);
-        context.peekFrame().namedLocalValues.put(variableName, variableValue);
+        final var frame = context.peekFrame();
+        frame.resetLocalDefines();
+        frame.namedLocalValues.put(variableName, variableValue);
         for (final var element : getElements()) {
             if (!element.isEvaluatedDirectly()) {
                 continue;
@@ -101,7 +103,7 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         final var values = getValue().evaluateAs(context, (Class<T[]>) type.arrayType());
         final var start = values[0];
         final var end = values[1];
-        for (var value = start; value.compareTo(end) != 0; value = inc.apply(value)) {
+        for (var value = start; value.compareTo(end) < 0; value = inc.apply(value)) {
             final var result = performIteration(ConstExpr.of(value, getTokenRange()), context);
             if ((result & EvaluationContext.RET_MASK_CONTINUE) != 0) {
                 continue;

@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.element;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeOwner;
 import org.jetbrains.annotations.NotNull;
 
@@ -172,6 +173,9 @@ public interface ElementContainer extends Element {
         var hasScope = false;
         if (this instanceof ScopeOwner scopeOwner) {
             context.pushFrame(scopeOwner);
+            if (!(this instanceof AssemblyFile)) {
+                context.peekFrame().resetLocalDefines();
+            }
             hasScope = true;
         }
         for (final var element : getElements()) {

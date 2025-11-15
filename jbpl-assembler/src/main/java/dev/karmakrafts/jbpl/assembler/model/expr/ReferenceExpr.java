@@ -37,9 +37,14 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     }
 
     public @NotNull DefineStatement getDefine(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var scope = context.getScope();
-        final var define = context.resolveByName(DefineStatement.class, name);
+        var define = context.resolveByName(DefineStatement.class, name);
+        if (define == null) { // Second attempt is for resolving private declarations
+            context.pushFrame(getContainingFile());
+            define = context.resolveByName(DefineStatement.class, name);
+            context.popFrame();
+        }
         if (define == null) {
+            final var scope = context.getScope();
             final var message = String.format("Could not find define '%s' in scope %s", name, scope);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
