@@ -21,13 +21,16 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.type.IntrinsicReceiverType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.util.Copyable;
 import org.jetbrains.annotations.NotNull;
 
 public final class IntrinsicReceiverExpr extends AbstractElement implements Expr {
     public IntrinsicReceiverType type;
+    public Object receiver;
 
-    public IntrinsicReceiverExpr(final @NotNull IntrinsicReceiverType type) {
+    public IntrinsicReceiverExpr(final @NotNull IntrinsicReceiverType type, final @NotNull Object receiver) {
         this.type = type;
+        this.receiver = receiver;
     }
 
     @Override
@@ -41,6 +44,6 @@ public final class IntrinsicReceiverExpr extends AbstractElement implements Expr
 
     @Override
     public @NotNull IntrinsicReceiverExpr copy() {
-        return copyParentAndSourceTo(new IntrinsicReceiverExpr(type));
+        return copyParentAndSourceTo(new IntrinsicReceiverExpr(type, Copyable.copyIfPossible(receiver)));
     }
 }

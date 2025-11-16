@@ -28,6 +28,7 @@ import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.validation.ReturnValidationVisitor;
 import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
 import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
+import dev.karmakrafts.jbpl.assembler.validation.VisibilityValidationVisitor;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.frontend.JBPLParser;
 import org.antlr.v4.runtime.*;
@@ -154,6 +155,7 @@ public final class Assembler {
     private void validateFile(final @NotNull AssemblyFile file) {
         file.accept(VersionValidationVisitor.INSTANCE);
         file.accept(ReturnValidationVisitor.INSTANCE);
+        file.accept(VisibilityValidationVisitor.INSTANCE);
     }
 
     private void validatePostLowering(final @NotNull EvaluationContext context) throws ValidationException {

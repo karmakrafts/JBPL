@@ -138,3 +138,9 @@ info typeof(coercion2)
 
 define my_var_name: string = "coercion"
 info ${my_var_name} // Interpolated reference expression
+
+define my_macro_name: string = "test_macro"
+macro ${my_macro_name}() {
+    info "PRINTING FROM DYNAMIC MACRO!"
+}
+${my_macro_name}()

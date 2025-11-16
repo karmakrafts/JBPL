@@ -146,7 +146,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     private static @NotNull List<Expr> parseMacroCall(final @NotNull MacroCallContext ctx,
                                                       final @NotNull Expr receiver) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var name = ctx.IDENT().getText();
+            final var name = parse(ctx.exprOrName());
             final var call = new MacroCallExpr(name);
             call.setReceiver(receiver);
             call.addArguments(ParserUtils.parseArguments(ctx.argument()));

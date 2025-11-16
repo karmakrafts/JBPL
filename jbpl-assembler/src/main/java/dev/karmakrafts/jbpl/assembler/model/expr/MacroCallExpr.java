@@ -33,14 +33,24 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class MacroCallExpr extends AbstractCallExpr implements Expr {
-    public String name;
+    public static final int NAME_INDEX = RECEIVER_INDEX + 1;
 
-    public MacroCallExpr(final @NotNull String name) {
+    public MacroCallExpr(final @NotNull Expr name) {
         super();
-        this.name = name;
+        addExpression(name);
     }
 
-    private @NotNull MacroDecl getMacro(final @NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull Expr getName() {
+        return getExpressions().get(NAME_INDEX);
+    }
+
+    public void setName(final @NotNull Expr name) {
+        name.setParent(this);
+        getExpressions().set(NAME_INDEX, name);
+    }
+
+    private @NotNull MacroDecl getMacro(final @NotNull String name,
+                                        final @NotNull EvaluationContext context) throws EvaluationException {
         final var scope = context.getScope();
         var macro = context.resolveByName(MacroDecl.class, name);
         if (macro == null) { // Second attempt is for resolving private declarations
@@ -58,7 +68,8 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return getMacro(context).getReturnType().evaluateAs(context, Type.class).resolveIfNeeded(context);
+        final var name = getName().evaluateAs(context, String.class);
+        return getMacro(name, context).getReturnType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
     private @NotNull List<Pair<@Nullable String, ConstExpr>> evaluateArguments(final @NotNull EvaluationContext context) {
@@ -139,7 +150,8 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var macro = getMacro(context);
+        final var name = getName().evaluateAs(context, String.class);
+        final var macro = getMacro(name, context);
         final var arguments = remapArguments(context, macro);
         context.pushFrame(macro); // Create new stack frame for macro body
         context.peekFrame().resetLocalDefines(); // Reset all local defines within the macro before invoking anything
@@ -150,7 +162,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull MacroCallExpr copy() {
-        final var call = copyParentAndSourceTo(new MacroCallExpr(name));
+        final var call = copyParentAndSourceTo(new MacroCallExpr(getName().copy()));
         call.setReceiver(getReceiver().copy());
         call.addArguments(getArguments().stream().map(Pair::copy).toList());
         return call;
@@ -158,7 +170,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     @Override
     public @NotNull String toString() { // @formatter:off
-        return String.format("%s^(%s)", name, getArguments().stream()
+        return String.format("%s^(%s)", getName(), getArguments().stream()
             .map(pair -> pair.right().toString())
             .collect(Collectors.joining(", ")));
     } // @formatter:on

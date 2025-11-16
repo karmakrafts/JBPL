@@ -146,8 +146,7 @@ macro:
     ;
 
 macroCall:
-    (softKeyword
-    | IDENT)
+    exprOrName
     L_PAREN
     (argument
     (COMMA
