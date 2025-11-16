@@ -159,6 +159,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_namedArgument -> new NamedArgumentNode(node);
             case JBPLParser.RULE_superType -> new SuperTypeNode(node);
             case JBPLParser.RULE_classDecl -> new ClassNode(node);
+            case JBPLParser.RULE_functionScopeReference -> new FunctionScopeReferenceNode(node);
             default -> new JBPLPsiNode(node);
         }; // @formatter:on
     }

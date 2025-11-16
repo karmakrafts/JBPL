@@ -322,8 +322,15 @@ expr:
     | nameOfExpr
     | preproClassInstantiation
     | injectorReference
+    | functionScopeReference
     | literal
     | reference
+    ;
+
+functionScopeReference: // fun.instructions for example inside fun or inject body
+    KW_FUN
+    DOT
+    exprOrName
     ;
 
 whenExpr:

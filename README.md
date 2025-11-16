@@ -5,6 +5,20 @@ and macro assembler.
 It can be used to author new code or patch existing code.  
 **We encourage you to use this tool for hacking around!**
 
+### Features
+
+- Standalone [ANTLRv4 frontend](https://github.com/karmakrafts/JBPL/tree/master/jbpl-frontend/src/main/antlr)
+- [Interpreter](https://github.com/karmakrafts/JBPL/tree/master/jbpl-assembler/src/main/java/dev/karmakrafts/jbpl/assembler/model)
+- [IntelliJ plugin](https://github.com/karmakrafts/JBPL/tree/master/jbpl-intellij-plugin)
+- [Rouge lexer](https://github.com/karmakrafts/rouge) (GitLab highlighting)
+
+### Why i made this
+
+JBPL was created in an effort to streamline the process of applying patches to
+the Kotlin compiler for another project i'm working on.  
+It allows me to easily bundle patches as resource files and load them selectively
+based on the current Kotlin version.
+
 ### Code Example
 
 ```jbpl
@@ -17,8 +31,8 @@ my_variable++
 info "my_variable is ${my_variable}" // ..and string interpolation
 
 // It has JVM signatures, instructions and opcodes as first-class types.
-define my_fld_sig: signature(field) = <com/example/Foo>.test: i32
-define my_fun_sig: signature(fun) = <com/example/Foo>.test(): void
+define my_fld_sig: signature(field) = signature <com/example/Foo>.test: i32
+define my_fun_sig: signature(fun) = signature <com/example/Foo>.test(): void
 define my_insn: instruction = instruction(ldc "Hello, World!")
 define my_op: opcode = opcode invokestatic
 
@@ -47,7 +61,8 @@ inject <com/example/TargetClass>.someFunction(): void {
 
 ### How to use it as a CLI tool
 
-The JBPL macro assembler can be invoked as a simple CLI application as follows:  
+First get a prebuilt JAR of the **jbpl-assembler-cli** or build one yourself.  
+Afterward the JBPL macro assembler can be invoked as a simple CLI application as follows:  
 
 ```shell
 java -jar jbpl-assembler-cli.jar --input <inputFile>.jbpl
@@ -77,22 +92,5 @@ dependencies {
 }
 ```
 
-### Get the IntelliJ plugin
+### How to install the Rouge lexer with a self-hosted GitLab instance
 
-TBA
-
-### Roadmap
-
-- [X] ANTLR grammar & frontend
-- [X] Interpreter
-- [X] IntelliJ Plugin
-- [X] [Rouge lexer](https://github.com/karmakrafts/rouge/tree/jbpl-support) (GitLab highlighting)
-- [ ] tmLanguage lexer (GitHub/Sublime Text highlighting)
-- [ ] Compiled JBPL assembly
-
-### Why i made this
-
-JBPL was created in an effort to streamline the process of applying patches to 
-the Kotlin compiler for another project i'm working on.  
-It allows me to easily bundle patches as resource files and load them selectively
-based on the current Kotlin version.
