@@ -20,7 +20,6 @@ import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.model.expr.*;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseBranch;
 import dev.karmakrafts.jbpl.assembler.model.expr.IfExpr.ElseIfBranch;
-import dev.karmakrafts.jbpl.assembler.model.type.IntrinsicReceiverType;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproClassType;
 import dev.karmakrafts.jbpl.assembler.source.TokenRange;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
@@ -413,7 +412,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public @NotNull List<Expr> visitFunctionScopeReference(final @NotNull FunctionScopeReferenceContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var ref = new ReferenceExpr(parse(ctx.exprOrName()));
-            ref.setReceiver(new IntrinsicReceiverExpr(IntrinsicReceiverType.FUN, null));
+            ref.setReceiver(new IntrinsicReceiverExpr());
             return List.of(ref);
         });
     }
@@ -422,7 +421,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     public @NotNull List<Expr> visitFieldScopeReference(final @NotNull FieldScopeReferenceContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
             final var ref = new ReferenceExpr(parse(ctx.exprOrName()));
-            ref.setReceiver(new IntrinsicReceiverExpr(IntrinsicReceiverType.FIELD, null));
+            ref.setReceiver(new IntrinsicReceiverExpr());
             return List.of(ref);
         });
     }

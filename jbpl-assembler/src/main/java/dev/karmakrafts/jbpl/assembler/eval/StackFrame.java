@@ -36,6 +36,8 @@ public final class StackFrame implements Copyable<StackFrame> {
     public final ScopeResolver scopeResolver;
     public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
     public final HashMap<String, Expr> namedLocalValues = new HashMap<>(); // Named arguments of the current macro
+    public final HashMap<String, Expr> intrinsicDefines = new HashMap<>();
+    public final HashMap<IntrinsicMacroSignature, IntrinsicMacro> intrinsicMacros = new HashMap<>();
 
     public final InsnList instructionBuffer = new InsnList();
     public final HashMap<String, LocalStatement> locals = new HashMap<>();

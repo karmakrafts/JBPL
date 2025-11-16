@@ -22,7 +22,6 @@ import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, ExprContainer, Reference {
     public static final int NAME_INDEX = RECEIVER_INDEX + 1;
@@ -39,10 +38,6 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     public void setName(final @NotNull Expr name) {
         name.setParent(this);
         getExpressions().set(NAME_INDEX, name);
-    }
-
-    public @Nullable Expr findArgument(final @NotNull String name, final @NotNull EvaluationContext context) {
-        return context.peekFrame().namedLocalValues.get(name);
     }
 
     public @NotNull DefineStatement getDefine(final @NotNull String name,
@@ -64,7 +59,19 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     @Override
     public @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName().evaluateAs(context, String.class);
-        final var argument = findArgument(name, context);
+        final var receiver = getReceiver();
+        final var frame = context.peekFrame();
+        if (receiver instanceof IntrinsicReceiverExpr) { // Load intrinsic define from the current stack frame if present
+            final var value = frame.intrinsicDefines.get(name);
+            if (value == null) {
+                final var message = String.format("No intrinsic value named '%s' in %s", name, receiver);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+            return value.evaluateAsConst(context);
+        }
+        final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
             return argument.evaluateAsConst(context);
         }
@@ -76,7 +83,19 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     public void storeToReference(final @NotNull ConstExpr value,
                                  final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName().evaluateAs(context, String.class);
-        final var argument = findArgument(name, context);
+        final var receiver = getReceiver();
+        final var frame = context.peekFrame();
+        if (receiver instanceof IntrinsicReceiverExpr) {
+            if (!frame.intrinsicDefines.containsKey(name)) {
+                final var message = String.format("No intrinsic value named '%s' in %s", name, receiver);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+            frame.intrinsicDefines.put(name, value); // Update ref to value (replacing instruction lists etc.)
+            return;
+        }
+        final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
             context.peekFrame().namedLocalValues.put(name, ConstExpr.of(value, getTokenRange()));
             return;
@@ -87,7 +106,19 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName().evaluateAs(context, String.class);
-        final var argument = findArgument(name, context);
+        final var frame = context.peekFrame();
+        final var receiver = getReceiver();
+        if (receiver instanceof IntrinsicReceiverExpr) {
+            final var value = frame.intrinsicDefines.get(name);
+            if (value == null) {
+                final var message = String.format("No intrinsic value named '%s' in %s", name, receiver);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+            return value.getType(context).resolveIfNeeded(context);
+        }
+        final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
             return argument.getType(context).resolveIfNeeded(context);
         }

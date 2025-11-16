@@ -179,7 +179,14 @@ public interface ElementVisitor {
         else if (expr instanceof RangeExpr rangeExpr) {
             return visitRangeExpr(rangeExpr);
         }
+        else if (expr instanceof IntrinsicReceiverExpr receiverExpr) {
+            return visitIntrinsicReceiverExpr(receiverExpr);
+        }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitIntrinsicReceiverExpr(final @NotNull IntrinsicReceiverExpr receiverExpr) {
+        return receiverExpr;
     }
 
     default @NotNull Expr visitRangeExpr(final @NotNull RangeExpr rangeExpr) {

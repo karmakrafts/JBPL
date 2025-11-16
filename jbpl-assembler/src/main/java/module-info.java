@@ -21,6 +21,7 @@ module dev.karmakrafts.jbpl.assembler {
     requires org.antlr.antlr4.runtime;
     requires dev.karmakrafts.jbpl.frontend;
     requires org.fusesource.jansi;
+    requires dev.karmakrafts.jbpl.assembler;
 
     exports dev.karmakrafts.jbpl.assembler;
     exports dev.karmakrafts.jbpl.assembler.parser;

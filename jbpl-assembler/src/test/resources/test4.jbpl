@@ -18,6 +18,7 @@ private define d: i32 = default(t1)
 info d
 
 public static fun <com/example/Example>.testing(): void {
+    info fun.instructions
     return
 }
 

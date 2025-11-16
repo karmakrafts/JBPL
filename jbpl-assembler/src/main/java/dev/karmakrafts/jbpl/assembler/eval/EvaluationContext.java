@@ -47,6 +47,8 @@ public final class EvaluationContext {
     public final Consumer<String> errorConsumer;
     public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
     private final Stack<StackFrame> frameStack = new Stack<>();
+    private final HashMap<String, Expr> intrinsicDefines = new HashMap<>();
+    private final HashMap<IntrinsicMacroSignature, IntrinsicMacro> intrinsicMacros = new HashMap<>();
     public int bytecodeVersion = Opcodes.V17;
     public int bytecodeApi = Opcodes.ASM9;
     private byte returnMask = RET_MASK_NONE;
@@ -59,6 +61,24 @@ public final class EvaluationContext {
         this.classResolver = classResolver;
         this.infoConsumer = infoConsumer;
         this.errorConsumer = errorConsumer;
+    }
+
+    public void addGlobalIntrinsicDefine(final @NotNull String name, final @NotNull Expr value) {
+        intrinsicDefines.put(name, value);
+    }
+
+    public void addLocalIntrinsicDefine(final @NotNull String name, final @NotNull Expr value) {
+        peekFrame().intrinsicDefines.put(name, value);
+    }
+
+    public void addGlobalIntrinsicMacro(final @NotNull IntrinsicMacroSignature signature,
+                                        final @NotNull Function<List<Expr>, Expr> callback) {
+        intrinsicMacros.put(signature, new IntrinsicMacro(signature, callback));
+    }
+
+    public void addLocalIntrinsicMacro(final @NotNull IntrinsicMacroSignature signature,
+                                       final @NotNull Function<List<Expr>, Expr> callback) {
+        peekFrame().intrinsicMacros.put(signature, new IntrinsicMacro(signature, callback));
     }
 
     public @NotNull StackTrace createStackTrace() {
@@ -230,6 +250,8 @@ public final class EvaluationContext {
     public void pushFrame(final @NotNull ScopeOwner owner) {
         final var parentScope = frameStack.empty() ? null : frameStack.peek().scope;
         final var newFrame = new StackFrame(new Scope(parentScope, owner));
+        newFrame.intrinsicDefines.putAll(intrinsicDefines);
+        newFrame.intrinsicMacros.putAll(intrinsicMacros);
         if (!frameStack.empty()) {
             // If we currently already have a frame, propagate named values scope-inwards
             newFrame.namedLocalValues.putAll(peekFrame().namedLocalValues);
