@@ -21,7 +21,12 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
-public record IntrinsicReceiverType(Target target) implements Type {
+public enum IntrinsicReceiverType implements Type {
+    // @formatter:off
+    FUN,
+    FIELD;
+    // @formatter:on
+
     @Override
     public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) throws EvaluationException {
         return TypeCategory.INTRINSIC_RECEIVER;
@@ -45,12 +50,5 @@ public record IntrinsicReceiverType(Target target) implements Type {
     @Override
     public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
         return this;
-    }
-
-    public enum Target {
-        // @formatter:off
-        FUN,
-        FIELD
-        // @formatter:on
     }
 }
