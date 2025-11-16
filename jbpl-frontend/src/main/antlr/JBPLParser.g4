@@ -323,8 +323,15 @@ expr:
     | preproClassInstantiation
     | injectorReference
     | functionScopeReference
+    | fieldScopeReference
     | literal
     | reference
+    ;
+
+fieldScopeReference: // field.access for example inside inject body
+    KW_FIELD
+    DOT
+    exprOrName
     ;
 
 functionScopeReference: // fun.instructions for example inside fun or inject body

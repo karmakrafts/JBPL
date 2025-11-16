@@ -53,6 +53,7 @@ for(i in 0..<sizeof(my_array)) {
 
 // Inject into existing functions; turn someFunction into a NOOP
 inject <com/example/TargetClass>.someFunction(): void {
+    define insn: [instruction] = fun.instructions
     return // Inject a return instruction at the head of the function    
 }
 
