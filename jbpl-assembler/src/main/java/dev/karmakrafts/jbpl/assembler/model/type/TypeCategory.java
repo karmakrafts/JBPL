@@ -28,7 +28,8 @@ public enum TypeCategory {
     OBJECT,
     INTERSECTION,
     PREPROCESSOR,
-    RANGE;
+    RANGE,
+    INTRINSIC_RECEIVER;
     // @formatter:on
 
     public boolean isNumber() {
