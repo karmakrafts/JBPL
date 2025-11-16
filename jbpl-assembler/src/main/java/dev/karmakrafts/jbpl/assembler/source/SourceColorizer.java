@@ -61,10 +61,10 @@ public final class SourceColorizer {
         JBPLLexer.KW_MACRO,
         JBPLLexer.KW_DEFINE,
         JBPLLexer.KW_FOR,
-        JBPLLexer.KW_PREPRO_INFO,
-        JBPLLexer.KW_PREPRO_ERROR,
+        JBPLLexer.KW_INFO,
+        JBPLLexer.KW_ERROR,
         JBPLLexer.KW_PREPRO_CLASS,
-        JBPLLexer.KW_PREPRO_INCLUDE,
+        JBPLLexer.KW_INCLUDE,
         JBPLLexer.KW_PREPRO_RETURN);
     private static final Set<Integer> STRING_TOKENS = Set.of(JBPLLexer.QUOTE,
         JBPLLexer.M_CONST_STR_TEXT,

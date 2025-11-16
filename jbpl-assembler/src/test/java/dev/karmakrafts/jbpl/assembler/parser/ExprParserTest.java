@@ -87,7 +87,7 @@ public final class ExprParserTest extends AbstractParserTest {
 
     @Test
     public void parseFieldSignature() {
-        final var result = parse("<com/example/Test>.myField: i32");
+        final var result = parse("signature <com/example/Test>.myField: i32");
         result.shouldSucceed();
         final var file = result.context();
         Assertions.assertNotNull(file);
@@ -103,7 +103,7 @@ public final class ExprParserTest extends AbstractParserTest {
 
     @Test
     public void parseFunctionSignature() {
-        final var result = parse("<com/example/Test>.myFunction(f32): i32");
+        final var result = parse("signature <com/example/Test>.myFunction(f32): i32");
         result.shouldSucceed();
         final var file = result.context();
         Assertions.assertNotNull(file);

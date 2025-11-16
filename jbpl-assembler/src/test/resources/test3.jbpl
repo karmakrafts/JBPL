@@ -1,19 +1,19 @@
-^include "test2.jbpl"
+include "test2.jbpl"
 
-^include "test4.jbpl"
+include "test4.jbpl"
 
 define _t: string = "test_define"
 define _tt: type = type string
 define ${_t}: ${_tt} = "HELLO, WORLD"
-^info test_define
-^info typeof(test_define)
+info test_define
+info typeof(test_define)
 
 define test_array: [string] = []{"Hellou", "Wourld", "Test"}
 define test_array2: [[string]] = []{[]{"Test"}, []{"HELLOU"}}
 
 for(arr in test_array2) {
     for(elem in arr) {
-        ^info "Hellou from 2D loop ${elem} (${arr})"
+        info "Hellou from 2D loop ${elem} (${arr})"
         ^return
     }
 }
@@ -21,55 +21,55 @@ for(arr in test_array2) {
 define var_name: string = "element"
 for(${var_name} in test_array) {
     if (element == "Hellou") continue
-    ^info element
+    info element
     ^return
 }
 
-^info "Hellou" in test_array
-^info "Andy" in test_array
+info "Hellou" in test_array
+info "Andy" in test_array
 
-^info 'A' in "Andy"
-^info 'Z' in "Andy"
+info 'A' in "Andy"
+info 'Z' in "Andy"
 
-^info type i32 in type (i32 | i64)
-^info type string in type (char | void)
+info type i32 in type (i32 | i64)
+info type string in type (char | void)
 
-^info sizeof(_t)
-^info sizeof(test_array)
-^info sizeof(type i32)
+info sizeof(_t)
+info sizeof(test_array)
+info sizeof(type i32)
 
 define when_var: i32 = 101
 when_var = 100
 
 define test_message: string = "Assignments don't work"
 test_message = "Assignments now work!"
-^info test_message
+info test_message
 
 final define forbidden_fruit: i32 = 420 // Cannot be re-assigned
 
-define just_another_array: [[string]] = []{[]{"Testing"}}
+define just_another_array: [[string]] = []{ []{"Testing"} }
 just_another_array[0][0] = "1234567890"
-^info just_another_array[0][0]
+info just_another_array[0][0]
 
 define s1: string = "ASSIGNED REF"
 s1 = s1 + "!!!"
-^info s1
+info s1
 
 define xyz: i32 = 0
-^info "xyz re-assign: ${xyz += 1}"
-^info "xyz: ${xyz <<= 1}"
-^info "xyz: ${xyz}"
+info "xyz re-assign: ${xyz += 1}"
+info "xyz: ${xyz <<= 1}"
+info "xyz: ${xyz}"
 
 define my_flag: bool = false
 define my_other_flag: bool = false
 my_other_flag |= xyz == 2
 define my_third_flag: bool = my_flag | my_other_flag
-^info "my_third_flag: ${my_third_flag}"
+info "my_third_flag: ${my_third_flag}"
 
 just_another_array[0] = []{"0987654321"}
 just_another_array[0][0] = "12345 OVERRIDDEN VALUE"
 
-^info when(when_var) {
+info when(when_var) {
     100 -> "Complex code is in ${just_another_array[0][0]}"
     101 -> "MORE TESTING"
     else -> "TESTING"
@@ -80,7 +80,7 @@ define _arr2: [i32] = []{2, 3}
 define _arr3: [i32] = _arr1 + _arr2
 
 for(i in 0..<sizeof(_arr3)) {
-    ^info "Array value is ${_arr3[i]}"
+    info "Array value is ${_arr3[i]}"
 }
 
 _arr3 = (_arr3 - []{1, 2}) + []{42}
@@ -88,34 +88,34 @@ _arr3 += 3
 _arr3 += []{44, 444}
 
 for(i in 0..<sizeof(_arr3)) {
-    ^info "Array value now is ${_arr3[i]}"
+    info "Array value now is ${_arr3[i]}"
 }
 
 for(f in 0f32 ..< 10f32) {
-    ^info "Printing float ${f}"
+    info "Printing float ${f}"
 }
 
 for(c in 'a' .. 'z') {
-    ^info "Printing char ${c}"
+    info "Printing char ${c}"
 }
 
 for(i in 0 .. 10) {
-    ^info "Printing index ${i}"
+    info "Printing index ${i}"
 }
 
 for(i in 0 ..< 10) {
-    ^info "Printing index ${i}"
+    info "Printing index ${i}"
 }
 
 private type MyAliasedType = i32
 private define my_aliased_type_define: MyAliasedType = 100
-^info my_aliased_type_define
+info my_aliased_type_define
 
 private type MyAliasedTypeArray = [MyAliasedType]
 private define my_aliased_type_array: MyAliasedTypeArray = []{0, 1, 2, 3, 4, 5}
 
 for(i in 0..<sizeof(my_aliased_type_array)) {
-    ^info "Aliased array value: ${my_aliased_type_array[i]}"
+    info "Aliased array value: ${my_aliased_type_array[i]}"
 }
 
 public final class <com/example/Testing>
@@ -124,14 +124,14 @@ final class <com/example/Testing2>
 private macro testing123(i: i32) {
     type MyAliasedType = string
     define s: MyAliasedType = "AHHHHH"
-    ^info s
+    info s
 }
 
 testing123(i: 100)
 
 define coercion: f32 = 2
 coercion += 0.1f32
-^info coercion
+info coercion
 
 define coercion2: i32 = 88i8
-^info typeof(coercion2)
+info typeof(coercion2)

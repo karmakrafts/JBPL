@@ -17,11 +17,8 @@
 package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
-import dev.karmakrafts.jbpl.assembler.model.element.ElementVisitor;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
-import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.scope.Scope;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
@@ -56,13 +53,7 @@ public final class StackFrame implements Copyable<StackFrame> {
         if (!(scope.owner() instanceof ElementContainer container)) {
             return;
         }
-        container.accept(new ElementVisitor() {
-            @Override
-            public @NotNull Statement visitDefine(final @NotNull DefineStatement define) {
-                define.resetValue();
-                return ElementVisitor.super.visitDefine(define);
-            }
-        });
+        container.accept(LocalDefineResetVisitor.INSTANCE);
     }
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {

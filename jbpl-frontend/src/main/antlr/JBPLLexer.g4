@@ -33,12 +33,8 @@ NL: ('\n' | ('\r' '\n'?));
 
 CONST_STR_START: '"' -> pushMode(M_CONST_STR), type(QUOTE);
 
-KW_PREPRO_INCLUDE: '^include';
 KW_PREPRO_RETURN: '^return';
-KW_PREPRO_ASSERT: '^assert';
 KW_PREPRO_CLASS: '^class';
-KW_PREPRO_ERROR: '^error';
-KW_PREPRO_INFO: '^info';
 CARET: '^';
 EXCL: '!';
 
@@ -53,6 +49,8 @@ KW_DEFINED: 'defined';
 KW_PRIVATE: 'private';
 KW_DEFAULT: 'default';
 KW_VERSION: 'version'; // This indicates the ASM (classfile) version we assemble against
+KW_INCLUDE: 'include';
+KW_ASSERT: 'assert';
 KW_DEFINE: 'define';
 KW_NAMEOF: 'nameof';
 KW_PUBLIC: 'public';
@@ -72,6 +70,8 @@ KW_LOCAL: 'local';
 KW_FALSE: 'false';
 KW_AFTER: 'after';
 KW_BREAK: 'break';
+KW_ERROR: 'error';
+KW_INFO: 'info';
 KW_WHEN: 'when';
 KW_ENUM: 'enum';
 KW_SYNC: 'sync';
@@ -251,18 +251,13 @@ fragment I2L: 'i2l';
 fragment I2S: 'i2s';
 INSN_I2: I2B | I2C | I2D | I2F | I2L | I2S;
 
-fragment BIN_DIGIT: [01_];
-fragment DEC_DIGIT: [0-9_];
-fragment HEX_DIGIT: [0-9a-fA-F_];
-fragment OCT_DIGIT: [0-7_];
-
-fragment LITERAL_DEC_INT: DEC_DIGIT+;
-fragment LITERAL_BIN_INT: '0' [bB] BIN_DIGIT+;
-fragment LITERAL_HEX_INT: '0' [xX] HEX_DIGIT+;
-fragment LITERAL_OCT_INT: '0' [oO] OCT_DIGIT+;
+fragment LITERAL_DEC_INT: [0-9]+ [0-9_]*;
+fragment LITERAL_BIN_INT: '0' [bB] [01]+ [01_]*;
+fragment LITERAL_HEX_INT: '0' [xX] [0-9a-fA-F]+ [0-9a-fA-F_]*;
+fragment LITERAL_OCT_INT: '0' [oO] [0-7]+ [0-7_]*;
 
 LITERAL_INT: LITERAL_DEC_INT | LITERAL_BIN_INT | LITERAL_HEX_INT | LITERAL_OCT_INT;
-LITERAL_FLOAT_LIKE: DEC_DIGIT+ ('.' DEC_DIGIT+)?;
+LITERAL_FLOAT_LIKE: [0-9]+ [0-9_]* ('.' [0-9]+ [0-9_]*)? ([eE] LITERAL_DEC_INT)?;
 
 fragment ESCAPED_CHAR: '\\' [nrbt0];
 LITERAL_CHAR: SINGLE_QUOTE (ESCAPED_CHAR | ~[']) SINGLE_QUOTE;

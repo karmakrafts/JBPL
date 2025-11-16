@@ -1,21 +1,21 @@
 private define z: i32 = 10
-^info "Testing: ${z << 1 << 1}"
+info "Testing: ${z << 1 << 1}"
 private define str: string = z as string
 private define x: i32 = (str as i32) << 1
-^info "Cast: ${str}"
-^info "Parse: ${x}"
+info "Cast: ${str}"
+info "Parse: ${x}"
 
 private define t1: type = type i32
 private define t2: type = type f32
 private define intersect: type = t1 + t2
 private define intersect2: type = type (i32 | i64 | bool | void)
 private define t3: type = intersect - type f32
-^info "Type is ${t3}"
+info "Type is ${t3}"
 
-^info t3
+info t3
 
 private define d: i32 = default(t1)
-^info d
+info d
 
 public static fun <com/example/Example>.testing(): void {
     return
@@ -29,29 +29,29 @@ private define y: i32 = if (cond > 0) 44
     else if (cond < 0) 22
     else 88i8
 
-^info "y is ${y}"
+info "y is ${y}"
 
 private define comp: i32 = y <=> OFFSET
 
-^assert true
-^assert 10 == 10
-^assert "Hello, World!" == "Hello, World!"
-^assert "FOO" != "BAR"
+assert true
+assert 10 == 10
+assert "Hello, World!" == "Hello, World!"
+assert "FOO" != "BAR"
 
 private define op: opcode = opcode invokestatic
-^info op
-^info typeof(op)
+info op
+info typeof(op)
 
 private define insn: instruction = instruction(ldc "Hello, World!")
-^info insn
-^info typeof(insn)
+info insn
+info typeof(insn)
 
 private define insnOp: opcode = opcodeof(insn)
-^info insnOp
-^info typeof(insnOp)
+info insnOp
+info typeof(insnOp)
 
-^info "HELLO WORLD! ${comp}"
-^info "HELLO WORLD!"
+info "HELLO WORLD! ${comp}"
+info "HELLO WORLD!"
 
 private define __X: i32 = -10
 
@@ -68,28 +68,28 @@ private macro testing(p: i32): i32 {
 }
 
 private define xxx: i32 = 10
-^info "Call to testing returned ${testing(y)}"
+info "Call to testing returned ${testing(y)}"
 
-^info "xxx is i32: ${xxx is i32}"
-^info "xxx: ${xxx++}"
+info "xxx is i32: ${xxx is i32}"
+info "xxx: ${xxx++}"
 
 private define arr: [i32] = []{0, 1, 2, 4, 8, 16}
 private define arr_idx: i32 = 2
-^info "Value 2 from arr is ${arr[arr_idx]}"
+info "Value 2 from arr is ${arr[arr_idx]}"
 
 private define md_arr: [[i32]] = []{[]{0}, []{1}}
 private define sub_arr: [i32] = md_arr[0]
-^info "Value from sub-array is ${sub_arr[0]}"
+info "Value from sub-array is ${sub_arr[0]}"
 
 public static field <com/example/Example>.test: i32 = md_arr[0][0]
 
 private macro print_pos(x: i32, y: i32, z: i32) {
-    ^info "Position at [${x}, ${y}, ${z}]"
+    info "Position at [${x}, ${y}, ${z}]"
 }
 
 print_pos(z: 2, x: 4, y: 6)
 
-^info "Hex value is ${10 * 0x10}"
-^info "Dec value is ${10 * 10}"
-^info "Oct value is ${10 * 0o10}"
-^info "Bin value is ${10 * 0b01}"
+info "Hex value is ${10 * 0x10}"
+info "Dec value is ${10 * 10}"
+info "Oct value is ${10 * 0o10}"
+info "Bin value is ${10 * 0b01}"

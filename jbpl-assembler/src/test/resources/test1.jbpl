@@ -20,7 +20,7 @@ macro fib(n: i64): i64 {
 define x: i64 = 0
 
 for(i in 0i64..<50i64) {
-    ^info "Fibonacci ${i}: ${x = fib(i)}"
+    info "Fibonacci ${i}: ${x = fib(i)}"
 }
 
-^assert x == 7778742049i64
+assert x == 7778742049i64

@@ -79,22 +79,22 @@ define:
     ;
 
 include:
-    KW_PREPRO_INCLUDE
+    KW_INCLUDE
     simpleStringLiteral
     ;
 
 assertStatement:
-    KW_PREPRO_ASSERT
+    KW_ASSERT
     expr
     ;
 
 infoStatement:
-    KW_PREPRO_INFO
+    KW_INFO
     expr
     ;
 
 errorStatement:
-    KW_PREPRO_ERROR
+    KW_ERROR
     expr
     ;
 
@@ -408,8 +408,9 @@ definedExpr:
     ;
 
 signatureExpr:
-    functionSignature
-    | fieldSignature
+    KW_SIGNATURE
+    (functionSignature
+    | fieldSignature)
     ;
 
 reference: // Impplicit references

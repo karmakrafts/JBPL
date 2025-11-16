@@ -95,12 +95,12 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_CONTINUE,
                  JBPLLexer.KW_WHEN,
                  JBPLLexer.KW_TYPE,
-                 JBPLLexer.KW_PREPRO_ASSERT,
+                 JBPLLexer.KW_ASSERT,
                  JBPLLexer.KW_PREPRO_CLASS,
-                 JBPLLexer.KW_PREPRO_INFO,
-                 JBPLLexer.KW_PREPRO_ERROR,
+                 JBPLLexer.KW_INFO,
+                 JBPLLexer.KW_ERROR,
                  JBPLLexer.KW_PREPRO_RETURN,
-                 JBPLLexer.KW_PREPRO_INCLUDE -> keys.add(TextAttributeKeys.KEYWORD);
+                 JBPLLexer.KW_INCLUDE -> keys.add(TextAttributeKeys.KEYWORD);
             case JBPLLexer.LITERAL_INT,
                  JBPLLexer.LITERAL_FLOAT_LIKE -> keys.add(TextAttributeKeys.NUMBER);
             case JBPLLexer.QUOTE,
@@ -151,7 +151,11 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_POP,
                  JBPLLexer.INSN_NEW,
                  JBPLLexer.INSN_RET,
-                 JBPLLexer.INSN_DUP -> keys.add(TextAttributeKeys.INSTRUCTION);
+                 JBPLLexer.INSN_DUP,
+                 JBPLLexer.INSN_ICONST,
+                 JBPLLexer.INSN_LCONST,
+                 JBPLLexer.INSN_FCONST,
+                 JBPLLexer.INSN_DCONST -> keys.add(TextAttributeKeys.INSTRUCTION);
             case JBPLLexer.DOT -> keys.add(TextAttributeKeys.DOT);
             //case JBPLLexer.IDENT -> keys.add(TextAttributeKeys.IDENT);
             case JBPLLexer.LINE_COMMENT -> keys.add(TextAttributeKeys.LINE_COMMENT);

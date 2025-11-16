@@ -61,7 +61,7 @@ public interface Element extends SourceOwner, Evaluable, Copyable<Element> {
                 return Optional.of((P) currentParent);
             }
             final var grandParent = currentParent.getParent();
-            if (grandParent == currentParent) {
+            if (grandParent == null || grandParent == currentParent) {
                 break; // Prevent endless recursion on tree roots
             }
             parentStack.push(grandParent);

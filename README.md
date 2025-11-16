@@ -14,7 +14,7 @@ final define my_string: string = "Hello, World!" // string == <java/lang/String>
 // JBPL supports mutability..
 define my_variable: i32 = 0
 my_variable++
-^info "my_variable is ${my_variable}" // ..and string interpolation
+info "my_variable is ${my_variable}" // ..and string interpolation
 
 // It has JVM signatures, instructions and opcodes as first-class types.
 define my_fld_sig: signature(field) = <com/example/Foo>.test: i32
@@ -29,12 +29,12 @@ my_array -= []{0, 2}
 
 // ..and various flavours of control flow.
 for(value in my_array) {
-    ^info "my_array value is: ${value}"
+    info "my_array value is: ${value}"
 }
 
 // Of course we also support ranges for builtin types.
 for(i in 0..<sizeof(my_array)) {
-    ^info "my_array value at ${i} is: ${my_array[i]}"
+    info "my_array value at ${i} is: ${my_array[i]}"
 }
 
 // Inject into existing functions; turn someFunction into a NOOP
@@ -86,7 +86,7 @@ TBA
 - [X] ANTLR grammar & frontend
 - [X] Interpreter
 - [X] IntelliJ Plugin
-- [ ] Rouge lexer (GitLab highlighting)
+- [X] [Rouge lexer](https://github.com/karmakrafts/rouge/tree/jbpl-support) (GitLab highlighting)
 - [ ] tmLanguage lexer (GitHub/Sublime Text highlighting)
 - [ ] Compiled JBPL assembly
 
