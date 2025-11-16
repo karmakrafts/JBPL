@@ -135,3 +135,6 @@ info coercion
 
 define coercion2: i32 = 88i8
 info typeof(coercion2)
+
+define my_var_name: string = "coercion"
+info ${my_var_name} // Interpolated reference expression

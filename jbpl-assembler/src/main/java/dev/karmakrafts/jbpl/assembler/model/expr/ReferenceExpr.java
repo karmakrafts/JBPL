@@ -25,18 +25,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, ExprContainer, Reference {
-    public String name;
+    public static final int NAME_INDEX = RECEIVER_INDEX + 1;
 
-    public ReferenceExpr(final @NotNull String name) {
+    public ReferenceExpr(final @NotNull Expr name) {
         super();
-        this.name = name;
+        addExpression(name);
     }
 
-    public @Nullable Expr findArgument(final @NotNull EvaluationContext context) {
+    public @NotNull Expr getName() {
+        return getExpressions().get(NAME_INDEX);
+    }
+
+    public void setName(final @NotNull Expr name) {
+        name.setParent(this);
+        getExpressions().set(NAME_INDEX, name);
+    }
+
+    public @Nullable Expr findArgument(final @NotNull String name, final @NotNull EvaluationContext context) {
         return context.peekFrame().namedLocalValues.get(name);
     }
 
-    public @NotNull DefineStatement getDefine(final @NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull DefineStatement getDefine(final @NotNull String name,
+                                              final @NotNull EvaluationContext context) throws EvaluationException {
         var define = context.resolveByName(DefineStatement.class, name);
         if (define == null) { // Second attempt is for resolving private declarations
             context.pushFrame(getContainingFile());
@@ -53,32 +63,35 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
 
     @Override
     public @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var argument = findArgument(context);
+        final var name = getName().evaluateAs(context, String.class);
+        final var argument = findArgument(name, context);
         if (argument != null) {
             return argument.evaluateAsConst(context);
         }
-        getDefine(context).evaluate(context);
+        getDefine(name, context).evaluate(context);
         return (ConstExpr) context.popValue();
     }
 
     @Override
     public void storeToReference(final @NotNull ConstExpr value,
                                  final @NotNull EvaluationContext context) throws EvaluationException {
-        final var argument = findArgument(context);
+        final var name = getName().evaluateAs(context, String.class);
+        final var argument = findArgument(name, context);
         if (argument != null) {
             context.peekFrame().namedLocalValues.put(name, ConstExpr.of(value, getTokenRange()));
             return;
         }
-        getDefine(context).setValue(value);
+        getDefine(name, context).setValue(value);
     }
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var argument = findArgument(context);
+        final var name = getName().evaluateAs(context, String.class);
+        final var argument = findArgument(name, context);
         if (argument != null) {
             return argument.getType(context).resolveIfNeeded(context);
         }
-        return getDefine(context).getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
+        return getDefine(name, context).getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
     @Override
@@ -88,13 +101,13 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
 
     @Override
     public @NotNull ReferenceExpr copy() {
-        final var reference = copyParentAndSourceTo(new ReferenceExpr(name));
+        final var reference = copyParentAndSourceTo(new ReferenceExpr(getName().copy()));
         reference.setReceiver(getReceiver().copy());
         return reference;
     }
 
     @Override
     public @NotNull String toString() {
-        return name;
+        return getName().toString();
     }
 }

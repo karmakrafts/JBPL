@@ -138,8 +138,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
 
     private static @NotNull List<Expr> parseReference(final @NotNull ReferenceContext ctx,
                                                       final @NotNull Expr receiver) {
-        var name = ctx.getText();
-        final var ref = new ReferenceExpr(name);
+        final var ref = new ReferenceExpr(ConstExpr.of(ctx.getText(), TokenRange.fromContext(ctx)));
         ref.setReceiver(receiver);
         return List.of(ref);
     }
@@ -297,6 +296,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     @Override
     public @NotNull List<Expr> visitExpr(final @NotNull ExprContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
+            final var wrappedExpr = ctx.wrappedExpr();
             if (ctx.DOT() != null) {
                 // This is a member reference which takes precedence over top level refs
                 // @formatter:off
@@ -306,10 +306,18 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
                 // @formatter:on
                 final var call = ctx.macroCall();
                 if (call != null) {
+                    // TODO: implement interpolated macro calls
                     return parseMacroCall(call, receiver);
+                }
+                if (wrappedExpr != null) {
+                    // This is an interpolated reference we need to unwrap/resolve at runtime
+                    final var ref = new ReferenceExpr(parse(wrappedExpr));
+                    ref.setReceiver(receiver);
+                    return List.of(ref);
                 }
                 return parseReference(ctx.reference(), receiver);
             } // @formatter:off
+            else if (wrappedExpr != null)           return List.of(new ReferenceExpr(parse(wrappedExpr))); // Top-level interpolated refs
             else if (ctx.L_SQBRACKET() != null)     return List.of(new ArrayAccessExpr(parse(ctx.expr(0)), parse(ctx.expr(1))));
             else if (ctx.KW_IN() != null)           return List.of(new InExpr(parse(ctx.expr(0)), parse(ctx.expr(1))));
             else if (ctx.KW_IS() != null)           return List.of(new IsExpr(parse(ctx.expr(0)), parse(ctx.exprOrType())));

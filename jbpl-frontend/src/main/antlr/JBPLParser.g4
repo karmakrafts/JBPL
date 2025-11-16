@@ -256,8 +256,8 @@ expr:
     | expr NL*? EXCL_RANGE NL*? expr
     | expr NL*? DOTDOT NL*? expr
 
-    | expr NL*? DOT NL*? macroCall
-    | expr NL*? DOT NL*? reference
+    | expr NL*? DOT NL*? macroCall // TODO: allow interpolated calls
+    | expr NL*? DOT NL*? (wrappedExpr | reference)
 
     | expr NL*? SPACESHIP NL*? expr
     | expr NL*? AMPAMP NL*? expr
@@ -324,6 +324,7 @@ expr:
     | injectorReference
     | functionScopeReference
     | fieldScopeReference
+    | wrappedExpr // Interpolated references
     | literal
     | reference
     ;
