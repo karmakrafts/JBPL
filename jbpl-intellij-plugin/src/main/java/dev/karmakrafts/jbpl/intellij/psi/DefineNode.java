@@ -90,6 +90,6 @@ public final class DefineNode extends JBPLPsiNode implements StructuralPsiElemen
 
     @Override
     public @NotNull Icon getStructureIcon() {
-        return Icons.DEFINE;
+        return Icons.getIconWithModifier(Icons.DEFINE, PsiUtils.findAll(this, "/define/defineModifiers").toList());
     }
 }

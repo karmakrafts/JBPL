@@ -66,9 +66,13 @@ elseBranch:
     | bodyElement)
     ;
 
-define:
+defineModifiers:
     KW_PRIVATE? // Only accessible current scope
     KW_FINAL? // Immutable define
+    ;
+
+define:
+    defineModifiers
     KW_DEFINE
     NL*?
     exprOrName
@@ -125,8 +129,12 @@ macroSignature:
     exprOrType)?
     ;
 
-macro:
+macroModifiers:
     KW_PRIVATE?
+    ;
+
+macro:
+    macroModifiers
     KW_MACRO
     macroSignature
     L_BRACE

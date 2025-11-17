@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.jbpl.intellij.util;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiElement;
@@ -45,8 +46,7 @@ public final class Icons {
     public static final Map<String, Icon> MODIFIERS = Map.of( // @formatter:off
         "final",     Nodes.FinalMark,
         "static",    Nodes.StaticMark,
-        "private",   Nodes.Private,
-        "protected", Nodes.Protected
+        "private",   Nodes.Locked
     ); // @formatter:on
 
     private Icons() {
