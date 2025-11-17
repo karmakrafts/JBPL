@@ -18,17 +18,41 @@ package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.InstructionCodec;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
+import java.util.Arrays;
+
 public final class InvokeInstruction extends AbstractExprContainer implements Instruction {
     public static final int SIGNATURE_INDEX = 0;
     public Opcode opcode;
+
+    static {
+        InstructionCodec.registerDecoder(MethodInsnNode.class, (ctx, node) -> {
+            final var opcode = Opcode.findByEncodedValue(node.getOpcode()).orElseThrow();
+            final var owner = Type.dematerialize(org.objectweb.asm.Type.getObjectType(node.owner)).orElseThrow();
+            final var name = node.name;
+            final var methodType = org.objectweb.asm.Type.getMethodType(node.desc);
+            final var returnType = Type.dematerialize(methodType.getReturnType()).orElseThrow();
+            final var signature = new FunctionSignatureExpr(ConstExpr.of(owner),
+                ConstExpr.of(name),
+                ConstExpr.of(returnType));
+            // @formatter:off
+            signature.addFunctionParameters(Arrays.stream(methodType.getArgumentTypes())
+                .map(type -> ConstExpr.of(Type.dematerialize(type).orElseThrow()))
+                .toList());
+            // @formatter:on
+            return new InvokeInstruction(opcode, signature);
+        });
+    }
 
     public InvokeInstruction(final @NotNull Opcode opcode, final @NotNull Expr signature) {
         this.opcode = opcode;
