@@ -46,8 +46,6 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     public static final int TARGET_INSTRUCTION_INDEX = 3;
     public static final int ARGS_INDEX = 4;
 
-    private int argumentIndex = 0;
-
     static {
         InstructionCodec.registerDecoder(InvokeDynamicInsnNode.class, (ctx, node) -> {
             final var factoryDesc = org.objectweb.asm.Type.getMethodType(node.desc);
@@ -118,12 +116,11 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     public void addArguments(final @NotNull Collection<? extends Expr> arguments) {
-        getExpressions().addAll(ARGS_INDEX + argumentIndex, arguments);
-        argumentIndex += arguments.size();
+        getExpressions().addAll(arguments);
     }
 
     public void addArgument(final @NotNull Expr argument) {
-        getExpressions().add(ARGS_INDEX + argumentIndex++, argument);
+        getExpressions().add(argument);
     }
 
     public void setArgument(final int index, final @NotNull Expr argument) {
@@ -135,7 +132,8 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     public @NotNull List<Expr> getArguments() {
-        return getExpressions().subList(ARGS_INDEX, ARGS_INDEX + argumentIndex);
+        final var expressions = getExpressions();
+        return expressions.subList(ARGS_INDEX, expressions.size());
     }
 
     public @NotNull Expr getInstantiatedSignature() {
