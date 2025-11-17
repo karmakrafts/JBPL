@@ -121,6 +121,23 @@ public final class EvaluationContext {
         output.put(name, transform.apply(classResolver.apply(name)));
     }
 
+    public void transformField(final @NotNull String className,
+                               final @NotNull String name,
+                               final @NotNull Function<FieldNode, FieldNode> transform) {
+        transformClass(className, node -> {
+            // @formatter:off
+            final var field = node.fields.stream()
+                .filter(f -> f.name.equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("Could not find field %s in %s", name, className)));
+            // @formatter:on
+            final var transformedField = transform.apply(field);
+            final var index = node.fields.indexOf(field);
+            node.fields.set(index, transformedField);
+            return node;
+        });
+    }
+
     public void removeField(final @NotNull String className, final @NotNull String name) {
         transformClass(className, node -> {
             // @formatter:off
@@ -130,6 +147,24 @@ public final class EvaluationContext {
                 .orElseThrow();
             // @formatter:on
             node.fields.remove(target);
+            return node;
+        });
+    }
+
+    public void transformFunction(final @NotNull String className,
+                                  final @NotNull String name,
+                                  final @NotNull org.objectweb.asm.Type type,
+                                  final @NotNull Function<MethodNode, MethodNode> transform) {
+        transformClass(className, node -> {
+            // @formatter:off
+            final var function = node.methods.stream()
+                .filter(f -> f.name.equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("Could not find method %s %s in %s", name, type.getDescriptor(), className)));
+            // @formatter:on
+            final var transformedFunction = transform.apply(function);
+            final var index = node.methods.indexOf(function);
+            node.methods.set(index, transformedFunction);
             return node;
         });
     }

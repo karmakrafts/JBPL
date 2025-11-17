@@ -27,14 +27,16 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
     private Expr target;
     private Expr selector;
 
+    public InjectorDecl(final @NotNull Expr target, final @NotNull Expr selector) {
+        setTarget(target);
+        setSelector(selector);
+    }
+
     public @NotNull Expr getSelector() {
         return selector;
     }
 
     public void setSelector(final @NotNull Expr selector) {
-        if (this.selector != null) {
-            this.selector.setParent(null);
-        }
         selector.setParent(this);
         this.selector = selector;
     }
@@ -44,23 +46,18 @@ public final class InjectorDecl extends AbstractStatementContainer implements De
     }
 
     public void setTarget(final @NotNull Expr target) {
-        if (this.target != null) {
-            this.target.setParent(null);
-        }
         target.setParent(this);
         this.target = target;
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) {
-        // TODO: implement this
+
     }
 
     @Override
     public @NotNull InjectorDecl copy() {
-        final var injector = copyParentAndSourceTo(new InjectorDecl());
-        injector.setTarget(getTarget().copy());
-        injector.setSelector(getSelector().copy());
+        final var injector = copyParentAndSourceTo(new InjectorDecl(getTarget().copy(), getSelector().copy()));
         injector.addStatements(getStatements().stream().map(Statement::copy).toList());
         return injector;
     }
