@@ -14,6 +14,13 @@ private macro use_argument(x: i32) {
     }
 
     shadow_argument_with_argument(1)
+
+    macro shadow_argument_with_define(x: i32) {
+        define x: i32 = 2
+        assert x == 2
+    }
+
+    shadow_argument_with_define(0)
 }
 
 use_argument(0)
