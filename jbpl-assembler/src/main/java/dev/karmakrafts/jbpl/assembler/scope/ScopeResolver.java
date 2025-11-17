@@ -31,6 +31,15 @@ public final class ScopeResolver {
         this.scope = scope;
     }
 
+    public static <E extends Element> @NotNull List<E> resolveAllLocally(final @NotNull Scope scope,
+                                                                         final @NotNull Class<E> type,
+                                                                         final @NotNull Predicate<E> filter) {
+        if (!(scope.owner() instanceof ElementContainer elementContainer)) {
+            return List.of();
+        }
+        return elementContainer.findElements(type, filter);
+    }
+
     public static <E extends Element> @NotNull List<E> resolveAll(final @NotNull Scope scope,
                                                                   final @NotNull Class<E> type,
                                                                   final @NotNull Predicate<E> filter) {
@@ -41,6 +50,15 @@ public final class ScopeResolver {
             }
             return ownerElement.findElement(type, filter).orElse(null);
         });
+    }
+
+    public static <E extends Element> @Nullable E resolveLocally(final @NotNull Scope scope,
+                                                                 final @NotNull Class<E> type,
+                                                                 final @NotNull Predicate<E> filter) {
+        if (!(scope.owner() instanceof ElementContainer elementContainer)) {
+            return null;
+        }
+        return elementContainer.findElement(type, filter).orElse(null);
     }
 
     public static <E extends Element> @Nullable E resolve(final @NotNull Scope scope,
@@ -55,8 +73,18 @@ public final class ScopeResolver {
         });
     }
 
+    public <E extends Element> @Nullable E resolveLocally(final @NotNull Class<E> type,
+                                                          final @NotNull Predicate<E> filter) {
+        return resolveLocally(scope, type, filter);
+    }
+
     public <E extends Element> @Nullable E resolve(final @NotNull Class<E> type, final @NotNull Predicate<E> filter) {
         return resolve(scope, type, filter);
+    }
+
+    public <E extends Element> @NotNull List<E> resolveAllLocally(final @NotNull Class<E> type,
+                                                                  final @NotNull Predicate<E> filter) {
+        return resolveAllLocally(scope, type, filter);
     }
 
     public <E extends Element> @NotNull List<E> resolveAll(final @NotNull Class<E> type,

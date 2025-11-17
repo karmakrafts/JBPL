@@ -24,6 +24,7 @@ import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class ReferenceExpr extends AbstractReceiverExpr implements Reference {
     public static final int NAME_INDEX = RECEIVER_INDEX + 1;
@@ -42,25 +43,22 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Referen
         getExpressions().set(NAME_INDEX, name);
     }
 
-    public @NotNull DefineStatement getDefine(final @NotNull String name,
-                                              final @NotNull EvaluationContext context) throws EvaluationException {
-        var define = context.resolveByName(DefineStatement.class, name);
-        if (define == null) { // Second attempt is for resolving by scope receiver
+    public @Nullable DefineStatement resolveDefine(final @NotNull String name,
+                                                   final @NotNull EvaluationContext context,
+                                                   final boolean resolveLocally) {
+        // @formatter:off
+        var define = resolveLocally
+            ? context.resolveLocallyByName(DefineStatement.class, name)
+            : context.resolveByName(DefineStatement.class, name);
+        // @formatter:on
+        if (define == null && !resolveLocally) { // Second attempt is for resolving by scope receiver
             final var receiver = getReceiver();
             if (!(receiver instanceof ScopeReceiverExpr scopeReceiverExpr)) {
-                final var message = String.format("Cannot resolve define %s by scope receiver %s", name, receiver);
-                throw new EvaluationException(message,
-                    SourceDiagnostic.from(this, message),
-                    context.createStackTrace());
+                return null;
             }
             final var resolver = new ScopeResolver(scopeReceiverExpr.scope);
             define = resolver.resolve(DefineStatement.class,
                 ExceptionUtils.unsafePredicate(d -> d.getName(context).equals(name)));
-        }
-        if (define == null) {
-            final var scope = context.getScope();
-            final var message = String.format("Could not find define '%s' in scope %s", name, scope);
-            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
         return define;
     }
@@ -73,11 +71,21 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Referen
         if (intrinsicDefine != null) { // Special treatment for intrinsic references
             return intrinsicDefine.getter().apply(context).evaluateAsConst(context);
         }
+        var define = resolveDefine(name, context, true); // Local defines shadow arguments but not intrinsics
+        if (define != null) {
+            define.evaluate(context);
+            return (ConstExpr) context.popValue();
+        }
         final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
             return argument.evaluateAsConst(context);
         }
-        getDefine(name, context).evaluate(context);
+        define = resolveDefine(name, context, false); // Out-of-scope defines shadow arguments
+        if (define == null) {
+            final var message = String.format("Could not resolve reference '%s' in %s", name, getReceiver());
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
+        define.evaluate(context);
         return (ConstExpr) context.popValue();
     }
 
@@ -99,12 +107,22 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Referen
             setter.accept(context, value);
             return;
         }
+        var define = resolveDefine(name, context, true); // Local defines shadow arguments but not intrinsics
+        if (define != null) {
+            define.setValue(value);
+            return;
+        }
         final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
             context.peekFrame().namedLocalValues.put(name, ConstExpr.of(value, getTokenRange()));
             return;
         }
-        getDefine(name, context).setValue(value);
+        define = resolveDefine(name, context, false); // Out-of-scope defines shadow arguments
+        if (define == null) {
+            final var message = String.format("Could not resolve reference '%s' in %s", name, getReceiver());
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
+        define.setValue(value);
     }
 
     @Override
@@ -122,11 +140,20 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Referen
             }
             return value.getter().apply(context).getType(context).resolveIfNeeded(context);
         }
+        var define = resolveDefine(name, context, true); // Local defines shadow arguments but not intrinsics
+        if (define != null) {
+            return define.getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
+        }
         final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
             return argument.getType(context).resolveIfNeeded(context);
         }
-        return getDefine(name, context).getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
+        define = resolveDefine(name, context, false); // Out-of-scope defines shadow arguments
+        if (define == null) {
+            final var message = String.format("Could not resolve reference '%s' in %s", name, getReceiver());
+            throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
+        }
+        return define.getType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
     @Override

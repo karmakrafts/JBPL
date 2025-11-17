@@ -72,9 +72,27 @@ public final class EvaluationContext {
         return resolveByName(type, name, element -> true);
     }
 
+    public <E extends NamedElement> @Nullable E resolveLocallyByName(final @NotNull Class<E> type,
+                                                                     final @NotNull String name,
+                                                                     final @NotNull Predicate<E> filter) {
+        return peekFrame().scopeResolver.resolveLocally(type,
+            filter.and(ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name))));
+    }
+
+    public <E extends NamedElement> @Nullable E resolveLocallyByName(final @NotNull Class<E> type,
+                                                                     final @NotNull String name) {
+        return resolveLocallyByName(type, name, element -> true);
+    }
+
     public <E extends NamedElement> @NotNull List<E> resolveAllByName(final @NotNull Class<E> type,
                                                                       final @NotNull String name) {
         return peekFrame().scopeResolver.resolveAll(type,
+            ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
+    }
+
+    public <E extends NamedElement> @NotNull List<E> resolveAllLocallyByName(final @NotNull Class<E> type,
+                                                                             final @NotNull String name) {
+        return peekFrame().scopeResolver.resolveAllLocally(type,
             ExceptionUtils.unsafePredicate(element -> element.getName(this).equals(name)));
     }
 
