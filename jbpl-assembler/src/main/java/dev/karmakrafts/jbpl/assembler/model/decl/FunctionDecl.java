@@ -61,8 +61,20 @@ public final class FunctionDecl extends AbstractStatementContainer implements De
         final var name = signature.getFunctionName().evaluateAs(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
         final var method = new MethodNode(context.bytecodeApi, access, name, descriptor, descriptor, null);
-        super.evaluate(context); // Evaluate child statements
-        method.instructions.add(context.getInstructionBuffer());
+        context.pushFrame(this);
+        context.intrinsicsHandler.initForFunction(method);
+        for (final var element : getElements()) {
+            if (!element.isEvaluatedDirectly() || context.controlFlowState.clearCnt()) {
+                continue;
+            }
+            element.evaluate(context);
+            if (context.controlFlowState.clearRet()) {
+                break;
+            }
+        }
+        context.popFrame();
+        method.instructions.add(context.instructionBuffer);
+        context.flushInstructionBuffer();
         context.addFunction(owner.name(), method);
     }
 

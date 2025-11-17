@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.jbpl.assembler.model.statement;
 
+import dev.karmakrafts.jbpl.assembler.eval.ControlFlowState;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElementContainer;
@@ -71,14 +72,15 @@ public final class ForStatement extends AbstractElementContainer implements Stat
                 continue;
             }
             element.evaluate(context);
-            final var returnMask = context.getReturnMask();
-            if (context.clearCnt() || context.clearBrk() || context.hasRet()) {
+            final var state = context.controlFlowState;
+            final var returnMask = state.getMask();
+            if (state.clearCnt() || state.clearBrk() || state.hasRet()) {
                 context.popFrame();
                 return returnMask;
             }
         }
         context.popFrame();
-        return EvaluationContext.RET_MASK_NONE;
+        return ControlFlowState.MASK_NONE;
     }
 
     private void iterateArray(final @NotNull EvaluationContext context) throws EvaluationException {
@@ -87,10 +89,10 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         for (var i = 0; i < arrayLength; i++) {
             final var value = Array.get(array, i);
             final var result = performIteration(ConstExpr.of(value, getTokenRange()), context);
-            if ((result & EvaluationContext.RET_MASK_CONTINUE) != 0) {
+            if ((result & ControlFlowState.MASK_CONTINUE) != 0) {
                 continue;
             }
-            if ((result & EvaluationContext.RET_MASK_BREAK) != 0 || (result & EvaluationContext.RET_MASK_RETURN) != 0) {
+            if ((result & ControlFlowState.MASK_BREAK) != 0 || (result & ControlFlowState.MASK_RETURN) != 0) {
                 break;
             }
         }
@@ -105,10 +107,10 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         final var end = values[1];
         for (var value = start; value.compareTo(end) < 0; value = inc.apply(value)) {
             final var result = performIteration(ConstExpr.of(value, getTokenRange()), context);
-            if ((result & EvaluationContext.RET_MASK_CONTINUE) != 0) {
+            if ((result & ControlFlowState.MASK_CONTINUE) != 0) {
                 continue;
             }
-            if ((result & EvaluationContext.RET_MASK_BREAK) != 0 || (result & EvaluationContext.RET_MASK_RETURN) != 0) {
+            if ((result & ControlFlowState.MASK_BREAK) != 0 || (result & ControlFlowState.MASK_RETURN) != 0) {
                 break;
             }
         }

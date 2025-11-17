@@ -23,6 +23,7 @@ import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 
 public final class FieldInstruction extends AbstractExprContainer implements Instruction {
@@ -48,13 +49,18 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
     }
 
     @Override
-    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
         final var signature = getSignature().evaluateAs(context, FieldSignatureExpr.class);
         final var owner = signature.getFieldOwner().evaluateAs(context, ClassType.class);
         final var name = signature.getFieldName().evaluateAs(context, String.class);
         final var descriptor = signature.evaluateAsConstDescriptor(context);
-        context.emit(new FieldInsnNode(encodedOpcode, owner.name(), name, descriptor));
+        return new FieldInsnNode(encodedOpcode, owner.name(), name, descriptor);
+    }
+
+    @Override
+    public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
+        Instruction.super.evaluate(context);
     }
 
     @Override

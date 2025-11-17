@@ -62,14 +62,14 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         final var receiver = getReceiver();
         final var frame = context.peekFrame();
         if (receiver instanceof IntrinsicReceiverExpr) { // Load intrinsic define from the current stack frame if present
-            final var value = frame.intrinsicDefines.get(name);
-            if (value == null) {
+            final var define = frame.intrinsicDefines.get(name);
+            if (define == null) {
                 final var message = String.format("No intrinsic value named '%s' in %s", name, receiver);
                 throw new EvaluationException(message,
                     SourceDiagnostic.from(this, message),
                     context.createStackTrace());
             }
-            return value.evaluateAsConst(context);
+            return define.getter().apply(context).evaluateAsConst(context);
         }
         final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
@@ -86,13 +86,21 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         final var receiver = getReceiver();
         final var frame = context.peekFrame();
         if (receiver instanceof IntrinsicReceiverExpr) {
-            if (!frame.intrinsicDefines.containsKey(name)) {
+            final var define = frame.intrinsicDefines.get(name);
+            if (define == null) {
                 final var message = String.format("No intrinsic value named '%s' in %s", name, receiver);
                 throw new EvaluationException(message,
                     SourceDiagnostic.from(this, message),
                     context.createStackTrace());
             }
-            frame.intrinsicDefines.put(name, value); // Update ref to value (replacing instruction lists etc.)
+            final var setter = define.setter();
+            if (setter == null) {
+                final var message = String.format("Intrinsic value '%s' in %s is immutable", name, receiver);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+            setter.accept(context, value);
             return;
         }
         final var argument = frame.namedLocalValues.get(name);
@@ -116,7 +124,7 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
                     SourceDiagnostic.from(this, message),
                     context.createStackTrace());
             }
-            return value.getType(context).resolveIfNeeded(context);
+            return value.getter().apply(context).getType(context).resolveIfNeeded(context);
         }
         final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {

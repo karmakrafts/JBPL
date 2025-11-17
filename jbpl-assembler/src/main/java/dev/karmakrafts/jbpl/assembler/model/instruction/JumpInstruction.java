@@ -21,6 +21,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 
 public final class JumpInstruction extends AbstractExprContainer implements Instruction {
@@ -47,11 +48,16 @@ public final class JumpInstruction extends AbstractExprContainer implements Inst
     }
 
     @Override
-    public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = opcode.encodedValue;
         final var target = getTarget();
         final var label = context.getOrCreateLabelNode(target.evaluateAs(context, String.class));
-        context.emit(new JumpInsnNode(encodedOpcode, label));
+        return new JumpInsnNode(encodedOpcode, label);
+    }
+
+    @Override
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        Instruction.super.evaluate(context);
     }
 
     @Override

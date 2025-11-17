@@ -130,7 +130,7 @@ public final class MacroDecl extends AbstractElementContainer
         final var elements = getElements();
         for (final var element : elements) {
             element.evaluate(context);
-            if (context.clearReturnMask()) { // Macro scope always clears all status flags
+            if (context.controlFlowState.clearReturnMask()) { // Macro scope always clears all status flags
                 break; // Break loop if we returned
             }
         }

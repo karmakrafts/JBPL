@@ -179,11 +179,11 @@ public interface ElementContainer extends Element {
             hasScope = true;
         }
         for (final var element : getElements()) {
-            if (!element.isEvaluatedDirectly() || context.clearCnt()) {
+            if (!element.isEvaluatedDirectly() || context.controlFlowState.clearCnt()) {
                 continue;
             }
             element.evaluate(context);
-            if (context.clearRet()) {
+            if (context.controlFlowState.clearRet()) {
                 break;
             }
         }

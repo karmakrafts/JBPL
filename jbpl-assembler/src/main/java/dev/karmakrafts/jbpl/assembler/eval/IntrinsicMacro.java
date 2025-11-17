@@ -17,12 +17,13 @@
 package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.util.XFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.function.Function;
 
-public record IntrinsicMacro(
+public record IntrinsicMacro( // @formatter:off
     @NotNull IntrinsicMacroSignature signature,
-    @NotNull Function<List<Expr>, Expr> callback
-) {}
+    @NotNull XFunction<List<Expr>, Expr, EvaluationException> callback
+) { // @formatter:on
+}

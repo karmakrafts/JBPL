@@ -43,11 +43,11 @@ public final class ReturnStatement extends AbstractExprContainer implements Stat
         final var value = getValue();
         final var type = value.getType(context);
         if (type == BuiltinType.VOID) {
-            context.ret();
+            context.controlFlowState.ret();
             return;
         }
         context.pushValue(value.evaluateAsConst(context));
-        context.ret();
+        context.controlFlowState.ret();
     }
 
     @Override

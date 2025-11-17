@@ -34,24 +34,17 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public final class EvaluationContext {
-    // @formatter:off
-    public static final byte RET_MASK_NONE      = 0b0000_0000;
-    public static final byte RET_MASK_RETURN    = 0b0000_0001;
-    public static final byte RET_MASK_CONTINUE  = 0b0000_0010;
-    public static final byte RET_MASK_BREAK     = 0b0000_0100;
-    // @formatter:on
-
     public final AssemblyFile file;
     public final Function<String, ClassNode> classResolver;
     public final Consumer<String> infoConsumer;
     public final Consumer<String> errorConsumer;
     public final HashMap<String, @Nullable ClassNode> output = new HashMap<>();
+    public final InsnList instructionBuffer = new InsnList();
+    public final IntrinsicsHandler intrinsicsHandler = new IntrinsicsHandler(this);
+    public final ControlFlowState controlFlowState = new ControlFlowState();
     private final Stack<StackFrame> frameStack = new Stack<>();
-    private final HashMap<String, Expr> intrinsicDefines = new HashMap<>();
-    private final HashMap<IntrinsicMacroSignature, IntrinsicMacro> intrinsicMacros = new HashMap<>();
     public int bytecodeVersion = Opcodes.V17;
     public int bytecodeApi = Opcodes.ASM9;
-    private byte returnMask = RET_MASK_NONE;
 
     public EvaluationContext(final @NotNull AssemblyFile file,
                              final @NotNull Function<String, ClassNode> classResolver,
@@ -61,24 +54,6 @@ public final class EvaluationContext {
         this.classResolver = classResolver;
         this.infoConsumer = infoConsumer;
         this.errorConsumer = errorConsumer;
-    }
-
-    public void addGlobalIntrinsicDefine(final @NotNull String name, final @NotNull Expr value) {
-        intrinsicDefines.put(name, value);
-    }
-
-    public void addLocalIntrinsicDefine(final @NotNull String name, final @NotNull Expr value) {
-        peekFrame().intrinsicDefines.put(name, value);
-    }
-
-    public void addGlobalIntrinsicMacro(final @NotNull IntrinsicMacroSignature signature,
-                                        final @NotNull Function<List<Expr>, Expr> callback) {
-        intrinsicMacros.put(signature, new IntrinsicMacro(signature, callback));
-    }
-
-    public void addLocalIntrinsicMacro(final @NotNull IntrinsicMacroSignature signature,
-                                       final @NotNull Function<List<Expr>, Expr> callback) {
-        peekFrame().intrinsicMacros.put(signature, new IntrinsicMacro(signature, callback));
     }
 
     public @NotNull StackTrace createStackTrace() {
@@ -105,58 +80,6 @@ public final class EvaluationContext {
 
     public void clearStack() {
         peekFrame().valueStack.clear();
-    }
-
-    public byte getReturnMask() {
-        return returnMask;
-    }
-
-    public boolean clearReturnMask() {
-        final var result = hasRet();
-        returnMask = RET_MASK_NONE;
-        return result;
-    }
-
-    public boolean hasCnt() {
-        return (returnMask & RET_MASK_CONTINUE) != 0;
-    }
-
-    public boolean clearCnt() {
-        final var result = returnMask;
-        returnMask &= ~RET_MASK_CONTINUE;
-        return (result & RET_MASK_CONTINUE) != 0;
-    }
-
-    public void cnt() {
-        returnMask |= RET_MASK_CONTINUE;
-    }
-
-    public boolean hasBrk() {
-        return (returnMask & RET_MASK_BREAK) != 0;
-    }
-
-    public boolean clearBrk() {
-        final var result = returnMask;
-        returnMask &= ~RET_MASK_BREAK;
-        return (result & RET_MASK_BREAK) != 0;
-    }
-
-    public void brk() {
-        returnMask |= RET_MASK_BREAK;
-    }
-
-    public boolean hasRet() {
-        return (returnMask & RET_MASK_RETURN) != 0;
-    }
-
-    public boolean clearRet() {
-        final var result = returnMask;
-        returnMask &= ~RET_MASK_RETURN;
-        return (result & RET_MASK_RETURN) != 0;
-    }
-
-    public void ret() {
-        returnMask |= RET_MASK_RETURN;
     }
 
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
@@ -235,12 +158,16 @@ public final class EvaluationContext {
         removeFunction(className, name, org.objectweb.asm.Type.getMethodType(mReturnType, mParamTypes));
     }
 
+    public void flushInstructionBuffer() {
+        instructionBuffer.clear();
+    }
+
     public void emit(final AbstractInsnNode instruction) {
-        peekFrame().instructionBuffer.add(instruction);
+        instructionBuffer.add(instruction);
     }
 
     public void emitAll(final InsnList instructions) {
-        peekFrame().instructionBuffer.add(instructions);
+        instructionBuffer.add(instructions);
     }
 
     public @NotNull StackFrame peekFrame() {
@@ -250,13 +177,12 @@ public final class EvaluationContext {
     public void pushFrame(final @NotNull ScopeOwner owner) {
         final var parentScope = frameStack.empty() ? null : frameStack.peek().scope;
         final var newFrame = new StackFrame(new Scope(parentScope, owner));
-        newFrame.intrinsicDefines.putAll(intrinsicDefines);
-        newFrame.intrinsicMacros.putAll(intrinsicMacros);
         if (!frameStack.empty()) {
             // If we currently already have a frame, propagate named values scope-inwards
             newFrame.namedLocalValues.putAll(peekFrame().namedLocalValues);
         }
         frameStack.push(newFrame);
+        intrinsicsHandler.initGlobal(); // Global intrinsics are injected into every new frame
     }
 
     public void popFrame() {
@@ -267,7 +193,6 @@ public final class EvaluationContext {
         }
         // Otherwise we merge the value stack and instruction buffer; locals and labels are never merged
         final var currentFrame = frameStack.peek();
-        currentFrame.instructionBuffer.add(lastFrame.instructionBuffer);
         currentFrame.valueStack.addAll(lastFrame.valueStack);
     }
 
@@ -300,15 +225,5 @@ public final class EvaluationContext {
 
     public @NotNull Expr peekValue() {
         return peekFrame().valueStack.peek();
-    }
-
-    public @NotNull InsnList getInstructionBuffer() {
-        return peekFrame().instructionBuffer;
-    }
-
-    public @NotNull InsnList copyInstructionBuffer() {
-        final var list = new InsnList();
-        list.add(getInstructionBuffer());
-        return list;
     }
 }

@@ -98,11 +98,11 @@ public final class AssemblyFile extends AbstractElementContainer implements Scop
     public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
         context.pushFrame(this);
         for (final var element : getElements()) {
-            if (!element.isEvaluatedDirectly() || context.clearCnt()) {
+            if (!element.isEvaluatedDirectly() || context.controlFlowState.clearCnt()) {
                 continue;
             }
             element.evaluate(context);
-            context.clearReturnMask(); // Top level clears return mask completely
+            context.controlFlowState.clearReturnMask(); // Top level clears return mask completely
             context.clearStack(); // Clear of current frame, we don't care about any top level values
         }
         context.popFrame();

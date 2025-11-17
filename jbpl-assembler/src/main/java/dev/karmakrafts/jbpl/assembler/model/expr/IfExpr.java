@@ -112,7 +112,7 @@ public final class IfExpr extends AbstractElementContainer implements Expr, Scop
             // If the condition of this if() expression didn't evaluate to true, attempt to take one of the else if() branches..
             for (final var branch : elseIfBranches) {
                 branch.evaluate(context);
-                if (context.hasRet()) {
+                if (context.controlFlowState.hasRet()) {
                     return;
                 }
             }

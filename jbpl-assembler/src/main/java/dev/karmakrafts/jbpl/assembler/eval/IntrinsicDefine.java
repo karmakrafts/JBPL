@@ -16,14 +16,15 @@
 
 package dev.karmakrafts.jbpl.assembler.eval;
 
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.util.XBiConsumer;
+import dev.karmakrafts.jbpl.assembler.util.XFunction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
-public record IntrinsicMacroSignature( // @formatter:off
+public record IntrinsicDefine( // @formatter:off
     @NotNull String name,
-    @NotNull Type returnType,
-    @NotNull List<Type> parameterTypes
+    @NotNull XFunction<EvaluationContext, Expr, EvaluationException> getter,
+    @Nullable XBiConsumer<EvaluationContext, Expr, EvaluationException> setter
 ) { // @formatter:on
 }

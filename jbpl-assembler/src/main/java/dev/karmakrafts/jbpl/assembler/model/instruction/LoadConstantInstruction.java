@@ -90,29 +90,30 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
     }
 
     @Override
-    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getValue().evaluateAs(context, Number.class);
         if (value instanceof Integer intValue) {
-            context.emit(createConstantInt(intValue));
-            return;
+            return createConstantInt(intValue);
         }
         else if (value instanceof Long longValue) {
-            context.emit(createConstantLong(longValue));
-            return;
+            return createConstantLong(longValue);
         }
         else if (value instanceof Float floatValue) {
-            context.emit(createConstantFloat(floatValue));
-            return;
+            return createConstantFloat(floatValue);
         }
         else if (value instanceof Double doubleValue) {
-            context.emit(createConstantDouble(doubleValue));
-            return;
+            return createConstantDouble(doubleValue);
         }
-        switch (opcode) {
-            case BIPUSH -> context.emit(new IntInsnNode(Opcodes.BIPUSH, value.byteValue()));
-            case SIPUSH -> context.emit(new IntInsnNode(Opcodes.SIPUSH, value.shortValue()));
-            default -> context.emit(new LdcInsnNode(value));
-        }
+        return switch (opcode) {
+            case BIPUSH -> new IntInsnNode(Opcodes.BIPUSH, value.byteValue());
+            case SIPUSH -> new IntInsnNode(Opcodes.SIPUSH, value.shortValue());
+            default -> new LdcInsnNode(value);
+        };
+    }
+
+    @Override
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        Instruction.super.evaluate(context);
     }
 
     @Override

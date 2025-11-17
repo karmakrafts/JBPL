@@ -21,6 +21,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 public final class StackInstruction extends AbstractExprContainer implements Instruction {
@@ -50,16 +51,20 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
     }
 
     @Override
-    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException {
         final var encodedOpcode = getOpcode(context).encodedValue;
         final var slotIdObject = getSlot().evaluateAs(context, Object.class);
         if (slotIdObject instanceof Integer slotId) {
-            context.emit(new VarInsnNode(encodedOpcode, slotId));
-            return;
+            return new VarInsnNode(encodedOpcode, slotId);
         }
         // Otherwise slotIdObject is a String and we need to resolve the local by name, fail if we can't find it
         final var slotId = context.peekFrame().getOrAssignLocalIndex((String) slotIdObject, context);
-        context.emit(new VarInsnNode(encodedOpcode, slotId));
+        return new VarInsnNode(encodedOpcode, slotId);
+    }
+
+    @Override
+    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        Instruction.super.evaluate(context);
     }
 
     @Override

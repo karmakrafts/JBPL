@@ -70,10 +70,10 @@ public final class EvaluationContextTest {
 
         context.emit(new InsnNode(Opcodes.NOP));
 
-        Assertions.assertEquals(Opcodes.DUP, context.getInstructionBuffer().get(0).getOpcode());
-        Assertions.assertEquals(Opcodes.POP, context.getInstructionBuffer().get(1).getOpcode());
-        Assertions.assertEquals(Opcodes.RETURN, context.getInstructionBuffer().get(2).getOpcode());
-        Assertions.assertEquals(Opcodes.NOP, context.getInstructionBuffer().get(3).getOpcode());
+        Assertions.assertEquals(Opcodes.DUP, context.instructionBuffer.get(0).getOpcode());
+        Assertions.assertEquals(Opcodes.POP, context.instructionBuffer.get(1).getOpcode());
+        Assertions.assertEquals(Opcodes.RETURN, context.instructionBuffer.get(2).getOpcode());
+        Assertions.assertEquals(Opcodes.NOP, context.instructionBuffer.get(3).getOpcode());
     }
 
     @Test

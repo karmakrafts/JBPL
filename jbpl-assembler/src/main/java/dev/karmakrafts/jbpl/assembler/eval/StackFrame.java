@@ -24,7 +24,6 @@ import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 
 import java.util.HashMap;
@@ -36,10 +35,9 @@ public final class StackFrame implements Copyable<StackFrame> {
     public final ScopeResolver scopeResolver;
     public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
     public final HashMap<String, Expr> namedLocalValues = new HashMap<>(); // Named arguments of the current macro
-    public final HashMap<String, Expr> intrinsicDefines = new HashMap<>();
+    public final HashMap<String, IntrinsicDefine> intrinsicDefines = new HashMap<>();
     public final HashMap<IntrinsicMacroSignature, IntrinsicMacro> intrinsicMacros = new HashMap<>();
 
-    public final InsnList instructionBuffer = new InsnList();
     public final HashMap<String, LocalStatement> locals = new HashMap<>();
     private final HashMap<String, Integer> localIndices = new HashMap<>();
     private final HashMap<String, LabelNode> labelNodes = new HashMap<>();
@@ -92,9 +90,6 @@ public final class StackFrame implements Copyable<StackFrame> {
         frame.namedLocalValues.putAll(namedLocalValues.entrySet().stream()
             .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
             .collect(Collectors.toMap(Pair::left, Pair::right)));
-        // @formatter:on
-        frame.instructionBuffer.add(instructionBuffer);
-        // @formatter:off
         frame.locals.putAll(locals.entrySet().stream()
             .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
             .collect(Collectors.toMap(Pair::left, Pair::right)));

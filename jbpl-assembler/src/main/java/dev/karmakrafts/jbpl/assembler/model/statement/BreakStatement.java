@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public final class BreakStatement extends AbstractElement implements Statement {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        context.brk();
+        context.controlFlowState.brk();
     }
 
     @Override

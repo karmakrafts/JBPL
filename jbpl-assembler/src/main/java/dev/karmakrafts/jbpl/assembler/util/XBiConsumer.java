@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler.eval;
+package dev.karmakrafts.jbpl.assembler.util;
 
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-
-public record IntrinsicMacroSignature( // @formatter:off
-    @NotNull String name,
-    @NotNull Type returnType,
-    @NotNull List<Type> parameterTypes
-) { // @formatter:on
+@FunctionalInterface
+public interface XBiConsumer<T, U, X extends Throwable> {
+    void accept(T t, U u) throws X;
 }

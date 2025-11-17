@@ -28,6 +28,7 @@ import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     }
 
     @Override
-    public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+    public @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException {
         final var instantiatedSignature = getInstantiatedSignature().evaluateAs(context, FunctionSignatureExpr.class);
         final var samSignature = getSAMSignature().evaluateAs(context, FunctionSignatureExpr.class);
         final var name = instantiatedSignature.getFunctionName().evaluateAs(context, String.class);
@@ -185,10 +186,12 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
         joinedArguments.add(targetHandle);
         joinedArguments.add(instantiatedType);
         joinedArguments.addAll(arguments);
-        context.emit(new InvokeDynamicInsnNode(name,
-            factoryDescriptor,
-            bsmHandle,
-            joinedArguments.toArray(Object[]::new)));
+        return new InvokeDynamicInsnNode(name, factoryDescriptor, bsmHandle, joinedArguments.toArray(Object[]::new));
+    }
+
+    @Override
+    public void evaluate(@NotNull EvaluationContext context) throws EvaluationException {
+        Instruction.super.evaluate(context);
     }
 
     @Override

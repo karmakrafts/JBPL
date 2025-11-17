@@ -20,10 +20,18 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.AbstractInsnNode;
 
 public interface Instruction extends Statement {
     @Override
     @NotNull Instruction copy();
 
     @NotNull Opcode getOpcode(final @NotNull EvaluationContext context) throws EvaluationException;
+
+    @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException;
+
+    @Override
+    default void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
+        context.emit(emit(context));
+    }
 }

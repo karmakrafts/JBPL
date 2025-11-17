@@ -99,7 +99,33 @@ public enum Opcode {
     IF_ACMPNE       (Opcodes.IF_ACMPNE),
     GOTO            (Opcodes.GOTO),
     JSR             (Opcodes.JSR),
-    RET             (Opcodes.RET);
+    RET             (Opcodes.RET),
+    MONITORENTER    (Opcodes.MONITORENTER),
+    MONITOREXIT     (Opcodes.MONITOREXIT),
+    SWAP            (Opcodes.SWAP),
+    DUP             (Opcodes.DUP),
+    DUP2            (Opcodes.DUP2),
+    DUP_X1          (Opcodes.DUP_X1),
+    DUP_X2          (Opcodes.DUP_X2),
+    DUP2_X1         (Opcodes.DUP2_X1),
+    DUP2_X2         (Opcodes.DUP2_X2),
+    POP             (Opcodes.POP),
+    POP2            (Opcodes.POP2),
+    I2B             (Opcodes.I2B),
+    I2S             (Opcodes.I2S),
+    I2C             (Opcodes.I2C),
+    I2L             (Opcodes.I2L),
+    I2F             (Opcodes.I2F),
+    I2D             (Opcodes.I2D),
+    L2I             (Opcodes.L2I),
+    L2F             (Opcodes.L2F),
+    L2D             (Opcodes.L2D),
+    F2I             (Opcodes.F2I),
+    F2L             (Opcodes.F2L),
+    F2D             (Opcodes.F2D),
+    D2I             (Opcodes.D2I),
+    D2L             (Opcodes.D2L),
+    D2F             (Opcodes.D2F);
     // @formatter:on
 
     // @formatter:off
@@ -115,6 +141,11 @@ public enum Opcode {
     public static final EnumSet<Opcode> IF_ICMP = EnumSet.of(IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE);
     public static final EnumSet<Opcode> IF_ACMP = EnumSet.of(IF_ACMPEQ, IF_ACMPNE);
     public static final EnumSet<Opcode> JUMP = CollectionUtils.enumSetOf(Opcode.class, IF, IF_ICMP, IF_ACMP, Set.of(Opcode.GOTO));
+    public static final EnumSet<Opcode> I_CONV = EnumSet.of(I2B, I2S, I2C, I2L, I2F, I2D);
+    public static final EnumSet<Opcode> L_CONV = EnumSet.of(L2I, L2F, L2D);
+    public static final EnumSet<Opcode> F_CONV = EnumSet.of(F2I, F2L, F2D);
+    public static final EnumSet<Opcode> D_CONV = EnumSet.of(D2I, D2L, D2F);
+    public static final EnumSet<Opcode> CONV = CollectionUtils.enumSetOf(Opcode.class, I_CONV, L_CONV, F_CONV, D_CONV);
     // @formatter:on
 
     public final int encodedValue;
@@ -125,6 +156,10 @@ public enum Opcode {
 
     public static @NotNull Optional<Opcode> findByName(final @NotNull String name) {
         return Arrays.stream(values()).filter(op -> op.name().equalsIgnoreCase(name)).findFirst();
+    }
+
+    public static @NotNull Optional<Opcode> findByEncodedValue(final int value) {
+        return Arrays.stream(values()).filter(op -> op.encodedValue == value).findFirst();
     }
 
     public boolean isConstant() {

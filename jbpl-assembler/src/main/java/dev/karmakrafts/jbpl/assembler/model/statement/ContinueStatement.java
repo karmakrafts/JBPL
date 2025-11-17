@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ContinueStatement extends AbstractElement implements Statement {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        context.cnt();
+        context.controlFlowState.cnt();
     }
 
     @Override

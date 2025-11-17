@@ -17,8 +17,10 @@
 package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
+import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 
 public final class OplessInstruction extends AbstractElement implements Instruction {
@@ -34,8 +36,8 @@ public final class OplessInstruction extends AbstractElement implements Instruct
     }
 
     @Override
-    public void evaluate(final @NotNull EvaluationContext context) {
-        context.emit(new InsnNode(opcode.encodedValue));
+    public @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException {
+        return new InsnNode(opcode.encodedValue);
     }
 
     @Override
