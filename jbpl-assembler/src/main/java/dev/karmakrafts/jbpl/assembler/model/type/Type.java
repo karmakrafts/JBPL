@@ -45,7 +45,7 @@ public sealed interface Type
 
     static @NotNull Optional<Type> dematerialize(final @NotNull org.objectweb.asm.Type type) {
         final var descriptor = type.getDescriptor();
-        if (descriptor.contains("[")) {
+        if (descriptor.startsWith("[")) {
             // We are de-materializing some type of array
             var dimensions = 0;
             var typeDescriptor = "";
@@ -67,7 +67,12 @@ public sealed interface Type
             }
             return Optional.of(arrayType);
         }
-        return BuiltinType.findByMaterialType(type).map(Type.class::cast);
+        return BuiltinType.findByMaterialType(type).map(Type.class::cast).or(() -> {
+            if (!descriptor.startsWith("L")) {
+                return Optional.empty();
+            }
+            return Optional.of(new ClassType(type.getInternalName(), false));
+        });
     }
 
     @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) throws EvaluationException;
