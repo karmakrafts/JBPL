@@ -1,0 +1,21 @@
+private macro global_macro(): bool {
+    ^return true
+}
+
+assert global_macro() == true
+
+private macro capture_global_macro(): bool {
+    ^return global_macro()
+}
+
+assert capture_global_macro() == true
+
+private macro shadow_global_macro() {
+    macro global_macro(): bool {
+        ^return false
+    }
+
+    assert global_macro() == false
+}
+
+shadow_global_macro()

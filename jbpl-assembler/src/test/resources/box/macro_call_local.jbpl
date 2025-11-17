@@ -1,0 +1,15 @@
+private macro enclosing_macro() {
+    macro local_macro(): bool {
+        ^return true
+    }
+
+    assert local_macro() == true
+
+    macro capture_local_macro(): bool {
+        ^return local_macro()
+    }
+
+    assert capture_local_macro() == true
+}
+
+enclosing_macro()
