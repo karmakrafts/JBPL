@@ -68,6 +68,7 @@ public final class Main {
                 System.out::println,
                 System.err::println);
             final var context = assembler.lowerAndCreateContext(options.valueOf(inputSpec), name -> new ClassNode());
+            context.eval();
             final var output = context.output.values();
             for (final var clazz : output) {
                 if (clazz == null) {

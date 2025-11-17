@@ -56,6 +56,10 @@ public final class EvaluationContext {
         this.errorConsumer = errorConsumer;
     }
 
+    public void eval() throws EvaluationException {
+        file.evaluate(this);
+    }
+
     public @NotNull StackTrace createStackTrace() {
         return new StackTrace(frameStack.stream().map(StackFrame::copy).toList());
     }
