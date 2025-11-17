@@ -22,9 +22,12 @@ import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Handle;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class FunctionSignatureExpr extends AbstractExprContainer implements SignatureExpr {
@@ -39,6 +42,33 @@ public final class FunctionSignatureExpr extends AbstractExprContainer implement
         addExpression(owner);
         addExpression(name);
         addExpression(returnType);
+    }
+
+    public static @NotNull Optional<FunctionSignatureExpr> dematerialize(final @NotNull String owner,
+                                                                         final @NotNull String name,
+                                                                         final @NotNull String desc) {
+        final var ownerType = Type.dematerialize(org.objectweb.asm.Type.getObjectType(owner));
+        if (ownerType.isEmpty()) {
+            return Optional.empty();
+        }
+        final var type = org.objectweb.asm.Type.getMethodType(desc);
+        final var returnType = Type.dematerialize(type.getReturnType());
+        if (returnType.isEmpty()) {
+            return Optional.empty();
+        }
+        final var signature = new FunctionSignatureExpr(ConstExpr.of(ownerType),
+            ConstExpr.of(name),
+            ConstExpr.of(returnType));
+        // @formatter:off
+        signature.addFunctionParameters(Arrays.stream(type.getArgumentTypes())
+            .map(argType -> ConstExpr.of(Type.dematerialize(argType).orElseThrow()))
+            .toList());
+        // @formatter:on
+        return Optional.of(signature);
+    }
+
+    public static @NotNull Optional<FunctionSignatureExpr> dematerialize(final @NotNull Handle handle) {
+        return dematerialize(handle.getOwner(), handle.getName(), handle.getDesc());
     }
 
     @Override

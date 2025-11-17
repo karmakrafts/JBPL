@@ -21,6 +21,9 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Handle;
+
+import java.util.Optional;
 
 public final class FieldSignatureExpr extends AbstractExprContainer implements SignatureExpr {
     public static final int OWNER_INDEX = 0;
@@ -31,6 +34,20 @@ public final class FieldSignatureExpr extends AbstractExprContainer implements S
         addExpression(owner);
         addExpression(name);
         addExpression(type);
+    }
+
+    public static @NotNull Optional<FieldSignatureExpr> dematerialize(final @NotNull String owner,
+                                                                      final @NotNull String name,
+                                                                      final @NotNull String desc) { // @formatter:off
+        return Type.dematerialize(org.objectweb.asm.Type.getObjectType(owner))
+            .flatMap(type -> Type.dematerialize(org.objectweb.asm.Type.getType(desc))
+                .map(value -> new FieldSignatureExpr(ConstExpr.of(type),
+                    ConstExpr.of(name),
+                    ConstExpr.of(value))));
+    } // @formatter:on
+
+    public static @NotNull Optional<FieldSignatureExpr> dematerialize(final @NotNull Handle handle) {
+        return dematerialize(handle.getOwner(), handle.getName(), handle.getDesc());
     }
 
     @Override

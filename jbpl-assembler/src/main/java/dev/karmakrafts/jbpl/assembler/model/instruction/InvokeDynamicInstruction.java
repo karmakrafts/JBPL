@@ -18,7 +18,9 @@ package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.InstructionCodec;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FunctionSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
@@ -34,6 +36,7 @@ import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class InvokeDynamicInstruction extends AbstractExprContainer implements Instruction {
@@ -44,6 +47,37 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     public static final int ARGS_INDEX = 4;
 
     private int argumentIndex = 0;
+
+    static {
+        InstructionCodec.registerDecoder(InvokeDynamicInsnNode.class, (ctx, node) -> {
+            final var factoryDesc = org.objectweb.asm.Type.getMethodType(node.desc);
+            final var factoryReturnType = factoryDesc.getReturnType();
+
+            final var instantiatedType = (org.objectweb.asm.Type) node.bsmArgs[2];
+            final var instantiatedSignature = FunctionSignatureExpr.dematerialize(factoryReturnType.getInternalName(),
+                node.name,
+                instantiatedType.getDescriptor()).orElseThrow();
+
+            final var samType = (org.objectweb.asm.Type) node.bsmArgs[0];
+            final var samSignature = FunctionSignatureExpr.dematerialize(factoryReturnType.getInternalName(),
+                node.name,
+                samType.getDescriptor()).orElseThrow();
+
+            final var bsmOpcode = decodeInvokeTag(node.bsm.getTag()).orElseThrow();
+            final var bsmSignature = FunctionSignatureExpr.dematerialize(node.bsm).orElseThrow();
+            final var bsmInstruction = new InvokeInstruction(bsmOpcode, bsmSignature);
+
+            final var targetHandle = (Handle) node.bsmArgs[1];
+            final var targetOpcode = decodeInvokeTag(targetHandle.getTag()).orElseThrow();
+            final var targetSignature = FunctionSignatureExpr.dematerialize(targetHandle).orElseThrow();
+            final var targetInstruction = new InvokeInstruction(targetOpcode, targetSignature);
+
+            return new InvokeDynamicInstruction(instantiatedSignature,
+                samSignature,
+                ConstExpr.of(bsmInstruction),
+                ConstExpr.of(targetInstruction));
+        });
+    }
 
     public InvokeDynamicInstruction(final @NotNull Expr instantiatedSignature,
                                     final @NotNull Expr samSignature,
@@ -58,6 +92,16 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
     private static @NotNull String computeFactoryDescriptor(final @NotNull ClassType type,
                                                             final @NotNull EvaluationContext context) {
         return org.objectweb.asm.Type.getMethodDescriptor(type.materialize(context));
+    }
+
+    private static @NotNull Optional<Opcode> decodeInvokeTag(final int tag) {
+        return switch (tag) {
+            case Opcodes.H_INVOKEVIRTUAL -> Optional.of(Opcode.INVOKEVIRTUAL);
+            case Opcodes.H_INVOKESTATIC -> Optional.of(Opcode.INVOKESTATIC);
+            case Opcodes.H_INVOKESPECIAL -> Optional.of(Opcode.INVOKESPECIAL);
+            case Opcodes.H_INVOKEINTERFACE -> Optional.of(Opcode.INVOKEINTERFACE);
+            default -> Optional.empty();
+        };
     }
 
     private int getInvokeTag(final @NotNull Opcode opcode,
