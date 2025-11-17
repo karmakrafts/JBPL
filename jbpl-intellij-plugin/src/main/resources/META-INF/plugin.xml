@@ -22,6 +22,14 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.java</depends>
 
+    <resource-bundle>messages.JBPL</resource-bundle>
+
+    <actions>
+        <action id="jbpl_create_file"
+                class="dev.karmakrafts.jbpl.intellij.action.CreateJBPLFileAction">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+    </actions>
     <!-- @formatter:off -->
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="JBPL"
