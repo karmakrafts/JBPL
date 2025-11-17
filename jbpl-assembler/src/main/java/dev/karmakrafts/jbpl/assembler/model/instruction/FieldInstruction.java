@@ -18,10 +18,13 @@ package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.InstructionCodec;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.expr.FieldSignatureExpr;
 import dev.karmakrafts.jbpl.assembler.model.type.ClassType;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -29,6 +32,17 @@ import org.objectweb.asm.tree.FieldInsnNode;
 public final class FieldInstruction extends AbstractExprContainer implements Instruction {
     public static final int SIGNATURE_INDEX = 0;
     public final Opcode opcode;
+
+    static {
+        InstructionCodec.registerDecoder(FieldInsnNode.class, (ctx, node) -> {
+            final var opcode = Opcode.findByEncodedValue(node.getOpcode()).orElseThrow();
+            final var owner = Type.dematerialize(org.objectweb.asm.Type.getObjectType(node.owner)).orElseThrow();
+            final var name = node.name;
+            final var type = Type.dematerialize(org.objectweb.asm.Type.getType(node.desc)).orElseThrow();
+            final var signature = new FieldSignatureExpr(ConstExpr.of(owner), ConstExpr.of(name), ConstExpr.of(type));
+            return new FieldInstruction(opcode, signature);
+        });
+    }
 
     public FieldInstruction(final @NotNull Opcode opcode, final @NotNull Expr signature) {
         addExpression(signature);
