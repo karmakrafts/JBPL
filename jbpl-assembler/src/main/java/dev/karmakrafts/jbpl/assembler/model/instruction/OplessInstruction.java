@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.InstructionCodec;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -25,6 +26,13 @@ import org.objectweb.asm.tree.InsnNode;
 
 public final class OplessInstruction extends AbstractElement implements Instruction {
     public Opcode opcode;
+
+    static {
+        InstructionCodec.registerDecoder(InsnNode.class, node -> {
+            final var opcode = Opcode.findByEncodedValue(node.getOpcode()).orElseThrow();
+            return new OplessInstruction(opcode);
+        });
+    }
 
     public OplessInstruction(final @NotNull Opcode opcode) {
         this.opcode = opcode;
