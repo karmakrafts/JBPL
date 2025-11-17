@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler.model.expr;
+package dev.karmakrafts.jbpl.assembler.box;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
-public abstract class AbstractReceiverExpr extends AbstractExprContainer implements Expr {
-    public static final int RECEIVER_INDEX = 0;
-
-    public AbstractReceiverExpr() {
-        addExpression(ConstExpr.unit()); // Receiver
-    }
-
-    public @NotNull Expr getReceiver() {
-        return getExpressions().get(RECEIVER_INDEX);
-    }
-
-    public void setReceiver(final @NotNull Expr receiver) {
-        receiver.setParent(this);
-        getExpressions().set(RECEIVER_INDEX, receiver);
+@TestInstance(Lifecycle.PER_METHOD)
+public final class ReferenceArgumentTest extends AssemblerBoxTest {
+    @Override
+    protected @NotNull String getFileName() {
+        return "reference_argument.jbpl";
     }
 }

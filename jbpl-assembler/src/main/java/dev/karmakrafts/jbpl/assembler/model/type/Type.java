@@ -25,13 +25,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public sealed interface Type
-    permits ArrayType, BuiltinType, ClassType, IntersectionType, PreproClassType, PreproType, RangeType, UnresolvedType, IntrinsicReceiverType {
+    permits ArrayType, BuiltinType, ClassType, IntersectionType, PreproClassType, PreproType, RangeType, UnresolvedType, ReceiverType {
     static @NotNull Optional<Type> tryParse(final @Nullable String value) {
         if (value == null) {
             return Optional.empty();
-        }
-        if (value.equals(IntrinsicReceiverType.INSTANCE.toString())) {
-            return Optional.of(IntrinsicReceiverType.INSTANCE);
         }
         // @formatter:off
         return BuiltinType.findByName(value)

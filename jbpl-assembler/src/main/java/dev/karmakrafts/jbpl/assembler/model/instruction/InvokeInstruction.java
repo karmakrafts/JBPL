@@ -29,7 +29,6 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 public final class InvokeInstruction extends AbstractExprContainer implements Instruction {
     public static final int SIGNATURE_INDEX = 0;
-    public Opcode opcode;
 
     static {
         InstructionCodec.registerDecoder(MethodInsnNode.class, (ctx, node) -> {
@@ -38,6 +37,8 @@ public final class InvokeInstruction extends AbstractExprContainer implements In
             return new InvokeInstruction(opcode, signature);
         });
     }
+
+    public Opcode opcode;
 
     public InvokeInstruction(final @NotNull Opcode opcode, final @NotNull Expr signature) {
         this.opcode = opcode;

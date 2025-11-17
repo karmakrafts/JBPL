@@ -21,11 +21,11 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
-public final class IntrinsicReceiverType implements Type {
-    public static final IntrinsicReceiverType INSTANCE = new IntrinsicReceiverType();
-
-    private IntrinsicReceiverType() {
-    }
+public enum ReceiverType implements Type {
+    // @formatter:off
+    INTRINSIC,
+    SCOPE;
+    // @formatter:on
 
     @Override
     public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) throws EvaluationException {

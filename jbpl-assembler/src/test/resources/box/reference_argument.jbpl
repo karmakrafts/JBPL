@@ -1,0 +1,19 @@
+private define x: i32 = 44
+
+private macro use_argument(x: i32) {
+    assert x == 0
+
+    macro capture_argument() {
+        assert x == 0
+    }
+
+    capture_argument()
+
+    macro shadow_argument_with_argument(x: i32) {
+        assert x == 1
+    }
+
+    shadow_argument_with_argument(1)
+}
+
+use_argument(0)

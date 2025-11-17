@@ -43,10 +43,11 @@ public final class WhenExpr extends AbstractExprContainer implements Expr, Scope
     }
 
     public void addBranches(final @NotNull Collection<? extends Branch> branches) {
-        this.branches.addAll(branches);
+        branches.forEach(this::addBranch);
     }
 
     public void addBranch(final @NotNull Branch branch) {
+        branch.setParent(this);
         branches.add(branch);
     }
 
@@ -59,7 +60,6 @@ public final class WhenExpr extends AbstractExprContainer implements Expr, Scope
     }
 
     public void setValue(final @NotNull Expr value) {
-        getValue().setParent(null);
         value.setParent(this);
         getExpressions().set(VALUE_INDEX, value);
     }
@@ -129,9 +129,6 @@ public final class WhenExpr extends AbstractExprContainer implements Expr, Scope
 
         @Override
         public void setValue(final @NotNull Expr condition) {
-            if (this.value != null) {
-                this.value.setParent(null);
-            }
             condition.setParent(this);
             this.value = condition;
         }

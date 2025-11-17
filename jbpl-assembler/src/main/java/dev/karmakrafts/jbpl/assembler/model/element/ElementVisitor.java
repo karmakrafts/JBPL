@@ -41,7 +41,7 @@ public interface ElementVisitor {
     }
 
     default @NotNull AssemblyFile visitFile(final @NotNull AssemblyFile file) {
-        final var transformedElements = file.transformChildren(this);
+        final var transformedElements = file.getElements().stream().map(this::visitElement).toList();
         file.clearElements();
         file.addElements(transformedElements);
         return file;
@@ -182,7 +182,14 @@ public interface ElementVisitor {
         else if (expr instanceof IntrinsicReceiverExpr receiverExpr) {
             return visitIntrinsicReceiverExpr(receiverExpr);
         }
+        else if (expr instanceof ScopeReceiverExpr scopeReceiverExpr) {
+            return visitScopeReceiverExpr(scopeReceiverExpr);
+        }
         throw new IllegalStateException("Unsupported expression type");
+    }
+
+    default @NotNull Expr visitScopeReceiverExpr(final @NotNull ScopeReceiverExpr scopeReceiverExpr) {
+        return scopeReceiverExpr;
     }
 
     default @NotNull Expr visitIntrinsicReceiverExpr(final @NotNull IntrinsicReceiverExpr receiverExpr) {

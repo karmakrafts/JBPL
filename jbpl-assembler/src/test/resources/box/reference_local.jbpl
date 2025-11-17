@@ -1,0 +1,19 @@
+private macro use_local_define() {
+    define x: i32 = 0
+    assert x == 0
+
+    macro capture_local_define() {
+        assert x == 0
+    }
+
+    capture_local_define()
+
+    macro shadow_local_define() {
+        define x: i32 = 1
+        assert x == 1
+    }
+
+    shadow_local_define()
+}
+
+use_local_define()

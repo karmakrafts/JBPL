@@ -19,11 +19,11 @@ package dev.karmakrafts.jbpl.assembler.eval;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Map;
 
 public record IntrinsicMacroSignature( // @formatter:off
     @NotNull String name,
     @NotNull Type returnType,
-    @NotNull List<Type> parameterTypes
+    @NotNull Map<String, Type> parameters
 ) { // @formatter:on
 }

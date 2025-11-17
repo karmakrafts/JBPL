@@ -1,8 +1,0 @@
-public static fun <com/example/Test>.<clinit>(): void {
-    iconst_0
-    ldc "Hello, World!"
-    invokevirtual <com/example/Foo>.test(i32, string): void
-    monitorenter
-    invokestatic <java/lang/String>.join([<java/lang/Object>]): <java/lang/String>
-    monitorexit
-}

@@ -19,6 +19,7 @@ package dev.karmakrafts.jbpl.assembler.eval;
 import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.util.XBiConsumer;
 import dev.karmakrafts.jbpl.assembler.util.XFunction;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.util.List;
+import java.util.Map;
 
 public final class IntrinsicsHandler {
     private final EvaluationContext context;
@@ -57,11 +59,21 @@ public final class IntrinsicsHandler {
     }
 
     public void addIntrinsicMacro(final @NotNull IntrinsicMacroSignature signature,
-                                  final @NotNull XFunction<List<Expr>, Expr, EvaluationException> callback) {
+                                  final @NotNull XBiConsumer<EvaluationContext, List<Expr>, EvaluationException> callback) {
         context.peekFrame().intrinsicMacros.put(signature, new IntrinsicMacro(signature, callback));
     }
 
     public void initGlobal() {
+        addIntrinsicMacro(new IntrinsicMacroSignature("info", BuiltinType.VOID, Map.of("message", BuiltinType.STRING)),
+            (ctx, args) -> {
+                final var message = args.get(0).evaluateAs(context, String.class);
+                ctx.infoConsumer.accept(message);
+            });
+        addIntrinsicMacro(new IntrinsicMacroSignature("error", BuiltinType.VOID, Map.of("message", BuiltinType.STRING)),
+            (ctx, args) -> {
+                final var message = args.get(0).evaluateAs(context, String.class);
+                ctx.errorConsumer.accept(message);
+            });
     }
 
     public void initForField(final @NotNull FieldNode node) {

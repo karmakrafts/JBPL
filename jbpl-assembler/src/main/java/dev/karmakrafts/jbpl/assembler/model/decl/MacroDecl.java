@@ -129,6 +129,9 @@ public final class MacroDecl extends AbstractElementContainer
         context.peekFrame().namedLocalValues.putAll(arguments); // Make current macro args available to child elements
         final var elements = getElements();
         for (final var element : elements) {
+            if (!element.isEvaluatedDirectly()) {
+                continue;
+            }
             element.evaluate(context);
             if (context.controlFlowState.clearReturnMask()) { // Macro scope always clears all status flags
                 break; // Break loop if we returned

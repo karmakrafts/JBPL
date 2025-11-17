@@ -28,7 +28,6 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 public final class StackInstruction extends AbstractExprContainer implements Instruction {
     public static final int SLOT_INDEX = 0;
-    public Opcode opcode;
 
     static {
         InstructionCodec.registerDecoder(VarInsnNode.class, (ctx, node) -> {
@@ -37,6 +36,8 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
             return new StackInstruction(opcode, ConstExpr.of(index));
         });
     }
+
+    public Opcode opcode;
 
     /**
      * @param opcode The wanted opcode

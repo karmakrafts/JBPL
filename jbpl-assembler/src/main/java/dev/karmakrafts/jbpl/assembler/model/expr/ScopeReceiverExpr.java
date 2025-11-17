@@ -21,12 +21,19 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.type.ReceiverType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.scope.Scope;
 import org.jetbrains.annotations.NotNull;
 
-public final class IntrinsicReceiverExpr extends AbstractElement implements Expr {
+public final class ScopeReceiverExpr extends AbstractElement implements Expr {
+    public Scope scope;
+
+    public ScopeReceiverExpr(final @NotNull Scope scope) {
+        this.scope = scope;
+    }
+
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
-        return ReceiverType.INTRINSIC;
+        return ReceiverType.SCOPE;
     }
 
     @Override
@@ -34,7 +41,7 @@ public final class IntrinsicReceiverExpr extends AbstractElement implements Expr
     }
 
     @Override
-    public @NotNull IntrinsicReceiverExpr copy() {
-        return copyParentAndSourceTo(new IntrinsicReceiverExpr());
+    public @NotNull ScopeReceiverExpr copy() {
+        return copyParentAndSourceTo(new ScopeReceiverExpr(scope));
     }
 }

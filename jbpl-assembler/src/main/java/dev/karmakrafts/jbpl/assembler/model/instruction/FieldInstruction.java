@@ -29,7 +29,6 @@ import org.objectweb.asm.tree.FieldInsnNode;
 
 public final class FieldInstruction extends AbstractExprContainer implements Instruction {
     public static final int SIGNATURE_INDEX = 0;
-    public final Opcode opcode;
 
     static {
         InstructionCodec.registerDecoder(FieldInsnNode.class, (ctx, node) -> {
@@ -38,6 +37,8 @@ public final class FieldInstruction extends AbstractExprContainer implements Ins
             return new FieldInstruction(opcode, signature);
         });
     }
+
+    public final Opcode opcode;
 
     public FieldInstruction(final @NotNull Opcode opcode, final @NotNull Expr signature) {
         addExpression(signature);

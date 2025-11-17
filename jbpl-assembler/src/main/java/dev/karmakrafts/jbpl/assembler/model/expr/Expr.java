@@ -19,7 +19,6 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
-import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.PreproType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
@@ -60,6 +59,6 @@ public interface Expr extends Statement {
     }
 
     default boolean isUnit() {
-        return this instanceof LiteralExpr literalExpr && literalExpr.type == BuiltinType.VOID;
+        return false;
     }
 }

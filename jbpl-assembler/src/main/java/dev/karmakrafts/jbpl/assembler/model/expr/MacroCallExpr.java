@@ -20,6 +20,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import dev.karmakrafts.jbpl.assembler.util.Pair;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public final class MacroCallExpr extends AbstractCallExpr implements Expr {
@@ -53,10 +55,17 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                                         final @NotNull EvaluationContext context) throws EvaluationException {
         final var scope = context.getScope();
         var macro = context.resolveByName(MacroDecl.class, name);
-        if (macro == null) { // Second attempt is for resolving private declarations
-            context.pushFrame(getContainingFile());
-            macro = context.resolveByName(MacroDecl.class, name);
-            context.popFrame();
+        if (macro == null) { // Second attempt is for resolving by scope receiver
+            final var receiver = getReceiver();
+            if (!(receiver instanceof ScopeReceiverExpr scopeReceiverExpr)) {
+                final var message = String.format("Cannot resolve define %s by scope receiver %s", name, receiver);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+            final var resolver = new ScopeResolver(scopeReceiverExpr.scope);
+            macro = resolver.resolve(MacroDecl.class,
+                ExceptionUtils.unsafePredicate(m -> m.getName(context).equals(name)));
         }
         if (macro == null) {
             throw new EvaluationException(String.format("Could not find macro '%s' in current scope %s", name, scope),
@@ -89,7 +98,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
 
     private @NotNull Map<String, Expr> resolveArguments(final @NotNull EvaluationContext context,
                                                         final @NotNull Map<String, Type> resolvedParameters,
-                                                        final @NotNull MacroDecl macro) throws EvaluationException {
+                                                        final @NotNull String macroName) throws EvaluationException {
         final var resolvedArgs = evaluateArguments(context);
         final var arguments = new HashMap<String, Expr>();
         final var parameters = new ArrayList<>(resolvedParameters.entrySet());
@@ -104,7 +113,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     .filter(entry -> entry.getKey().equals(name))
                     .findFirst()
                     .orElseThrow(() -> new EvaluationException(
-                        String.format("No parameter named '%s' in macro %s", name, ExceptionUtils.rethrowUnchecked(() -> macro.getName(context))),
+                        String.format("No parameter named '%s' in macro %s", name, macroName),
                         SourceDiagnostic.from(this), context.createStackTrace()
                     ));
                 // @formatter:on
@@ -115,7 +124,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                         valueType,
                         name,
                         paramType,
-                        macro.getName(context)), SourceDiagnostic.from(this, value), context.createStackTrace());
+                        macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
                 }
                 arguments.put(name, value);
                 currentArgIndex = parameters.indexOf(parameter) + 1;
@@ -129,7 +138,7 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                     valueType,
                     parameter.getKey(),
                     paramType,
-                    macro.getName(context)), SourceDiagnostic.from(this, value), context.createStackTrace());
+                    macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
             }
             arguments.put(parameter.getKey(), value);
             currentArgIndex++;
@@ -138,9 +147,9 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     }
 
     private @NotNull List<Expr> remapArguments(final @NotNull EvaluationContext context,
-                                               final @NotNull MacroDecl macro) throws EvaluationException {
-        final var params = macro.resolveParameters(context);
-        final var arguments = resolveArguments(context, params, macro);
+                                               final @NotNull String macroName,
+                                               final @NotNull Map<String, Type> params) throws EvaluationException {
+        final var arguments = resolveArguments(context, params, macroName);
         final var sequentialArguments = new ArrayList<Expr>();
         for (final var paramName : params.keySet()) {
             sequentialArguments.add(arguments.get(paramName));
@@ -151,8 +160,20 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName().evaluateAs(context, String.class);
+        // @formatter:off
+        final var intrinsicMacro = context.peekFrame().intrinsicMacros.entrySet().stream()
+            .filter(entry -> entry.getKey().name().equals(name))
+            .map(Entry::getValue)
+            .findFirst();
+        // @formatter:on
+        if (intrinsicMacro.isPresent()) {
+            final var macro = intrinsicMacro.get();
+            final var arguments = remapArguments(context, name, macro.signature().parameters());
+            macro.callback().accept(context, arguments);
+            return;
+        }
         final var macro = getMacro(name, context);
-        final var arguments = remapArguments(context, macro);
+        final var arguments = remapArguments(context, name, macro.resolveParameters(context));
         context.pushFrame(macro); // Create new stack frame for macro body
         context.peekFrame().resetLocalDefines(); // Reset all local defines within the macro before invoking anything
         context.pushValues(arguments); // Push arguments into callee stack frame

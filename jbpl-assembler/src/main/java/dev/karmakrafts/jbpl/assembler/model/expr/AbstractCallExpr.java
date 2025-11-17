@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractCallExpr extends AbstractReceiverExpr implements Expr {
+public abstract class AbstractCallExpr extends AbstractReceiverExpr {
     private final ArrayList<Pair<@Nullable Expr, Expr>> arguments = new ArrayList<>();
 
     public AbstractCallExpr() {

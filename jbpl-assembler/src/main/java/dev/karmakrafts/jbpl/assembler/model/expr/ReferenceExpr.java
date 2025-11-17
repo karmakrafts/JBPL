@@ -20,10 +20,12 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.statement.DefineStatement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
+import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
+import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
-public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, ExprContainer, Reference {
+public final class ReferenceExpr extends AbstractReceiverExpr implements Reference {
     public static final int NAME_INDEX = RECEIVER_INDEX + 1;
 
     public ReferenceExpr(final @NotNull Expr name) {
@@ -43,10 +45,17 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     public @NotNull DefineStatement getDefine(final @NotNull String name,
                                               final @NotNull EvaluationContext context) throws EvaluationException {
         var define = context.resolveByName(DefineStatement.class, name);
-        if (define == null) { // Second attempt is for resolving private declarations
-            context.pushFrame(getContainingFile());
-            define = context.resolveByName(DefineStatement.class, name);
-            context.popFrame();
+        if (define == null) { // Second attempt is for resolving by scope receiver
+            final var receiver = getReceiver();
+            if (!(receiver instanceof ScopeReceiverExpr scopeReceiverExpr)) {
+                final var message = String.format("Cannot resolve define %s by scope receiver %s", name, receiver);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+            final var resolver = new ScopeResolver(scopeReceiverExpr.scope);
+            define = resolver.resolve(DefineStatement.class,
+                ExceptionUtils.unsafePredicate(d -> d.getName(context).equals(name)));
         }
         if (define == null) {
             final var scope = context.getScope();
@@ -59,17 +68,10 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
     @Override
     public @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName().evaluateAs(context, String.class);
-        final var receiver = getReceiver();
         final var frame = context.peekFrame();
-        if (receiver instanceof IntrinsicReceiverExpr) { // Load intrinsic define from the current stack frame if present
-            final var define = frame.intrinsicDefines.get(name);
-            if (define == null) {
-                final var message = String.format("No intrinsic value named '%s' in %s", name, receiver);
-                throw new EvaluationException(message,
-                    SourceDiagnostic.from(this, message),
-                    context.createStackTrace());
-            }
-            return define.getter().apply(context).evaluateAsConst(context);
+        final var intrinsicDefine = frame.intrinsicDefines.get(name);
+        if (intrinsicDefine != null) { // Special treatment for intrinsic references
+            return intrinsicDefine.getter().apply(context).evaluateAsConst(context);
         }
         final var argument = frame.namedLocalValues.get(name);
         if (argument != null) {
@@ -85,15 +87,9 @@ public final class ReferenceExpr extends AbstractReceiverExpr implements Expr, E
         final var name = getName().evaluateAs(context, String.class);
         final var receiver = getReceiver();
         final var frame = context.peekFrame();
-        if (receiver instanceof IntrinsicReceiverExpr) {
-            final var define = frame.intrinsicDefines.get(name);
-            if (define == null) {
-                final var message = String.format("No intrinsic value named '%s' in %s", name, receiver);
-                throw new EvaluationException(message,
-                    SourceDiagnostic.from(this, message),
-                    context.createStackTrace());
-            }
-            final var setter = define.setter();
+        final var intrinsicDefine = frame.intrinsicDefines.get(name);
+        if (intrinsicDefine != null) { // Special treatment for intrinsic references
+            final var setter = intrinsicDefine.setter();
             if (setter == null) {
                 final var message = String.format("Intrinsic value '%s' in %s is immutable", name, receiver);
                 throw new EvaluationException(message,

@@ -32,7 +32,6 @@ import org.objectweb.asm.tree.LdcInsnNode;
 
 public final class LoadConstantInstruction extends AbstractExprContainer implements Instruction {
     public static final int VALUE_INDEX = 0;
-    public Opcode opcode;
 
     static {
         InstructionCodec.registerDecoder(LdcInsnNode.class, (ctx, node) -> {
@@ -43,6 +42,8 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
             return new LoadConstantInstruction(Opcode.LDC, ConstExpr.of(value));
         });
     }
+
+    public Opcode opcode;
 
     public LoadConstantInstruction(final @NotNull Opcode opcode, final @NotNull Expr value) {
         this.opcode = opcode;

@@ -25,14 +25,14 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 
 public final class OplessInstruction extends AbstractElement implements Instruction {
-    public Opcode opcode;
-
     static {
         InstructionCodec.registerDecoder(InsnNode.class, (ctx, node) -> {
             final var opcode = Opcode.findByEncodedValue(node.getOpcode()).orElseThrow();
             return new OplessInstruction(opcode);
         });
     }
+
+    public Opcode opcode;
 
     public OplessInstruction(final @NotNull Opcode opcode) {
         this.opcode = opcode;

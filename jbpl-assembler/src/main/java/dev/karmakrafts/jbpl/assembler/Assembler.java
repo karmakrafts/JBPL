@@ -20,6 +20,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.lower.CompoundLowering;
 import dev.karmakrafts.jbpl.assembler.lower.IncludeLowering;
 import dev.karmakrafts.jbpl.assembler.lower.NoopRemovalLowering;
+import dev.karmakrafts.jbpl.assembler.lower.ScopeReceiverLowering;
 import dev.karmakrafts.jbpl.assembler.model.AssemblyFile;
 import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
@@ -158,10 +159,6 @@ public final class Assembler {
         file.accept(VisibilityValidationVisitor.INSTANCE);
     }
 
-    private void validatePostLowering(final @NotNull EvaluationContext context) throws ValidationException {
-        validateBytecodeVersion(context);
-    }
-
     private void validateBytecodeVersion(final @NotNull EvaluationContext context) throws ValidationException {
         final var version = context.bytecodeVersion;
         if (!BYTECODE_VERSIONS.contains(version)) {
@@ -170,19 +167,24 @@ public final class Assembler {
         }
     }
 
-    private @NotNull EvaluationContext lower(final @NotNull AssemblyFile file,
-                                             final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
+    private void lower(@NotNull AssemblyFile file) {
+        file.transform(ScopeReceiverLowering.INSTANCE);
         file.transform(includeLowering);
         file.transform(CompoundLowering.INSTANCE);
         file.transform(NoopRemovalLowering.INSTANCE);
+    }
+
+    private @NotNull EvaluationContext createContext(final @NotNull AssemblyFile file,
+                                                     final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
+        lower(file);
         final var context = new EvaluationContext(file, classResolver, infoConsumer, errorConsumer);
-        validatePostLowering(context);
+        validateBytecodeVersion(context);
         return context;
     }
 
-    public @NotNull EvaluationContext getOrParseAndLowerFile(final @NotNull String path,
-                                                             final @NotNull Function<String, ClassNode> classResolver) throws ValidationException, ParserException {
-        return lower(getOrParseFile(path), classResolver);
+    public @NotNull EvaluationContext getOrParseAndCreateContext(final @NotNull String path,
+                                                                 final @NotNull Function<String, ClassNode> classResolver) throws ValidationException, ParserException {
+        return createContext(getOrParseFile(path), classResolver);
     }
 
     private static final class SyntaxError extends RuntimeException {

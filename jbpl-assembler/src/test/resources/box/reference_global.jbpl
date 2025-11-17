@@ -1,0 +1,16 @@
+private define x: i32 = 0
+
+assert x == 0
+
+private macro capture_global() {
+    assert x == 0
+}
+
+capture_global()
+
+private macro shadow_global() {
+    define x: i32 = 1
+    assert x == 1
+}
+
+shadow_global()

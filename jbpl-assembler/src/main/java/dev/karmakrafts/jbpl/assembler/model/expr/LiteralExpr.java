@@ -21,6 +21,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
+import dev.karmakrafts.jbpl.assembler.util.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,6 +49,11 @@ public final class LiteralExpr extends AbstractElement implements ConstExpr {
     @Override
     public void evaluate(final @NotNull EvaluationContext context) {
         context.pushValue(this); // Literals push themselves on the stack as ConstValue
+    }
+
+    @Override
+    public boolean isUnit() {
+        return value == Unit.INSTANCE;
     }
 
     @Override

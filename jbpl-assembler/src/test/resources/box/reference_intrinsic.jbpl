@@ -1,0 +1,7 @@
+public static class <com/example/Test>
+
+public static fun <com/example/Test>.test(): void {
+    assert sizeof(fun.instructions) == 0
+    fun.instructions += instruction(nop)
+    assert sizeof(fun.instructions) == 1
+}
