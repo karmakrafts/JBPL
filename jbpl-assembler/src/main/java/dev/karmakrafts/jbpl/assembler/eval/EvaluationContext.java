@@ -86,6 +86,10 @@ public final class EvaluationContext {
         return peekFrame().getOrCreateLabelNode(name);
     }
 
+    public @NotNull Optional<String> getLabelName(final @NotNull LabelNode label) {
+        return peekFrame().getLabelName(label);
+    }
+
     public void removeClass(final @NotNull String name) {
         output.put(name, null);
     }

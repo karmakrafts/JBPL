@@ -17,6 +17,7 @@
 package dev.karmakrafts.jbpl.assembler.eval;
 
 import dev.karmakrafts.jbpl.assembler.model.instruction.Instruction;
+import dev.karmakrafts.jbpl.assembler.util.XBiFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -26,39 +27,42 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 public final class InstructionCodec {
     // Decoders have to create their result instances, so we can't delegate to Instruction instance function
-    private static final HashMap<Class<? extends AbstractInsnNode>, Function<AbstractInsnNode, Instruction>> DECODERS = new HashMap<>();
+    private static final HashMap<Class<? extends AbstractInsnNode>, XBiFunction<EvaluationContext, AbstractInsnNode, Instruction, EvaluationException>> DECODERS = new HashMap<>();
 
     private InstructionCodec() {
     }
 
     @SuppressWarnings("unchecked")
     public static <I extends AbstractInsnNode> void registerDecoder(final @NotNull Class<I> type,
-                                                                    final @NotNull Function<I, Instruction> decoder) {
-        DECODERS.put(type, (Function<AbstractInsnNode, Instruction>) decoder);
+                                                                    final @NotNull XBiFunction<EvaluationContext, I, Instruction, EvaluationException> decoder) {
+        DECODERS.put(type,
+            (XBiFunction<EvaluationContext, AbstractInsnNode, Instruction, EvaluationException>) decoder);
     }
 
     @SuppressWarnings("unchecked")
-    public static <I extends AbstractInsnNode> @Nullable Function<I, Instruction> getDecoder(final @NotNull Class<I> type) {
-        return (Function<I, Instruction>) DECODERS.get(type);
+    public static <I extends AbstractInsnNode> @Nullable XBiFunction<EvaluationContext, I, Instruction, EvaluationException> getDecoder(
+        final @NotNull Class<I> type) {
+        return (XBiFunction<EvaluationContext, I, Instruction, EvaluationException>) DECODERS.get(type);
     }
 
     @SuppressWarnings("unchecked")
-    public static @NotNull Optional<Instruction> decode(final @NotNull AbstractInsnNode instruction) {
+    public static @NotNull Optional<Instruction> decode(final @NotNull AbstractInsnNode instruction,
+                                                        final @NotNull EvaluationContext context) throws EvaluationException {
         final var decoder = getDecoder((Class<AbstractInsnNode>) instruction.getClass());
         if (decoder == null) {
             return Optional.empty();
         }
-        return Optional.of(decoder.apply(instruction));
+        return Optional.of(decoder.apply(context, instruction));
     }
 
-    public static @NotNull List<Instruction> decode(final @NotNull InsnList list) {
+    public static @NotNull List<Instruction> decode(final @NotNull InsnList list,
+                                                    final @NotNull EvaluationContext context) throws EvaluationException {
         final var instructions = new ArrayList<Instruction>();
         for (final var node : list) {
-            instructions.add(decode(node).orElseThrow());
+            instructions.add(decode(node, context).orElseThrow());
         }
         return instructions;
     }

@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.LabelNode;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,13 @@ public final class StackFrame implements Copyable<StackFrame> {
     public @NotNull LabelNode getOrCreateLabelNode(final @NotNull String name) {
         return labelNodes.computeIfAbsent(name, n -> new LabelNode());
     }
+
+    public @NotNull Optional<String> getLabelName(final @NotNull LabelNode label) { // @formatter:off
+        return labelNodes.entrySet().stream()
+            .filter(entry -> entry.getValue() == label)
+            .map(Entry::getKey)
+            .findFirst();
+    } // @formatter:on
 
     public int getOrAssignLocalIndex(final @NotNull String name,
                                      final @NotNull EvaluationContext context) throws EvaluationException {

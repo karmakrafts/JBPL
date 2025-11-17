@@ -31,7 +31,7 @@ public final class StackInstruction extends AbstractExprContainer implements Ins
     public Opcode opcode;
 
     static {
-        InstructionCodec.registerDecoder(VarInsnNode.class, node -> {
+        InstructionCodec.registerDecoder(VarInsnNode.class, (ctx, node) -> {
             final var opcode = Opcode.findByEncodedValue(node.getOpcode()).orElseThrow();
             final var index = node.var;
             return new StackInstruction(opcode, ConstExpr.of(index));

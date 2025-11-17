@@ -35,7 +35,7 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
     public Opcode opcode;
 
     static {
-        InstructionCodec.registerDecoder(LdcInsnNode.class, node -> {
+        InstructionCodec.registerDecoder(LdcInsnNode.class, (ctx, node) -> {
             var value = node.cst;
             if (value instanceof org.objectweb.asm.Type type) {
                 value = Type.dematerialize(type);

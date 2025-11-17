@@ -28,7 +28,7 @@ public final class OplessInstruction extends AbstractElement implements Instruct
     public Opcode opcode;
 
     static {
-        InstructionCodec.registerDecoder(InsnNode.class, node -> {
+        InstructionCodec.registerDecoder(InsnNode.class, (ctx, node) -> {
             final var opcode = Opcode.findByEncodedValue(node.getOpcode()).orElseThrow();
             return new OplessInstruction(opcode);
         });

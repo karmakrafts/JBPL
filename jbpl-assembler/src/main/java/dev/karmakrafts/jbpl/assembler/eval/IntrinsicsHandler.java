@@ -70,7 +70,7 @@ public final class IntrinsicsHandler {
             (ctx, value) -> node.access = value.evaluateAs(ctx, Integer.class));
         // Function instructions
         addIntrinsicDefine("instructions", ctx -> {
-            final var instructions = InstructionCodec.decode(ctx.instructionBuffer).toArray(Instruction[]::new);
+            final var instructions = InstructionCodec.decode(ctx.instructionBuffer, ctx).toArray(Instruction[]::new);
             return ConstExpr.of(instructions);
         }, (ctx, value) -> {
             final var instructions = InstructionCodec.encode(List.of(value.evaluateAs(ctx, Instruction[].class)), ctx);

@@ -18,7 +18,9 @@ package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.InstructionCodec;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -26,6 +28,14 @@ import org.objectweb.asm.tree.JumpInsnNode;
 
 public final class JumpInstruction extends AbstractExprContainer implements Instruction {
     public static final int TARGET_INDEX = 0;
+
+    static {
+        InstructionCodec.registerDecoder(JumpInsnNode.class, (ctx, node) -> {
+            final var opcode = Opcode.findByEncodedValue(node.getOpcode()).orElseThrow();
+            final var target = ctx.getLabelName(node.label).orElseThrow();
+            return new JumpInstruction(opcode, ConstExpr.of(target));
+        });
+    }
 
     public Opcode opcode;
 
