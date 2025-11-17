@@ -69,12 +69,17 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
     @Override
     public @NotNull List<Declaration> visitInjector(final @NotNull InjectorContext ctx) {
         return ExceptionUtils.rethrowUnchecked(() -> {
-            final var injector = new InjectorDecl();
-            injector.setTarget(ExprParser.parse(ctx.functionSignature()));
-            final var selector = ctx.exprOrName();
-            if (selector != null) {
-                injector.setSelector(ExprParser.parse(selector));
-            }
+            // @formatter:off
+            final var target = ctx.fieldSignature() != null
+                ? ExprParser.parse(ctx.fieldSignature())
+                : (ctx.functionSignature() != null
+                    ? ExprParser.parse(ctx.functionSignature())
+                    : ExprParser.parse(ctx.wrappedExpr()));
+            final var selector = ctx.exprOrName() != null
+                ? ExprParser.parse(ctx.exprOrName())
+                : ConstExpr.unit();
+            // @formatter:on
+            final var injector = new InjectorDecl(target, selector);
             // @formatter:off
             injector.addStatements(ctx.statement().stream()
                 .map(ExceptionUtils.unsafeFunction(StatementParser::parse))

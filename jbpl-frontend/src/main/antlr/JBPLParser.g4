@@ -519,6 +519,7 @@ injector:
     KW_INJECT
     NL*?
     (functionSignature
+    | fieldSignature
     | wrappedExpr)
     NL*?
     (KW_BY

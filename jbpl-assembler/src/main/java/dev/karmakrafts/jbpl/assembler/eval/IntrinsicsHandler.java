@@ -23,6 +23,7 @@ import dev.karmakrafts.jbpl.assembler.util.XBiConsumer;
 import dev.karmakrafts.jbpl.assembler.util.XFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.util.List;
@@ -61,6 +62,13 @@ public final class IntrinsicsHandler {
     }
 
     public void initGlobal() {
+    }
+
+    public void initForField(final @NotNull FieldNode node) {
+        // Field access modifiers
+        addIntrinsicDefine("access",
+            ctx -> ConstExpr.of(node.access),
+            (ctx, value) -> node.access = value.evaluateAs(ctx, Integer.class));
     }
 
     public void initForFunction(final @NotNull MethodNode node) {
