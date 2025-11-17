@@ -26,10 +26,7 @@ import dev.karmakrafts.jbpl.assembler.parser.ElementParser;
 import dev.karmakrafts.jbpl.assembler.parser.ParserException;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
-import dev.karmakrafts.jbpl.assembler.validation.ReturnValidationVisitor;
-import dev.karmakrafts.jbpl.assembler.validation.ValidationException;
-import dev.karmakrafts.jbpl.assembler.validation.VersionValidationVisitor;
-import dev.karmakrafts.jbpl.assembler.validation.VisibilityValidationVisitor;
+import dev.karmakrafts.jbpl.assembler.validation.*;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.frontend.JBPLParser;
 import org.antlr.v4.runtime.*;
@@ -158,6 +155,7 @@ public final class Assembler {
         file.accept(VersionValidationVisitor.INSTANCE);
         file.accept(ReturnValidationVisitor.INSTANCE);
         file.accept(VisibilityValidationVisitor.INSTANCE);
+        file.accept(IncludeValidationVisitor.INSTANCE);
     }
 
     private void validateBytecodeVersion(final @NotNull EvaluationContext context) throws ValidationException {
