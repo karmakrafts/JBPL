@@ -94,6 +94,10 @@ public enum BuiltinType implements Type {
         return Arrays.stream(values()).filter(t -> t.getCategory(context) == TypeCategory.FLOAT && t.byteSize == size).findFirst();
     }
 
+    public static @NotNull Optional<BuiltinType> findByMaterialType(final @NotNull org.objectweb.asm.Type type) {
+        return Arrays.stream(values()).filter(t -> t.materialType.equals(type)).findFirst();
+    }
+
     @Override
     public @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) {
         return category;

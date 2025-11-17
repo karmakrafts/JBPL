@@ -18,8 +18,11 @@ package dev.karmakrafts.jbpl.assembler.model.instruction;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.InstructionCodec;
 import dev.karmakrafts.jbpl.assembler.model.expr.AbstractExprContainer;
+import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -30,6 +33,16 @@ import org.objectweb.asm.tree.LdcInsnNode;
 public final class LoadConstantInstruction extends AbstractExprContainer implements Instruction {
     public static final int VALUE_INDEX = 0;
     public Opcode opcode;
+
+    static {
+        InstructionCodec.registerDecoder(LdcInsnNode.class, node -> {
+            var value = node.cst;
+            if (value instanceof org.objectweb.asm.Type type) {
+                value = Type.dematerialize(type);
+            }
+            return new LoadConstantInstruction(Opcode.LDC, ConstExpr.of(value));
+        });
+    }
 
     public LoadConstantInstruction(final @NotNull Opcode opcode, final @NotNull Expr value) {
         this.opcode = opcode;

@@ -26,20 +26,12 @@ import java.util.Optional;
 
 public sealed interface Type
     permits ArrayType, BuiltinType, ClassType, IntersectionType, PreproClassType, PreproType, RangeType, UnresolvedType, IntrinsicReceiverType {
-    /**
-     * Attempt to parse a type from the given string value.
-     * This will assume the input values are in one of the following formats:
-     * <ul>
-     *     <li>A builtin type by its keyword like <b>i8</b>, <b>f32</b>, <b>string</b> etc.</li>
-     *     <li>A preprocessor type by its name (or keyword) like <b>type</b>, <b>opcode</b> etc.</li>
-     *     <li>A JVM class type in the form of <b>&lt;fully/qualified/Name&gt;</b></li>
-     *     <li>An intersection type in the form of <b>(OneType | AnotherType)</b></li>
-     *     <li>An array type in the form of <b>[type]</b>, <b>[[type]]</b> etc.</li>
-     * </ul>
-     */
     static @NotNull Optional<Type> tryParse(final @Nullable String value) {
         if (value == null) {
             return Optional.empty();
+        }
+        if (value.equals(IntrinsicReceiverType.INSTANCE.toString())) {
+            return Optional.of(IntrinsicReceiverType.INSTANCE);
         }
         // @formatter:off
         return BuiltinType.findByName(value)
@@ -49,6 +41,33 @@ public sealed interface Type
             .or(() -> ClassType.tryParse(value))
             .or(() -> IntersectionType.tryParse(value));
         // @formatter:on
+    }
+
+    static @NotNull Optional<Type> dematerialize(final @NotNull org.objectweb.asm.Type type) {
+        final var descriptor = type.getDescriptor();
+        if (descriptor.contains("[")) {
+            // We are de-materializing some type of array
+            var dimensions = 0;
+            var typeDescriptor = "";
+            for (var i = 0; i < descriptor.length(); i++) {
+                final var c = descriptor.charAt(i);
+                if (c == '[') {
+                    dimensions++;
+                    continue;
+                }
+                typeDescriptor = descriptor.substring(i);
+            }
+            var elementType = dematerialize(org.objectweb.asm.Type.getType(typeDescriptor));
+            if (elementType.isEmpty()) {
+                return Optional.empty();
+            }
+            var arrayType = elementType.get();
+            for (var i = 0; i < dimensions; i++) {
+                arrayType = arrayType.array();
+            }
+            return Optional.of(arrayType);
+        }
+        return BuiltinType.findByMaterialType(type).map(Type.class::cast);
     }
 
     @NotNull TypeCategory getCategory(final @NotNull EvaluationContext context) throws EvaluationException;
