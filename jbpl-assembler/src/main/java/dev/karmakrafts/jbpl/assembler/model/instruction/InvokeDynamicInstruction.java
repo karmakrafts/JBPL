@@ -70,10 +70,21 @@ public final class InvokeDynamicInstruction extends AbstractExprContainer implem
             final var targetSignature = FunctionSignatureExpr.dematerialize(targetHandle).orElseThrow();
             final var targetInstruction = new InvokeInstruction(targetOpcode, targetSignature);
 
-            return new InvokeDynamicInstruction(instantiatedSignature,
+            final var instruction = new InvokeDynamicInstruction(instantiatedSignature,
                 samSignature,
                 ConstExpr.of(bsmInstruction),
                 ConstExpr.of(targetInstruction));
+            if (node.bsmArgs.length > 3) { // Handle additional constant arguments passed to BSM
+                instruction.addArguments(List.of(node.bsmArgs).subList(3, node.bsmArgs.length).stream().map(value -> {
+                    var unwrappedValue = value;
+                    if (unwrappedValue instanceof org.objectweb.asm.Type type) {
+                        unwrappedValue = Type.dematerialize(type);
+                    }
+                    return ConstExpr.of(unwrappedValue);
+                }).toList());
+            }
+
+            return instruction;
         });
     }
 
