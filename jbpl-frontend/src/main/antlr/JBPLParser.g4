@@ -88,16 +88,6 @@ assertStatement:
     expr
     ;
 
-infoStatement:
-    KW_INFO
-    expr
-    ;
-
-errorStatement:
-    KW_ERROR
-    expr
-    ;
-
 versionStatement:
     KW_VERSION
     expr
@@ -578,8 +568,6 @@ statement:
     | returnStatement
     | yeetStatement
     | versionStatement
-    | infoStatement
-    | errorStatement
     | assertStatement
     | breakStatement
     | continueStatement

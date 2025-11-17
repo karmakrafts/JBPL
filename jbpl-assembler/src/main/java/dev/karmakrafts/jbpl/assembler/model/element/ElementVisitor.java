@@ -376,12 +376,6 @@ public interface ElementVisitor {
         else if (statement instanceof VersionStatement versionStatement) {
             return visitVersionStatement(versionStatement);
         }
-        else if (statement instanceof InfoStatement infoStatement) {
-            return visitInfoStatement(infoStatement);
-        }
-        else if (statement instanceof ErrorStatement errorStatement) {
-            return visitErrorStatement(errorStatement);
-        }
         else if (statement instanceof ForStatement forStatement) {
             return visitForStatement(forStatement);
         }
@@ -411,14 +405,6 @@ public interface ElementVisitor {
 
     default @NotNull Statement visitAssertStatement(final @NotNull AssertStatement assertStatement) {
         return visitExprContainer(assertStatement);
-    }
-
-    default @NotNull Statement visitInfoStatement(final @NotNull InfoStatement infoStatement) {
-        return visitExprContainer(infoStatement);
-    }
-
-    default @NotNull Statement visitErrorStatement(final @NotNull ErrorStatement errorStatement) {
-        return visitExprContainer(errorStatement);
     }
 
     default @NotNull Statement visitVersionStatement(final @NotNull VersionStatement versionStatement) {

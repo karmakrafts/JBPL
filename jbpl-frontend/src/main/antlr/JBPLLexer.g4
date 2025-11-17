@@ -70,8 +70,6 @@ KW_LOCAL: 'local';
 KW_FALSE: 'false';
 KW_AFTER: 'after';
 KW_BREAK: 'break';
-KW_ERROR: 'error';
-KW_INFO: 'info';
 KW_WHEN: 'when';
 KW_ENUM: 'enum';
 KW_SYNC: 'sync';

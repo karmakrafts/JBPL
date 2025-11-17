@@ -97,8 +97,6 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.KW_TYPE,
                  JBPLLexer.KW_ASSERT,
                  JBPLLexer.KW_PREPRO_CLASS,
-                 JBPLLexer.KW_INFO,
-                 JBPLLexer.KW_ERROR,
                  JBPLLexer.KW_PREPRO_RETURN,
                  JBPLLexer.KW_INCLUDE -> keys.add(TextAttributeKeys.KEYWORD);
             case JBPLLexer.LITERAL_INT,
