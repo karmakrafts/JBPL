@@ -1,0 +1,88 @@
+// Primitive to string
+assert (123i8 as string) == "123"
+assert (1234i16 as string) == "1234"
+assert (12345i32 as string) == "12345"
+assert (123456i64 as string) == "123456"
+assert (3.141f32 as string) == "3.141"
+assert (3.141592653f64 as string) == "3.141592653"
+assert (true as string) == "true"
+assert (false as string) == "false"
+assert ('X' as string) == "X"
+
+// String to primitive
+assert ("123" as i8) == 123i8
+assert ("1234" as i16) == 1234i16
+assert ("12345" as i32) == 12345i32
+assert ("123456" as i64) == 123456i64
+assert ("3.141" as f32) == 3.141f32
+assert ("3.141592653" as f64) == 3.141592653f64
+assert ("true" as bool) == true
+assert ("false" as bool) == false
+
+// Char-to-int casts
+assert ('a' as i32) == 97
+assert (97 as char) == 'a'
+
+// Int-to-bool casts
+assert (0i8 as bool) == false
+assert (1i8 as bool) == true
+assert (111i8 as bool) == true
+assert (-1i8 as bool) == true
+assert (0i16 as bool) == false
+assert (1i16 as bool) == true
+assert (111i16 as bool) == true
+assert (-1i16 as bool) == true
+assert (0i32 as bool) == false
+assert (1i32 as bool) == true
+assert (111i32 as bool) == true
+assert (-1 as bool) == true
+assert (0i64 as bool) == false
+assert (1i64 as bool) == true
+assert (111i64 as bool) == true
+assert (-1i64 as bool) == true
+
+// Bool-to-int casts
+assert (true as i8) == 1i8
+assert (false as i8) == 0i8
+assert (true as i16) == 1i16
+assert (false as i16) == 0i16
+assert (true as i32) == 1
+assert (false as i32) == 0
+assert (true as i64) == 1i64
+assert (false as i64) == 0i64
+
+// Widening casts
+assert (123i8 as i16) == 123i16
+assert (123i8 as i32) == 123
+assert (123i8 as i64) == 123i64
+assert (123i16 as i32) == 123
+assert (123i16 as i64) == 123i64
+assert (123 as i64) == 123i64
+
+// Narrowing casts
+assert (123i64 as i8) == 123i8
+assert (123 as i8) == 123i8
+assert (123i16 as i8) == 123i8
+assert (123i64 as i16) == 123i16
+assert (123 as i16) == 123i16
+assert (123i64 as i32) == 123
+
+// Int-to-float casts
+assert (123i8 as f32) == 123f32
+assert (123i16 as f32) == 123f32
+assert (123 as f32) == 123f32
+assert (123i64 as f32) == 123f32
+assert (123i8 as f64) == 123f64
+assert (123i16 as f64) == 123f64
+assert (123 as f64) == 123f64
+assert (123i64 as f64) == 123f64
+
+// Float-to-int casts
+assert (123f32 as i8) == 123i8
+assert (123f32 as i16) == 123i16
+assert (123f32 as i32) == 123
+assert (123f32 as i64) == 123i64
+assert (123f64 as i8) == 123i8
+assert (123f64 as i16) == 123i16
+assert (123f64 as i32) == 123
+assert (123f64 as i64) == 123i64

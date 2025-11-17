@@ -170,6 +170,23 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         };
     }
 
+    private @NotNull ConstExpr evaluateForChar(final @NotNull Character lhsChar,
+                                               final @NotNull Character rhsChar,
+                                               final @NotNull Op op,
+                                               final @NotNull EvaluationContext context) throws EvaluationException {
+        return switch (op) {
+            // Character equality
+            case EQ -> ConstExpr.of(lhsChar == rhsChar, getTokenRange());
+            case NE -> ConstExpr.of(lhsChar != rhsChar, getTokenRange());
+            default -> {
+                final var message = String.format("Unsupported char binary expression: %s %s %s", lhsChar, op, lhsChar);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+        };
+    }
+
     private @NotNull ConstExpr evaluateForBool(final @NotNull Boolean lhsBool,
                                                final @NotNull Boolean rhsBool,
                                                final @NotNull Op op,
@@ -528,6 +545,7 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
         }
         final var lhsValue = getLhs().evaluateAs(context, Object.class);
         final var lhsType = getLhs().getType(context);
+        final var lhsTypeCategory = lhsType.getCategory(context);
         // Arrays are the only thing where we care about either sides type
         if (lhsType instanceof ArrayType lhsArrayType) {
             context.pushValue(evaluateForArray(lhsValue, lhsArrayType, op, context));
@@ -548,7 +566,12 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             context.pushValue(evaluateForBool((Boolean) lhsValue, rhsValue, op, context));
             return;
         }
-        else if (lhsType.getCategory(context).isNumber()) { // Numeric binary expressions
+        else if (lhsType == BuiltinType.CHAR) { // Character binary expressions
+            final var rhsValue = getRhs().evaluateAs(context, Character.class);
+            context.pushValue(evaluateForChar((Character) lhsValue, rhsValue, op, context));
+            return;
+        }
+        else if (lhsTypeCategory.isNumber()) { // Numeric binary expressions
             context.pushValue(evaluateForNumber((Number) lhsValue, (BuiltinType) lhsType, context));
             return;
         }
