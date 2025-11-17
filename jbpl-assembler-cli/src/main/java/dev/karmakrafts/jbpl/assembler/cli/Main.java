@@ -67,7 +67,7 @@ public final class Main {
             final var assembler = new Assembler(ExceptionUtils.unsafeFunction(Main::readFile),
                 System.out::println,
                 System.err::println);
-            final var context = assembler.getOrParseAndCreateContext(options.valueOf(inputSpec), name -> new ClassNode());
+            final var context = assembler.lowerAndCreateContext(options.valueOf(inputSpec), name -> new ClassNode());
             final var output = context.output.values();
             for (final var clazz : output) {
                 if (clazz == null) {

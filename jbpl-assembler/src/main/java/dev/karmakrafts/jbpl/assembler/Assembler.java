@@ -109,7 +109,7 @@ public final class Assembler {
                                                 final @NotNull Consumer<String> infoConsumer,
                                                 final @NotNull Consumer<String> errorConsumer) {
         return new Assembler(path -> {
-            final var stream = Assembler.class.getResourceAsStream(String.format("%s/%s", basePath, path));
+            final var stream = Assembler.class.getResourceAsStream(String.format("/%s/%s", basePath, path));
             return Channels.newChannel(stream);
         }, infoConsumer, errorConsumer);
     }
@@ -140,6 +140,7 @@ public final class Assembler {
                         .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
                         .toList());
                     // @formatter:on
+                    lowerPerFile(file);
                     validateFile(file);
                     return file;
                 }
@@ -167,24 +168,27 @@ public final class Assembler {
         }
     }
 
-    private void lower(@NotNull AssemblyFile file) {
+    private void lowerPerFile(final @NotNull AssemblyFile file) {
         file.transform(ScopeReceiverLowering.INSTANCE);
+    }
+
+    private @NotNull AssemblyFile lowerFinal(final @NotNull AssemblyFile file) {
         file.transform(includeLowering);
         file.transform(CompoundLowering.INSTANCE);
         file.transform(NoopRemovalLowering.INSTANCE);
+        return file;
     }
 
-    private @NotNull EvaluationContext createContext(final @NotNull AssemblyFile file,
-                                                     final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
-        lower(file);
-        final var context = new EvaluationContext(file, classResolver, infoConsumer, errorConsumer);
+    private @NotNull EvaluationContext lowerAndCreateContext(final @NotNull AssemblyFile file,
+                                                             final @NotNull Function<String, ClassNode> classResolver) throws ValidationException {
+        final var context = new EvaluationContext(lowerFinal(file), classResolver, infoConsumer, errorConsumer);
         validateBytecodeVersion(context);
         return context;
     }
 
-    public @NotNull EvaluationContext getOrParseAndCreateContext(final @NotNull String path,
-                                                                 final @NotNull Function<String, ClassNode> classResolver) throws ValidationException, ParserException {
-        return createContext(getOrParseFile(path), classResolver);
+    public @NotNull EvaluationContext lowerAndCreateContext(final @NotNull String path,
+                                                            final @NotNull Function<String, ClassNode> classResolver) throws ValidationException, ParserException {
+        return lowerAndCreateContext(getOrParseFile(path), classResolver);
     }
 
     private static final class SyntaxError extends RuntimeException {

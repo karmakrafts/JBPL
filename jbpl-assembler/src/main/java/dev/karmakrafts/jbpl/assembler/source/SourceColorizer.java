@@ -61,6 +61,7 @@ public final class SourceColorizer {
         JBPLLexer.KW_MACRO,
         JBPLLexer.KW_DEFINE,
         JBPLLexer.KW_FOR,
+        JBPLLexer.KW_ASSERT,
         JBPLLexer.KW_PREPRO_CLASS,
         JBPLLexer.KW_INCLUDE,
         JBPLLexer.KW_PREPRO_RETURN);
