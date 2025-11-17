@@ -104,24 +104,27 @@ public final class LoadConstantInstruction extends AbstractExprContainer impleme
 
     @Override
     public @NotNull AbstractInsnNode emit(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var value = getValue().evaluateAs(context, Number.class);
-        if (value instanceof Integer intValue) {
-            return createConstantInt(intValue);
+        final var value = getValue().evaluateAsConstAndMaterialize(context);
+        if (value instanceof Number numberValue) {
+            if (numberValue instanceof Integer intValue) {
+                return createConstantInt(intValue);
+            }
+            else if (numberValue instanceof Long longValue) {
+                return createConstantLong(longValue);
+            }
+            else if (numberValue instanceof Float floatValue) {
+                return createConstantFloat(floatValue);
+            }
+            else if (numberValue instanceof Double doubleValue) {
+                return createConstantDouble(doubleValue);
+            }
+            return switch (opcode) {
+                case BIPUSH -> new IntInsnNode(Opcodes.BIPUSH, numberValue.byteValue());
+                case SIPUSH -> new IntInsnNode(Opcodes.SIPUSH, numberValue.shortValue());
+                default -> new LdcInsnNode(numberValue);
+            };
         }
-        else if (value instanceof Long longValue) {
-            return createConstantLong(longValue);
-        }
-        else if (value instanceof Float floatValue) {
-            return createConstantFloat(floatValue);
-        }
-        else if (value instanceof Double doubleValue) {
-            return createConstantDouble(doubleValue);
-        }
-        return switch (opcode) {
-            case BIPUSH -> new IntInsnNode(Opcodes.BIPUSH, value.byteValue());
-            case SIPUSH -> new IntInsnNode(Opcodes.SIPUSH, value.shortValue());
-            default -> new LdcInsnNode(value);
-        };
+        return new LdcInsnNode(value);
     }
 
     @Override

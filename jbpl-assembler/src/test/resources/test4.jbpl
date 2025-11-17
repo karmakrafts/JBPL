@@ -18,8 +18,10 @@ private define d: i32 = default(t1)
 info d
 
 public static fun <com/example/Example>.testing(): void {
-    info fun.instructions
-    return
+    info "Instruction buffer before emit: (${sizeof(fun.instructions)})"
+    info "Emitting instruction in function body"
+    ldc "Hello, World!"
+    info "Instruction buffer after emit: (${sizeof(fun.instructions)}) ${fun.instructions[0]}"
 }
 
 private define OFFSET: i32 = 20
