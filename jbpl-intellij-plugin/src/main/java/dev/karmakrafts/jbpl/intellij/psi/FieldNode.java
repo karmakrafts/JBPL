@@ -30,7 +30,7 @@ public final class FieldNode extends JBPLPsiNode implements StructuralPsiElement
     }
 
     @Override
-    public @NotNull Icon getStructureIcon() {
+    public @NotNull Icon getIcon(final int flags) {
         return Icons.getIconWithModifier(Nodes.Field, PsiUtils.findAll(this, "/field/accessModifier").toList());
     }
 

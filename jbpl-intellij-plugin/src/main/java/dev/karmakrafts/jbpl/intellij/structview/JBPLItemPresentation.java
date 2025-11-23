@@ -42,7 +42,7 @@ public final class JBPLItemPresentation implements ItemPresentation {
     @Override
     public @Nullable Icon getIcon(final boolean unused) {
         if (element instanceof StructuralPsiElement structural) {
-            return structural.getStructureIcon();
+            return structural.getIcon(0);
         }
         return null;
     }

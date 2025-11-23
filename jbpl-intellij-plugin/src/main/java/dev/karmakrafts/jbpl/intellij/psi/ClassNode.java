@@ -49,7 +49,7 @@ public final class ClassNode extends JBPLPsiNode implements StructuralPsiElement
     }
 
     @Override
-    public @NotNull Icon getStructureIcon() {
+    public @NotNull Icon getIcon(final int flags) {
         return Icons.getIconWithModifier(Nodes.Class, PsiUtils.findAll(this, "/classDecl/accessModifier").toList());
     }
 }

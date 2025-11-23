@@ -38,7 +38,7 @@ public final class InjectorNode extends JBPLPsiNode implements StructuralPsiElem
     }
 
     @Override
-    public @NotNull Icon getStructureIcon() {
+    public @NotNull Icon getIcon(final int flags) {
         return Icons.INJECTOR;
     }
 

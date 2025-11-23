@@ -29,7 +29,7 @@ public final class YeetNode extends JBPLPsiNode implements StructuralPsiElement 
     }
 
     @Override
-    public @NotNull Icon getStructureIcon() {
+    public @NotNull Icon getIcon(final int flags) {
         return Icons.YEET;
     }
 

@@ -39,7 +39,7 @@ public final class PreproClassNode extends JBPLPsiNode implements StructuralPsiE
     }
 
     @Override
-    public @NotNull Icon getStructureIcon() {
+    public @NotNull Icon getIcon(final int flags) {
         return Icons.PREPRO_CLASS;
     }
 

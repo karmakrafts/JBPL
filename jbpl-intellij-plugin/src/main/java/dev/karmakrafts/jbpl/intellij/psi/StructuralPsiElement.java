@@ -21,11 +21,7 @@ import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-
 public interface StructuralPsiElement extends PsiElement, NavigationItem {
-    @Nullable Icon getStructureIcon();
-
     default @Nullable String getStructureText() {
         return getName();
     }
