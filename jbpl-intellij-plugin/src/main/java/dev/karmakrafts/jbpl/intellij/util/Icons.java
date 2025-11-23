@@ -16,7 +16,6 @@
 
 package dev.karmakrafts.jbpl.intellij.util;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiElement;

@@ -37,8 +37,8 @@ public final class CreateJBPLFileAction extends CreateFileFromTemplateAction {
     protected void buildDialog(final @NotNull Project project,
                                final @NotNull PsiDirectory directory,
                                final @NotNull CreateFileFromTemplateDialog.Builder builder) {
-        builder.setTitle(JBPLBundle.INSTANCE.getMessage("action.createJBPLFile.title"))
-            .addKind(JBPLBundle.INSTANCE.getMessage("action.createJBPLFile.text"), Icons.FILE, "JBPL");
+        builder.setTitle(JBPLBundle.INSTANCE.getMessage("action.createJBPLFile.title")).addKind(JBPLBundle.INSTANCE.getMessage(
+            "action.createJBPLFile.text"), Icons.FILE, "JBPL");
     }
 
     @Override

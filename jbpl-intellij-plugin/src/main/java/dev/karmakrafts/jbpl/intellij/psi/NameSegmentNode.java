@@ -17,10 +17,37 @@
 package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiReference;
+import dev.karmakrafts.jbpl.intellij.reference.ClassTypeReference;
+import dev.karmakrafts.jbpl.intellij.reference.PackageReference;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public final class NameSegmentNode extends JBPLPsiNode {
     public NameSegmentNode(final @NotNull ASTNode node) {
         super(node);
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return getText();
+    }
+
+    @Override
+    public @Nullable PsiReference getReference() {
+        final var parent = getParent();
+        if (!(parent instanceof ClassTypeNode classTypeNode)) {
+            return null;
+        }
+        final var children = List.of(classTypeNode.getChildren());
+        final var index = children.indexOf(this);
+        if (index == children.size() - 2) {
+            // This is the actual class name, so resolve to class
+            return new ClassTypeReference(this);
+        }
+        // Otherwise this is a package segment
+        return new PackageReference(this);
     }
 }

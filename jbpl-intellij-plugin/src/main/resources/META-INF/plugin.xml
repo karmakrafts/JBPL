@@ -41,12 +41,12 @@
         <lang.syntaxHighlighterFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLSyntaxHighlighterFactory"/>
         <lang.braceMatcher language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLBraceMatcher"/>
         <lang.psiStructureViewFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.structview.JBPLStructureViewFactory"/>
-        <psi.referenceContributor language="JAVA" implementation="dev.karmakrafts.jbpl.intellij.reference.JBPLReferenceContributor"/>
         <completion.contributor language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
         <codeInsight.lineMarkerProvider language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLLineMarkerProvider"/>
         <annotator language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLAnnotator"/>
         <iconProvider implementation="dev.karmakrafts.jbpl.intellij.JBPLIconProvider"/>
         <navbar implementation="dev.karmakrafts.jbpl.intellij.JBPLStructureAwareNavBarModelExtension"/>
+        <gotoDeclarationHandler implementation="dev.karmakrafts.jbpl.intellij.JBPLGoToDeclarationHandler"/>
     </extensions>
     <!-- @formatter:on -->
 </idea-plugin>

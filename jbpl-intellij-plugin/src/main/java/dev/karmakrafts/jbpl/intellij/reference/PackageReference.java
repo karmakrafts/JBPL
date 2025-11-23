@@ -20,7 +20,6 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceBase;
-import com.intellij.psi.search.GlobalSearchScope;
 import dev.karmakrafts.jbpl.intellij.psi.ClassTypeNode;
 import dev.karmakrafts.jbpl.intellij.psi.NameSegmentNode;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +28,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class ClassTypeReference extends PsiReferenceBase<NameSegmentNode> {
-    public ClassTypeReference(final @NotNull NameSegmentNode element) {
+public final class PackageReference extends PsiReferenceBase<NameSegmentNode> {
+    public PackageReference(final @NotNull NameSegmentNode element) {
         super(element);
     }
 
@@ -39,8 +38,9 @@ public final class ClassTypeReference extends PsiReferenceBase<NameSegmentNode> 
         return new TextRange(0, myElement.getTextLength());
     }
 
-    private @Nullable String resolveFQN() {
-        // Resolve class FQN to this point in the selection
+    @Override
+    public @Nullable PsiElement resolve() {
+        // Resolve package FQN to this point in the selection
         var name = myElement.getName();
         final var parent = myElement.getParent();
         if (parent instanceof ClassTypeNode) {
@@ -57,30 +57,8 @@ public final class ClassTypeReference extends PsiReferenceBase<NameSegmentNode> 
                 .collect(Collectors.joining("."));
             // @formatter:on
         }
-        return name;
-    }
-
-    @Override
-    public Object @NotNull [] getVariants() {
-        final var name = resolveFQN();
-        if (name == null) {
-            return new Object[0];
-        }
         final var project = myElement.getProject();
         final var facade = JavaPsiFacade.getInstance(project);
-        final var scope = GlobalSearchScope.allScope(project);
-        return facade.findClasses(name, scope);
-    }
-
-    @Override
-    public @Nullable PsiElement resolve() {
-        final var name = resolveFQN();
-        if (name == null) {
-            return null;
-        }
-        final var project = myElement.getProject();
-        final var facade = JavaPsiFacade.getInstance(project);
-        final var scope = GlobalSearchScope.allScope(project);
-        return facade.findClass(name, scope);
+        return facade.findPackage(name);
     }
 }
