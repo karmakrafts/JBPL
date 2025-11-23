@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-^include "number.jbpl"
+include "number.jbpl"
 
-macro clamp(min: ${Number}, max: ${Number}, value: ${Number}): ${Number} {
+macro clamp(min: Number, max: Number, value: Number): Number {
     if (value < min) ^return min
     else if(value > max) ^return max
     else ^return value

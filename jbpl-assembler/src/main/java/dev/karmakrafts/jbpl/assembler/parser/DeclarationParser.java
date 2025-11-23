@@ -99,7 +99,8 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
                 ? ExprParser.parse(signature.exprOrType())
                 : ConstExpr.unit();
             // @formatter:on
-            final var isPrivate = ctx.KW_PRIVATE() != null;
+            final var modifiers = ctx.macroModifiers();
+            final var isPrivate = modifiers.KW_PRIVATE() != null;
             final var macro = new MacroDecl(name, returnType, isPrivate);
             // @formatter:off
             macro.addElements(ctx.bodyElement().stream()

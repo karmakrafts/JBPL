@@ -20,6 +20,7 @@ import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.SortableTreeElement;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ItemPresentation;
+import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementVisitor;
 import dev.karmakrafts.jbpl.intellij.psi.StructuralPsiElement;
@@ -53,6 +54,30 @@ public final class JBPLStructureViewElement implements StructureViewTreeElement,
     @Override
     public @NotNull ItemPresentation getPresentation() {
         return presentation;
+    }
+
+    @Override
+    public void navigate(final boolean requestFocus) {
+        if (!(element instanceof Navigatable navigatable)) {
+            return;
+        }
+        navigatable.navigate(requestFocus);
+    }
+
+    @Override
+    public boolean canNavigate() {
+        if (!(element instanceof Navigatable navigatable)) {
+            return false;
+        }
+        return navigatable.canNavigate();
+    }
+
+    @Override
+    public boolean canNavigateToSource() {
+        if (!(element instanceof Navigatable navigatable)) {
+            return false;
+        }
+        return navigatable.canNavigateToSource();
     }
 
     @Override

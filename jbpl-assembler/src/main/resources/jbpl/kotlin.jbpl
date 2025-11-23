@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-^include "builtin.jbpl"
-
 macro kt_get_property(owner: type, name: string, type: type) {
     invokevirtual ${owner}.${get_special_name("get-${name}")}(): ${type}
 }
