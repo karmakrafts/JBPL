@@ -16,12 +16,12 @@
 
 package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.psi.tree.IElementType;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiLeafNode;
+import com.intellij.lang.ASTNode;
+import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
-public class JBPLPsiLeafNode extends ANTLRPsiLeafNode {
-    public JBPLPsiLeafNode(final @NotNull IElementType type, final @NotNull CharSequence text) {
-        super(type, text);
+public class JBPLPsiLeafNode extends ANTLRPsiNode {
+    public JBPLPsiLeafNode(final @NotNull ASTNode node) {
+        super(node);
     }
 }

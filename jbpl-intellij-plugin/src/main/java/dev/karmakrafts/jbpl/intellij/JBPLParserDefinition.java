@@ -117,12 +117,8 @@ public final class JBPLParserDefinition implements ParserDefinition {
     }
 
     @Override
-    public @NotNull PsiElement createElement(final @NotNull ASTNode node) {
-        final var elementType = node.getElementType();
-        if (elementType instanceof TokenIElementType tokenType) {
-            return new JBPLPsiLeafNode(tokenType, node.getText());
-        }
-        if (!(elementType instanceof RuleIElementType ruleType)) {
+    public @NotNull PsiElement createElement(@NotNull ASTNode node) {
+        if (!(node.getElementType() instanceof RuleIElementType ruleType)) {
             return new JBPLPsiNode(node);
         }
         return switch (ruleType.getRuleIndex()) { // @formatter:off

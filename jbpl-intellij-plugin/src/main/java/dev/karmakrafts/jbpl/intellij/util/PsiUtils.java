@@ -39,7 +39,7 @@ public final class PsiUtils {
         if (!(element instanceof JBPLPsiLeafNode node)) {
             return false;
         }
-        if (!(node.getElementType() instanceof TokenIElementType elementType)) {
+        if (!(node.getNode().getElementType() instanceof TokenIElementType elementType)) {
             return false;
         }
         return elementType.getANTLRTokenType() == type;

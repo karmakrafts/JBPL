@@ -19,6 +19,8 @@ package dev.karmakrafts.jbpl.intellij.completion;
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.patterns.PlatformPatterns;
+import dev.karmakrafts.jbpl.frontend.JBPLLexer;
+import dev.karmakrafts.jbpl.intellij.JBPLParserDefinition;
 import dev.karmakrafts.jbpl.intellij.JBPLanguage;
 
 public final class JBPLCompletionContributor extends CompletionContributor {
@@ -26,5 +28,8 @@ public final class JBPLCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
             PlatformPatterns.psiElement().withLanguage(JBPLanguage.INSTANCE),
             new KeywordCompletionProvider());
+        extend(CompletionType.BASIC,
+            PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
+            new IdentCompletionProvider());
     }
 }
