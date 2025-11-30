@@ -16,7 +16,7 @@
 
 include "number.jbpl"
 
-macro clamp(min: Number, max: Number, value: Number): Number {
+macro clamp[T : Number](min: T, max: T, value: T): T {
     if (value < min) ^return min
     else if(value > max) ^return max
     else ^return value

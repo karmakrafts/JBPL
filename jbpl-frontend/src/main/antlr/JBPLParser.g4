@@ -394,10 +394,8 @@ whenBranchBody:
     ((L_BRACE
     (bodyElement
     | NL)*?
-    R_BRACE
-    NL+)
-    | bodyElement
-    NL+)
+    R_BRACE)
+    | bodyElement)
     ;
 
 wrappedExpr:

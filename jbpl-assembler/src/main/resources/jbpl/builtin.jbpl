@@ -30,7 +30,7 @@ macro store(type: type, local: (i32 | string)) {
 
 macro load(type: type, local: (i32 | string)) {
     when(type) {
-        type i8 -> istore ${local}
+        type i8 -> {istore ${local}}
         type i16 -> istore ${local}
         type i32 -> istore ${local}
         type char -> istore ${local}
