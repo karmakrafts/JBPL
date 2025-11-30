@@ -31,6 +31,7 @@ dependencies {
 
 tasks {
     publishPlugin {
+        hidden = false
         token = System.getenv("JB_MARKETPLACE_TOKEN")
     }
     runIde {

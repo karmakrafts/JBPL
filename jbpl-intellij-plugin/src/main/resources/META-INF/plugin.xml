@@ -15,7 +15,7 @@
   -->
 
 <idea-plugin>
-    <id>dev.karmakrafts.jbpl.intellij</id>
+    <id>dev.karmakrafts.jbpl</id>
     <name>Java Bytecode Patch Language</name>
     <vendor email="support@karmakrafts.dev" url="https://karmakrafts.dev">Karma Krafts</vendor>
 
