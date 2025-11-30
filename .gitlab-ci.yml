@@ -82,7 +82,7 @@ build-release:
   rules:
     - *if-release
   script:
-    - ./gradlew clean build
+    - ./gradlew clean build buildPlugin
   artifacts:
     expire_in: never
     paths:
@@ -149,10 +149,10 @@ create-release:
     assets:
       links:
         - name: "jbpl-assembler-cli.jar"
-          url: "$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/raw/jbpl-assembler-cli/build/libs/jbpl-assembler-cli-${CI_COMMIT_TAG}.jar"
+          url: "$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/file/jbpl-assembler-cli/build/libs/jbpl-assembler-cli-${CI_COMMIT_TAG}.jar"
         - name: "jbpl-assembler-cli-slim.jar"
-          url: "$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/raw/jbpl-assembler-cli/build/libs/jbpl-assembler-cli-${CI_COMMIT_TAG}-slim.jar"
+          url: "$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/file/jbpl-assembler-cli/build/libs/jbpl-assembler-cli-${CI_COMMIT_TAG}-slim.jar"
         - name: "jbpl-intellij-plugin.zip"
-          url: "$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/raw/jbpl-intellij-plugin/build/distributions/jbpl-intellij-plugin-${CI_COMMIT_TAG}.zip"
+          url: "$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/file/jbpl-intellij-plugin/build/distributions/jbpl-intellij-plugin-${CI_COMMIT_TAG}.zip"
   tags:
     - macos
