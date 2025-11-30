@@ -29,7 +29,8 @@ public final class JBPLBraceMatcher implements PairedBraceMatcher {
         makePair(JBPLLexer.M_CONST_STR_LERP_BEGIN, JBPLLexer.R_BRACE, true),
         makePair(JBPLLexer.L_BRACE, JBPLLexer.R_BRACE, true),
         makePair(JBPLLexer.L_PAREN, JBPLLexer.R_PAREN, false),
-        makePair(JBPLLexer.L_SQBRACKET, JBPLLexer.R_SQBRACKET, false)
+        makePair(JBPLLexer.L_SQBRACKET, JBPLLexer.R_SQBRACKET, false),
+        makePair(JBPLLexer.L_ABRACKET, JBPLLexer.R_ABRACKET, false)
     }; // @formatter:on
 
     private static @NotNull BracePair makePair(final int lType, final int rType, final boolean structural) {
