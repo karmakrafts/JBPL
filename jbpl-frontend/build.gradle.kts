@@ -4,13 +4,13 @@ import dev.karmakrafts.conventions.setProjectInfo
 plugins {
     `java-library`
     antlr
+    alias(libs.plugins.dokka)
 }
 
 configureJava(libs.versions.java)
 
 java {
     withSourcesJar()
-    withJavadocJar()
     sourceSets {
         val main by getting {
             java.srcDirs("${layout.buildDirectory.get().asFile.absolutePath}/generated-src/antlr/main/java")
@@ -37,6 +37,11 @@ tasks {
 }
 
 publishing {
+    publications {
+        create<MavenPublication>("frontend") {
+            from(components["java"])
+        }
+    }
     setProjectInfo(
         name = "JBPL Frontend",
         description = "ANTLRv4 based lexer-parser-frontend for the Java Bytecode Patch Language",

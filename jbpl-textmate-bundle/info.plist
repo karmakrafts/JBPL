@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>contactEmailRot13</key>
+	<string>fhccbeg@xneznxensgf.qri</string>
+	<key>contactName</key>
+	<string>Karma Krafts</string>
+	<key>description</key>
+	<string>An assembly language and macro assembler for the JVM.</string>
+	<key>name</key>
+	<string>Java Bytecode Patch Language</string>
+	<key>uuid</key>
+	<string>3a9505dd-c735-4dfc-a155-b93f3423a683</string>
+</dict>
+</plist>

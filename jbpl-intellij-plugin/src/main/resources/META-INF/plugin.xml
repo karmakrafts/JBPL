@@ -17,10 +17,17 @@
 <idea-plugin>
     <id>dev.karmakrafts.jbpl.intellij</id>
     <name>Java Bytecode Patch Language</name>
-    <vendor>Karma Krafts</vendor>
+    <vendor email="support@karmakrafts.dev" url="https://karmakrafts.dev">Karma Krafts</vendor>
+
+    <description>
+        <![CDATA[
+            Syntax highlighting, completion and IDE integration for the Java Bytecode Patch Language.
+        ]]>
+    </description>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.java</depends>
+    <idea-version since-build="223"/>
 
     <resource-bundle>messages.JBPL</resource-bundle>
 
