@@ -1,10 +1,9 @@
 import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.setProjectInfo
 
 plugins {
     `java-library`
     antlr
-    signing
-    `maven-publish`
 }
 
 configureJava(libs.versions.java)
@@ -20,7 +19,7 @@ java {
 }
 
 dependencies {
-    antlr(libs.antlr)
+    antlr(libs.antlr4)
     api(libs.annotations)
 }
 
@@ -35,4 +34,12 @@ tasks {
             file("${layout.buildDirectory.get().asFile.absolutePath}/generated-src/antlr/main/java/$outputPath")
         arguments = arguments + listOf("-visitor", "-package", outputPackage)
     }
+}
+
+publishing {
+    setProjectInfo(
+        name = "JBPL Frontend",
+        description = "ANTLRv4 based lexer-parser-frontend for the Java Bytecode Patch Language",
+        url = "https://git.karmakrafts.dev/kk/jbpl"
+    )
 }

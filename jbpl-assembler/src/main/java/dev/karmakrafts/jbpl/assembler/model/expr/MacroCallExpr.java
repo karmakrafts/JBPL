@@ -43,6 +43,22 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         addExpression(name);
     }
 
+    private static @NotNull List<Pair<@Nullable String, ConstExpr>> evaluateNamedValues(final @NotNull List<Pair<@Nullable Expr, Expr>> values,
+                                                                                        final @NotNull EvaluationContext context) {
+        // @formatter:off
+        return values.stream()
+            .map(ExceptionUtils.unsafeFunction(pair -> {
+                final var name = pair.left();
+                final var value = pair.right().evaluateAsConst(context);
+                if(name != null) {
+                    return new Pair<>(name.evaluateAs(context, String.class), value);
+                }
+                return new Pair<>((String)null, value);
+            }))
+            .toList();
+        // @formatter:on
+    }
+
     public @NotNull Expr getName() {
         return getExpressions().get(NAME_INDEX);
     }
@@ -82,25 +98,9 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return getMacro(name, context).getReturnType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
-    private static @NotNull List<Pair<@Nullable String, ConstExpr>> evaluateNamedValues(final @NotNull List<Pair<@Nullable Expr, Expr>> values,
-                                                                                        final @NotNull EvaluationContext context) {
-        // @formatter:off
-        return values.stream()
-            .map(ExceptionUtils.unsafeFunction(pair -> {
-                final var name = pair.left();
-                final var value = pair.right().evaluateAsConst(context);
-                if(name != null) {
-                    return new Pair<>(name.evaluateAs(context, String.class), value);
-                }
-                return new Pair<>((String)null, value);
-            }))
-            .toList();
-        // @formatter:on
-    }
-
     private @NotNull Map<String, Expr> resolveTypeArguments(final @NotNull EvaluationContext context,
-                                                        final @NotNull Map<String, Type> resolvedParameters,
-                                                        final @NotNull String macroName) throws EvaluationException {
+                                                            final @NotNull Map<String, Type> resolvedParameters,
+                                                            final @NotNull String macroName) throws EvaluationException {
         final var resolvedArgs = evaluateNamedValues(getTypeArguments(), context);
         final var arguments = new HashMap<String, Expr>();
         final var parameters = new ArrayList<>(resolvedParameters.entrySet());

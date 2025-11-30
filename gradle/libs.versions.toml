@@ -6,18 +6,19 @@ jbpl = "1.0.0"
 ow2asm = "9.9" # https://gitlab.ow2.org/asm/asm/-/tags
 karmaConventions = "1.8.1" # https://github.com/karmakrafts/karma-conventions/tags
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
-antlr = "4.13.2" # https://github.com/antlr/antlr4/releases
+antlr4 = "4.13.2" # https://github.com/antlr/antlr4/releases
 annotations = "26.0.2-1" # https://github.com/JetBrains/java-annotations/releases
 junit = "6.0.1" # https://github.com/junit-team/junit-framework/releases
 jansi = "3.30.6" # https://github.com/jline/jline3/releases
 shadow = "9.2.2" # https://github.com/GradleUp/shadow/releases
 intelliJPlatform = "2.10.5" # https://github.com/JetBrains/intellij-platform-gradle-plugin/releases
-intelliJAdaptor = "0.2.2"
+intelliJAdaptor = "0.2.2" # https://git.karmakrafts.dev/kk/antlr4-intellij-adaptor/-/releases
 joptSimple = "5.0.4" # https://github.com/jopt-simple/jopt-simple/tags
+dokka = "2.1.0" # https://github.com/Kotlin/dokka/releases
 
 [libraries]
 
-antlr = { module = "org.antlr:antlr4", version.ref = "antlr" }
+antlr4 = { module = "org.antlr:antlr4", version.ref = "antlr4" }
 ow2-asm-core = { module = "org.ow2.asm:asm", version.ref = "ow2asm" }
 ow2-asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "ow2asm" }
 annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
@@ -34,3 +35,4 @@ karmaConventions = { id = "dev.karmakrafts.conventions.karma-conventions", versi
 gradleNexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexus" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }

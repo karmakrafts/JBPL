@@ -1,9 +1,8 @@
 import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.setProjectInfo
 
 plugins {
     `java-library`
-    signing
-    `maven-publish`
 }
 
 configureJava(libs.versions.java)
@@ -24,4 +23,12 @@ tasks {
     test {
         useJUnitPlatform()
     }
+}
+
+publishing {
+    setProjectInfo(
+        name = "JBPL Assembler",
+        description = "Macro assembler for the Java Bytecode Patch Language",
+        url = "https://git.karmakrafts.dev/kk/jbpl"
+    )
 }

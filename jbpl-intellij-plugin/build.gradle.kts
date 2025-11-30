@@ -3,8 +3,6 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     `java-library`
-    signing
-    `maven-publish`
     alias(libs.plugins.intelliJPlatform)
 }
 
@@ -29,11 +27,6 @@ dependencies {
     }
     implementation(projects.jbplFrontend)
     implementation(libs.intelliJAdaptor)
-}
-
-java {
-    withSourcesJar()
-    withJavadocJar()
 }
 
 tasks {

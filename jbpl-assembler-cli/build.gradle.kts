@@ -16,8 +16,6 @@
 
 plugins {
     application
-    signing
-    `maven-publish`
     alias(libs.plugins.shadow)
 }
 

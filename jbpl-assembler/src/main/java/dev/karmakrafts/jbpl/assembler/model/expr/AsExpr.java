@@ -57,7 +57,7 @@ public final class AsExpr extends AbstractExprContainer implements Expr {
         final var value = getValue().evaluateAsConst(context);
         final var valueType = value.getType(context);
         final var type = getType(context);
-        if(valueType.equals(type)) { // If the types are already the same, we can just pass through the value directly
+        if (valueType.equals(type)) { // If the types are already the same, we can just pass through the value directly
             context.pushValue(value);
             return;
         }
