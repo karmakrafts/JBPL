@@ -135,11 +135,11 @@ publish-documentation:
   tags:
     - docs
 
-# publish-jb-marketplace:
-#   stage: publish
-#   rules:
-#     - *if-release
-#   script:
-#     - ./gradlew buildPlugin publishPlugin
-#   tags:
-#     - macos
+publish-jb-marketplace:
+  stage: publish
+  rules:
+    - *if-release
+  script:
+    - ./gradlew publishPlugin
+  tags:
+    - macos
