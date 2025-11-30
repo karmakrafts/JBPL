@@ -55,6 +55,6 @@ public final class MacroNode extends JBPLPsiNode implements Annotated, Structura
 
     @Override
     public @NotNull Icon getIcon(final int flags) {
-        return Icons.getIconWithModifier(Icons.MACRO, PsiUtils.findAll(this, "/macro/macroModifiers").toList());
+        return Icons.getIconWithModifier(Icons.MACRO, PsiUtils.findAll(this, "/macro/macroModifier").toList());
     }
 }

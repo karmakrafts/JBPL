@@ -39,7 +39,10 @@ public final class DefineNode extends JBPLPsiNode implements StructuralPsiElemen
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public void annotate(final @NotNull AnnotationHolder holder) {
-        final var isFinal = PsiUtils.hasToken(this, JBPLLexer.KW_FINAL);
+        // @formatter:off
+        final var isFinal = PsiUtils.findAll(this, "/define/defineModifier")
+            .anyMatch(mod -> PsiUtils.hasToken(mod, JBPLLexer.KW_FINAL));
+        // @formatter:on
         if (isFinal) {
             // @formatter:off
             PsiUtils.find(this, "/define/exprOrName/nameSegment").ifPresent(name -> holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
@@ -90,6 +93,6 @@ public final class DefineNode extends JBPLPsiNode implements StructuralPsiElemen
 
     @Override
     public @NotNull Icon getIcon(final int flags) {
-        return Icons.getIconWithModifier(Icons.DEFINE, PsiUtils.findAll(this, "/define/defineModifiers").toList());
+        return Icons.getIconWithModifier(Icons.DEFINE, PsiUtils.findAll(this, "/define/defineModifier").toList());
     }
 }
