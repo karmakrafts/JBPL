@@ -1,5 +1,11 @@
 # ☕ JBPL
 
+[![](https://git.karmakrafts.dev/kk/jbpl/badges/master/pipeline.svg)](https://git.karmakrafts.dev/kk/jbpl/-/pipelines)
+[![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo.maven.apache.org%2Fmaven2%2Fdev%2Fkarmakrafts%2Fjbpl%2Fjbpl-assembler%2Fmaven-metadata.xml
+)](https://git.karmakrafts.dev/kk/jbpl/-/packages)
+[![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fdev%2Fkarmakrafts%2Fjbpl%2Fjbpl-assembler%2Fmaven-metadata.xml
+)](https://git.karmakrafts.dev/kk/jbpl/-/packages)
+
 Java Bytecode Patch Language (or JBPL) is a fully featured JVM assembly language  
 and macro assembler.  
 It can be used to author new code or patch existing code.  
@@ -7,10 +13,11 @@ It can be used to author new code or patch existing code.
 
 ### Features
 
-- Standalone [ANTLRv4 frontend](https://github.com/karmakrafts/JBPL/tree/master/jbpl-frontend/src/main/antlr)
-- [Interpreter](https://github.com/karmakrafts/JBPL/tree/master/jbpl-assembler/src/main/java/dev/karmakrafts/jbpl/assembler/model)
-- [IntelliJ plugin](https://github.com/karmakrafts/JBPL/tree/master/jbpl-intellij-plugin)
-- [Rouge lexer](https://github.com/karmakrafts/rouge) (GitLab highlighting)
+- Standalone [ANTLRv4 frontend](https://git.karmakrafts.dev/kk/jbpl/-/tree/master/jbpl-frontend?ref_type=heads)
+- [Interpreter](https://git.karmakrafts.dev/kk/jbpl/-/tree/master/jbpl-assembler?ref_type=heads)
+- [IntelliJ plugin](https://git.karmakrafts.dev/kk/jbpl/-/tree/master/jbpl-intellij-plugin?ref_type=heads)
+- [Rouge lexer](https://github.com/karmakrafts/rouge)
+- [TextMate Bundle](https://git.karmakrafts.dev/kk/jbpl/-/tree/master/jbpl-textmate-bundle?ref_type=heads)
 
 ### Why i made this
 
