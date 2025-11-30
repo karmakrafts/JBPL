@@ -1,5 +1,6 @@
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.setProjectInfo
+import java.time.ZonedDateTime
 
 plugins {
     `java-library`
@@ -23,6 +24,21 @@ dependencies {
     api(libs.annotations)
 }
 
+dokka {
+    moduleName = project.name
+    pluginsConfiguration {
+        html {
+            footerMessage = "(c) ${ZonedDateTime.now().year} Karma Krafts & associates"
+        }
+    }
+}
+
+val dokkaJar = tasks.register("dokkaJar", Jar::class) {
+    dependsOn(tasks.dokkaGeneratePublicationHtml)
+    from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
+}
+
 tasks {
     withType<Jar> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -34,11 +50,20 @@ tasks {
             file("${layout.buildDirectory.get().asFile.absolutePath}/generated-src/antlr/main/java/$outputPath")
         arguments = arguments + listOf("-visitor", "-package", outputPackage)
     }
+    System.getProperty("publishDocs.root")?.let { docsDir ->
+        register("publishDocs", Copy::class) {
+            dependsOn(dokkaJar)
+            mustRunAfter(dokkaJar)
+            from(zipTree(dokkaJar.map { outputs.files.first() }))
+            into("$docsDir/${project.name}")
+        }
+    }
 }
 
 publishing {
     publications {
         create<MavenPublication>("frontend") {
+            artifact(dokkaJar)
             from(components["java"])
         }
     }
