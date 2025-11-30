@@ -54,7 +54,7 @@ tasks {
         register("publishDocs", Copy::class) {
             dependsOn(dokkaJar)
             mustRunAfter(dokkaJar)
-            from(zipTree(dokkaJar.map { outputs.files.first() }))
+            from(zipTree(dokkaJar.map { task -> task.outputs.files.first() }))
             into("$docsDir/${project.name}")
         }
     }
