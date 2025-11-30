@@ -12,6 +12,8 @@ configureJava(libs.versions.java)
 
 repositories {
     mavenCentral()
+    mavenLocal()
+    maven("https://central.sonatype.com/repository/maven-snapshots")
     intellijPlatform {
         defaultRepositories()
     }

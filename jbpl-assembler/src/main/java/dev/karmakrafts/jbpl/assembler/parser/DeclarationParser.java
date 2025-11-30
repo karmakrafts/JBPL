@@ -107,6 +107,7 @@ public final class DeclarationParser extends JBPLParserBaseVisitor<List<Declarat
                 .map(ExceptionUtils.unsafeFunction(ElementParser::parse))
                 .toList());
             // @formatter:on
+            macro.addTypeParameters(ParserUtils.parseTypeParameters(signature.typeParameter()));
             macro.addParameters(ParserUtils.parseParameters(signature.parameter()));
             return List.of(macro);
         });

@@ -22,6 +22,8 @@ import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.PrefixMatcher;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.util.ProcessingContext;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
@@ -47,21 +49,9 @@ public final class IdentCompletionProvider extends CompletionProvider<Completion
         };
     }
 
-    @Override
-    protected void addCompletions(final @NotNull CompletionParameters parameters,
-                                  final @NotNull ProcessingContext context,
-                                  final @NotNull CompletionResultSet result) {
-        var element = parameters.getPosition();
-        // Resolve raw identifiers to their segment parent if present
-        if (element.getNode().getElementType() instanceof TokenIElementType tokenType && tokenType.getANTLRTokenType() == JBPLLexer.IDENT) {
-            final var segment = element.getParent();
-            if (segment != null) {
-                element = segment;
-            }
-        }
-        if (!(element.getParent() instanceof ClassTypeNode classTypeNode)) {
-            return;
-        }
+    private void addClassTypeCompletions(final @NotNull ClassTypeNode classTypeNode,
+                                         final @NotNull PsiElement element,
+                                         final @NotNull CompletionResultSet result) {
         final var children = List.of(classTypeNode.getChildren());
         final var index = children.indexOf(element);
         final var project = element.getProject();
@@ -83,7 +73,7 @@ public final class IdentCompletionProvider extends CompletionProvider<Completion
             .filter(elementName(matcher))
             .map(clazz -> LookupElementBuilder.create(clazz)
                 .withPresentableText(Objects.requireNonNull(clazz.getName()))
-                .withTypeText("class")
+                .withTypeText(getClassTypeText(clazz))
                 .withIcon(clazz.getIcon(0)))
             .toList());
         result.addAllElements(Arrays.stream(pkg.getSubPackages())
@@ -94,5 +84,38 @@ public final class IdentCompletionProvider extends CompletionProvider<Completion
                 .withIcon(subPackage.getIcon(0)))
             .toList());
         // @formatter:on
+    }
+
+    @Override
+    protected void addCompletions(final @NotNull CompletionParameters parameters,
+                                  final @NotNull ProcessingContext context,
+                                  final @NotNull CompletionResultSet result) {
+        var element = parameters.getPosition();
+        // Resolve raw identifiers to their segment parent if present
+        if (element.getNode().getElementType() instanceof TokenIElementType tokenType && tokenType.getANTLRTokenType() == JBPLLexer.IDENT) {
+            final var segment = element.getParent();
+            if (segment != null) {
+                element = segment;
+            }
+        }
+        if (element.getParent() instanceof ClassTypeNode classTypeNode) {
+            addClassTypeCompletions(classTypeNode, element, result);
+        }
+    }
+
+    private static @NotNull String getClassTypeText(final @NotNull PsiClass clazz) {
+        if (clazz.isInterface()) {
+            return "interface";
+        }
+        else if (clazz.isEnum()) {
+            return "enum";
+        }
+        else if (clazz.isRecord()) {
+            return "record";
+        }
+        else if (clazz.isAnnotationType()) {
+            return "annotation";
+        }
+        return "class";
     }
 }

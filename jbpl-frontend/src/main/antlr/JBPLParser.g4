@@ -117,8 +117,19 @@ returnStatement:
     expr?
     ;
 
+typeParameter:
+    exprOrName
+    (COLON
+    exprOrType)
+    ;
+
 macroSignature:
     exprOrName
+    (L_SQBRACKET
+    typeParameter
+    (COMMA
+    typeParameter)*
+    R_SQBRACKET)?
     L_PAREN
     (parameter
     (COMMA
@@ -145,12 +156,29 @@ macro:
 
 macroCall:
     exprOrName
+    (L_SQBRACKET
+    (typeArgument
+    (COMMA
+    typeArgument)*
+    )
+    R_SQBRACKET)?
     L_PAREN
     (argument
     (COMMA
     argument)*
     )?
     R_PAREN
+    ;
+
+typeArgument:
+    namedTypeArgument
+    | type
+    ;
+
+namedTypeArgument:
+    exprOrName
+    EQ
+    type
     ;
 
 argument:

@@ -24,6 +24,12 @@ import java.util.Map;
 public record IntrinsicMacroSignature( // @formatter:off
     @NotNull String name,
     @NotNull Type returnType,
-    @NotNull Map<String, Type> parameters
+    @NotNull Map<String, Type> parameters,
+    @NotNull Map<String, Type> typeParameters
 ) { // @formatter:on
+    public IntrinsicMacroSignature(final @NotNull String name,
+                                   final @NotNull Type returnType,
+                                   final @NotNull Map<String, Type> parameters) {
+        this(name, returnType, parameters, Map.of());
+    }
 }

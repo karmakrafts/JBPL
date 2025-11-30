@@ -35,12 +35,22 @@ public record UnresolvedType(Expr name) implements Type {
     @Override
     public @NotNull Type resolve(final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName(context);
-        final var typeAlias = context.resolveByName(TypeAliasStatement.class, name);
+        // Local type aliases shadow type parameters
+        var typeAlias = context.resolveLocallyByName(TypeAliasStatement.class, name);
         if (typeAlias != null) {
-            // Type aliases can shadow prepro class definitions
             return typeAlias.resolve(context);
         }
-        return new PreproClassType(name); // TODO: cache this?
+        // Type parameters shadow global type aliases
+        final var typeArgument = context.peekFrame().namedLocalTypes.get(name);
+        if (typeArgument != null) {
+            return typeArgument;
+        }
+        // Global type aliases shadow prepro classes
+        typeAlias = context.resolveByName(TypeAliasStatement.class, name);
+        if (typeAlias != null) {
+            return typeAlias.resolve(context);
+        }
+        return new PreproClassType(name);
     }
 
     @Override

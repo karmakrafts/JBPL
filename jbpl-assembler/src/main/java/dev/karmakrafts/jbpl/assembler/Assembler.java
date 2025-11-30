@@ -91,7 +91,6 @@ public final class Assembler {
     private final Consumer<String> infoConsumer;
     private final Consumer<String> errorConsumer;
     private final HashMap<String, AssemblyFile> files = new HashMap<>();
-    private final IncludeLowering includeLowering = new IncludeLowering(this);
 
     public Assembler(final @NotNull Function<String, ReadableByteChannel> resourceProvider,
                      final @NotNull Consumer<String> infoConsumer,
@@ -171,7 +170,7 @@ public final class Assembler {
     }
 
     private @NotNull AssemblyFile lowerFinal(final @NotNull AssemblyFile file) {
-        file.transform(includeLowering);
+        file.transform(new IncludeLowering(this));
         file.transform(CompoundLowering.INSTANCE);
         file.transform(NoopRemovalLowering.INSTANCE);
         return file;

@@ -19,6 +19,7 @@ package dev.karmakrafts.jbpl.assembler.eval;
 import dev.karmakrafts.jbpl.assembler.model.element.ElementContainer;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.model.statement.LocalStatement;
+import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.scope.Scope;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
@@ -36,7 +37,8 @@ public final class StackFrame implements Copyable<StackFrame> {
     public final Scope scope;
     public final ScopeResolver scopeResolver;
     public final Stack<Expr> valueStack = new Stack<>(); // Used for caller<->callee passing
-    public final HashMap<String, Expr> namedLocalValues = new HashMap<>(); // Named arguments of the current macro
+    public final HashMap<String, Expr> namedLocalValues = new HashMap<>(); // Named arguments to the current macro
+    public final HashMap<String, Type> namedLocalTypes = new HashMap<>(); // Named type arguments to the current macro
     public final HashMap<String, IntrinsicDefine> intrinsicDefines = new HashMap<>();
     public final HashMap<IntrinsicMacroSignature, IntrinsicMacro> intrinsicMacros = new HashMap<>();
 
@@ -99,6 +101,7 @@ public final class StackFrame implements Copyable<StackFrame> {
         frame.namedLocalValues.putAll(namedLocalValues.entrySet().stream()
             .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
             .collect(Collectors.toMap(Pair::left, Pair::right)));
+        frame.namedLocalTypes.putAll(namedLocalTypes);
         frame.locals.putAll(locals.entrySet().stream()
             .map(entry -> new Pair<>(entry.getKey(), entry.getValue().copy()))
             .collect(Collectors.toMap(Pair::left, Pair::right)));

@@ -16,11 +16,14 @@
 
 package dev.karmakrafts.jbpl.assembler.eval;
 
-import dev.karmakrafts.jbpl.assembler.util.XBiConsumer;
+import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import org.jetbrains.annotations.NotNull;
 
-public record IntrinsicMacro( // @formatter:off
-    @NotNull IntrinsicMacroSignature signature,
-    @NotNull XBiConsumer<EvaluationContext, IntrinsicMacroArguments, EvaluationException> callback
+import java.util.List;
+
+public record IntrinsicMacroArguments( // @formatter:off
+    @NotNull List<Expr> typeArguments,
+    @NotNull List<Expr> arguments
 ) { // @formatter:on
+
 }

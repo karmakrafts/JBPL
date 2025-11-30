@@ -100,6 +100,22 @@ public interface ElementVisitor {
     }
 
     default @NotNull Declaration visitMacro(final @NotNull MacroDecl macroDecl) {
+        macroDecl.setName(visitExpr(macroDecl.getName()));
+        macroDecl.setReturnType(visitExpr(macroDecl.getReturnType()));
+        // @formatter:off
+        final var transformedTypeParams = macroDecl.getTypeParameters().stream()
+            .map(pair -> new Pair<>(visitExpr(pair.left()), visitExpr(pair.right())))
+            .toList();
+        // @formatter:on
+        macroDecl.clearTypeParameters();
+        macroDecl.addTypeParameters(transformedTypeParams);
+        // @formatter:off
+        final var transformedParams = macroDecl.getParameters().stream()
+            .map(pair -> new Pair<>(visitExpr(pair.left()), visitExpr(pair.right())))
+            .toList();
+        // @formatter:on
+        macroDecl.clearParameters();
+        macroDecl.addParameters(transformedParams);
         return visitElementContainer(macroDecl);
     }
 

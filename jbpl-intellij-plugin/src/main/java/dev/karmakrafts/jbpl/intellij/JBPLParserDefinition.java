@@ -64,12 +64,9 @@ public final class JBPLParserDefinition implements ParserDefinition {
     }
 
     public static void ensureTokenTypesRegistered() {
-        final var tokenCount = JBPLParser.VOCABULARY.getMaxTokenType();
-        final var tokenNames = new String[tokenCount + 1];
-        for (var i = 0; i <= tokenCount; i++) {
-            tokenNames[i] = JBPLParser.VOCABULARY.getDisplayName(i);
-        }
-        PSIElementTypeFactory.defineLanguageIElementTypes(JBPLanguage.INSTANCE, tokenNames, JBPLParser.ruleNames);
+        PSIElementTypeFactory.defineLanguageIElementTypes(JBPLanguage.INSTANCE,
+            JBPLParser.VOCABULARY,
+            JBPLParser.ruleNames);
     }
 
     @Override
@@ -157,6 +154,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_classDecl -> new ClassNode(node);
             case JBPLParser.RULE_functionScopeReference -> new FunctionScopeReferenceNode(node);
             case JBPLParser.RULE_fieldScopeReference -> new FieldScopeReferenceNode(node);
+            case JBPLParser.RULE_typeParameter -> new TypeParameterNode(node);
             default -> new JBPLPsiNode(node);
         }; // @formatter:on
     }

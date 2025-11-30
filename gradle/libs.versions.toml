@@ -4,30 +4,28 @@ java = "17"
 
 jbpl = "1.0.0"
 ow2asm = "9.9" # https://gitlab.ow2.org/asm/asm/-/tags
-karmaConventions = "1.8.0" # https://github.com/karmakrafts/karma-conventions/tags
+karmaConventions = "1.8.1" # https://github.com/karmakrafts/karma-conventions/tags
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 antlr = "4.13.2" # https://github.com/antlr/antlr4/releases
 annotations = "26.0.2-1" # https://github.com/JetBrains/java-annotations/releases
-junit = "5.14.1" # https://github.com/junit-team/junit-framework/releases
-junitPlatform = "1.14.1" # https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
+junit = "6.0.1" # https://github.com/junit-team/junit-framework/releases
 jansi = "3.30.6" # https://github.com/jline/jline3/releases
 shadow = "9.2.2" # https://github.com/GradleUp/shadow/releases
-intelliJPlatform = "2.10.4" # https://github.com/JetBrains/intellij-platform-gradle-plugin/releases
-intelliJAdaptor = "0.1" # https://github.com/antlr/antlr4-intellij-adaptor/releases
+intelliJPlatform = "2.10.5" # https://github.com/JetBrains/intellij-platform-gradle-plugin/releases
+intelliJAdaptor = "0.2.2"
 joptSimple = "5.0.4" # https://github.com/jopt-simple/jopt-simple/tags
 
 [libraries]
 
 antlr = { module = "org.antlr:antlr4", version.ref = "antlr" }
-antlr-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }
 ow2-asm-core = { module = "org.ow2.asm:asm", version.ref = "ow2asm" }
 ow2-asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "ow2asm" }
 annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 jansi = { module = "org.jline:jline-terminal-jansi", version.ref = "jansi" }
-intelliJAdaptor = { module = "org.antlr:antlr4-intellij-adaptor", version.ref = "intelliJAdaptor" }
+intelliJAdaptor = { module = "dev.karmakrafts.antlr4:antlr4-intellij-adaptor", version.ref = "intelliJAdaptor" }
 joptSimple = { module = "net.sf.jopt-simple:jopt-simple", version.ref = "joptSimple" }
 
 [plugins]

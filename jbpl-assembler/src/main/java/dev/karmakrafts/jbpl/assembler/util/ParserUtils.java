@@ -138,4 +138,14 @@ public final class ParserUtils {
         }
         return paramPairs;
     }
+
+    public static @NotNull List<Pair<Expr, Expr>> parseTypeParameters(final @NotNull List<TypeParameterContext> params) throws ParserException {
+        final var paramPairs = new ArrayList<Pair<Expr, Expr>>();
+        for (final var param : params) {
+            final var name = ExprParser.parse(param.exprOrName());
+            final var type = ExprParser.parse(param.exprOrType());
+            paramPairs.add(new Pair<>(name, type));
+        }
+        return paramPairs;
+    }
 }

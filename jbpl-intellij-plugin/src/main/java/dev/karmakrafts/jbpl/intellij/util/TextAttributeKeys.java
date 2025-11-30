@@ -16,14 +16,13 @@
 
 package dev.karmakrafts.jbpl.intellij.util;
 
+import com.intellij.ide.highlighter.JavaHighlightingColors;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 
 public final class TextAttributeKeys {
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("JBPL_KEYWORD",
         DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey IDENT = TextAttributesKey.createTextAttributesKey("JBPL_IDENT",
-        DefaultLanguageHighlighterColors.IDENTIFIER);
     public static final TextAttributesKey NUMBER = TextAttributesKey.createTextAttributesKey("JBPL_NUMBER",
         DefaultLanguageHighlighterColors.NUMBER);
     public static final TextAttributesKey STRING = TextAttributesKey.createTextAttributesKey("JBPL_STRING",
@@ -67,6 +66,9 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.CLASS_NAME);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("JBPL_VARIABLE",
         DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
+    public static final TextAttributesKey TYPE_PARAMETER = TextAttributesKey.createTextAttributesKey(
+        "JBPL_TYPE_PARAMETER",
+        JavaHighlightingColors.TYPE_PARAMETER_NAME_ATTRIBUTES);
 
     private TextAttributeKeys() {
     }

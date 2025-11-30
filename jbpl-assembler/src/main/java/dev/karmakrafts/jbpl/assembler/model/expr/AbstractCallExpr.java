@@ -24,11 +24,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractCallExpr extends AbstractReceiverExpr {
+    private final ArrayList<Pair<@Nullable Expr, Expr>> typeArguments = new ArrayList<>();
     private final ArrayList<Pair<@Nullable Expr, Expr>> arguments = new ArrayList<>();
 
     public AbstractCallExpr() {
         super();
     }
+
+    // Type arguments
+
+    public void clearTypeArguments() {
+        typeArguments.clear();
+    }
+
+    public @NotNull Pair<@Nullable Expr, Expr> getTypeArgument(final int index) {
+        return typeArguments.get(index + 1);
+    }
+
+    public void addTypeArgument(final @Nullable Expr name, final @NotNull Expr argument) {
+        if (name != null) {
+            name.setParent(this);
+        }
+        argument.setParent(this);
+        typeArguments.add(new Pair<>(name, argument));
+    }
+
+    public void addTypeArguments(final @NotNull Iterable<Pair<@Nullable Expr, Expr>> arguments) {
+        for (final var pair : arguments) {
+            addTypeArgument(pair.left(), pair.right());
+        }
+    }
+
+    public @NotNull List<Pair<@Nullable Expr, Expr>> getTypeArguments() {
+        return typeArguments;
+    }
+
+    // Arguments
 
     public void clearArguments() {
         arguments.clear();

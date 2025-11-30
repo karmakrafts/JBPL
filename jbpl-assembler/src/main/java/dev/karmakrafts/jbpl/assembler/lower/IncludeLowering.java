@@ -25,8 +25,11 @@ import dev.karmakrafts.jbpl.assembler.model.statement.Statement;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+
 public final class IncludeLowering implements ElementVisitor {
     private final Assembler assembler;
+    private final HashSet<String> alreadyIncluded = new HashSet<>();
 
     public IncludeLowering(final @NotNull Assembler assembler) {
         this.assembler = assembler;
@@ -41,7 +44,11 @@ public final class IncludeLowering implements ElementVisitor {
 
     @Override
     public @NotNull Statement visitInclude(final @NotNull IncludeStatement includeStatement) {
-        final var includedFile = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseFile(includeStatement.path));
+        final var includePath = includeStatement.path;
+        if (alreadyIncluded.contains(includePath)) {
+            return includeStatement;
+        }
+        final var includedFile = ExceptionUtils.rethrowUnchecked(() -> assembler.getOrParseFile(includePath));
         final var statement = new CompoundStatement();
         // @formatter:off
         statement.addElementsVerbatim(includedFile.getElements().stream()
@@ -49,6 +56,7 @@ public final class IncludeLowering implements ElementVisitor {
             .map(Element::copy)
             .toList());
         // @formatter:on
+        alreadyIncluded.add(includePath);
         return statement;
     }
 }

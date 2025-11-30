@@ -33,6 +33,7 @@ import java.util.*;
 public final class MacroDecl extends AbstractElementContainer
     implements Declaration, ScopeOwner, NamedElement, IncludeVisibilityProvider {
     private final ArrayList<Pair<Expr, Expr>> parameters = new ArrayList<>();
+    private final ArrayList<Pair<Expr, Expr>> typeParameters = new ArrayList<>();
     public boolean isPrivate;
     private Expr name;
     private Expr returnType;
@@ -92,8 +93,48 @@ public final class MacroDecl extends AbstractElementContainer
         return parameters;
     }
 
+    public void clearTypeParameters() {
+        for (final var pair : typeParameters) {
+            pair.left().setParent(null);
+            pair.right().setParent(null);
+        }
+        typeParameters.clear();
+    }
+
+    public void addTypeParameter(final @NotNull Expr name, final @NotNull Expr type) {
+        name.setParent(this);
+        type.setParent(this);
+        typeParameters.add(new Pair<>(name, type));
+    }
+
+    public void addTypeParameters(final @NotNull Collection<Pair<Expr, Expr>> typeParameters) {
+        for (final var entry : typeParameters) {
+            entry.left().setParent(this);
+            entry.right().setParent(this);
+        }
+        this.typeParameters.addAll(typeParameters);
+    }
+
+    public @NotNull List<Pair<Expr, Expr>> getTypeParameters() {
+        return typeParameters;
+    }
+
     public @NotNull Map<String, Type> resolveParameters(final @NotNull EvaluationContext context) throws EvaluationException {
         final var params = getParameters();
+        if (params.isEmpty()) {
+            return Map.of();
+        }
+        final var resolvedParams = new LinkedHashMap<String, Type>(16, 0.75F, true);
+        for (final var pair : params) {
+            final var name = pair.left().evaluateAs(context, String.class);
+            final var type = pair.right().evaluateAs(context, Type.class);
+            resolvedParams.put(name, type);
+        }
+        return resolvedParams;
+    }
+
+    public @NotNull Map<String, Type> resolveTypeParameters(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var params = getTypeParameters();
         if (params.isEmpty()) {
             return Map.of();
         }
@@ -118,15 +159,26 @@ public final class MacroDecl extends AbstractElementContainer
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        // Pop as many args as we have param types from callee frame
+        // Resolve type arguments
+        final var typeArgumentValues = context.popValues(typeParameters.size());
+        final var typeParamNames = resolveTypeParameters(context).keySet();
+        final var typeArguments = new HashMap<String, Type>();
+        var typeArgIndex = 0;
+        for (final var name : typeParamNames) {
+            typeArguments.put(name, typeArgumentValues.get(typeArgIndex++).evaluateAs(context, Type.class));
+        }
+        // Resolve arguments
         final var argumentValues = context.popValues(parameters.size());
         final var paramNames = resolveParameters(context).keySet();
         final var arguments = new HashMap<String, Expr>();
-        var index = 0;
+        var argIndex = 0;
         for (final var name : paramNames) {
-            arguments.put(name, argumentValues.get(index++));
+            arguments.put(name, argumentValues.get(argIndex++));
         }
-        context.peekFrame().namedLocalValues.putAll(arguments); // Make current macro args available to child elements
+        // Execute the body of the macro in the current frame
+        final var frame = context.peekFrame();
+        frame.namedLocalTypes.putAll(typeArguments);
+        frame.namedLocalValues.putAll(arguments); // Make current macro args available to child elements
         final var elements = getElements();
         for (final var element : elements) {
             if (!element.isEvaluatedDirectly()) {

@@ -59,19 +59,19 @@ public final class IntrinsicsHandler {
     }
 
     public void addIntrinsicMacro(final @NotNull IntrinsicMacroSignature signature,
-                                  final @NotNull XBiConsumer<EvaluationContext, List<Expr>, EvaluationException> callback) {
+                                  final @NotNull XBiConsumer<EvaluationContext, IntrinsicMacroArguments, EvaluationException> callback) {
         context.peekFrame().intrinsicMacros.put(signature, new IntrinsicMacro(signature, callback));
     }
 
     public void initGlobal() {
         addIntrinsicMacro(new IntrinsicMacroSignature("info", BuiltinType.VOID, Map.of("message", BuiltinType.STRING)),
             (ctx, args) -> {
-                final var message = args.get(0).evaluateAs(context, String.class);
+                final var message = args.arguments().get(0).evaluateAs(context, String.class);
                 ctx.infoConsumer.accept(message);
             });
         addIntrinsicMacro(new IntrinsicMacroSignature("error", BuiltinType.VOID, Map.of("message", BuiltinType.STRING)),
             (ctx, args) -> {
-                final var message = args.get(0).evaluateAs(context, String.class);
+                final var message = args.arguments().get(0).evaluateAs(context, String.class);
                 ctx.errorConsumer.accept(message);
             });
     }

@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.eval.IntrinsicMacroArguments;
 import dev.karmakrafts.jbpl.assembler.model.decl.MacroDecl;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.scope.ScopeResolver;
@@ -81,9 +82,10 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return getMacro(name, context).getReturnType().evaluateAs(context, Type.class).resolveIfNeeded(context);
     }
 
-    private @NotNull List<Pair<@Nullable String, ConstExpr>> evaluateArguments(final @NotNull EvaluationContext context) {
+    private static @NotNull List<Pair<@Nullable String, ConstExpr>> evaluateNamedValues(final @NotNull List<Pair<@Nullable Expr, Expr>> values,
+                                                                                        final @NotNull EvaluationContext context) {
         // @formatter:off
-        return getArguments().stream()
+        return values.stream()
             .map(ExceptionUtils.unsafeFunction(pair -> {
                 final var name = pair.left();
                 final var value = pair.right().evaluateAsConst(context);
@@ -96,10 +98,60 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         // @formatter:on
     }
 
+    private @NotNull Map<String, Expr> resolveTypeArguments(final @NotNull EvaluationContext context,
+                                                        final @NotNull Map<String, Type> resolvedParameters,
+                                                        final @NotNull String macroName) throws EvaluationException {
+        final var resolvedArgs = evaluateNamedValues(getTypeArguments(), context);
+        final var arguments = new HashMap<String, Expr>();
+        final var parameters = new ArrayList<>(resolvedParameters.entrySet());
+        var currentArgIndex = 0;
+        for (final var resolvedArg : resolvedArgs) {
+            final var name = resolvedArg.left();
+            final var value = resolvedArg.right();
+            final var valueType = value.getType(context);
+            if (name != null) {
+                // @formatter:off
+                final var parameter = parameters.stream()
+                    .filter(entry -> entry.getKey().equals(name))
+                    .findFirst()
+                    .orElseThrow(() -> new EvaluationException(
+                        String.format("No parameter named '%s' in macro %s", name, macroName),
+                        SourceDiagnostic.from(this), context.createStackTrace()
+                    ));
+                // @formatter:on
+                final var paramType = parameter.getValue();
+                if (!paramType.isAssignableFrom(valueType, context)) {
+                    throw new EvaluationException(String.format(
+                        "Mismatched argument type %s for parameter %s: %s in call to macro %s",
+                        valueType,
+                        name,
+                        paramType,
+                        macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
+                }
+                arguments.put(name, value);
+                currentArgIndex = parameters.indexOf(parameter) + 1;
+                continue;
+            }
+            final var parameter = parameters.get(currentArgIndex);
+            final var paramType = parameter.getValue();
+            if (!paramType.isAssignableFrom(valueType, context)) {
+                throw new EvaluationException(String.format(
+                    "Mismatched argument type %s for parameter %s: %s in call to macro %s",
+                    valueType,
+                    parameter.getKey(),
+                    paramType,
+                    macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
+            }
+            arguments.put(parameter.getKey(), value);
+            currentArgIndex++;
+        }
+        return arguments;
+    }
+
     private @NotNull Map<String, Expr> resolveArguments(final @NotNull EvaluationContext context,
                                                         final @NotNull Map<String, Type> resolvedParameters,
                                                         final @NotNull String macroName) throws EvaluationException {
-        final var resolvedArgs = evaluateArguments(context);
+        final var resolvedArgs = evaluateNamedValues(getArguments(), context);
         final var arguments = new HashMap<String, Expr>();
         final var parameters = new ArrayList<>(resolvedParameters.entrySet());
         var currentArgIndex = 0;
@@ -157,6 +209,12 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return sequentialArguments;
     }
 
+    private @NotNull List<Expr> remapTypeArguments(final @NotNull EvaluationContext context,
+                                                   final @NotNull String macroName,
+                                                   final @NotNull Map<String, Type> params) throws EvaluationException {
+        return List.of(); // TODO: implement this
+    }
+
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName().evaluateAs(context, String.class);
@@ -166,16 +224,19 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
             .map(Entry::getValue)
             .findFirst();
         // @formatter:on
-        if (intrinsicMacro.isPresent()) {
+        if (intrinsicMacro.isPresent()) { // Intrinsic macros always shadow everything else
             final var macro = intrinsicMacro.get();
+            final var typeArguments = remapTypeArguments(context, name, macro.signature().typeParameters());
             final var arguments = remapArguments(context, name, macro.signature().parameters());
-            macro.callback().accept(context, arguments);
+            macro.callback().accept(context, new IntrinsicMacroArguments(typeArguments, arguments));
             return;
         }
         final var macro = getMacro(name, context);
+        final var typeArguments = remapTypeArguments(context, name, macro.resolveTypeParameters(context));
         final var arguments = remapArguments(context, name, macro.resolveParameters(context));
         context.pushFrame(macro); // Create new stack frame for macro body
         context.peekFrame().resetLocalDefines(); // Reset all local defines within the macro before invoking anything
+        context.pushValues(typeArguments); // Push type arguments into callee stack frame
         context.pushValues(arguments); // Push arguments into callee stack frame
         macro.evaluate(context);
         context.popFrame(); // Frame data will be merged to retain result from callee frame
