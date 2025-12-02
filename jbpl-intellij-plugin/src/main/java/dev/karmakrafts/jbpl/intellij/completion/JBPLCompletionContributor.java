@@ -30,6 +30,9 @@ public final class JBPLCompletionContributor extends CompletionContributor {
             new KeywordCompletionProvider());
         extend(CompletionType.BASIC,
             PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
-            new IdentCompletionProvider());
+            new ClassTypeCompletionProvider());
+        extend(CompletionType.BASIC,
+            PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
+            new MethodCompletionProvider());
     }
 }

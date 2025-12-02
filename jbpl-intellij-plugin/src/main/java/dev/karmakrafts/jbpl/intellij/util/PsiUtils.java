@@ -31,6 +31,13 @@ public final class PsiUtils {
     private PsiUtils() {
     }
 
+    public static int getTokenType(final @NotNull PsiElement element) {
+        if(!(element.getNode().getElementType() instanceof TokenIElementType tokenType)) {
+            return -1;
+        }
+        return tokenType.getANTLRTokenType();
+    }
+
     public static boolean hasToken(final @NotNull PsiElement element, final int type) {
         final var token = find(element, String.format("/*/%s", JBPLLexer.VOCABULARY.getLiteralName(type)));
         if (token.isPresent()) {
