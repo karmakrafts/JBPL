@@ -2,7 +2,7 @@
 
 java = "17"
 
-jbpl = "1.0.6"
+jbpl = "1.1.0"
 ow2asm = "9.9" # https://gitlab.ow2.org/asm/asm/-/tags
 karmaConventions = "1.8.1" # https://github.com/karmakrafts/karma-conventions/tags
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
