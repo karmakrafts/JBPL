@@ -25,14 +25,18 @@ import dev.karmakrafts.jbpl.intellij.JBPLanguage;
 
 public final class JBPLCompletionContributor extends CompletionContributor {
     public JBPLCompletionContributor() {
-        extend(CompletionType.BASIC,
-            PlatformPatterns.psiElement().withLanguage(JBPLanguage.INSTANCE),
-            new KeywordCompletionProvider());
+        // TODO: re-implement keyword completion with context
+        //extend(CompletionType.BASIC,
+        //    PlatformPatterns.psiElement().withLanguage(JBPLanguage.INSTANCE),
+        //    new KeywordCompletionProvider());
         extend(CompletionType.BASIC,
             PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
             new ClassTypeCompletionProvider());
         extend(CompletionType.BASIC,
             PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
             new MethodCompletionProvider());
+        extend(CompletionType.BASIC,
+            PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
+            new FieldCompletionProvider());
     }
 }

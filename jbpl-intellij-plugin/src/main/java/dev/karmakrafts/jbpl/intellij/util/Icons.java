@@ -48,6 +48,9 @@ public final class Icons {
         "private",   Nodes.Locked
     ); // @formatter:on
 
+    // Used for completion results
+    public static final Icon STATIC_METHOD = LayeredIcon.layeredIcon(new Icon[]{Nodes.Method, Nodes.StaticMark});
+
     private Icons() {
     }
 
