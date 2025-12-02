@@ -16,17 +16,32 @@
 
 package dev.karmakrafts.jbpl.intellij.completion;
 
-import com.intellij.codeInsight.completion.CompletionParameters;
-import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
-import com.intellij.util.ProcessingContext;
+import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 
-public final class FieldCompletionProvider extends CompletionProvider<CompletionParameters> {
-    @Override
-    protected void addCompletions(final @NotNull CompletionParameters completionParameters,
-                                  final @NotNull ProcessingContext processingContext,
-                                  final @NotNull CompletionResultSet completionResultSet) {
+import java.util.Arrays;
 
+public final class FieldCompletionProvider extends ClassTypeMemberCompletionProvider {
+    @Override
+    protected void addCompletions(final @NotNull PsiClass clazz,
+                                  final @NotNull PsiElement element,
+                                  final boolean isSpecialName,
+                                  final @NotNull CompletionResultSet result) {
+        if (isSpecialName) {
+            return; // Fields cannot have a special name
+        }
+        final var prefixMatcher = result.getPrefixMatcher();
+        // @formatter:off
+        result.addAllElements(Arrays.stream(clazz.getFields())
+            .filter(field -> prefixMatcher.prefixMatches(field.getName()))
+            .map(field -> LookupElementBuilder.create(field)
+                .withPresentableText(String.format("%s: %s", field.getName(), field.getType().getCanonicalText()))
+                .withTypeText("field")
+                .withIcon(field.getIcon(0)))
+            .toList());
+        // @formatter:on
     }
 }
