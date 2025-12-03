@@ -18,7 +18,9 @@ package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.PsiTreeUtil;
 import dev.karmakrafts.jbpl.intellij.reference.ClassTypeReference;
+import dev.karmakrafts.jbpl.intellij.reference.FieldReference;
 import dev.karmakrafts.jbpl.intellij.reference.PackageReference;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +41,11 @@ public final class NameSegmentNode extends JBPLPsiNode {
     public @Nullable PsiReference getReference() {
         final var parent = getParent();
         if (!(parent instanceof ClassTypeNode classTypeNode)) {
+            final var fieldSignature = (FieldSignatureNode) PsiTreeUtil.findFirstParent(this,
+                FieldSignatureNode.class::isInstance);
+            if (fieldSignature != null) {
+                return new FieldReference(this);
+            }
             return null;
         }
         final var children = List.of(classTypeNode.getChildren());
