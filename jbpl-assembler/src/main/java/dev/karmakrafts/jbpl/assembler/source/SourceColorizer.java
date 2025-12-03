@@ -36,6 +36,7 @@ public final class SourceColorizer {
         JBPLLexer.KW_BOOL,
         JBPLLexer.KW_CHAR,
         JBPLLexer.KW_STRING,
+        JBPLLexer.KW_ANY,
         JBPLLexer.KW_TYPE,
         JBPLLexer.KW_TYPEOF,
         JBPLLexer.KW_TRUE,

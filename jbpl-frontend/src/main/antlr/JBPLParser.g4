@@ -897,6 +897,7 @@ type:
     | KW_VOID
     | KW_BOOL
     | KW_CHAR
+    | KW_ANY
     | KW_I16
     | KW_I32
     | KW_I64
