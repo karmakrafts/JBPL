@@ -704,7 +704,8 @@ jump:
 typeInstruction:
     (INSN_NEW
     | INSN_CHECKCAST
-    | INSN_INSTANCEOF)
+    | INSN_INSTANCEOF
+    | INSN_ANEWARRAY)
     (wrappedExpr
     | classType)
     ;
