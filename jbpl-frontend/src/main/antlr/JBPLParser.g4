@@ -29,6 +29,7 @@ file:
 comment:
     LINE_COMMENT
     | BLOCK_COMMENT
+    | UNCLOSED_BLOCK_COMMENT
     ;
 
 bodyElement:

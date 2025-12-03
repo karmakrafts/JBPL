@@ -16,7 +16,6 @@
 
 package dev.karmakrafts.jbpl.intellij.util;
 
-import com.intellij.ide.highlighter.JavaHighlightingColors;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 
@@ -68,7 +67,7 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
     public static final TextAttributesKey TYPE_PARAMETER = TextAttributesKey.createTextAttributesKey(
         "JBPL_TYPE_PARAMETER",
-        JavaHighlightingColors.TYPE_PARAMETER_NAME_ATTRIBUTES);
+        DefaultLanguageHighlighterColors.PARAMETER);
 
     private TextAttributeKeys() {
     }

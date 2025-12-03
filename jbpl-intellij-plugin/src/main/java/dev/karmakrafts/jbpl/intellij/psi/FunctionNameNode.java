@@ -22,9 +22,11 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import dev.karmakrafts.jbpl.intellij.reference.MethodReference;
+import dev.karmakrafts.jbpl.intellij.util.JavaUtils;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class FunctionNameNode extends JBPLPsiNode implements Annotated {
     public FunctionNameNode(final @NotNull ASTNode node) {
@@ -32,7 +34,10 @@ public final class FunctionNameNode extends JBPLPsiNode implements Annotated {
     }
 
     @Override
-    public @NotNull PsiReference getReference() {
+    public @Nullable PsiReference getReference() {
+        if (!JavaUtils.isJavaAvailable()) {
+            return null;
+        }
         return new MethodReference(this);
     }
 

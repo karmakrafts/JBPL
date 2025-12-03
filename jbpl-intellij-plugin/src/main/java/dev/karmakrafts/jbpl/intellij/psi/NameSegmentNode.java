@@ -22,6 +22,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import dev.karmakrafts.jbpl.intellij.reference.ClassTypeReference;
 import dev.karmakrafts.jbpl.intellij.reference.FieldReference;
 import dev.karmakrafts.jbpl.intellij.reference.PackageReference;
+import dev.karmakrafts.jbpl.intellij.util.JavaUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +40,9 @@ public final class NameSegmentNode extends JBPLPsiNode {
 
     @Override
     public @Nullable PsiReference getReference() {
+        if (!JavaUtils.isJavaAvailable()) {
+            return null; // When Java is not available, we cannot create any Java references
+        }
         final var parent = getParent();
         if (!(parent instanceof ClassTypeNode classTypeNode)) {
             final var fieldSignature = (FieldSignatureNode) PsiTreeUtil.findFirstParent(this,

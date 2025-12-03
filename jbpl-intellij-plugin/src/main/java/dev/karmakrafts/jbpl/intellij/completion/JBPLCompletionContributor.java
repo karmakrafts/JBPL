@@ -22,18 +22,21 @@ import com.intellij.patterns.PlatformPatterns;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.intellij.lang.JBPLParserDefinition;
 import dev.karmakrafts.jbpl.intellij.lang.JBPLanguage;
+import dev.karmakrafts.jbpl.intellij.util.JavaUtils;
 
 public final class JBPLCompletionContributor extends CompletionContributor {
     public JBPLCompletionContributor() {
-        extend(CompletionType.BASIC,
-            PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
-            new ClassTypeCompletionProvider());
-        extend(CompletionType.BASIC,
-            PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
-            new MethodCompletionProvider());
-        extend(CompletionType.BASIC,
-            PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
-            new FieldCompletionProvider());
+        if (JavaUtils.isJavaAvailable()) {
+            extend(CompletionType.BASIC,
+                PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
+                new ClassTypeCompletionProvider());
+            extend(CompletionType.BASIC,
+                PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
+                new MethodCompletionProvider());
+            extend(CompletionType.BASIC,
+                PlatformPatterns.psiElement(JBPLParserDefinition.getTokenType(JBPLLexer.IDENT)).withLanguage(JBPLanguage.INSTANCE),
+                new FieldCompletionProvider());
+        }
         extend(CompletionType.BASIC,
             PlatformPatterns.psiElement().withLanguage(JBPLanguage.INSTANCE),
             new KeywordCompletionProvider());
