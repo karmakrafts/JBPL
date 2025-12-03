@@ -16,8 +16,10 @@
 
 package dev.karmakrafts.jbpl.assembler.parser;
 
+import dev.karmakrafts.jbpl.assembler.model.element.Comment;
 import dev.karmakrafts.jbpl.assembler.model.element.Element;
 import dev.karmakrafts.jbpl.assembler.util.ExceptionUtils;
+import dev.karmakrafts.jbpl.frontend.JBPLParser.CommentContext;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.DeclarationContext;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.ExprContext;
 import dev.karmakrafts.jbpl.frontend.JBPLParser.StatementContext;
@@ -38,6 +40,11 @@ public final class ElementParser extends JBPLParserBaseVisitor<List<? extends El
             .findFirst()
             .orElseThrow(() -> new ParserException("Could not parse element", null));
     } // @formatter:on
+
+    @Override
+    public @NotNull List<? extends Element> visitComment(final @NotNull CommentContext ctx) {
+        return List.of(new Comment());
+    }
 
     @Override
     public @NotNull List<? extends Element> visitDeclaration(final @NotNull DeclarationContext ctx) {

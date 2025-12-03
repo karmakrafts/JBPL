@@ -150,6 +150,7 @@ public enum BuiltinType implements Type {
                 case INTEGER, FLOAT -> ((BuiltinType) other).ordinal() <= ordinal();
                 default -> Type.super.isAssignableFrom(other, context);
             };
+            case OBJECT -> true; // anything may be assigned to any
             default -> Type.super.isAssignableFrom(other, context);
         };
     }
@@ -159,6 +160,7 @@ public enum BuiltinType implements Type {
                              final @NotNull EvaluationContext context) throws EvaluationException {
         final var otherCategory = other.getCategory(context);
         return switch (this) { // @formatter:off
+            case OBJECT -> true; // anything may be cast from any
             case I8, I16, I32, I64, F32, F64 -> otherCategory.isNumber()
                 || otherCategory == TypeCategory.CHAR
                 || otherCategory == TypeCategory.BOOL
@@ -186,6 +188,9 @@ public enum BuiltinType implements Type {
             throw new EvaluationException(message, SourceDiagnostic.from(value, message), context.createStackTrace());
         }
         final var constValue = value.evaluateAs(context, Object.class);
+        if (this == OBJECT) { // We can cast any value to any
+            return ConstExpr.of(constValue, value.getTokenRange());
+        }
         if (constValue instanceof Number numberValue) {
             return switch (this) {
                 case I8 -> ConstExpr.of(numberValue.byteValue(), value.getTokenRange());

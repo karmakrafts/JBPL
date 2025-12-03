@@ -37,7 +37,14 @@ public interface ElementVisitor {
         else if (element instanceof Statement statement) {
             return visitStatement(statement);
         }
+        else if (element instanceof Comment comment) {
+            return visitComment(comment);
+        }
         throw new IllegalStateException("Unsupported element type");
+    }
+
+    default @NotNull Element visitComment(final @NotNull Comment comment) {
+        return comment;
     }
 
     default @NotNull AssemblyFile visitFile(final @NotNull AssemblyFile file) {
