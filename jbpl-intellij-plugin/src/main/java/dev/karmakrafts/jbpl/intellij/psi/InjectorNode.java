@@ -25,9 +25,14 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public final class InjectorNode extends JBPLPsiNode implements StructuralPsiElement, Annotated {
+public final class InjectorNode extends JBPLPsiNode implements StructuralPsiElement, Annotated, Foldable {
     public InjectorNode(final @NotNull ASTNode node) {
         super(node);
+    }
+
+    @Override
+    public @NotNull String getFoldedText() {
+        return String.format("inject %s {...}", getDetailedStructureText());
     }
 
     @Override

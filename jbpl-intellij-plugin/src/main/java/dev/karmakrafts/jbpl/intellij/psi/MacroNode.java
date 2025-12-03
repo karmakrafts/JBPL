@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
+import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import dev.karmakrafts.jbpl.intellij.util.TextAttributeKeys;
@@ -25,10 +26,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.stream.Collectors;
 
-public final class MacroNode extends JBPLPsiNode implements Annotated, StructuralPsiElement {
+public final class MacroNode extends JBPLPsiNode implements Annotated, StructuralPsiElement, Foldable {
     public MacroNode(final @NotNull ASTNode node) {
         super(node);
+    }
+
+    @Override
+    public @NotNull String getFoldedText() {
+        // @formatter:off
+        var mods = PsiUtils.findAll(this, "/macro/macroModifier")
+            .map(PsiElement::getText)
+            .collect(Collectors.joining(" "));
+        // @formatter:on
+        if (mods.isEmpty()) {
+            return String.format("macro %s {...}", getDetailedStructureText());
+        }
+        return String.format("%s macro %s {...}", mods, getDetailedStructureText());
     }
 
     @Override

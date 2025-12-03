@@ -18,15 +18,30 @@ package dev.karmakrafts.jbpl.intellij.psi;
 
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
 import dev.karmakrafts.jbpl.intellij.util.Icons;
 import dev.karmakrafts.jbpl.intellij.util.PsiUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.stream.Collectors;
 
-public final class FunctionNode extends JBPLPsiNode implements StructuralPsiElement {
+public final class FunctionNode extends JBPLPsiNode implements StructuralPsiElement, Foldable {
     public FunctionNode(final @NotNull ASTNode node) {
         super(node);
+    }
+
+    @Override
+    public @NotNull String getFoldedText() {
+        // @formatter:off
+        final var mods = PsiUtils.findAll(this, "/function/accessModifier")
+            .map(PsiElement::getText)
+            .collect(Collectors.joining(" "));
+        // @formatter:on
+        if (mods.isEmpty()) {
+            return String.format("fun %s {...}", getDetailedStructureText());
+        }
+        return String.format("%s fun %s {...}", mods, getDetailedStructureText());
     }
 
     @Override

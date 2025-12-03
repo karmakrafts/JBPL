@@ -50,6 +50,7 @@
         <lang.braceMatcher language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLBraceMatcher"/>
         <lang.psiStructureViewFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.structview.JBPLStructureViewFactory"/>
         <lang.commenter language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLCommenter"/>
+        <lang.foldingBuilder language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLFoldingBuilder"/>
         <completion.contributor language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
         <codeInsight.lineMarkerProvider language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.insight.JBPLLineMarkerProvider"/>
         <annotator language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLAnnotator"/>
