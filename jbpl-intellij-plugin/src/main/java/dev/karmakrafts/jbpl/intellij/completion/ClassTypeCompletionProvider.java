@@ -43,6 +43,22 @@ public final class ClassTypeCompletionProvider extends CompletionProvider<Comple
         JBPLLexer.KW_SIGNATURE);
     private static final IntSet ALLOWED_TOKENS = IntSet.of(JBPLLexer.IDENT, JBPLLexer.SLASH, JBPLLexer.L_ABRACKET);
 
+    private static @NotNull String getClassTypeText(final @NotNull PsiClass clazz) {
+        if (clazz.isInterface()) {
+            return "interface";
+        }
+        else if (clazz.isEnum()) {
+            return "enum";
+        }
+        else if (clazz.isRecord()) {
+            return "record";
+        }
+        else if (clazz.isAnnotationType()) {
+            return "annotation";
+        }
+        return "class";
+    }
+
     @Override
     protected void addCompletions(final @NotNull CompletionParameters parameters,
                                   final @NotNull ProcessingContext context,
@@ -95,21 +111,5 @@ public final class ClassTypeCompletionProvider extends CompletionProvider<Comple
                 break;
             }
         }
-    }
-
-    private static @NotNull String getClassTypeText(final @NotNull PsiClass clazz) {
-        if (clazz.isInterface()) {
-            return "interface";
-        }
-        else if (clazz.isEnum()) {
-            return "enum";
-        }
-        else if (clazz.isRecord()) {
-            return "record";
-        }
-        else if (clazz.isAnnotationType()) {
-            return "annotation";
-        }
-        return "class";
     }
 }

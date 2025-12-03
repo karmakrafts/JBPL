@@ -156,6 +156,8 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_fieldScopeReference -> new FieldScopeReferenceNode(node);
             case JBPLParser.RULE_typeParameter -> new TypeParameterNode(node);
             case JBPLParser.RULE_specialFunctionName -> new SpecialFunctionNameNode(node);
+            case JBPLParser.RULE_stringLiteral -> new StringLiteralNode(node);
+            case JBPLParser.RULE_include -> new IncludeNode(node);
             default -> new JBPLPsiNode(node);
         }; // @formatter:on
     }

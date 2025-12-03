@@ -16,7 +16,9 @@
 
 package dev.karmakrafts.jbpl.intellij.util;
 
+import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
 import dev.karmakrafts.jbpl.intellij.JBPLanguage;
 import dev.karmakrafts.jbpl.intellij.psi.JBPLPsiLeafNode;
@@ -24,15 +26,44 @@ import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.xpath.XPath;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Stack;
 import java.util.stream.Stream;
 
 public final class PsiUtils {
     private PsiUtils() {
     }
 
+    public static @NotNull List<PsiFile> getFilesRecursively(final @NotNull PsiDirectory dir) {
+        final var dirStack = new Stack<PsiDirectory>();
+        dirStack.push(dir);
+        final var directories = new ArrayList<PsiFile>();
+        while (!dirStack.isEmpty()) {
+            final var subDir = dirStack.pop();
+            final var children = List.of(subDir.getFiles());
+            directories.addAll(children);
+            dirStack.addAll(List.of(subDir.getSubdirectories()));
+        }
+        return directories;
+    }
+
+    public static @NotNull List<PsiDirectory> getSubDirectoriesRecursively(final @NotNull PsiDirectory dir) {
+        final var dirStack = new Stack<PsiDirectory>();
+        dirStack.push(dir);
+        final var directories = new ArrayList<PsiDirectory>();
+        while (!dirStack.isEmpty()) {
+            final var subDir = dirStack.pop();
+            final var children = List.of(subDir.getSubdirectories());
+            directories.addAll(children);
+            dirStack.addAll(children);
+        }
+        return directories;
+    }
+
     public static int getTokenType(final @NotNull PsiElement element) {
-        if(!(element.getNode().getElementType() instanceof TokenIElementType tokenType)) {
+        if (!(element.getNode().getElementType() instanceof TokenIElementType tokenType)) {
             return -1;
         }
         return tokenType.getANTLRTokenType();
