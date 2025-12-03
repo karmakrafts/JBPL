@@ -14,34 +14,17 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.insight;
 
-import com.intellij.extapi.psi.PsiFileBase;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.psi.FileViewProvider;
+import com.intellij.codeInsight.daemon.LineMarkerInfo;
+import com.intellij.codeInsight.daemon.LineMarkerProvider;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNamedElement;
-import org.antlr.intellij.adaptor.psi.ScopeNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class JBPLFile extends PsiFileBase implements ScopeNode {
-    public JBPLFile(final @NotNull FileViewProvider viewProvider) {
-        super(viewProvider, JBPLanguage.INSTANCE);
-    }
-
+public final class JBPLLineMarkerProvider implements LineMarkerProvider {
     @Override
-    public @Nullable ScopeNode getContext() {
-        return null;
-    }
-
-    @Override
-    public @NotNull FileType getFileType() {
-        return JBPLFileType.INSTANCE;
-    }
-
-    @Override
-    public @Nullable PsiElement resolve(final @NotNull PsiNamedElement element) {
+    public @Nullable LineMarkerInfo<?> getLineMarkerInfo(final @NotNull PsiElement element) {
         return null;
     }
 }

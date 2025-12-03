@@ -26,8 +26,8 @@ lexer grammar JBPLLexer;
     }
 }
 
-LINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN);
-BLOCK_COMMENT: '/*' (BLOCK_COMMENT | .)*? '*/' -> channel(HIDDEN);
+LINE_COMMENT: '//' ~[\r\n]*;
+BLOCK_COMMENT: '/*' (BLOCK_COMMENT | .)*? '*/';
 WS: [\u0020\u0009\u000C] -> channel(HIDDEN);
 NL: ('\n' | ('\r' '\n'?));
 

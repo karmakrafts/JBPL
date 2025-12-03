@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.navigation;
 
 import com.intellij.ide.navigationToolbar.StructureAwareNavBarModelExtension;
 import com.intellij.lang.Language;
+import dev.karmakrafts.jbpl.intellij.lang.JBPLanguage;
 import dev.karmakrafts.jbpl.intellij.psi.StructuralPsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

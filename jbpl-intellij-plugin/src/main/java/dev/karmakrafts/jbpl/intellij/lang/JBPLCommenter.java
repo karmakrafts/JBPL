@@ -14,19 +14,34 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.lang;
 
-import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.Annotator;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.psi.Annotated;
+import com.intellij.lang.Commenter;
 import org.jetbrains.annotations.NotNull;
 
-public final class JBPLAnnotator implements Annotator {
+public final class JBPLCommenter implements Commenter {
     @Override
-    public void annotate(final @NotNull PsiElement element, final @NotNull AnnotationHolder holder) {
-        if (element instanceof Annotated annotated) {
-            annotated.annotate(holder);
-        }
+    public @NotNull String getLineCommentPrefix() {
+        return "//";
+    }
+
+    @Override
+    public @NotNull String getBlockCommentPrefix() {
+        return "/*";
+    }
+
+    @Override
+    public @NotNull String getBlockCommentSuffix() {
+        return "*/";
+    }
+
+    @Override
+    public @NotNull String getCommentedBlockCommentPrefix() {
+        return "/**";
+    }
+
+    @Override
+    public @NotNull String getCommentedBlockCommentSuffix() {
+        return "*/";
     }
 }

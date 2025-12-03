@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.lang;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
@@ -158,6 +158,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
             case JBPLParser.RULE_specialFunctionName -> new SpecialFunctionNameNode(node);
             case JBPLParser.RULE_stringLiteral -> new StringLiteralNode(node);
             case JBPLParser.RULE_include -> new IncludeNode(node);
+            case JBPLParser.RULE_comment -> new CommentNode(node);
             default -> new JBPLPsiNode(node);
         }; // @formatter:on
     }

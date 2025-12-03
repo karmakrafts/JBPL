@@ -20,7 +20,7 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
-import dev.karmakrafts.jbpl.intellij.JBPLanguage;
+import dev.karmakrafts.jbpl.intellij.lang.JBPLanguage;
 import dev.karmakrafts.jbpl.intellij.psi.JBPLPsiLeafNode;
 import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.xpath.XPath;

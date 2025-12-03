@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.lang;
 
-import com.intellij.codeInsight.daemon.LineMarkerInfo;
-import com.intellij.codeInsight.daemon.LineMarkerProvider;
-import com.intellij.psi.PsiElement;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.intellij.lang.Language;
 
-public final class JBPLLineMarkerProvider implements LineMarkerProvider {
-    @Override
-    public @Nullable LineMarkerInfo<?> getLineMarkerInfo(final @NotNull PsiElement element) {
-        return null;
+public final class JBPLanguage extends Language {
+    public static final JBPLanguage INSTANCE = new JBPLanguage();
+
+    private JBPLanguage() {
+        super("JBPL");
     }
 }

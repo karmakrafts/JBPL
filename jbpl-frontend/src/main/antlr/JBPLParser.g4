@@ -26,8 +26,14 @@ file:
     EOF
     ;
 
+comment:
+    LINE_COMMENT
+    | BLOCK_COMMENT
+    ;
+
 bodyElement:
-    declaration
+    comment
+    | declaration
     | statement
     ;
 

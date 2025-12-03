@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.lang;
 
-import com.intellij.ide.IconProvider;
-import com.intellij.psi.PsiElement;
-import dev.karmakrafts.jbpl.intellij.psi.JBPLFile;
-import dev.karmakrafts.jbpl.intellij.util.Icons;
+import com.intellij.openapi.fileTypes.SyntaxHighlighter;
+import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-
-public final class JBPLIconProvider extends IconProvider {
+public final class JBPLSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
     @Override
-    public @Nullable Icon getIcon(final @NotNull PsiElement element, final int flags) {
-        if (element instanceof JBPLFile) {
-            return Icons.FILE;
-        }
-        return null;
+    public @NotNull SyntaxHighlighter getSyntaxHighlighter(final @Nullable Project project,
+                                                           final @Nullable VirtualFile virtualFile) {
+        return new JBPLSyntaxHighlighter();
     }
 }

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.psi;
 
-import com.intellij.openapi.fileTypes.SyntaxHighlighter;
-import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiComment;
+import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public final class JBPLSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
+public final class CommentNode extends JBPLPsiNode implements PsiComment {
+    public CommentNode(final @NotNull ASTNode node) {
+        super(node);
+    }
+
     @Override
-    public @NotNull SyntaxHighlighter getSyntaxHighlighter(final @Nullable Project project,
-                                                           final @Nullable VirtualFile virtualFile) {
-        return new JBPLSyntaxHighlighter();
+    public @NotNull IElementType getTokenType() {
+        return getNode().getElementType();
     }
 }

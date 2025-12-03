@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.intellij;
+package dev.karmakrafts.jbpl.intellij.lang;
 
 import com.intellij.lang.BracePair;
 import com.intellij.lang.PairedBraceMatcher;

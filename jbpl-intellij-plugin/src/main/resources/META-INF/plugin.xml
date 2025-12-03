@@ -27,6 +27,7 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.java</depends>
+    <depends optional="true" config-file="dependencies/copyright.xml">com.intellij.copyright</depends>
     <idea-version since-build="223"/>
 
     <resource-bundle>messages.JBPL</resource-bundle>
@@ -44,16 +45,17 @@
                 implementationClass="dev.karmakrafts.jbpl.intellij.JBPLFileType"
                 fieldName="INSTANCE"
                 extensions="jbpl"/>
-        <lang.parserDefinition language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLSyntaxHighlighterFactory"/>
-        <lang.braceMatcher language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLBraceMatcher"/>
+        <lang.parserDefinition language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLSyntaxHighlighterFactory"/>
+        <lang.braceMatcher language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLBraceMatcher"/>
         <lang.psiStructureViewFactory language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.structview.JBPLStructureViewFactory"/>
+        <lang.commenter language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLCommenter"/>
         <completion.contributor language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
-        <codeInsight.lineMarkerProvider language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLLineMarkerProvider"/>
-        <annotator language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.JBPLAnnotator"/>
+        <codeInsight.lineMarkerProvider language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.insight.JBPLLineMarkerProvider"/>
+        <annotator language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLAnnotator"/>
         <iconProvider implementation="dev.karmakrafts.jbpl.intellij.JBPLIconProvider"/>
-        <navbar implementation="dev.karmakrafts.jbpl.intellij.JBPLStructureAwareNavBarModelExtension"/>
-        <gotoDeclarationHandler implementation="dev.karmakrafts.jbpl.intellij.JBPLGoToDeclarationHandler"/>
+        <navbar implementation="dev.karmakrafts.jbpl.intellij.navigation.JBPLStructureAwareNavBarModelExtension"/>
+        <gotoDeclarationHandler implementation="dev.karmakrafts.jbpl.intellij.insight.JBPLGoToDeclarationHandler"/>
     </extensions>
     <!-- @formatter:on -->
 </idea-plugin>

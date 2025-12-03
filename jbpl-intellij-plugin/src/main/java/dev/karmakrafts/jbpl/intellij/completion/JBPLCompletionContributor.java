@@ -20,8 +20,8 @@ import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.patterns.PlatformPatterns;
 import dev.karmakrafts.jbpl.frontend.JBPLLexer;
-import dev.karmakrafts.jbpl.intellij.JBPLParserDefinition;
-import dev.karmakrafts.jbpl.intellij.JBPLanguage;
+import dev.karmakrafts.jbpl.intellij.lang.JBPLParserDefinition;
+import dev.karmakrafts.jbpl.intellij.lang.JBPLanguage;
 
 public final class JBPLCompletionContributor extends CompletionContributor {
     public JBPLCompletionContributor() {
