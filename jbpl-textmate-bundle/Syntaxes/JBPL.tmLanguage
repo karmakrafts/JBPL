@@ -343,7 +343,7 @@
                     <!-- type keywords -->
                     <dict>
                         <key>match</key>
-                        <string>\b(?:void|char|bool|string|i8|i16|i32|i64|f32|f64)\b</string>
+                        <string>\b(?:void|char|bool|any|string|i8|i16|i32|i64|f32|f64)\b</string>
                         <key>name</key>
                         <string>storage.type.jbpl</string>
                     </dict>
