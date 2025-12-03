@@ -35,12 +35,16 @@ import java.util.Collections;
 import java.util.Objects;
 
 public final class ClassTypeCompletionProvider extends CompletionProvider<CompletionParameters> {
-    private static final IntSet TYPE_KEYWORDS = IntSet.of(JBPLLexer.KW_TYPE,
+    private static final IntSet TRIGGER_TOKENS = IntSet.of(JBPLLexer.KW_TYPE,
         JBPLLexer.KW_INJECT,
         JBPLLexer.KW_FUN,
         JBPLLexer.KW_FIELD,
         JBPLLexer.KW_YEET,
-        JBPLLexer.KW_SIGNATURE);
+        JBPLLexer.KW_SIGNATURE,
+        JBPLLexer.INSN_NEW,
+        JBPLLexer.INSN_ANEWARRAY,
+        JBPLLexer.INSN_CHECKCAST,
+        JBPLLexer.INSN_INSTANCEOF);
     private static final IntSet ALLOWED_TOKENS = IntSet.of(JBPLLexer.IDENT, JBPLLexer.SLASH, JBPLLexer.L_ABRACKET);
 
     private static @NotNull String getClassTypeText(final @NotNull PsiClass clazz) {
@@ -82,7 +86,7 @@ public final class ClassTypeCompletionProvider extends CompletionProvider<Comple
                 return; // We didn't find the keyword as the root of context
             }
             tokenType = PsiUtils.getTokenType(prevElement);
-            if (TYPE_KEYWORDS.contains(tokenType) && lBracketFound) {
+            if (TRIGGER_TOKENS.contains(tokenType) && lBracketFound) {
                 Collections.reverse(nameSegments);
                 final var packageName = String.join(".", nameSegments);
                 final var prefixMatcher = result.getPrefixMatcher();
