@@ -19,6 +19,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.ArrayType;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
@@ -52,29 +53,41 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
 
     @Override
     public @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException {
-        final var array = getReference().evaluateAs(context, Object.class);
+        final var value = getReference().evaluateAs(context,
+            Object.class); // This can either be an array ref or a string
         final int index = getIndex().evaluateAs(context, Integer.class);
-        final var length = Array.getLength(array);
+        if (value instanceof String stringValue) {
+            // Get the character at the given index for strings
+            return ConstExpr.of(stringValue.charAt(index), getTokenRange());
+        }
+        final var length = Array.getLength(value);
         if (index >= length) {
             final var message = String.format("Array index %d out of bounds for array of length %d", index, length);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        return ConstExpr.of(Array.get(array, index));
+        return ConstExpr.of(Array.get(value, index), getTokenRange());
     }
 
     @Override
     public void storeToReference(final @NotNull ConstExpr value,
                                  final @NotNull EvaluationContext context) throws EvaluationException {
-        final var array = getReference().evaluateAsConst(context);
-        final var arrayRef = array.getConstValue();
+        final var refExpr = getReference().evaluateAsConst(context);
         final int index = getIndex().evaluateAs(context, Integer.class);
-        final var length = Array.getLength(arrayRef);
+        if (refExpr instanceof LiteralExpr literalExpr) {
+            // For strings, we update the value in-place
+            final var chars = literalExpr.value.toString().toCharArray();
+            chars[index] = value.evaluateAs(context, Character.class);
+            literalExpr.value = new String(chars);
+            return;
+        }
+        final var ref = refExpr.getConstValue();
+        final var length = Array.getLength(ref);
         if (index >= length) {
             final var message = String.format("Array index %d out of bounds for array of length %d", index, length);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        Array.set(arrayRef, index, value.getConstValue());
-        if (array instanceof ArrayExpr arrayExpr) {
+        Array.set(ref, index, value.getConstValue());
+        if (refExpr instanceof ArrayExpr arrayExpr) {
             arrayExpr.setValue(index, value); // Update value expression in actual array tree element
         }
     }
@@ -82,6 +95,9 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
         final var type = getReference().getType(context).resolveIfNeeded(context);
+        if (type == BuiltinType.STRING) {
+            return BuiltinType.CHAR;
+        }
         if (!(type instanceof ArrayType arrayType)) {
             throw new EvaluationException("Array access requires array reference type",
                 SourceDiagnostic.from(this),

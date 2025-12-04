@@ -25,18 +25,21 @@ assert sizeof("") == 0
 assert sizeof("!") == 1
 assert sizeof(test) == 13
 
-// Subscript indexing - TODO: this is broken, see JBPL-18
-// assert test[0] == 'H'
-// assert test[sizeof(test) - 1] == '!'
+// Subscript indexing
+assert test[0] == 'H'
+assert test[sizeof(test) - 1] == '!'
+
+test[sizeof(test) - 1] = '?'
+assert test == "Hello, World?"
 
 // Concatination
-assert (test + "!!") == "Hello, World!!!"
+assert (test + "!!") == "Hello, World?!!"
 
 // Interpolation
-// TODO: this is broken, see JBPL-
+// TODO: this is broken, see JBPL-19
 //private macro my_macro(): string {
 //    ^return "!!"
 //}
 //
 //assert "${my_macro()}!!" == "Hello, World!!!"
-assert "${test}!!" == "Hello, World!!!"
+assert "${test}!!" == "Hello, World?!!"
