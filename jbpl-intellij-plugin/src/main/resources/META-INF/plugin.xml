@@ -53,6 +53,7 @@
         <lang.foldingBuilder language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLFoldingBuilder"/>
         <completion.contributor language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.completion.JBPLCompletionContributor"/>
         <codeInsight.lineMarkerProvider language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.insight.JBPLLineMarkerProvider"/>
+        <quoteHandler className="dev.karmakrafts.jbpl.intellij.insight.JBPLQuoteHandler" fileType="JBPL"/>
         <annotator language="JBPL" implementationClass="dev.karmakrafts.jbpl.intellij.lang.JBPLAnnotator"/>
         <iconProvider implementation="dev.karmakrafts.jbpl.intellij.JBPLIconProvider"/>
         <navbar implementation="dev.karmakrafts.jbpl.intellij.navigation.JBPLStructureAwareNavBarModelExtension"/>
