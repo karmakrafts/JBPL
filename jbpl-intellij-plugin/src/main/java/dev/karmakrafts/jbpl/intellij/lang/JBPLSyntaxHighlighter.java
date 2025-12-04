@@ -125,6 +125,7 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
                  JBPLLexer.INSN_STORE,
                  JBPLLexer.INSN_ARRAY_LOAD,
                  JBPLLexer.INSN_ARRAY_STORE,
+                 JBPLLexer.INSN_CHECKCAST,
                  JBPLLexer.INSN_LDC,
                  JBPLLexer.INSN_GET,
                  JBPLLexer.INSN_PUT,
