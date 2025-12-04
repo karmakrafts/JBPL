@@ -20,6 +20,7 @@ import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.type.ArrayType;
 import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
+import dev.karmakrafts.jbpl.assembler.model.type.RangeType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
 import org.jetbrains.annotations.NotNull;
@@ -51,21 +52,44 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
         getExpressions().set(INDEX_INDEX, index);
     }
 
+    @SuppressWarnings("SuspiciousSystemArraycopy")
     @Override
     public @NotNull ConstExpr loadFromReference(final @NotNull EvaluationContext context) throws EvaluationException {
         final var value = getReference().evaluateAs(context,
             Object.class); // This can either be an array ref or a string
-        final int index = getIndex().evaluateAs(context, Integer.class);
+        final var index = getIndex().evaluateAs(context, Object.class);
+        final var isSlice = getIndex().getType(context).resolveIfNeeded(context) instanceof RangeType;
         if (value instanceof String stringValue) {
+            if (isSlice) {
+                final var range = (Integer[]) index;
+                return ConstExpr.of(stringValue.substring(range[0], range[1]), getTokenRange());
+            }
             // Get the character at the given index for strings
-            return ConstExpr.of(stringValue.charAt(index), getTokenRange());
+            return ConstExpr.of(stringValue.charAt((int) index), getTokenRange());
+        }
+        if (isSlice) {
+            final var range = (Integer[]) index;
+            final var componentType = value.getClass().getComponentType();
+            final var length = Array.getLength(value);
+            final var sliceLength = range[1] - range[0];
+            if (sliceLength > length) {
+                final var message = "Array range out of bounds";
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, message),
+                    context.createStackTrace());
+            }
+            final var slice = Array.newInstance(componentType, sliceLength);
+            System.arraycopy(value, range[0], slice, 0, sliceLength);
+            return ConstExpr.of(slice, getTokenRange());
         }
         final var length = Array.getLength(value);
-        if (index >= length) {
-            final var message = String.format("Array index %d out of bounds for array of length %d", index, length);
+        if ((int) index >= length) {
+            final var message = String.format("Array index %d out of bounds for array of length %d",
+                (int) index,
+                length);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
-        return ConstExpr.of(Array.get(value, index), getTokenRange());
+        return ConstExpr.of(Array.get(value, (int) index), getTokenRange());
     }
 
     @Override
@@ -94,7 +118,11 @@ public final class ArrayAccessExpr extends AbstractExprContainer implements Expr
 
     @Override
     public @NotNull Type getType(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var isSlice = getIndex().getType(context).resolveIfNeeded(context) instanceof RangeType;
         final var type = getReference().getType(context).resolveIfNeeded(context);
+        if (isSlice) {
+            return type;
+        }
         if (type == BuiltinType.STRING) {
             return BuiltinType.CHAR;
         }

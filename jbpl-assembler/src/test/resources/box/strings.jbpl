@@ -32,6 +32,10 @@ assert test[sizeof(test) - 1] == '!'
 test[sizeof(test) - 1] = '?'
 assert test == "Hello, World?"
 
+// Slicing
+private define test2: string = test[0..<5]
+assert test2 == "Hello"
+
 // Concatination
 assert (test + "!!") == "Hello, World?!!"
 
