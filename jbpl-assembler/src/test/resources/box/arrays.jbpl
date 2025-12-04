@@ -46,3 +46,6 @@ assert sub_array[0] == "World!"
 
 define sub_array2: [string] = my_array[0..<1]
 assert sub_array2[0] == "HELLOU"
+
+// Array-string casting
+// assert ([string]{} as string) == "[]{}"

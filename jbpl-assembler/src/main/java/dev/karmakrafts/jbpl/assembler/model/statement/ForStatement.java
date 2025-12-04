@@ -194,4 +194,9 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         forStatement.addElements(getElements().stream().map(Element::copy).toList());
         return forStatement;
     }
+
+    @Override
+    public @NotNull String toString() {
+        return String.format("for (%s in %s) {...}", variableName, value);
+    }
 }
