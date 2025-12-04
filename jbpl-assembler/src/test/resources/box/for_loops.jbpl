@@ -36,14 +36,14 @@ assert index == 101
 private define buffer: string = ""
 
 for(c in 'a'..<'z') {
-    buffer = "${buffer}${c}"
+    buffer += c
 }
 
 assert buffer == "abcdefghijklmnopqrstuvwxy"
 buffer = ""
 
 for(c in 'a'..'z') {
-    buffer = "${buffer}${c}"
+    buffer += c
 }
 
 assert buffer == "abcdefghijklmnopqrstuvwxyz"

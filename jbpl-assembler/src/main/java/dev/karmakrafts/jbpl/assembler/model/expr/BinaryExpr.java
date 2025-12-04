@@ -107,6 +107,9 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             final var message = String.format("Cannot perform re-assignment with operator %s on type %s", op, type);
             throw new EvaluationException(message, SourceDiagnostic.from(this, message), context.createStackTrace());
         }
+        if (builtinType == BuiltinType.STRING) {
+            return evaluateForString(oldValueRef.toString(), operandRef.toString(), op.discardAssign(), context);
+        }
         if (oldValueRef instanceof Number lhsNumber && operandRef instanceof Number rhsNumber) {
             return evaluatePreAssignmentForNumber(lhsNumber, rhsNumber, builtinType, context);
         }
@@ -465,8 +468,9 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
     }
 
     private @NotNull ConstExpr evaluateForString(final @NotNull String lhsValue,
+                                                 final @NotNull String rhsValue,
+                                                 final @NotNull Op op,
                                                  final @NotNull EvaluationContext context) throws EvaluationException {
-        final var rhsValue = getRhs().evaluateAs(context, Object.class).toString();
         return switch (op) {
             case ADD -> ConstExpr.of(String.format("%s%s", lhsValue, rhsValue), getTokenRange());
             case CMP -> ConstExpr.of(lhsValue.compareTo(rhsValue), getTokenRange());
@@ -552,7 +556,8 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
             return;
         }
         if (lhsType == BuiltinType.STRING) { // String concatenation with any type
-            context.pushValue(evaluateForString((String) lhsValue, context));
+            final var rhsValue = getRhs().evaluateAs(context, Object.class).toString();
+            context.pushValue(evaluateForString((String) lhsValue, rhsValue, op, context));
             return;
         }
         else if (lhsType == PreproType.TYPE) { // Type addition/subtraction creates intersection types
