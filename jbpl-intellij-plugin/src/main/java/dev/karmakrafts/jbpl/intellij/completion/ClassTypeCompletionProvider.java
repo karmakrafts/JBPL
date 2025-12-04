@@ -19,7 +19,10 @@ package dev.karmakrafts.jbpl.intellij.completion;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.InsertionContext;
+import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -102,18 +105,42 @@ public final class ClassTypeCompletionProvider extends CompletionProvider<Comple
                     .map(subPkg -> LookupElementBuilder.create(subPkg)
                         .withPresentableText(subPkg.getName())
                         .withTypeText("package")
-                        .withIcon(subPkg.getIcon(0)))
+                        .withIcon(subPkg.getIcon(0))
+                        .withInsertHandler(ClassTypeCompletionProvider::handlePackageInsertion))
                     .toList());
                 result.addAllElements(Arrays.stream(pkg.getClasses())
                     .filter(clazz -> clazz.getName() != null && prefixMatcher.prefixMatches(clazz.getName()))
                     .map(clazz -> LookupElementBuilder.create(clazz)
                         .withPresentableText(clazz.getName())
                         .withTypeText(getClassTypeText(clazz))
-                        .withIcon(clazz.getIcon(0)))
+                        .withIcon(clazz.getIcon(0))
+                        .withInsertHandler(ClassTypeCompletionProvider::handleClassInsertion))
                     .toList());
                 // @formatter:on
                 break;
             }
         }
+    }
+
+    private static void handlePackageInsertion(final @NotNull InsertionContext context,
+                                               final @NotNull LookupElement item) {
+        final var document = context.getDocument();
+        var offset = context.getTailOffset();
+        final var currentSuffix = document.getText(TextRange.create(offset, offset + 1));
+        if (!currentSuffix.equals("/")) {
+            document.insertString(offset, "/"); // Automatically insert trailing slash if not present
+        }
+        context.getEditor().getCaretModel().moveToOffset(offset + 1);
+    }
+
+    private static void handleClassInsertion(final @NotNull InsertionContext context,
+                                             final @NotNull LookupElement item) {
+        final var document = context.getDocument();
+        var offset = context.getTailOffset();
+        final var currentSuffix = document.getText(TextRange.create(offset, offset + 1));
+        if (!currentSuffix.equals(">")) {
+            document.insertString(offset, ">"); // Automatically insert trailing slash if not present
+        }
+        context.getEditor().getCaretModel().moveToOffset(offset + 1);
     }
 }
