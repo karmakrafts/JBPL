@@ -48,14 +48,13 @@ for(c in 'a'..'z') {
 
 assert buffer == "abcdefghijklmnopqrstuvwxyz"
 
-// TODO: This is currently broken, see JBPL-17
-//define buffer2: string = ""
-//
-//for(c in buffer) {
-//    buffer2 = "${buffer}${c}"
-//}
-//
-//assert buffer2 == buffer
+define buffer2: string = ""
+
+for(c in buffer) {
+    buffer2 += c
+}
+
+assert buffer2 == buffer
 
 // Nested loops
 

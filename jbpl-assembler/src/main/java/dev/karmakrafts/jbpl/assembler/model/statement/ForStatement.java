@@ -98,6 +98,19 @@ public final class ForStatement extends AbstractElementContainer implements Stat
         }
     }
 
+    private void iterateString(final @NotNull EvaluationContext context) throws EvaluationException {
+        final var value = this.value.evaluateAs(context, Object.class).toString();
+        for (var i = 0; i < value.length(); i++) {
+            final var result = performIteration(ConstExpr.of(value.charAt(i), getTokenRange()), context);
+            if ((result & ControlFlowState.MASK_CONTINUE) != 0) {
+                continue;
+            }
+            if ((result & ControlFlowState.MASK_BREAK) != 0 || (result & ControlFlowState.MASK_RETURN) != 0) {
+                break;
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private <T extends Comparable<T>> void iterateNumericRange(final @NotNull Class<T> type,
                                                                final @NotNull Function<T, T> inc,
@@ -159,6 +172,10 @@ public final class ForStatement extends AbstractElementContainer implements Stat
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var valueType = value.getType(context);
+        if (valueType == BuiltinType.STRING) {
+            iterateString(context);
+            return;
+        }
         if (valueType instanceof ArrayType) {
             iterateArray(context);
             return;
