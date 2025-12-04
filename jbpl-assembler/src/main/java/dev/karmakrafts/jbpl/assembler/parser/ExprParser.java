@@ -155,7 +155,15 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     private static @NotNull Expr parseStringSegment(final @NotNull StringSegmentContext ctx) {
-        final var text = ctx.M_CONST_STR_TEXT();
+        final var escapedQuote = ctx.M_STRING_ESCAPED_QUOTE();
+        if (escapedQuote != null) {
+            return ConstExpr.of("\"", TokenRange.fromTerminalNode(escapedQuote));
+        }
+        final var escapedChar = ctx.M_STRING_ESCAPED_CHAR();
+        if (escapedChar != null) {
+            return ConstExpr.of(ParserUtils.unescape(escapedChar.getText()), TokenRange.fromTerminalNode(escapedChar));
+        }
+        final var text = ctx.M_STRING_TEXT();
         if (text != null) {
             return ConstExpr.of(text.getText(), TokenRange.fromTerminalNode(text));
         }
@@ -437,23 +445,10 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
     }
 
     @Override
-    public @NotNull List<Expr> visitLiteral(final @NotNull LiteralContext ctx) {
-        final var literalChar = ctx.LITERAL_CHAR();
-        if (literalChar != null) {
-            var value = literalChar.getText();
-            value = value.substring(1, value.length() - 1); // Strip the single quotes
-            if (value.contains("\\")) { // Handle escaped characters
-                value = switch (value) {
-                    case "\\n" -> "\n";
-                    case "\\t" -> "\t";
-                    case "\\r" -> "\r";
-                    case "\\0" -> "\0";
-                    default -> throw new IllegalStateException("Unsupported character escape sequence");
-                };
-            }
-            return List.of(ConstExpr.of(value.charAt(0), TokenRange.fromContext(ctx)));
-        }
-        return super.visitLiteral(ctx);
+    public @NotNull List<Expr> visitCharLiteral(final @NotNull CharLiteralContext ctx) {
+        var text = ctx.getText();
+        text = ParserUtils.unescape(text.substring(1, text.length() - 1)); // Strip the single quotes
+        return List.of(ConstExpr.of(text.charAt(0), TokenRange.fromContext(ctx)));
     }
 
     @Override

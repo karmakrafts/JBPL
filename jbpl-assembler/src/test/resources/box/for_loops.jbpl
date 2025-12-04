@@ -48,7 +48,7 @@ for(c in 'a'..'z') {
 
 assert buffer == "abcdefghijklmnopqrstuvwxyz"
 
-define buffer2: string = ""
+private define buffer2: string = ""
 
 for(c in buffer) {
     buffer2 += c

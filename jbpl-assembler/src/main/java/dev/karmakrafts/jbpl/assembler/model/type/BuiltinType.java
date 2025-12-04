@@ -143,7 +143,7 @@ public enum BuiltinType implements Type {
     @Override
     public boolean isAssignableFrom(final @NotNull Type other,
                                     final @NotNull EvaluationContext context) throws EvaluationException {
-        if(this == OBJECT) {
+        if (this == OBJECT) {
             return true;
         }
         return switch (category) {
@@ -160,7 +160,7 @@ public enum BuiltinType implements Type {
     @Override
     public boolean canCastTo(final @NotNull Type other,
                              final @NotNull EvaluationContext context) throws EvaluationException {
-        if(other == OBJECT) {
+        if (other == OBJECT) {
             return true;
         }
         final var otherCategory = other.getCategory(context);

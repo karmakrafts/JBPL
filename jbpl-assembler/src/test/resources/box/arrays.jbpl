@@ -41,10 +41,10 @@ for(i in 0..<sizeof(my_array)) {
 assert value == "HELLOU, World!"
 
 // Array subscript slicing
-define sub_array: [string] = my_array[1..<2]
+private define sub_array: [string] = my_array[1..<2]
 assert sub_array[0] == "World!"
 
-define sub_array2: [string] = my_array[0..<1]
+private define sub_array2: [string] = my_array[0..<1]
 assert sub_array2[0] == "HELLOU"
 
 // Array-string casting

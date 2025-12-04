@@ -55,7 +55,7 @@ public final class JBPLParserDefinition implements ParserDefinition {
         COMMENTS = PSIElementTypeFactory.createTokenSet(JBPLanguage.INSTANCE,
             JBPLLexer.LINE_COMMENT,
             JBPLLexer.BLOCK_COMMENT);
-        STRING_LITERALS = PSIElementTypeFactory.createTokenSet(JBPLanguage.INSTANCE, JBPLLexer.M_CONST_STR_TEXT);
+        STRING_LITERALS = PSIElementTypeFactory.createTokenSet(JBPLanguage.INSTANCE, JBPLLexer.M_STRING_TEXT);
         WHITESPACE = PSIElementTypeFactory.createTokenSet(JBPLanguage.INSTANCE, JBPLLexer.WS, JBPLLexer.NL);
     }
 

@@ -103,7 +103,7 @@ public final class JBPLSyntaxHighlighter extends SyntaxHighlighterBase {
             case JBPLLexer.LITERAL_INT,
                  JBPLLexer.LITERAL_FLOAT_LIKE -> keys.add(TextAttributeKeys.NUMBER);
             case JBPLLexer.QUOTE,
-                 JBPLLexer.M_CONST_STR_TEXT -> keys.add(TextAttributeKeys.STRING);
+                 JBPLLexer.M_STRING_TEXT -> keys.add(TextAttributeKeys.STRING);
             case JBPLLexer.SINGLE_QUOTE,
                  JBPLLexer.LITERAL_CHAR -> keys.add(TextAttributeKeys.CHAR);
             case JBPLLexer.L_PAREN,

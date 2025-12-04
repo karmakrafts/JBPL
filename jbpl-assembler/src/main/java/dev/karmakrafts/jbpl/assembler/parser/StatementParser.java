@@ -117,7 +117,7 @@ public final class StatementParser extends JBPLParserBaseVisitor<List<Statement>
     @Override
     public @NotNull List<Statement> visitInclude(final @NotNull IncludeContext ctx) {
         // @formatter:off
-        return List.of(new IncludeStatement(ctx.simpleStringLiteral().M_CONST_STR_TEXT()
+        return List.of(new IncludeStatement(ctx.simpleStringLiteral().M_STRING_TEXT()
             .stream()
             .map(TerminalNode::getText)
             .collect(Collectors.joining(""))));

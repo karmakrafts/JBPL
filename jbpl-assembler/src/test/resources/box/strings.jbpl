@@ -25,6 +25,9 @@ assert sizeof("") == 0
 assert sizeof("!") == 1
 assert sizeof(test) == 13
 
+// Escaped characters
+assert ("\0"[0] as i32) == 0
+
 // Subscript indexing
 assert test[0] == 'H'
 assert test[sizeof(test) - 1] == '!'

@@ -32,7 +32,7 @@ LINE_COMMENT: '//' ~[\r\n]*;
 WS: [\u0020\u0009\u000C] -> channel(HIDDEN);
 NL: ('\n' | ('\r' '\n'?));
 
-CONST_STR_START: '"' -> pushMode(M_CONST_STR), type(QUOTE);
+CONST_STR_START: '"' -> pushMode(M_STRING), type(QUOTE);
 
 KW_PREPRO_RETURN: '^return';
 KW_PREPRO_CLASS: '^class';
@@ -258,16 +258,19 @@ fragment LITERAL_OCT_INT: '0' [oO] [0-7]+ [0-7_]*;
 LITERAL_INT: LITERAL_DEC_INT | LITERAL_BIN_INT | LITERAL_HEX_INT | LITERAL_OCT_INT;
 LITERAL_FLOAT_LIKE: [0-9]+ [0-9_]* ('.' [0-9]+ [0-9_]*)? ([eE] LITERAL_DEC_INT)?;
 
-fragment ESCAPED_CHAR: '\\' [nrbt0];
-LITERAL_CHAR: SINGLE_QUOTE (ESCAPED_CHAR | ~[']) SINGLE_QUOTE;
+fragment ESCAPED_CHAR: '\\' [nrbt0'\\];
+LITERAL_ESCAPED_CHAR: SINGLE_QUOTE ESCAPED_CHAR SINGLE_QUOTE;
+LITERAL_CHAR: SINGLE_QUOTE ~['] SINGLE_QUOTE;
 
 IDENT: [a-zA-Z_]+[a-zA-Z0-9_]*;
 
 ERROR: .;
 
-mode M_CONST_STR;
+mode M_STRING;
 
-M_CONST_STR_END: QUOTE -> popMode, type(QUOTE);
-M_CONST_STR_LERP_BEGIN: '${' -> pushMode(DEFAULT_MODE);
-M_CONST_STR_TEXT: ~('"' | '$')+;
-M_CONST_STR_ERROR: ERROR -> type(ERROR);
+M_STRING_ESCAPED_QUOTE: '\\' QUOTE;
+M_STRING_END: QUOTE -> popMode, type(QUOTE);
+M_STRING_LERP_BEGIN: '${' -> pushMode(DEFAULT_MODE);
+M_STRING_ESCAPED_CHAR: '\\' [nrbt0$\\];
+M_STRING_TEXT: ~('"' | '$' | '\\')+;
+M_STRING_ERROR: ERROR -> type(ERROR);

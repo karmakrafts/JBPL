@@ -67,7 +67,7 @@ public final class SourceColorizer {
         JBPLLexer.KW_INCLUDE,
         JBPLLexer.KW_PREPRO_RETURN);
     private static final Set<Integer> STRING_TOKENS = Set.of(JBPLLexer.QUOTE,
-        JBPLLexer.M_CONST_STR_TEXT,
+        JBPLLexer.M_STRING_TEXT,
         JBPLLexer.SINGLE_QUOTE,
         JBPLLexer.LITERAL_CHAR);
     private static final Set<Integer> NUMERIC_TOKENS = Set.of(JBPLLexer.LITERAL_INT, JBPLLexer.LITERAL_FLOAT_LIKE);

@@ -28,6 +28,8 @@ public final class TextAttributeKeys {
         DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey CHAR = TextAttributesKey.createTextAttributesKey("JBPL_CHAR",
         DefaultLanguageHighlighterColors.STRING);
+    public static final TextAttributesKey ESCAPED_CHAR = TextAttributesKey.createTextAttributesKey("JBPL_ESCAPED_CHAR",
+        DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE);
     public static final TextAttributesKey BRACE = TextAttributesKey.createTextAttributesKey("JBPL_BRACE",
         DefaultLanguageHighlighterColors.BRACES);
     public static final TextAttributesKey PAREN = TextAttributesKey.createTextAttributesKey("JBPL_PAREN",

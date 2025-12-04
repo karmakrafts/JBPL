@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class JBPLBraceMatcher implements PairedBraceMatcher {
     private static final BracePair[] PAIRS = new BracePair[] { // @formatter:off
-        makePair(JBPLLexer.M_CONST_STR_LERP_BEGIN, JBPLLexer.R_BRACE, true),
+        makePair(JBPLLexer.M_STRING_LERP_BEGIN, JBPLLexer.R_BRACE, true),
         makePair(JBPLLexer.L_BRACE, JBPLLexer.R_BRACE, true),
         makePair(JBPLLexer.L_PAREN, JBPLLexer.R_PAREN, false),
         makePair(JBPLLexer.L_SQBRACKET, JBPLLexer.R_SQBRACKET, false),

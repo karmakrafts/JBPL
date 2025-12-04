@@ -40,6 +40,36 @@ public final class ParserUtils {
     private ParserUtils() {
     }
 
+    public static @NotNull String unescape(final @NotNull String text) {
+        final var builder = new StringBuilder();
+        var isEscape = false;
+        for (var i = 0; i < text.length(); i++) {
+            final var c = text.charAt(i);
+            if (isEscape) {
+                builder.append(switch (c) {
+                    case '"' -> "\"";
+                    case '\'' -> "'";
+                    case 'n' -> "\n";
+                    case 't' -> "\t";
+                    case 'b' -> "\b";
+                    case 'r' -> "\r";
+                    case '0' -> "\0";
+                    case '\\' -> "\\";
+                    case '$' -> "$";
+                    default -> throw new IllegalStateException("Illegal escape sequence");
+                });
+                isEscape = false;
+                continue;
+            }
+            if (c == '\\') {
+                isEscape = true;
+                continue;
+            }
+            builder.append(c);
+        }
+        return builder.toString();
+    }
+
     public static @NotNull Object parseIntWithPrefix(final @NotNull String value,
                                                      final @NotNull BiFunction<String, Integer, Object> parseFunction) {
         if (value.startsWith("0x") || value.startsWith("0X")) {

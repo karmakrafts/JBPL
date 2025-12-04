@@ -771,9 +771,14 @@ literal:
     | opcodeLiteral
     | instructionLiteral
     | boolLiteral
-    | LITERAL_CHAR
+    | charLiteral
     | floatLiteral
     | intLiteral
+    ;
+
+charLiteral:
+    LITERAL_ESCAPED_CHAR
+    | LITERAL_CHAR
     ;
 
 boolLiteral:
@@ -803,15 +808,17 @@ stringLiteral:
     ;
 
 stringSegment:
-    (M_CONST_STR_LERP_BEGIN
+    M_STRING_ESCAPED_QUOTE
+    | M_STRING_ESCAPED_CHAR
+    | (M_STRING_LERP_BEGIN
     expr
     R_BRACE)
-    | M_CONST_STR_TEXT
+    | M_STRING_TEXT
     ;
 
 simpleStringLiteral:
     QUOTE
-    M_CONST_STR_TEXT*?
+    M_STRING_TEXT*?
     QUOTE
     ;
 
