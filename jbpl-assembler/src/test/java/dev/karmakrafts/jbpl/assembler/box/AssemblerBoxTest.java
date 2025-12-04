@@ -37,7 +37,13 @@ public abstract class AssemblerBoxTest {
 
     @Test
     public void invoke() throws ParserException, ValidationException, EvaluationException {
-        final var assembler = Assembler.createFromResources("box/", infoBuffer::add, errorBuffer::add);
+        final var assembler = Assembler.createFromResources("box/", message -> {
+            infoBuffer.add(message);
+            System.out.println(message);
+        }, message -> {
+            errorBuffer.add(message);
+            System.err.println(message);
+        });
         final var context = assembler.lowerAndCreateContext(getFileName(), className -> {
             final var node = new ClassNode();
             node.name = className;

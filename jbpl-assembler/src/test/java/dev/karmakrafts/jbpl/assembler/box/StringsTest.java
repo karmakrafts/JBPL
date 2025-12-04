@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-private macro use_local_define() {
-    define x: i32 = 0
-    assert x == 0
+package dev.karmakrafts.jbpl.assembler.box;
 
-    macro capture_local_define() {
-        assert x == 0
+import org.jetbrains.annotations.NotNull;
+
+public final class StringsTest extends AssemblerBoxTest {
+    @Override
+    protected @NotNull String getFileName() {
+        return "strings.jbpl";
     }
-
-    capture_local_define()
-
-    macro shadow_local_define() {
-        define x: i32 = 1
-        assert x == 1
-    }
-
-    shadow_local_define()
 }
-
-use_local_define()

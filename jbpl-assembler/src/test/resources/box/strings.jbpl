@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-private macro use_local_define() {
-    define x: i32 = 0
-    assert x == 0
+private define test: string = "Hello, World!"
 
-    macro capture_local_define() {
-        assert x == 0
-    }
+// Equality and inequality
+assert test == "Hello, World!"
+assert test != "Hellorld!"
 
-    capture_local_define()
+// Size
+assert sizeof("") == 0
+assert sizeof("!") == 1
+assert sizeof(test) == 13
 
-    macro shadow_local_define() {
-        define x: i32 = 1
-        assert x == 1
-    }
+// Subscript indexing - TODO: this is broken, see JBPL-18
+// assert test[0] == 'H'
+// assert test[sizeof(test) - 1] == '!'
 
-    shadow_local_define()
-}
+// Concatination
+assert (test + "!!") == "Hello, World!!!"
 
-use_local_define()
+// Interpolation
+// TODO: this is broken, see JBPL-
+//private macro my_macro(): string {
+//    ^return "!!"
+//}
+//
+//assert "${my_macro()}!!" == "Hello, World!!!"
+assert "${test}!!" == "Hello, World!!!"

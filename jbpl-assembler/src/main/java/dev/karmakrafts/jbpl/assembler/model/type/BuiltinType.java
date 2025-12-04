@@ -143,6 +143,9 @@ public enum BuiltinType implements Type {
     @Override
     public boolean isAssignableFrom(final @NotNull Type other,
                                     final @NotNull EvaluationContext context) throws EvaluationException {
+        if(this == OBJECT) {
+            return true;
+        }
         return switch (category) {
             // We need to take into account implicit widening conversions here
             case INTEGER, FLOAT -> switch (other.getCategory(context)) {
@@ -150,7 +153,6 @@ public enum BuiltinType implements Type {
                 case INTEGER, FLOAT -> ((BuiltinType) other).ordinal() <= ordinal();
                 default -> Type.super.isAssignableFrom(other, context);
             };
-            case OBJECT -> true; // anything may be assigned to any
             default -> Type.super.isAssignableFrom(other, context);
         };
     }
@@ -158,9 +160,11 @@ public enum BuiltinType implements Type {
     @Override
     public boolean canCastTo(final @NotNull Type other,
                              final @NotNull EvaluationContext context) throws EvaluationException {
+        if(other == OBJECT) {
+            return true;
+        }
         final var otherCategory = other.getCategory(context);
         return switch (this) { // @formatter:off
-            case OBJECT -> true; // anything may be cast from any
             case I8, I16, I32, I64, F32, F64 -> otherCategory.isNumber()
                 || otherCategory == TypeCategory.CHAR
                 || otherCategory == TypeCategory.BOOL
