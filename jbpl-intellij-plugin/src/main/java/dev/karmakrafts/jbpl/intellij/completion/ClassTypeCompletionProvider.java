@@ -44,6 +44,8 @@ public final class ClassTypeCompletionProvider extends CompletionProvider<Comple
         JBPLLexer.KW_FIELD,
         JBPLLexer.KW_YEET,
         JBPLLexer.KW_SIGNATURE,
+        JBPLLexer.EQ,
+        // For type assignments in type aliases
         JBPLLexer.INSN_NEW,
         JBPLLexer.INSN_ANEWARRAY,
         JBPLLexer.INSN_CHECKCAST,
