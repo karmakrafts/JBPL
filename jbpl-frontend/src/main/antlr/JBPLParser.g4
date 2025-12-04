@@ -350,7 +350,6 @@ expr:
     | opcodeOfExpr
     | sizeOfExpr
     | defaultExpr
-    | definedExpr
     | nameOfExpr
     | preproClassInstantiation
     | injectorReference
@@ -440,13 +439,6 @@ injectorReference:
 
 nameOfExpr:
     KW_NAMEOF
-    L_PAREN
-    expr
-    R_PAREN
-    ;
-
-definedExpr:
-    KW_DEFINED
     L_PAREN
     expr
     R_PAREN

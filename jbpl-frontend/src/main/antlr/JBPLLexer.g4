@@ -46,7 +46,6 @@ KW_TRANSIENT: 'transient';
 KW_OPCODEOF: 'opcodeof';
 KW_CONTINUE: 'continue';
 KW_VOLATILE: 'volatile';
-KW_DEFINED: 'defined';
 KW_PRIVATE: 'private';
 KW_DEFAULT: 'default';
 KW_VERSION: 'version'; // This indicates the ASM (classfile) version we assemble against
