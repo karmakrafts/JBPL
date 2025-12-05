@@ -18,6 +18,7 @@ package dev.karmakrafts.jbpl.assembler.model.type;
 
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
+import dev.karmakrafts.jbpl.assembler.model.expr.ArrayExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.ConstExpr;
 import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
 import dev.karmakrafts.jbpl.assembler.source.SourceDiagnostic;
@@ -191,12 +192,15 @@ public enum BuiltinType implements Type {
             final var message = String.format("Cannot cast value of type %s to type %s", valueType, this);
             throw new EvaluationException(message, SourceDiagnostic.from(value, message), context.createStackTrace());
         }
-        if (this == STRING) { // Any value is convertible to string via .toString from its containing expression
-            return ConstExpr.of(value.toString(), value.getTokenRange());
-        }
         final var constValue = value.evaluateAs(context, Object.class);
         if (this == OBJECT) { // We can cast any value to any
             return ConstExpr.of(constValue, value.getTokenRange());
+        }
+        else if (this == STRING) { // Any value is convertible to string via .toString from its containing expression
+            if (value instanceof ArrayExpr) {
+                return ConstExpr.of(value.toString(), value.getTokenRange());
+            }
+            return ConstExpr.of(constValue.toString(), value.getTokenRange());
         }
         else if (constValue instanceof Number numberValue) {
             return switch (this) {
@@ -224,7 +228,6 @@ public enum BuiltinType implements Type {
                 case I64 -> ConstExpr.of(boolValue ? 1L : 0L, value.getTokenRange());
                 case F32 -> ConstExpr.of(boolValue ? 1F : 0F, value.getTokenRange());
                 case F64 -> ConstExpr.of(boolValue ? 1D : 0D, value.getTokenRange());
-                case STRING -> ConstExpr.of(boolValue.toString(), value.getTokenRange());
                 default -> {
                     final var message = String.format("Cannot cast value of type %s to type %s", valueType, this);
                     throw new EvaluationException(message,
@@ -241,7 +244,6 @@ public enum BuiltinType implements Type {
                 case I64 -> ConstExpr.of((long) (int) charValue, value.getTokenRange());
                 case F32 -> ConstExpr.of((float) (int) charValue, value.getTokenRange());
                 case F64 -> ConstExpr.of((double) (int) charValue, value.getTokenRange());
-                case STRING -> ConstExpr.of(charValue.toString(), value.getTokenRange());
                 default -> {
                     final var message = String.format("Cannot cast value of type %s to type %s", valueType, this);
                     throw new EvaluationException(message,
