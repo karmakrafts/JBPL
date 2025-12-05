@@ -14,13 +14,75 @@
  * limitations under the License.
  */
 
-macro reflect_call(signature: signature(fun)) {
-
-}
-
-macro reflect_instanceof(type: type) {
+macro reflective_instanceof(type: type) {
     invokevirtual <java/lang/Object>.getClass(): <java/lang/Class>
     invokevirtual <java/lang/Class>.getName(): string
-    // TODO: ...
-    invokevirtual <java/lang/String>.equals(<java/lang/Object>): bool
+    ldc ${type as string}
+    invokevirtual <java/lang/String>.equals(any): bool
+}
+
+macro reflective_call(name: string, return_type: type, param_types: [type]) {
+    // Save call arguments (reduce args, leave only instance on top of stack)
+    define param_count: i32 = sizeof(param_types)
+    ldc ${param_count}
+    anewarray <java/lang/Object>
+    local call_args: [any]
+    astore call_args
+    for (index in 0..<param_count) {
+        aload call_args
+        swap
+        ldc ${index}
+        swap
+        aastore
+    }
+    // Retrieve instance class and save both instance and class
+    dup
+    local instance: any
+    astore instance
+    invokevirtual <java/lang/Object>.getClass(): <java/lang/Class>
+    ldc ${name}
+    ldc ${param_count}
+    anewarray <java/lang/Class>
+    for(index in 0..<param_count) {
+        dup
+        ldc ${index}
+        ldc ${param_types[index]}
+        aastore
+    }
+    // Get the actual method
+    invokevirtual <java/lang/Class>.getDeclaredMethod([<java/lang/Class>]): <java/lang/reflect/Method>
+    local method: <java/lang/reflect/Method>
+    astore method
+    // Make function accessible if required
+    local access_changed: bool
+    ldc false
+    istore access_changed
+    aload method
+    invokevirtual <java/lang/reflect/Method>.getModifiers(): i32
+    ldc 0x00000001
+    iand
+    ifne already_accessible
+    // We know this method is not public, so we make it accessible
+    aload method
+    ldc true
+    invokevirtual <java/lang/reflect/Method>.setAccessible(bool): void
+    ldc true
+    istore access_changed
+:already_accessible
+    // The method is accessible from here on
+    aload method
+    aload instance
+    aload call_args
+    invokevirtual <java/lang/reflect/Method>.invoke(any, any, [any]): any
+    checkcast ${return_type}
+    local result: any
+    astore result
+    // Reset caller access if it was changed
+    iload access_changed
+    ifeq end
+    aload method
+    ldc false
+    invokevirtual <java/lang/reflect/Method>.setAccessible(bool): void
+:end
+    aload result // Only leave call result on stack
 }

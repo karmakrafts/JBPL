@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler.eval;
+package dev.karmakrafts.jbpl.assembler.box;
 
-import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-
-public record IntrinsicMacroArguments( // @formatter:off
-    @NotNull Map<String, Type> typeArguments,
-    @NotNull Map<String, Expr> arguments
-) { // @formatter:on
-
+public final class GenericMacroTest extends AssemblerBoxTest {
+    @Override
+    protected @NotNull String getFileName() {
+        return "generic_macro.jbpl";
+    }
 }

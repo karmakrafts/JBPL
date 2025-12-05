@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.jbpl.assembler.eval;
-
-import dev.karmakrafts.jbpl.assembler.model.expr.Expr;
-import dev.karmakrafts.jbpl.assembler.model.type.Type;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
-
-public record IntrinsicMacroArguments( // @formatter:off
-    @NotNull Map<String, Type> typeArguments,
-    @NotNull Map<String, Expr> arguments
-) { // @formatter:on
-
+// Simple generic macro
+macro simple_test[T : any](value: T, expected_type: type) {
+    assert typeof(value) == expected_type
 }
+
+simple_test[string]("Hello, World!", type string)
+simple_test[i32](100, type i32)
+simple_test[i8](100i8, type i8)
+simple_test[bool](true, type bool)

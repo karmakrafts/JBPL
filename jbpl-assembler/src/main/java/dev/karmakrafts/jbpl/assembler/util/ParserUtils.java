@@ -90,6 +90,16 @@ public final class ParserUtils {
         return List.of(ConstExpr.of(parseIntWithPrefix(value, parseFunction), TokenRange.fromContext(ctx)));
     }
 
+    public static @NotNull Pair<@Nullable Expr, Expr> parseTypeArgument(final @NotNull TypeArgumentContext ctx) throws ParserException {
+        // TODO: implement support for interpolation in generic bounds
+        final var namedCtx = ctx.namedTypeArgument();
+        if (namedCtx != null) {
+            return new Pair<>(ExprParser.parse(namedCtx.exprOrName()),
+                ConstExpr.of(TypeParser.parse(namedCtx.type()), TokenRange.fromContext(namedCtx.type())));
+        }
+        return new Pair<>(null, ConstExpr.of(TypeParser.parse(ctx.type()), TokenRange.fromContext(ctx.type())));
+    }
+
     public static @NotNull Pair<@Nullable Expr, Expr> parseArgument(final @NotNull ArgumentContext ctx) throws ParserException {
         final var namedCtx = ctx.namedArgument();
         if (namedCtx != null) {
@@ -97,6 +107,12 @@ public final class ParserUtils {
         }
         return new Pair<>(null, ExprParser.parse(ctx.expr()));
     }
+
+    public static @NotNull List<Pair<@Nullable Expr, Expr>> parseTypeArguments(final @NotNull List<TypeArgumentContext> args) { // @formatter:off
+        return args.stream()
+            .map(ExceptionUtils.unsafeFunction(ParserUtils::parseTypeArgument))
+            .toList();
+    } // @formatter:on
 
     public static @NotNull List<Pair<@Nullable Expr, Expr>> parseArguments(final @NotNull List<ArgumentContext> args) { // @formatter:off
         return args.stream()

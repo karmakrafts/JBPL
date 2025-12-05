@@ -159,26 +159,26 @@ public final class MacroDecl extends AbstractElementContainer
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
-        // Resolve type arguments
-        final var typeArgumentValues = context.popValues(typeParameters.size());
-        final var typeParamNames = resolveTypeParameters(context).keySet();
-        final var typeArguments = new HashMap<String, Type>();
-        var typeArgIndex = 0;
-        for (final var name : typeParamNames) {
-            typeArguments.put(name, typeArgumentValues.get(typeArgIndex++).evaluateAs(context, Type.class));
-        }
-        // Resolve arguments
-        final var argumentValues = context.popValues(parameters.size());
-        final var paramNames = resolveParameters(context).keySet();
-        final var arguments = new HashMap<String, Expr>();
-        var argIndex = 0;
-        for (final var name : paramNames) {
-            arguments.put(name, argumentValues.get(argIndex++));
-        }
-        // Execute the body of the macro in the current frame
-        final var frame = context.peekFrame();
-        frame.namedLocalTypes.putAll(typeArguments);
-        frame.namedLocalValues.putAll(arguments); // Make current macro args available to child elements
+        //// Resolve type arguments
+        //final var typeArgumentValues = context.popValues(typeParameters.size());
+        //final var typeParamNames = resolveTypeParameters(context).keySet();
+        //final var typeArguments = new HashMap<String, Type>();
+        //var typeArgIndex = 0;
+        //for (final var name : typeParamNames) {
+        //    typeArguments.put(name, typeArgumentValues.get(typeArgIndex++).evaluateAs(context, Type.class));
+        //}
+        //// Resolve arguments
+        //final var argumentValues = context.popValues(parameters.size());
+        //final var paramNames = resolveParameters(context).keySet();
+        //final var arguments = new HashMap<String, Expr>();
+        //var argIndex = 0;
+        //for (final var name : paramNames) {
+        //    arguments.put(name, argumentValues.get(argIndex++));
+        //}
+        //// Execute the body of the macro in the current frame
+        //final var frame = context.peekFrame();
+        //frame.namedLocalTypes.putAll(typeArguments);
+        //frame.namedLocalValues.putAll(arguments); // Make current macro args available to child elements
         final var elements = getElements();
         for (final var element : elements) {
             if (!element.isEvaluatedDirectly()) {

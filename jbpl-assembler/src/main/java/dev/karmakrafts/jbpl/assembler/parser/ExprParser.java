@@ -150,6 +150,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
             final var call = new MacroCallExpr(name);
             call.setReceiver(receiver);
             call.addArguments(ParserUtils.parseArguments(ctx.argument()));
+            call.addTypeArguments(ParserUtils.parseTypeArguments(ctx.typeArgument()));
             return List.of(call);
         });
     }

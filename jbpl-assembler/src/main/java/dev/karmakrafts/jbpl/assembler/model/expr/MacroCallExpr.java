@@ -28,10 +28,7 @@ import dev.karmakrafts.jbpl.assembler.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -121,12 +118,15 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                 // @formatter:on
                 final var paramType = parameter.getValue();
                 if (!paramType.isAssignableFrom(valueType, context)) {
-                    throw new EvaluationException(String.format(
+                    final var message = String.format(
                         "Mismatched argument type %s for parameter %s: %s in call to macro %s",
                         valueType,
                         name,
                         paramType,
-                        macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
+                        macroName);
+                    throw new EvaluationException(message,
+                        SourceDiagnostic.from(this, value, message),
+                        context.createStackTrace());
                 }
                 arguments.put(name, value);
                 currentArgIndex = parameters.indexOf(parameter) + 1;
@@ -135,12 +135,14 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
             final var parameter = parameters.get(currentArgIndex);
             final var paramType = parameter.getValue();
             if (!paramType.isAssignableFrom(valueType, context)) {
-                throw new EvaluationException(String.format(
-                    "Mismatched argument type %s for parameter %s: %s in call to macro %s",
+                final var message = String.format("Mismatched argument type %s for parameter %s: %s in call to macro %s",
                     valueType,
                     parameter.getKey(),
                     paramType,
-                    macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
+                    macroName);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, value, message),
+                    context.createStackTrace());
             }
             arguments.put(parameter.getKey(), value);
             currentArgIndex++;
@@ -164,33 +166,41 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
                 final var parameter = parameters.stream()
                     .filter(entry -> entry.getKey().equals(name))
                     .findFirst()
-                    .orElseThrow(() -> new EvaluationException(
-                        String.format("No parameter named '%s' in macro %s", name, macroName),
-                        SourceDiagnostic.from(this), context.createStackTrace()
-                    ));
+                    .orElseThrow(() -> {
+                        final var message = String.format("No parameter named '%s' in macro %s", name, macroName);
+                        return new EvaluationException(
+                            message,
+                            SourceDiagnostic.from(this, message), context.createStackTrace()
+                        );
+                    });
                 // @formatter:on
-                final var paramType = parameter.getValue();
+                final var paramType = parameter.getValue().resolveIfNeeded(context);
                 if (!paramType.isAssignableFrom(valueType, context)) {
-                    throw new EvaluationException(String.format(
+                    final var message = String.format(
                         "Mismatched argument type %s for parameter %s: %s in call to macro %s",
                         valueType,
                         name,
                         paramType,
-                        macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
+                        macroName);
+                    throw new EvaluationException(message,
+                        SourceDiagnostic.from(this, value, message),
+                        context.createStackTrace());
                 }
                 arguments.put(name, value);
                 currentArgIndex = parameters.indexOf(parameter) + 1;
                 continue;
             }
             final var parameter = parameters.get(currentArgIndex);
-            final var paramType = parameter.getValue();
+            final var paramType = parameter.getValue().resolveIfNeeded(context);
             if (!paramType.isAssignableFrom(valueType, context)) {
-                throw new EvaluationException(String.format(
-                    "Mismatched argument type %s for parameter %s: %s in call to macro %s",
+                final var message = String.format("Mismatched argument type %s for parameter %s: %s in call to macro %s",
                     valueType,
                     parameter.getKey(),
                     paramType,
-                    macroName), SourceDiagnostic.from(this, value), context.createStackTrace());
+                    macroName);
+                throw new EvaluationException(message,
+                    SourceDiagnostic.from(this, value, message),
+                    context.createStackTrace());
             }
             arguments.put(parameter.getKey(), value);
             currentArgIndex++;
@@ -198,26 +208,33 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
         return arguments;
     }
 
-    private @NotNull List<Expr> remapArguments(final @NotNull EvaluationContext context,
-                                               final @NotNull String macroName,
-                                               final @NotNull Map<String, Type> params) throws EvaluationException {
+    private @NotNull Map<String, Expr> remapArguments(final @NotNull EvaluationContext context,
+                                                      final @NotNull String macroName,
+                                                      final @NotNull Map<String, Type> params) throws EvaluationException {
         final var arguments = resolveArguments(context, params, macroName);
-        final var sequentialArguments = new ArrayList<Expr>();
+        final var sequentialArguments = new LinkedHashMap<String, Expr>();
         for (final var paramName : params.keySet()) {
-            sequentialArguments.add(arguments.get(paramName));
+            sequentialArguments.put(paramName, arguments.get(paramName));
         }
         return sequentialArguments;
     }
 
-    private @NotNull List<Expr> remapTypeArguments(final @NotNull EvaluationContext context,
-                                                   final @NotNull String macroName,
-                                                   final @NotNull Map<String, Type> params) throws EvaluationException {
-        return List.of(); // TODO: implement this
+    private @NotNull Map<String, Type> remapTypeArguments(final @NotNull EvaluationContext context,
+                                                          final @NotNull String macroName,
+                                                          final @NotNull Map<String, Type> params) throws EvaluationException {
+        final var arguments = resolveTypeArguments(context, params, macroName);
+        final var sequentialArguments = new LinkedHashMap<String, Type>();
+        for (final var paramName : params.keySet()) {
+            sequentialArguments.put(paramName,
+                arguments.get(paramName).evaluateAs(context, Type.class).resolveIfNeeded(context));
+        }
+        return sequentialArguments;
     }
 
     @Override
     public void evaluate(final @NotNull EvaluationContext context) throws EvaluationException {
         final var name = getName().evaluateAs(context, String.class);
+
         // @formatter:off
         final var intrinsicMacro = context.peekFrame().intrinsicMacros.entrySet().stream()
             .filter(entry -> entry.getKey().name().equals(name))
@@ -231,13 +248,13 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
             macro.callback().accept(context, new IntrinsicMacroArguments(typeArguments, arguments));
             return;
         }
+
         final var macro = getMacro(name, context);
-        final var typeArguments = remapTypeArguments(context, name, macro.resolveTypeParameters(context));
-        final var arguments = remapArguments(context, name, macro.resolveParameters(context));
         context.pushFrame(macro); // Create new stack frame for macro body
-        context.peekFrame().resetLocalDefines(); // Reset all local defines within the macro before invoking anything
-        context.pushValues(typeArguments); // Push type arguments into callee stack frame
-        context.pushValues(arguments); // Push arguments into callee stack frame
+        final var frame = context.peekFrame();
+        frame.resetLocalDefines(); // Reset all local defines within the macro before invoking anything
+        frame.namedLocalTypes.putAll(remapTypeArguments(context, name, macro.resolveTypeParameters(context)));
+        frame.namedLocalValues.putAll(remapArguments(context, name, macro.resolveParameters(context)));
         macro.evaluate(context);
         context.popFrame(); // Frame data will be merged to retain result from callee frame
     }
@@ -251,9 +268,22 @@ public final class MacroCallExpr extends AbstractCallExpr implements Expr {
     }
 
     @Override
-    public @NotNull String toString() { // @formatter:off
-        return String.format("%s^(%s)", getName(), getArguments().stream()
+    public @NotNull String toString() {
+        final var typeArgs = getTypeArguments();
+        if (!typeArgs.isEmpty()) {
+            // @formatter:off
+            final var typeArgsString = typeArgs.stream()
+                .map(pair -> String.format("%s : %s", pair.left(), pair.right()))
+                .collect(Collectors.joining(", "));
+            return String.format("%s[%s](%s)", getName(), typeArgsString, getArguments().stream()
+                .map(pair -> pair.right().toString())
+                .collect(Collectors.joining(", ")));
+            // @formatter:on
+        }
+        // @formatter:off
+        return String.format("%s(%s)", getName(), getArguments().stream()
             .map(pair -> pair.right().toString())
             .collect(Collectors.joining(", ")));
-    } // @formatter:on
+        // @formatter:on
+    }
 }

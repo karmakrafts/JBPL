@@ -137,6 +137,8 @@ public final class BinaryExpr extends AbstractExprContainer implements Expr {
                                                final @NotNull Type rhs,
                                                final @NotNull EvaluationContext context) throws EvaluationException {
         return switch (op) {
+            case EQ -> ConstExpr.of(lhs.equals(rhs), getTokenRange());
+            case NE -> ConstExpr.of(!lhs.equals(rhs), getTokenRange());
             case ADD -> ConstExpr.of(IntersectionType.unfold(List.of(lhs, rhs)), getTokenRange());
             case SUB -> {
                 if (lhs instanceof IntersectionType lhsIntersectionType) {

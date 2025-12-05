@@ -66,12 +66,12 @@ public final class IntrinsicsHandler {
     public void initGlobal() {
         addIntrinsicMacro(new IntrinsicMacroSignature("info", BuiltinType.VOID, Map.of("message", BuiltinType.STRING)),
             (ctx, args) -> {
-                final var message = args.arguments().get(0).evaluateAs(context, String.class);
+                final var message = args.arguments().get("message").evaluateAs(context, String.class);
                 ctx.infoConsumer.accept(message);
             });
         addIntrinsicMacro(new IntrinsicMacroSignature("error", BuiltinType.VOID, Map.of("message", BuiltinType.STRING)),
             (ctx, args) -> {
-                final var message = args.arguments().get(0).evaluateAs(context, String.class);
+                final var message = args.arguments().get("message").evaluateAs(context, String.class);
                 ctx.errorConsumer.accept(message);
             });
     }
