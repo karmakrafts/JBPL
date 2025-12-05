@@ -462,7 +462,7 @@
                 <key>match</key>
                 <string>&lt;[A-Za-z_][A-Za-z0-9_$]*(?:/[A-Za-z_][A-Za-z0-9_$]*)&gt;</string>
                 <key>name</key>
-                <string>entity.name.type.class.internal-name.jbpl</string>
+                <string>entity.name.class.jbpl</string>
             </dict>
 
             <!-- literals repository (strings, chars, numbers) -->
@@ -470,7 +470,7 @@
             <dict>
                 <key>patterns</key>
                 <array>
-                    <!-- double-quoted string with interpolation -->
+                    <!-- double-quoted string with interpolation and escapes -->
                     <dict>
                         <key>begin</key>
                         <string>"</string>
@@ -483,7 +483,7 @@
                             </dict>
                         </dict>
                         <key>end</key>
-                        <string>"</string>
+                        <string>(?&lt;!\\)"</string>
                         <key>endCaptures</key>
                         <dict>
                             <key>0</key>
@@ -498,21 +498,73 @@
                                 <key>include</key>
                                 <string>#string-interpolation</string>
                             </dict>
+                            <!-- escaped double-quote -->
                             <dict>
                                 <key>match</key>
-                                <string>[^"$\{\}]++</string>
+                                <string>\\"</string>
+                                <key>name</key>
+                                <string>constant.character.escape.jbpl</string>
+                            </dict>
+                            <!-- valid escapes inside strings: \n \r \b \t \0 \$ \\ -->
+                            <dict>
+                                <key>match</key>
+                                <string>\\[nrbt0$\\]</string>
+                                <key>name</key>
+                                <string>constant.character.escape.jbpl</string>
+                            </dict>
+                            <dict>
+                                <key>match</key>
+                                <string>[^"\\$\{\}]++</string>
                                 <key>name</key>
                                 <string>string.quoted.double.jbpl</string>
                             </dict>
                         </array>
                     </dict>
 
-                    <!-- character literal -->
+                    <!-- character literal (supports escapes: \n \r \b \t \0 \' \\) -->
                     <dict>
                         <key>match</key>
-                        <string>'\\.'|'[^\\]'</string>
-                        <key>name</key>
-                        <string>constant.character.jbpl</string>
+                        <string>(')(\\[nrbt0'\\])(')</string>
+                        <key>captures</key>
+                        <dict>
+                            <key>1</key>
+                            <dict>
+                                <key>name</key>
+                                <string>string.quoted.single.jbpl</string>
+                            </dict>
+                            <key>2</key>
+                            <dict>
+                                <key>name</key>
+                                <string>constant.character.jbpl</string>
+                            </dict>
+                            <key>3</key>
+                            <dict>
+                                <key>name</key>
+                                <string>string.quoted.single.jbpl</string>
+                            </dict>
+                        </dict>
+                    </dict>
+                    <dict>
+                        <key>match</key>
+                        <string>(')([^\\\'])(')</string>
+                        <key>captures</key>
+                        <dict>
+                            <key>1</key>
+                            <dict>
+                                <key>name</key>
+                                <string>string.quoted.single.jbpl</string>
+                            </dict>
+                            <key>2</key>
+                            <dict>
+                                <key>name</key>
+                                <string>constant.character.jbpl</string>
+                            </dict>
+                            <key>3</key>
+                            <dict>
+                                <key>name</key>
+                                <string>string.quoted.single.jbpl</string>
+                            </dict>
+                        </dict>
                     </dict>
 
                     <!-- numbers -->
