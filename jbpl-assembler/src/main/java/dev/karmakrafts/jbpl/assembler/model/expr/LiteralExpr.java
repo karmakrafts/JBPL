@@ -19,6 +19,7 @@ package dev.karmakrafts.jbpl.assembler.model.expr;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationContext;
 import dev.karmakrafts.jbpl.assembler.eval.EvaluationException;
 import dev.karmakrafts.jbpl.assembler.model.element.AbstractElement;
+import dev.karmakrafts.jbpl.assembler.model.type.BuiltinType;
 import dev.karmakrafts.jbpl.assembler.model.type.Type;
 import dev.karmakrafts.jbpl.assembler.util.Copyable;
 import dev.karmakrafts.jbpl.assembler.util.Unit;
@@ -71,6 +72,12 @@ public final class LiteralExpr extends AbstractElement implements ConstExpr {
 
     @Override
     public @NotNull String toString() {
+        if(type == BuiltinType.STRING) {
+            return String.format("\"%s\"", value);
+        }
+        else if(type == BuiltinType.CHAR) {
+            return String.format("'%s'", value.toString());
+        }
         return value.toString();
     }
 

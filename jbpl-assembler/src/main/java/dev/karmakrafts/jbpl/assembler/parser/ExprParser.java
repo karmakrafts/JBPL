@@ -174,7 +174,7 @@ public final class ExprParser extends JBPLParserBaseVisitor<List<Expr>> {
         final var builder = new StringBuilder();
         final var ranges = new ArrayList<TokenRange>();
         while (!queue.isEmpty()) {
-            final var segment = queue.pop();
+            final var segment = queue.removeLast();
             ranges.add(segment.getTokenRange());
             builder.append(segment.getConstValue());
         }

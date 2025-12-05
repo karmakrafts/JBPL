@@ -16,9 +16,22 @@
 
 package dev.karmakrafts.jbpl.assembler.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public final class Unit {
     public static final Unit INSTANCE = new Unit();
 
     private Unit() {
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object obj) {
+        return obj instanceof Unit;
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return "void";
     }
 }

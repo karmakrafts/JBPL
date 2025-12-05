@@ -79,6 +79,12 @@ public record ArrayType(Type elementType) implements Type {
     }
 
     @Override
+    public boolean canCastTo(final @NotNull Type other,
+                             final @NotNull EvaluationContext context) throws EvaluationException {
+        return other == BuiltinType.STRING || Type.super.canCastTo(other, context);
+    }
+
+    @Override
     public @NotNull org.objectweb.asm.Type materialize(final @NotNull EvaluationContext context) throws EvaluationException {
         if (!elementType.getCategory(context).isMaterializable()) {
             throw new UnsupportedOperationException(String.format("Array of type %s cannot be materialized",

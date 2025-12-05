@@ -160,7 +160,7 @@ public enum BuiltinType implements Type {
     @Override
     public boolean canCastTo(final @NotNull Type other,
                              final @NotNull EvaluationContext context) throws EvaluationException {
-        if (other == OBJECT) {
+        if (other == OBJECT || other == STRING) {
             return true;
         }
         final var otherCategory = other.getCategory(context);
@@ -191,11 +191,14 @@ public enum BuiltinType implements Type {
             final var message = String.format("Cannot cast value of type %s to type %s", valueType, this);
             throw new EvaluationException(message, SourceDiagnostic.from(value, message), context.createStackTrace());
         }
+        if (this == STRING) { // Any value is convertible to string via .toString from its containing expression
+            return ConstExpr.of(value.toString(), value.getTokenRange());
+        }
         final var constValue = value.evaluateAs(context, Object.class);
         if (this == OBJECT) { // We can cast any value to any
             return ConstExpr.of(constValue, value.getTokenRange());
         }
-        if (constValue instanceof Number numberValue) {
+        else if (constValue instanceof Number numberValue) {
             return switch (this) {
                 case I8 -> ConstExpr.of(numberValue.byteValue(), value.getTokenRange());
                 case I16 -> ConstExpr.of(numberValue.shortValue(), value.getTokenRange());
@@ -205,7 +208,6 @@ public enum BuiltinType implements Type {
                 case F64 -> ConstExpr.of(numberValue.doubleValue(), value.getTokenRange());
                 case BOOL -> ConstExpr.of(numberValue.intValue() != 0, value.getTokenRange());
                 case CHAR -> ConstExpr.of((char) numberValue.intValue(), value.getTokenRange());
-                case STRING -> ConstExpr.of(numberValue.toString(), value.getTokenRange());
                 default -> {
                     final var message = String.format("Cannot cast value of type %s to type %s", valueType, this);
                     throw new EvaluationException(message,
