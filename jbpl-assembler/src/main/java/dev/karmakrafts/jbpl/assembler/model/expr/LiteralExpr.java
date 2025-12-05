@@ -72,10 +72,10 @@ public final class LiteralExpr extends AbstractElement implements ConstExpr {
 
     @Override
     public @NotNull String toString() {
-        if(type == BuiltinType.STRING) {
+        if (type == BuiltinType.STRING) {
             return String.format("\"%s\"", value);
         }
-        else if(type == BuiltinType.CHAR) {
+        else if (type == BuiltinType.CHAR) {
             return String.format("'%s'", value.toString());
         }
         return value.toString();
